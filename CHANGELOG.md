@@ -6,6 +6,12 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.3.0 — 09/11/2026
+- Croqui (Simulador CNC.html): campo INTERVALO trocado por **COD INTERNO** (código do item do cadastro);
+  no formulário do desenho o campo "Intervalo" virou "Cód. interno (item)" (`data-d="cod"`).
+- Croqui: texto do bloco **Quantidade** centralizado (estava à esquerda).
+- gerar.ps1: passa o código do item do job (`item`) para o COD INTERNO do desenho.
+
 ## 5.2.0 — 09/11/2026
 - O CADASTRO do Kuru manda (os cabeçalhos dos .PIT estão errados na maioria):
   - jobs ganham `"cad": {"prog": "...", "bucha": "..."}` lidos de OP → Visualizar Cadastro → aba Part Seals;

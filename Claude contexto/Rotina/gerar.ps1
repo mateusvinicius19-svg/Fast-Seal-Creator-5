@@ -100,6 +100,7 @@ foreach ($j in $jobsList) {
   try {
     $pp = @{}; $j.p.PSObject.Properties | ForEach-Object { $pp[$_.Name] = $_.Value }
     $dw = @{}; if ($j.dwg) { $j.dwg.PSObject.Properties | ForEach-Object { $dw[$_.Name] = $_.Value } }
+    if (-not $dw.ContainsKey('cod') -and "$($j.item)".Trim()) { $dw['cod'] = "$($j.item)".Trim() }   # v5.3.0: croqui "COD INTERNO" = codigo do item
     # v5.2.0: CADASTRO do Kuru (OP -> Visualizar Cadastro -> aba Part Seals) manda (usuario 09/11: cabecalhos dos .PIT estao errados na maioria).
     #   "cad": {"prog":"46012", "bucha":"106X129 PU (PINCA)"}  -> prog preenchido = programa ja existe (so atribuir); bucha = a da fabrica.
     if ($j.cad -and "$($j.cad.prog)".Trim()) {

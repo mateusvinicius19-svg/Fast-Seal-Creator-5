@@ -317,7 +317,7 @@ body.printing #dwgModal .dwgf{display:none}
       <label>Aprovado (nome)<input data-d="apr" value=""></label>
       <label>Quantidade<input data-d="qtd" value="1"></label>
       <label>Observação<input data-d="obs" value=""></label>
-      <label>Intervalo<input data-d="int" value=""></label>
+      <label>Cód. interno (item)<input data-d="cod" value=""></label>
       <label>Folha<input data-d="folha" value="1/1"></label>
     </div>
     <div class="sheet" id="dwgSheet"></div>
@@ -3041,7 +3041,7 @@ function drawingSVG(p){  const PT = state.orient === "portrait";
   const q1 = L + 130, q2 = PT ? 540 : 700;
   t += box(L, yA, R, yC) + `<line x1="${L}" y1="${yB}" x2="${R}" y2="${yB}" class="tb"/>`;
   t += `<line x1="${q1}" y1="${yA}" x2="${q1}" y2="${yC}" class="tb"/><line x1="${q2}" y1="${yA}" x2="${q2}" y2="${yC}" class="tb"/>`;
-  t += val(L + 8, yA + 15, info.qtd) + val(q1 + 8, yA + 15, `${pieceName(p)} ${dimTxt}  ·  secção ${f2(sec)}`) + val(q2 + 8, yA + 15, info.obs);
+  t += `<text x="${(L + q1) / 2}" y="${yA + 15}" class="tv" text-anchor="middle">${esc(info.qtd)}</text>` + val(q1 + 8, yA + 15, `${pieceName(p)} ${dimTxt}  ·  secção ${f2(sec)}`) + val(q2 + 8, yA + 15, info.obs);
   t += `<text x="${(L + q1) / 2}" y="${yC - 5}" class="th" text-anchor="middle">Quantidade</text><text x="${(q1 + q2) / 2}" y="${yC - 5}" class="th" text-anchor="middle">Dimensões</text><text x="${(q2 + R) / 2}" y="${yC - 5}" class="th" text-anchor="middle">Observação</text>`;
   // bloco principal
   const yT = yC, yBot = B;
@@ -3079,7 +3079,7 @@ function drawingSVG(p){  const PT = state.orient === "portrait";
   t += lbl(c2 + 5, yT + 12, "PROGRAMA Nº.:") + val(c2 + 10, yT + 28, info.prog, "tv big") + lbl(cx1 + 5, yT + 12, "DIMENSÃO:") + val(cx1 + 10, yT + 28, dimTxt + (PT ? "" : `   (secção ${f2(sec)})`), "tv big");
   t += lbl(c2 + 5, r1 + 13, "DESCRIÇÃO / DENOMINAÇÃO:") + val(c2 + 14, r1 + 52, pieceName(p), "tv huge") + val(c2 + 14, r1 + 76, `Ø interno ${f2(p.dint)}  ·  Ø externo ${f2(p.dext)}  ·  ${altTxt}  ·  secção ${f2(sec)}`, PT ? "tv sm" : "tv") + (alojTxt2 ? val(c2 + 14, r1 + 94, alojTxt2, PT ? "tv sm" : "tv") : "");
   t += `<line x1="${e1}" y1="${r2}" x2="${e1}" y2="${yBot}" class="tb"/><line x1="${e2}" y1="${r2}" x2="${e2}" y2="${yBot}" class="tb"/><line x1="${e3}" y1="${r2}" x2="${e3}" y2="${yBot}" class="tb"/>`;
-  t += lbl(c2 + 5, r2 + 12, "INTERVALO:") + val(c2 + 10, r2 + 31, info.int) + lbl(e1 + 5, r2 + 12, "ESCALA") + val(e1 + 10, r2 + 31, "S/E") + lbl(e2 + 5, r2 + 12, "FOLHA:") + val(e2 + 10, r2 + 31, info.folha) + lbl(e3 + 5, r2 + 12, "FORMATO:") + `<text x="${(e3 + R) / 2}" y="${yBot - 6}" class="tv" style="font-size:22px;font-weight:400" text-anchor="middle">A4</text>`;
+  t += lbl(c2 + 5, r2 + 12, "COD INTERNO:") + val(c2 + 10, r2 + 31, info.cod || "") + lbl(e1 + 5, r2 + 12, "ESCALA") + val(e1 + 10, r2 + 31, "S/E") + lbl(e2 + 5, r2 + 12, "FOLHA:") + val(e2 + 10, r2 + 31, info.folha) + lbl(e3 + 5, r2 + 12, "FORMATO:") + `<text x="${(e3 + R) / 2}" y="${yBot - 6}" class="tv" style="font-size:22px;font-weight:400" text-anchor="middle">A4</text>`;
 
   return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 ${W} ${H}" font-family="Arial">
 <defs>

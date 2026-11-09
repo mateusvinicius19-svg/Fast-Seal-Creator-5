@@ -38,7 +38,7 @@ function Dup-ParseHdr([string]$h) {
   $m = [regex]::Match($s, '^%\s*([A-Z]+)\s*(\d{2,3})(\s+[A-Z](?=\s))?(?:-[A-Z0-9]+)*\s+([\d.]+(?:\s*[X/]\s*[\d.]*)*)')
   if (-not $m.Success) { return $null }
   $base = $m.Groups[1].Value; $prof = $base + $m.Groups[2].Value + ($m.Groups[3].Value -replace '\s', '')
-  $profs = if ($base -eq 'PSHPSE') { @('PSH' + $m.Groups[2].Value, 'PSE' + $m.Groups[2].Value) } else { @($prof) }
+  $profs = if ($base -eq 'PSHPSE') { @(('PSH' + $m.Groups[2].Value), ('PSE' + $m.Groups[2].Value)) } else { @($prof) }
   $raw = $m.Groups[4].Value -replace '\s', ''
   $trunc = ($s.Length -ge 21 -and $s.Length -le 22 -and ($m.Index + $m.Length) -ge $s.Length)
   $toks = @($raw -split '[X/]' | Where-Object { $_ -ne '' })
@@ -109,12 +109,18 @@ function Find-Dup([string]$type, $p) {
   if (-not $prof -or $exp.Count -lt 3) { return [pscustomobject]@{ status = 'SEM CONFERENCIA'; numeros = ''; detalhe = "perfil/medidas nao conferidos ($type)" } }
   Dup-LoadIdx
   $des = Dup-Desenhos $prof
-  $certos = @(); $poss = @(); $info = @()
+  $certos = @(); $poss = @(); $info = @(); $info2 = @()
   # 1) desenhos com as mesmas medidas e número -> programa existe?
   foreach ($d in $des) {
     if (-not (Dup-SameDims $d.dims $exp)) { continue }
     $pit = @(Get-ChildItem -LiteralPath $DupProg -Filter ('{0:D6}*.PIT' -f $d.num) -File -ErrorAction SilentlyContinue | ForEach-Object Name)
-    if ($pit.Count) { $certos += $pit; $info += "desenho '$($d.nome)'" }
+    foreach ($pf in $pit) {
+      # o desenho sozinho não basta: o cabeçalho do .PIT tem de ser do mesmo perfil (025382 = desenho PSH 106 mas programa RS01P;
+      # 031951.PIT = arquivo no formato MCS) -> senão vai para VERIFICAR
+      $he = @($script:DUP_HDRS | Where-Object { $_.arq -eq $pf } | Select-Object -First 1)
+      if ($he.Count -and $he[0].ph.profs -contains $prof -and (Dup-Cmp $he[0].ph $exp)) { $certos += $pf; $info += "desenho '$($d.nome)'" }
+      else { $poss += $pf; $info2 += "$pf (desenho '$($d.nome)', cabecalho de outro perfil/formato)" }
+    }
   }
   # 2) cabeçalhos dos .PIT
   foreach ($e in $script:DUP_HDRS) {
@@ -137,7 +143,7 @@ function Find-Dup([string]$type, $p) {
   }
   $certos = @($certos | Sort-Object -Unique); $poss = @($poss | Where-Object { $certos -notcontains $_ } | Sort-Object -Unique)
   if ($certos.Count) { return [pscustomobject]@{ status = 'JA EXISTE'; numeros = ($certos -join ', '); detalhe = ((@('mesmo perfil e medidas') + $info) -join '; ') + $(if ($poss.Count) { "; tambem possivel: $($poss -join ', ')" } else { '' }) } }
-  if ($poss.Count) { return [pscustomobject]@{ status = 'VERIFICAR'; numeros = ($poss -join ', '); detalhe = 'cabecalho com as mesmas medidas, mas incompleto (sem altura total ou cortado) e sem desenho p/ confirmar: abrir e conferir' } }
+  if ($poss.Count) { return [pscustomobject]@{ status = 'VERIFICAR'; numeros = ($poss -join ', '); detalhe = ((@('mesmas medidas, mas cabecalho incompleto ou de outro perfil/formato: abrir e conferir') + $info2) -join '; ') } }
   return [pscustomobject]@{ status = 'NOVO'; numeros = ''; detalhe = '' }
 }
 

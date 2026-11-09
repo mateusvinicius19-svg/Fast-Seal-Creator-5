@@ -1,0 +1,28 @@
+# Repositório PÚBLICO: só código e documentação técnica.
+# Fora: dados de clientes/OPs, preços, conversas, binários e cópias antigas (o histórico do git substitui).
+*.zip
+*.pdf
+*.xlsx
+*.xls
+*.ipt
+*.PIT
+*.png
+*.jpg
+*.csv
+imagens/
+OldVersions/
+Backup planilhas*/
+Claude contexto/Rotina/backup/
+Claude contexto/Rotina/relatorios/
+Claude contexto/Rotina/jobs_*.json
+Claude contexto/Simulador CNC (antes*).html
+Simulador CNC (antes*).html
+/Rotina
+*.txt
+# Notas com nomes de clientes / OPs (ficam só no W: enquanto o repositório for público)
+Claude contexto/ROTINA NOTURNA - LEIA.md
+Claude contexto/LEIA-ME PRIMEIRO.md
+Claude contexto/fastseal-access.md
+Claude contexto/MEMORY.md
+Thumbs.db
+~$*

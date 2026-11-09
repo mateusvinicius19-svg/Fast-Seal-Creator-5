@@ -76,6 +76,7 @@ $hdrs = @{}
 [IO.File]::ReadAllLines($IDX, [Text.Encoding]::UTF8) | Select-Object -Skip 1 | ForEach-Object { $c = $_.Split("`t"); if ($c.Count -ge 3) { $hdrs[$c[0]] = $c[2] } }
 $byKey = @{}
 foreach ($e in $hdrs.GetEnumerator()) { foreach ($k in (Get-Key $e.Value)) { if (-not $byKey[$k]) { $byKey[$k] = @() }; $byKey[$k] += $e.Key } }
+. (Join-Path $ROT 'duplicados.ps1') -DupProg $PROG -DupDes 'W:\Parts\PartsSeals\PROJETOS\DESENHOS'   # Find-Dup (v5.1.0)
 
 # ---------- 3. numeracao: proximo numero depois do maior da pasta Programas_CNC (e dos ja reservados em Para conferir) ----------
 function Get-MaxNum {
@@ -99,6 +100,15 @@ foreach ($j in $jobsList) {
   try {
     $pp = @{}; $j.p.PSObject.Properties | ForEach-Object { $pp[$_.Name] = $_.Value }
     $dw = @{}; if ($j.dwg) { $j.dwg.PSObject.Properties | ForEach-Object { $dw[$_.Name] = $_.Value } }
+    # v5.1.0: conferencia de programa ja existente (cabecalhos + desenhos + altura do corte) ANTES de reservar numero.
+    # VERIFICAR = provavel duplicado: nao gera; para gerar mesmo assim, por "forcar": true no job.
+    $dup = Find-Dup $j.type $j.p
+    if ($dup.status -eq 'JA EXISTE' -or ($dup.status -eq 'VERIFICAR' -and -not $j.forcar)) {
+      $r.status = $dup.status; $r.numero = $dup.numeros
+      $r.obs = if ($dup.status -eq 'JA EXISTE') { "Programa com o mesmo perfil e medidas ja existe: so atribuir ($($dup.detalhe))." } else { "Possivel duplicado: $($dup.detalhe). Se nao for, por ""forcar"": true no job." }
+      $res += [pscustomobject]$r; continue
+    }
+    if ($dup.status -eq 'SEM CONFERENCIA') { $r.obs = "ATENCAO: $($dup.detalhe). " }
     $n = [math]::Max($next, (Get-MaxNum) + 1)
     while ((Test-Path -LiteralPath (Join-Path $PROG ('{0:D6}.PIT' -f $n))) -or (Test-Path -LiteralPath (Join-Path $PROG "MCS 500\$n.txt"))) { $n++ }
     $num = '{0:D6}' -f $n
@@ -108,7 +118,7 @@ foreach ($j in $jobsList) {
     $exist = @(); foreach ($k in (Get-Key $hdr)) { if ($byKey[$k]) { $exist += $byKey[$k] } }
     $exist = @($exist | Sort-Object -Unique)
     if ($exist.Count) { $r.status = 'JA EXISTE'; $r.numero = ($exist -join ', '); $r.obs = 'Programa com o mesmo perfil e medidas ja esta em Programas_CNC: so atribuir.'; $res += [pscustomobject]$r; continue }
-    if ($o.check) { $r.obs = "Aviso do Simulador: $($o.check). " }
+    if ($o.check) { $r.obs += "Aviso do Simulador: $($o.check). " }
     if ($o.aloj)  { $r.obs += "$($o.aloj). " }
     $r.numero = $num; $r.status = 'GERADO'; $next = $n + 1
     if (-not $DryRun) {

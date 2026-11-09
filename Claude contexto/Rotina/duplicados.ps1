@@ -126,8 +126,9 @@ function Find-Dup([string]$type, $p) {
   foreach ($e in $script:DUP_HDRS) {
     if ($e.ph.profs -notcontains $prof) { continue }
     $r = Dup-Cmp $e.ph $exp
-    if ($r -eq 'certo') { $certos += $e.arq }
-    elseif ($r -eq 'possivel') {
+    # v5.2.0: cabeçalho sozinho NÃO confirma (usuário: a maioria dos cabeçalhos está errada) -> precisa do desenho do mesmo
+    # número ou da altura do corte; senão fica VERIFICAR
+    if ($r) {
       # confirma pelo desenho do mesmo número
       $nb = if ($e.arq -match '^(\d+)') { [int]$matches[1] } else { -1 }
       $dd = @($des | Where-Object { $_.num -eq $nb })

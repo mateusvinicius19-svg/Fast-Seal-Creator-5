@@ -100,6 +100,19 @@ foreach ($j in $jobsList) {
   try {
     $pp = @{}; $j.p.PSObject.Properties | ForEach-Object { $pp[$_.Name] = $_.Value }
     $dw = @{}; if ($j.dwg) { $j.dwg.PSObject.Properties | ForEach-Object { $dw[$_.Name] = $_.Value } }
+    # v5.2.0: CADASTRO do Kuru (OP -> Visualizar Cadastro -> aba Part Seals) manda (usuario 09/11: cabecalhos dos .PIT estao errados na maioria).
+    #   "cad": {"prog":"46012", "bucha":"106X129 PU (PINCA)"}  -> prog preenchido = programa ja existe (so atribuir); bucha = a da fabrica.
+    if ($j.cad -and "$($j.cad.prog)".Trim()) {
+      $cp = [int](("$($j.cad.prog)" -replace '\D', '')); $cf = @(Get-ChildItem -LiteralPath $PROG -Filter ('{0:D6}*.PIT' -f $cp) -File -ErrorAction SilentlyContinue | ForEach-Object Name)
+      if ($cf.Count) { $r.status = 'JA EXISTE'; $r.numero = ($cf -join ', '); $r.obs = "Cadastro (Part Seals) ja aponta o programa $($j.cad.prog): so atribuir."; $res += [pscustomobject]$r; continue }
+      $r.status = 'VERIFICAR'; $r.numero = "$($j.cad.prog)"; $r.obs = "Cadastro aponta o programa $($j.cad.prog), mas o .PIT nao esta em Programas_CNC: conferir."; $res += [pscustomobject]$r; continue
+    }
+    if ($j.cad -and "$($j.cad.bucha)".Trim() -and -not $pp.ContainsKey('bi')) {
+      $bu = "$($j.cad.bucha)".ToUpper() -replace ',', '.'
+      if ($bu -match '([\d.]+)\s*X\s*([\d.]+)') { $pp['bi'] = [double]$matches[1]; $pp['bo'] = [double]$matches[2] }
+      elseif ($bu -match 'TARUGO\s*([\d.]+)') { $pp['bi'] = 0; $pp['bo'] = [double]$matches[1] }
+      $r.obs += "Bucha do cadastro: $($j.cad.bucha). "
+    }
     # v5.1.0: conferencia de programa ja existente (cabecalhos + desenhos + altura do corte) ANTES de reservar numero.
     # VERIFICAR = provavel duplicado: nao gera; para gerar mesmo assim, por "forcar": true no job.
     $dup = Find-Dup $j.type $j.p
@@ -108,7 +121,7 @@ foreach ($j in $jobsList) {
       $r.obs = if ($dup.status -eq 'JA EXISTE') { "Programa com o mesmo perfil e medidas ja existe: so atribuir ($($dup.detalhe))." } else { "Possivel duplicado: $($dup.detalhe). Se nao for, por ""forcar"": true no job." }
       $res += [pscustomobject]$r; continue
     }
-    if ($dup.status -eq 'SEM CONFERENCIA') { $r.obs = "ATENCAO: $($dup.detalhe). " }
+    if ($dup.status -eq 'SEM CONFERENCIA') { $r.obs += "ATENCAO: $($dup.detalhe). " }
     $n = [math]::Max($next, (Get-MaxNum) + 1)
     while ((Test-Path -LiteralPath (Join-Path $PROG ('{0:D6}.PIT' -f $n))) -or (Test-Path -LiteralPath (Join-Path $PROG "MCS 500\$n.txt"))) { $n++ }
     $num = '{0:D6}' -f $n

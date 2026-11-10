@@ -6,6 +6,10 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.7.2 — 10/11/2026
+- Rotina\cancelar.ps1 (novo): cancela programa duplicado — MOVE (não apaga) .PIT/variantes, .txt do MCS 500, pasta do desenho
+  e pedido ARGUS para `Rotina\backup\cancelados\<num>`, anota em `Rotina\Programas cancelados.csv`. Confere que o original existe
+  e pede S para confirmar. Uso: `cancelar.ps1 -Num 046166 -Dup 046125` (046166 feito em duplicado do 046125).
 ## 5.7.1 — 10/11/2026
 - Prévia de impressão: o botão **Imprimir / PDF** (e o Ctrl+P com a prévia aberta) pergunta o **Cód. interno** ANTES da
   janela de impressão, já preenchido com o código da peça (Enter confirma, Cancelar não imprime). Não precisa mais fechar

@@ -2049,6 +2049,7 @@ async function saveProgram(auto){
   else if (dir){ $("genMsg").textContent = "Procurando o próximo número livre…"; $("genMsg").style.color = ""; sug = await nextFreeProg(dir); }
   const num = auto ? sug : prompt("Número do programa" + (state.alterNum ? " (alterando " + sug + ")" : sug ? " (próximo livre: " + sug + ")" : " (ex.: 046004)") + (suf ? ` — bucha especial: vai salvar como "número ${suf[1]}"` : "") + ":", sug);
   if (num === null) return;
+  if (!auto && !askCod()) return;
   let base = num.trim().replace(/\.(pit|txt|nc)$/i, "");
   if (!base) return;
   if (/^\d{1,6}[A-Z]?$/i.test(base)) base = base.replace(/^(\d+)/, d => d.padStart(6, "0"));
@@ -3139,7 +3140,19 @@ function dxfOf(p){
   out.push("0","ENDSEC","0","EOF");
   return out.join("\r\n");
 }
-$("btnDraw").onclick = () => { if (!state.genParams) return; $("dwgSheet").innerHTML = drawingSVG(state.genParams); $("dwgModal").classList.add("show"); };
+// v5.7.0 (usuário 10/11/2026): cada item tem um código interno diferente — pergunta o Cód. interno ANTES de mostrar o desenho
+// (botão do desenho e Salvar programa). Uma vez por peça: na mesma peça não pergunta de novo; peça nova começa em branco.
+function askCod(){
+  const p = state.genParams, el = document.querySelector("#dwgFields [data-d=cod]");
+  if (!p || !el || !DESENHO_TYPES.includes(p.tipoGen)) return true;
+  const key = pieceFile(p), same = state.codKey === key;
+  if (same && el.value.trim()) return true;
+  const v = prompt("Cód. interno do item (vai no desenho e no Anexo 1 do ARGUS):", same ? el.value.trim() : "");
+  if (v === null) return false;
+  el.value = v.trim(); state.codKey = key; try { saveForm(); } catch(e){}
+  return true;
+}
+$("btnDraw").onclick = () => { if (!state.genParams || !askCod()) return; $("dwgSheet").innerHTML = drawingSVG(state.genParams); $("dwgModal").classList.add("show"); };
 $("dwgFields").addEventListener("input", () => { if (state.genParams) $("dwgSheet").innerHTML = drawingSVG(state.genParams); });
 $("dwgClose").onclick = () => $("dwgModal").classList.remove("show");
 /* visualização de impressão */
@@ -3269,7 +3282,7 @@ sizeCanvas(); draw();
   for (const [k, v] of Object.entries(s.dwg || {})){ const el = document.querySelector(`#dwgFields [data-d="${k}"]`); if (el) el.value = v; }
   syncTolRows(); generate();
 })();
-document.addEventListener("input", e => { if (e.target.closest && e.target.closest("#dwgFields")) saveForm(); });
+document.addEventListener("input", e => { if (e.target.closest && e.target.closest("#dwgFields")) saveForm(); if (e.target.matches && e.target.matches("#dwgFields [data-d=cod], #pvSide [data-dd=cod]") && state.genParams) try { state.codKey = pieceFile(state.genParams); } catch(_){} });
 document.addEventListener("input", e => { const a = e.target.dataset && e.target.dataset.ak; if (a && alojMode(a) === "aloj"){ clearTimeout(window.__alojT); window.__alojT = setTimeout(() => alojApply(a), 250); } });
 document.addEventListener("change", e => { const d = e.target.dataset || {}; if (d.amode && d.ak2) alojSetMode(d.ak2, d.amode); });
 </script>

@@ -6,6 +6,10 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.7.0 — 10/11/2026
+- Simulador (desenho): pergunta o **Cód. interno (item)** ANTES de mostrar o desenho — no botão do desenho e no
+  Salvar programa (depois do número, antes de gravar o PDF/pedido ARGUS). Uma vez por peça (`askCod`, chave `pieceFile`):
+  peça nova começa em branco (não reaproveita o código do item anterior); Cancelar não abre o desenho / não salva.
 ## 5.6.2 — 10/11/2026
 - ESPEC Kuru: a tela "Pedidos do Simulador" fica na aba Projeto do Kuru (não na Usinagem CNC nem no Pargus).
 - Desenho avulso: `Desenhos avulsos/PLUG (18 X 53.3)/` — PLUG Ø18 x 53,3 (colar Ø18 x 2, canal Ø11 x 2,5, corpo Ø12,

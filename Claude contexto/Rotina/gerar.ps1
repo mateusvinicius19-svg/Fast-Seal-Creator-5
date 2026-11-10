@@ -116,8 +116,10 @@ foreach ($j in $jobsList) {
     }
     # v5.1.0: conferencia de programa ja existente (cabecalhos + desenhos + altura do corte) ANTES de reservar numero.
     # VERIFICAR = provavel duplicado: nao gera; para gerar mesmo assim, por "forcar": true no job.
+    # v5.4.0: "forcar": true tambem passa por JA EXISTE (usuario pediu programa NOVO mesmo havendo antigo); fica anotado na obs.
     $dup = Find-Dup $j.type $j.p
-    if ($dup.status -eq 'JA EXISTE' -or ($dup.status -eq 'VERIFICAR' -and -not $j.forcar)) {
+    if ($j.forcar -and $dup.status -in 'JA EXISTE', 'VERIFICAR') { $r.obs += "FORCADO (usuario pediu novo); ja existiam: $($dup.numeros). " }
+    elseif ($dup.status -eq 'JA EXISTE' -or $dup.status -eq 'VERIFICAR') {
       $r.status = $dup.status; $r.numero = $dup.numeros
       $r.obs = if ($dup.status -eq 'JA EXISTE') { "Programa com o mesmo perfil e medidas ja existe: so atribuir ($($dup.detalhe))." } else { "Possivel duplicado: $($dup.detalhe). Se nao for, por ""forcar"": true no job." }
       $res += [pscustomobject]$r; continue
@@ -131,7 +133,7 @@ foreach ($j in $jobsList) {
     $hdr = (($o.fagor -split "`n")[0]).Trim()
     $exist = @(); foreach ($k in (Get-Key $hdr)) { if ($byKey[$k]) { $exist += $byKey[$k] } }
     $exist = @($exist | Sort-Object -Unique)
-    if ($exist.Count) { $r.status = 'JA EXISTE'; $r.numero = ($exist -join ', '); $r.obs = 'Programa com o mesmo perfil e medidas ja esta em Programas_CNC: so atribuir.'; $res += [pscustomobject]$r; continue }
+    if ($exist.Count -and -not $j.forcar) { $r.status = 'JA EXISTE'; $r.numero = ($exist -join ', '); $r.obs = 'Programa com o mesmo perfil e medidas ja esta em Programas_CNC: so atribuir.'; $res += [pscustomobject]$r; continue }
     if ($o.check) { $r.obs += "Aviso do Simulador: $($o.check). " }
     if ($o.aloj)  { $r.obs += "$($o.aloj). " }
     $r.numero = $num; $r.status = 'GERADO'; $next = $n + 1

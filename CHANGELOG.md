@@ -6,6 +6,10 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.9.3 — 10/11/2026
+- Arruelas em Teflon saindo de **TARUGO**: desbaste interno com o 1º passe em **Ø16** e depois passes de no máximo **8 no Ø**
+  até Ø int − 2 (acabamento 2). Ex.: 30x38 → Ø16, 22, 28; 50x58 → Ø16, 24, 32, 40, 48. Ø int pequeno (Ø int − 2 < 16): 1º passe em Ø int − 2.
+  Só Teflon (PTFE puro e PTFE+BR); PU e os outros continuam como antes (tarugo começa em Ø7).
 ## 5.9.2 — 10/11/2026
 - Arruelas em Teflon: o passe único (externo e interno) vale só para peça que sai de **BUCHA** (tubo). Saindo de **TARUGO**
   (Ø int. 0), desbasta normal (máx. 8 no Ø, acabamento 2), com o limite de 40 mm e as etapas em Z de até 20 mm, e sem o aviso do passe único.

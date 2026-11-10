@@ -1444,11 +1444,19 @@ function roughLevels(from, finish, dir){   // dir +1 = externo (desce), -1 = int
 const arrPU = p => (p.matA || "PU") === "PU";
 const arrTeflon = p => p.matA === "PTFE" || p.matA === "PTFEBR";
 const arrTeflonPasse = p => arrTeflon(p) && buchaOf(p).bi > 0;   // passe único: Teflon saindo de bucha, não de tarugo
+// v5.9.3 (usuário 10/11): Teflon saindo de TARUGO — interno: 1º passe em Ø16 e depois passes de no máximo 8 no Ø até Ø int − 2 (acabamento 2)
+function tarugoTeflonLevels(dint){
+  const last = dint - 2; if (!(last > 0)) return [];
+  const first = Math.min(16, last), out = [first];
+  const n = Math.ceil((last - first) / 8 - 1e-9);
+  for (let k = 1; k <= n; k++) out.push(+(first + (last - first) * k / n).toFixed(3));
+  return out;
+}
 function arrRough(p, mode, zEnd, xBack, feed){
   // v5.9.2 (usuário 10/11): só quando sai de BUCHA (tubo); de TARUGO (Ø int. 0) desbasta normal
   if (arrTeflonPasse(p)) return [];
   const b = buchaOf(p); if (b.txt === "----") return [];
-  const lv = mode === "od" ? roughLevels(b.bo, p.dext, 1) : roughLevels(b.bi, p.dint, -1);
+  const lv = mode === "od" ? roughLevels(b.bo, p.dext, 1) : (arrTeflon(p) && !(b.bi > 0)) ? tarugoTeflonLevels(p.dint) : roughLevels(b.bi, p.dint, -1);
   if (!lv.length) return [];
   // v5.8.0 (usuário 10/11/2026, PSA 108): com p.zSeg o desbaste em Z é dividido em etapas de até zSeg mm, sempre pelo menos 2
   // (nunca o comprimento todo de uma vez); cada etapa passa todos os Ø de fora para dentro antes de descer a próxima.

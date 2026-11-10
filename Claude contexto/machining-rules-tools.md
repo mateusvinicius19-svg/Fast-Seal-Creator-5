@@ -39,4 +39,4 @@ metadata:
   - Desbaste em Z (NBR, POM, Nylon, Celeron): comprimento máximo 40 mm (limita as peças por ciclo) e NUNCA de uma vez: dividir em etapas de até 20 mm, sempre pelo menos 2.
   - PU: NÃO usar a regra do desbaste em Z (sem limite de 40 mm e sem etapas) — desbaste como sempre, bucha automática da tabela de buchas PU.
   - Teflon (PTFE puro e PTFE+BR) saindo de BUCHA (tubo): externo e interno num PASSE SÓ (o de acabamento), a bucha de Teflon fica bem próxima da medida; bucha digitada; avisar se sobrar ≥ 5 no Ø.
-  - Teflon saindo de TARUGO: NÃO usa o passe único — desbaste normal (máx. 8 no Ø, acabamento 2) + limite de 40 mm e etapas em Z de até 20 mm.
+  - Teflon saindo de TARUGO: NÃO usa o passe único — desbaste interno com 1º passe em Ø16, depois passes de no máximo 8 no Ø até Ø int − 2 (acabamento 2); limite de 40 mm e etapas em Z de até 20 mm. (Só Teflon; PU/outros: tarugo como antes.)

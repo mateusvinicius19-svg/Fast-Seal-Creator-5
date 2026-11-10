@@ -26,6 +26,7 @@ pasta de rede. O Kuru, que já grava no ARGUS (Pargus, Atribuir, F9 Salvar no AR
 
 - `programa` pode vir vazio: aí grava só o Anexo 1.
 - Subpasta `feitos\`: onde ficam os pedidos já aplicados. O script `Claude contexto\Rotina\pedidos_argus.ps1` já usa esse formato.
+- Desde a v5.7.0 a rotina (`gerar.ps1`) também grava pedidos nessa fila, no mesmo formato.
 
 ## 2. O que o Kuru deve fazer
 

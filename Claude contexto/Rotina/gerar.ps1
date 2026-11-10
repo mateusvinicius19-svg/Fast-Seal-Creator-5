@@ -88,6 +88,13 @@ function Get-MaxNum {
 }
 
 # ---------- 4. gerar ----------
+# fila do ARGUS (mesmo formato do pedidoArgus() do Simulador e do pedidos_argus.ps1)
+function New-PedidoArgus([string]$item, [string]$prog, [string]$pdf, [string]$perfil) {
+  $q = 'W:\Parts\PartsSeals\PROJETOS\DESENHOS\_PEDIDOS ARGUS'; New-Item -ItemType Directory -Force $q | Out-Null
+  $rec = [ordered]@{ item = $item; programa = $prog; anexo1 = $pdf; perfil = $perfil; criado = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ss.fffZ'); status = 'pendente' }
+  [IO.File]::WriteAllText((Join-Path $q "$($item)_$prog.json"), ($rec | ConvertTo-Json), (New-Object Text.UTF8Encoding $false))
+  return "Pedido ARGUS na fila: item $item (Anexo 1 + programa $prog). "
+}
 $tmp = ConvertFrom-Json ([IO.File]::ReadAllText($Jobs, [Text.Encoding]::UTF8)); $jobsList = @(); foreach ($x in $tmp) { $jobsList += $x }
 # Destino (pedido do usuario 06/11/2026): pastas normais -> Programas_CNC (.PIT), Programas_CNC\MCS 500 (.txt), PROJETOS\DESENHOS (PDF).
 # Numero: antes de CADA programa rele o maior numero da pasta (o usuario tambem salva ao mesmo tempo) e nunca sobrescreve arquivo existente.
@@ -147,6 +154,10 @@ foreach ($j in $jobsList) {
         $dd = Join-Path $DES "$($o.desFam)\$($o.desName)"; $pdf = Join-Path $dd "$($o.desName).pdf"
         if (Test-Path -LiteralPath $pdf) { $r.obs += 'Desenho ja existia (mantido). ' }
         else { New-Item -ItemType Directory -Force $dd | Out-Null; [IO.File]::WriteAllBytes($pdf, [Convert]::FromBase64String($o.pdf)); $r.desenho = "DESENHOS\$($o.desFam)\$($o.desName)\$($o.desName).pdf" }
+        # v5.7.0: pedido do Anexo 1 / Codigo do programa no ARGUS (antes so o Simulador na tela gravava; OP 31205/2 ficou de fora)
+        if ("$($j.item)".Trim() -match '^\d+$') {
+          try { $r.obs += (New-PedidoArgus "$($j.item)".Trim() $num $pdf $o.desFam) } catch { $r.obs += "Pedido ARGUS NAO gravado: $_. " }
+        } else { $r.obs += 'Sem item numerico: pedido ARGUS (Anexo 1) nao gravado. ' }
       } else { $r.obs += "Desenho: $($o.pdfErr). " }
     }
   } catch { $r.status = 'ERRO'; $r.obs = "$_" }

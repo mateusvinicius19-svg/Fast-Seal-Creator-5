@@ -32,7 +32,7 @@ $inj = @'
   if (q.type === "lip") p.dext = p.dint + 2 * p.sec;
   for (const [k,v] of Object.entries(Object.assign({prog: q.num || ""}, q.dwg || {}))) { const el = document.querySelector('#dwgFields [data-d="'+k+'"]'); if (el) el.value = v; }
   const lines = GEN[q.type].build(p), fag = lines.join("\n");
-  const out = {ok:true, aloj: alojTxt, check: GEN[q.type].check ? (GEN[q.type].check(p) || "") : "", fagor: fag, mcs: fagorToMcs(fag),
+  const out = {ok:true, aloj: alojTxt, check: GEN[q.type].check ? (GEN[q.type].check(p) || "") : "", fagor: fag, mcs: fagorToMcs(fag), ciclo: (typeof cicloPcs === "function" ? cicloPcs(p) : 0),
                desFam: (DESENHO_TYPES.includes(q.type) ? desFam(p) : ""), desName: (DESENHO_TYPES.includes(q.type) ? desenhoFolderName(p, q.num || "0") : "")};
   if (DESENHO_TYPES.includes(q.type) && !(q.type === "iso" && pieceKind(p) === "dp")) {
     try { const b = await drawingPdfBytes(p); let s = ""; for (let i = 0; i < b.length; i++) s += String.fromCharCode(b[i]); out.pdf = btoa(s); } catch(e){ out.pdfErr = String(e); }
@@ -144,9 +144,11 @@ foreach ($j in $jobsList) {
     if ($exist.Count -and -not $j.forcar) { $r.status = 'JA EXISTE'; $r.numero = ($exist -join ', '); $r.obs = 'Programa com o mesmo perfil e medidas ja esta em Programas_CNC: so atribuir.'; $res += [pscustomobject]$r; continue }
     if ($o.check) { $r.obs += "Aviso do Simulador: $($o.check). " }
     if ($o.aloj)  { $r.obs += "$($o.aloj). " }
-    $r.numero = $num; $r.status = 'GERADO'; $next = $n + 1
+    $r.numero = $num; $r.status = 'GERADO'; if ([int]$o.ciclo -gt 1) { $r.obs += "Arquivo: $num CICLO $($o.ciclo) PÇ. " }; $next = $n + 1
     if (-not $DryRun) {
-      $fp = Join-Path $PROG "$num.PIT"; $fm = Join-Path $PROG "MCS 500\$n.txt"
+      # v5.8.0: PSA 108 com varias pecas por ciclo -> "046140 CICLO 5 PÇ.PIT" / "46140 CICLO 5 PÇ.txt"
+      $suf = if ([int]$o.ciclo -gt 1) { " CICLO $($o.ciclo) PÇ" } else { '' }
+      $fp = Join-Path $PROG "$num$suf.PIT"; $fm = Join-Path $PROG "MCS 500\$n$suf.txt"
       if ((Test-Path -LiteralPath $fp) -or (Test-Path -LiteralPath $fm)) { throw "numero $num ficou ocupado durante a geracao" }
       [IO.File]::WriteAllText($fp, (($o.fagor -replace "`r", '') -replace "`n", "`r`n"), $cp1252)
       [IO.File]::WriteAllText($fm, (($o.mcs -replace "`r", '') -replace "`n", "`r`n"), $cp1252)

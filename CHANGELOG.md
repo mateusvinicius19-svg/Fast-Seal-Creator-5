@@ -6,6 +6,14 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.8.0 — 10/11/2026
+- PSA 108 (Simulador): desbaste em Z com limite de **40 mm** de comprimento (param. `zMax`): as peças por ciclo ficam limitadas a
+  (40 − paralelo) ÷ (altura + bedame − sobreposição), com ATENÇÃO quando passar. O desbaste nunca vai de uma vez: é dividido em
+  etapas de até **20 mm** (param. `zSeg`), **sempre pelo menos 2**. Cada etapa passa todos os Ø, de fora para dentro, antes de descer.
+  Os outros ciclos de arruela (ciclo/semch) não mudam.
+- PSA 108 com várias peças por ciclo: o arquivo leva a quantidade no número, `046140 CICLO 5 PÇ.PIT` / `46140 CICLO 5 PÇ.txt`
+  (Simulador ao salvar e Rotina\gerar.ps1). Com 1 peça, o nome continua só o número.
+- Exemplo testado: 50 x 58 x 2, 1 pç com RPT N11 (12 peças, 3,1 mm por peça) e 6 pç por ciclo com RPT N1 (12 peças, 17,85 mm por ciclo).
 ## 5.7.0 — 10/11/2026
 - Rotina\gerar.ps1: desenho gerado pela rotina agora também grava o pedido do ARGUS (Anexo 1 = PDF + Código do programa) em
   `DESENHOS\_PEDIDOS ARGUS\<item>_<programa>.json`, igual ao Simulador. Antes só o Simulador na tela gravava, e as OPs da rotina

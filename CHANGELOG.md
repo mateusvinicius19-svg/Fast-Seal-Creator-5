@@ -6,6 +6,11 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.10.0 — 10/11/2026
+- Simulador: botão **🔓 PROJETOS** = pasta única `W:\Parts\PartsSeals\PROJETOS`. Escolhe uma vez; o Programas_CNC, o MCS 500 e o DESENHOS
+  saem dela. Nos outros dias o navegador só pede **Permitir** (1 clique, no 🔓 PROJETOS ou no Salvar), sem escolher pasta. Antes eram
+  3 pastas separadas, e no Salvar só a 1ª era liberada (o navegador dá uma permissão por clique), então o DESENHOS tinha que ser escolhido de novo.
+  O botão fica com contorno laranja quando falta liberar. Os botões 📁 de cada pasta continuam para quem não usar a pasta única.
 ## 5.9.4 — 10/11/2026
 - Arruelas em Teflon (PTFE puro e PTFE+BR): bucha **automática** com 2 mm de sobremetal nos 2 diâmetros (Ø int − 2 × Ø ext + 2;
   ex.: 20x28 → 18X30), em vez de "----". Bucha digitada igual à sugerida não vira exceção no nome; diferente → "NNNNNN BIxBO".

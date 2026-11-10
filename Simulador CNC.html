@@ -230,7 +230,7 @@ body.printing #dwgModal .dwgf{display:none}
       <details class="params" id="buchaBox" style="display:none"><summary>Buchas (tabela + adicionadas)</summary><div class="buchas" id="buchaList"></div><div class="fields"><label>Ø interno da bucha<input id="bNewI" type="text" inputmode="decimal"></label><label>Ø externo da bucha<input id="bNewO" type="text" inputmode="decimal"></label></div><button class="btn" id="bAdd" type="button">+ Adicionar bucha</button> <span class="note">Vermelha: a escolhida (a mais leve que serve, com 1 mm de folga). T = tarugo. Amarelas: adicionadas. ✕ remove. Mudanças ficam salvas neste computador.</span></details>
       <div class="genbar">
         <button class="btn primary" id="btnCopy">&#x29C9; Copiar</button>
-        <button class="btn" id="btnSave" title="Salva o Fagor (.PIT) no Programas_CNC e a versão convertida (.txt) no MCS 500">&#x1F4BE; Salvar Fagor + MCS 500</button><button class="btn" id="btnCopyMcs" title="Copia a versão convertida para o MCS 500">&#x29C9; Copiar MCS</button><button class="btn" id="btnDirProg" title="Escolher a pasta W:\Parts\PartsSeals\PROJETOS\Programas_CNC">&#x1F4C1; Programas_CNC</button><button class="btn" id="btnDirMcs" title="Escolher a pasta W:\Parts\PartsSeals\PROJETOS\Programas_CNC\MCS 500">&#x1F4C1; MCS 500</button><button class="btn" id="btnAlt" title="Abrir um programa do Programas_CNC pelo número e refazer com outra bucha (salva como NNNNNN BIxBO — o original não muda)">&#x270F;&#xFE0F; Alterar programa</button><button class="btn" id="btnVer" title="Digitar o número e ver o programa e as variantes (NNNNNN BIxBO...)">&#x1F50E; Ver programa</button><button class="btn" id="btnHist" title="Programas salvos pelo Simulador (Programas_CNC\Historico Simulador CNC.csv)">&#x1F4CB; Histórico</button><button class="btn" id="btnDirDes" title="Escolher a pasta W:\Parts\PartsSeals\PROJETOS\DESENHOS">&#x1F4C1; DESENHOS</button>
+        <button class="btn" id="btnSave" title="Salva o Fagor (.PIT) no Programas_CNC e a versão convertida (.txt) no MCS 500">&#x1F4BE; Salvar Fagor + MCS 500</button><button class="btn" id="btnCopyMcs" title="Copia a versão convertida para o MCS 500">&#x29C9; Copiar MCS</button><button class="btn" id="btnDirRoot" title="Pasta única W:\Parts\PartsSeals\PROJETOS (tem Programas_CNC, MCS 500 e DESENHOS): escolha uma vez; nos outros dias é só clicar e Permitir">&#x1F513; PROJETOS</button><button class="btn" id="btnDirProg" title="Escolher a pasta W:\Parts\PartsSeals\PROJETOS\Programas_CNC">&#x1F4C1; Programas_CNC</button><button class="btn" id="btnDirMcs" title="Escolher a pasta W:\Parts\PartsSeals\PROJETOS\Programas_CNC\MCS 500">&#x1F4C1; MCS 500</button><button class="btn" id="btnAlt" title="Abrir um programa do Programas_CNC pelo número e refazer com outra bucha (salva como NNNNNN BIxBO — o original não muda)">&#x270F;&#xFE0F; Alterar programa</button><button class="btn" id="btnVer" title="Digitar o número e ver o programa e as variantes (NNNNNN BIxBO...)">&#x1F50E; Ver programa</button><button class="btn" id="btnHist" title="Programas salvos pelo Simulador (Programas_CNC\Historico Simulador CNC.csv)">&#x1F4CB; Histórico</button><button class="btn" id="btnDirDes" title="Escolher a pasta W:\Parts\PartsSeals\PROJETOS\DESENHOS">&#x1F4C1; DESENHOS</button>
         <button class="btn" id="btnDraw" style="display:none">&#x1F4D0; Desenho</button>
         <span class="note" id="genMsg"></span>
       </div>
@@ -1902,8 +1902,17 @@ function kvDb(){ return new Promise((res, rej) => { const r = indexedDB.open("si
 async function kvGet(k){ try { const db = await kvDb(); return await new Promise(res => { const q = db.transaction("kv").objectStore("kv").get(k); q.onsuccess = () => res(q.result); q.onerror = () => res(null); }); } catch(e){ return null; } }
 async function kvSet(k, v){ try { const db = await kvDb(); await new Promise(res => { const tx = db.transaction("kv", "readwrite"); tx.objectStore("kv").put(v, k); tx.oncomplete = res; tx.onerror = res; }); } catch(e){} }
 // pasta lembrada: silent = só devolve se já tiver permissão (sem abrir janela). Abrir janela/permissão precisa ser logo após um clique.
+// v5.10.0 (usuário 10/11): pasta única PROJETOS — uma permissão por dia vale para Programas_CNC, MCS 500 e DESENHOS
+// (o navegador esquece a permissão ao fechar; com 3 pastas separadas só a 1ª era liberada no clique do Salvar)
+const ROOT_SUB = { dirProgramasCNC: ["Programas_CNC"], dirMCS500: ["Programas_CNC", "MCS 500"], dirDesenhos: ["DESENHOS"] };
+async function rootDir(silent){
+  const h = await kvGet("dirProjetos"); if (!h) return null;
+  try { let q = await h.queryPermission({ mode: "readwrite" }); if (q !== "granted" && !silent) q = await h.requestPermission({ mode: "readwrite" }); return q === "granted" ? h : null; } catch(e){ return null; }
+}
+async function isProjetosDir(h){ try { await h.getDirectoryHandle("Programas_CNC"); await h.getDirectoryHandle("DESENHOS"); return true; } catch(e){ return false; } }
 async function pickDir(key, id, forceNew, silent, label){
   if (!window.showDirectoryPicker) return null;
+  if (!forceNew && ROOT_SUB[key]){ const r = await rootDir(silent); if (r) try { let d = r; for (const n of ROOT_SUB[key]) d = await d.getDirectoryHandle(n); return d; } catch(e){} }
   let h = forceNew ? null : await kvGet(key);
   if (h){ try { let q = await h.queryPermission({ mode: "readwrite" }); if (q !== "granted" && !silent) q = await h.requestPermission({ mode: "readwrite" }); if (q === "granted") return h; } catch(e){} }
   if (silent) return null;
@@ -2125,6 +2134,15 @@ async function saveProgram(auto){
   return false;
 }
 $("btnSave").onclick = () => saveProgram(false);
+$("btnDirRoot").onclick = async () => {
+  const msg = (t, bad) => { $("genMsg").textContent = t; $("genMsg").style.color = bad ? "#b2221f" : ""; };
+  if (!window.showDirectoryPicker) return msg("Este navegador não salva em pastas (use o Edge ou o Chrome).", true);
+  if (await kvGet("dirProjetos")){ if (await rootDir(false)) return msg("🔓 Pastas liberadas: Programas_CNC, MCS 500 e DESENHOS (PROJETOS)."); }
+  let h; try { h = await window.showDirectoryPicker({ id: "projetos", mode: "readwrite" }); } catch(e){ return msg("Pasta PROJETOS não escolhida.", true); }
+  if (!(await isProjetosDir(h))) return msg(`A pasta "${h.name}" não é a W:\Parts\PartsSeals\PROJETOS (não tem Programas_CNC e DESENHOS). Clique em 🔓 PROJETOS e escolha a certa.`, true);
+  await kvSet("dirProjetos", h); msg("🔓 PROJETOS lembrada. Nos próximos dias: clique em 🔓 PROJETOS (ou em Salvar) e Permitir — sem escolher pasta.");
+};
+(async () => { try { const h = await kvGet("dirProjetos"); if (h && !(await rootDir(true))){ $("btnDirRoot").style.outline = "2px solid #e8590c"; $("btnDirRoot").title = "Clique e Permitir para liberar as pastas de hoje"; } } catch(e){} })();
 $("btnDirProg").onclick = async () => { const h = await progDir(true, false); if (h){ $("genMsg").textContent = "Pasta do programa: " + h.name; $("genMsg").style.color = ""; } };
 $("btnHist").onclick = () => { $("histBox").scrollIntoView({ behavior: "smooth" }); histLoadInline(true); };
 // ---- ✏️ Alterar programa (usuário 09/11/2026): digita o número + a bucha nova → abre NNNNNN.PIT do Programas_CNC e muda SÓ o desbaste

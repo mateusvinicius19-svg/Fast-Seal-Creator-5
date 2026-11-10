@@ -52,8 +52,10 @@ pasta de rede. O Kuru, que já grava no ARGUS (Pargus, Atribuir, F9 Salvar no AR
    - Deu erro: deixar o arquivo na fila, com `"status": "erro"` e `"erro": "<motivo>"`, sem tentar de novo em loop. Tentar de novo
      só quando o arquivo mudar ou quando alguém clicar em reprocessar.
    - Registrar na auditoria do Kuru (`argus-catalogo-auditoria.jsonl` ou equivalente) o item, os campos e os valores antes e depois.
-7. **Tela.** Uma lista simples no Pargus ("Pedidos do Simulador") com pendentes, conflitos e erros, mais os botões Aplicar,
-   Reprocessar e Descartar. Um aviso discreto quando um pedido for aplicado.
+7. **Tela, na aba Projeto.** Um cartão novo em **Projeto** (junto de Lista Diária de Projeto, Castor etc.), chamado
+   "Pedidos do Simulador", com pendentes, conflitos e erros, mais os botões Aplicar, Reprocessar e Descartar. Não colocar
+   na Usinagem CNC: é ferramenta do setor de Projeto. Um aviso discreto quando um pedido for aplicado. Se a OP do item estiver
+   na Lista Diária de Projeto, a coluna PROGRAMA dela passa a mostrar o número gravado.
 
 ## 3. Fora do escopo
 

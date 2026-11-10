@@ -19,11 +19,12 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - Simulador (desenho): pergunta o **Cód. interno (item)** ANTES de mostrar o desenho — no botão do desenho e no
   Salvar programa (depois do número, antes de gravar o PDF/pedido ARGUS). Uma vez por peça (`askCod`, chave `pieceFile`):
   peça nova começa em branco (não reaproveita o código do item anterior); Cancelar não abre o desenho / não salva.
-## 5.6.2 — 10/11/2026
-- ESPEC Kuru: a tela "Pedidos do Simulador" fica na aba Projeto do Kuru (não na Usinagem CNC nem no Pargus).
+## 5.6.3 — 10/11/2026
 - Desenho avulso: `Desenhos avulsos/PLUG (18 X 53.3)/` — PLUG Ø18 x 53,3 (colar Ø18 x 2, canal Ø11 x 2,5, corpo Ø12,
   chanfro 1 x 45°, furo Ø4,1 x 5,5 ponta 118°) na folha Parts Seals (drawingSVG modo "custom"); PDF/SVG/PNG + `gerar_desenho.js`.
   Chanfros 0,5 x 45° e quebra 0,2 estimados da imagem (não cotados). Material/programa/cód. interno em branco.
+## 5.6.2 — 10/11/2026
+- ESPEC Kuru: a tela "Pedidos do Simulador" fica na aba Projeto do Kuru (não na Usinagem CNC nem no Pargus).
 ## 5.6.1 — 10/11/2026
 - Documentação: `Claude contexto/ESPEC Kuru - pedidos ARGUS do Simulador.md`, a especificação para o Kuru Nuvem ler a fila
   `DESENHOS\_PEDIDOS ARGUS` e gravar sozinho o Anexo 1 e o Código do programa no ARGUS (usuário quer automático ao salvar).

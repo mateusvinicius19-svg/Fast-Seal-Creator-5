@@ -1440,7 +1440,10 @@ function roughLevels(from, finish, dir){   // dir +1 = externo (desce), -1 = int
   return out;
 }
 // passes retos em G90 até zEnd; termina onde estava (xBack, Z zAp) para o G91 seguinte continuar valendo
+// v5.9.0 (usuário 10/11/2026): Teflon (PTFE puro e PTFE+BR) — bucha bem próxima da medida: externo e interno num passe só (o de acabamento)
+const arrTeflon = p => p.matA === "PTFE" || p.matA === "PTFEBR";
 function arrRough(p, mode, zEnd, xBack, feed){
+  if (arrTeflon(p)) return [];
   const b = buchaOf(p); if (b.txt === "----") return [];
   const lv = mode === "od" ? roughLevels(b.bo, p.dext, 1) : roughLevels(b.bi, p.dint, -1);
   if (!lv.length) return [];
@@ -1717,6 +1720,15 @@ for (const k of ["ciclo", "semch", "psa108"]){
     return applyArrMat(b.call(this, p), p);
   };
   const nm = GEN[k].main.findIndex(f => f[0] === "nome");
+  const ck = GEN[k].check;   // Teflon: avisa se a bucha deixa muito para tirar num passe só (5 ou mais no Ø, a mesma regra do passe único)
+  GEN[k].check = function(p){
+    let m = ck ? (ck.call(this, p) || "") : "";
+    if (arrTeflon(p)){ const b = buchaOf(p), w = [];
+      if (b.bo - p.dext >= 5) w.push(`externo: bucha Ø${gen15(b.bo)} deixa ${fx(b.bo - p.dext, 1)} no Ø`);
+      if (b.bi > 0 && p.dint - b.bi >= 5) w.push(`interno: bucha Ø${gen15(b.bi)} deixa ${fx(p.dint - b.bi, 1)} no Ø`);
+      if (w.length) m += (m ? " " : "") + "ATENÇÃO (Teflon, passe único): " + w.join("; ") + " — conferir a bucha."; }
+    return m;
+  };
   GEN[k].main.splice(nm, 0, ["matA", "Material", "PU"], ["bi", "Bucha Ø interno (vazio = automática no PU)", ""], ["bo", "Bucha Ø externo (vazio = automática no PU)", ""]);
 }
 // custo de material por peça: bucha do programa (TUBE a/b ou ;BUCHA AXB) × mm consumidos por ciclo (avanço do G92) ÷ peças por ciclo

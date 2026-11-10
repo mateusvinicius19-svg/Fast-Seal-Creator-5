@@ -6,6 +6,10 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.9.0 — 10/11/2026
+- Arruelas (PSA 108, ciclo e ciclo sem chanfro) em **Teflon** (PTFE puro e PTFE+BR): externo e interno num **passe só** (o de
+  acabamento), sem passes de desbaste nem etapas em Z, porque a bucha de Teflon fica bem próxima da medida nos diâmetros.
+  ATENÇÃO se a bucha digitada deixar 5 mm ou mais no Ø (externo ou interno). PU, NBR e os outros materiais não mudam.
 ## 5.8.0 — 10/11/2026
 - PSA 108 (Simulador): desbaste em Z com limite de **40 mm** de comprimento (param. `zMax`): as peças por ciclo ficam limitadas a
   (40 − paralelo) ÷ (altura + bedame − sobreposição), com ATENÇÃO quando passar. O desbaste nunca vai de uma vez: é dividido em

@@ -1441,6 +1441,7 @@ function roughLevels(from, finish, dir){   // dir +1 = externo (desce), -1 = int
 }
 // passes retos em G90 até zEnd; termina onde estava (xBack, Z zAp) para o G91 seguinte continuar valendo
 // v5.9.0 (usuário 10/11/2026): Teflon (PTFE puro e PTFE+BR) — bucha bem próxima da medida: externo e interno num passe só (o de acabamento)
+const arrPU = p => (p.matA || "PU") === "PU";
 const arrTeflon = p => p.matA === "PTFE" || p.matA === "PTFEBR";
 function arrRough(p, mode, zEnd, xBack, feed){
   if (arrTeflon(p)) return [];
@@ -1449,7 +1450,8 @@ function arrRough(p, mode, zEnd, xBack, feed){
   if (!lv.length) return [];
   // v5.8.0 (usuário 10/11/2026, PSA 108): com p.zSeg o desbaste em Z é dividido em etapas de até zSeg mm, sempre pelo menos 2
   // (nunca o comprimento todo de uma vez); cada etapa passa todos os Ø de fora para dentro antes de descer a próxima.
-  const D = -zEnd, k = p.zSeg > 0 ? Math.max(2, Math.ceil(D / p.zSeg - 1e-9)) : 1;
+  // v5.9.1 (usuário 10/11): no PU essa regra NÃO vale (desbaste como antes, de uma vez)
+  const D = -zEnd, k = p.zSeg > 0 && !arrPU(p) ? Math.max(2, Math.ceil(D / p.zSeg - 1e-9)) : 1;
   const L = ["G90", "; (DESBASTE " + (mode === "od" ? "EXTERNO" : "INTERNO") + " - MAX. 8 NO DIAMETRO, ACABAMENTO 2" + (k > 1 ? ", EM Z " + k + " ETAPAS DE " + fx(D / k, 3) : "") + ")"];
   let first = true;
   for (let s = 1; s <= k; s++){
@@ -1661,7 +1663,7 @@ function psaTolFill(p){
   return p;
 }
 // peças que cabem no limite de Z do desbaste: N × (altura + bedame − sobreposição) + paralelo ≤ zMax (usuário 10/11: 40 mm)
-function psaMaxN(p){ const B6 = p.h + (p.bed - p.sobrep), z = p.zMax > 0 ? p.zMax : 40; return Math.max(1, Math.floor((z - p.par) / B6 + 1e-9)); }
+function psaMaxN(p){ if (arrPU(p)) return 10; const B6 = p.h + (p.bed - p.sobrep), z = p.zMax > 0 ? p.zMax : 40; return Math.max(1, Math.floor((z - p.par) / B6 + 1e-9)); }
 function psaChSug(h){ return xround(Math.min(1, Math.max(0.2, 0.10 * (Number(h) || 0))), 2); }
 function psaFill(p){
   const s = psaChSug(p.h), e = v => v === "" || v === undefined || v === null || isNaN(v);

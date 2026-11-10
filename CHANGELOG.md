@@ -6,6 +6,10 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.9.1 — 10/11/2026
+- PSA 108 em **PU**: sem a regra da v5.8.0 (limite de 40 mm e desbaste em Z em etapas). PU volta a sair igual a antes
+  (conferido: mesmas linhas da v5.7.0), com a bucha automática da tabela. A regra fica para NBR, POM, Nylon, Celeron e Teflon
+  (no Teflon só o limite de 40 mm, porque ele não tem desbaste). O nome "NNNNNN CICLO N PÇ" continua para todos.
 ## 5.9.0 — 10/11/2026
 - Arruelas (PSA 108, ciclo e ciclo sem chanfro) em **Teflon** (PTFE puro e PTFE+BR): externo e interno num **passe só** (o de
   acabamento), sem passes de desbaste nem etapas em Z, porque a bucha de Teflon fica bem próxima da medida nos diâmetros.

@@ -24,6 +24,7 @@ $inj = @'
   if (q.orient) state.orient = q.orient;
   const p = profDefaults(q.type); if (q.type === "psa108") { p.chE = ""; p.chI = ""; }   // sem isso ficava o chanfro do exemplo (2,9 -> 0,29); vazio = sugestao pela altura
   Object.assign(p, q.p); p.tipoGen = q.type;
+  if (q.type === "psa108" && typeof psaTolFill === "function") psaTolFill(p);   // v5.5.0: tolerancia padrao do desenho (Ø pela tabela, altura 0/-0,1)
   if (!(q.p && q.p.mat) && q.dwg && q.dwg.mat) p.mat = q.dwg.mat;   // material da peca escolhe as ferramentas (Teflon: T7D7/T4D4/T8D8)
   if (!(q.p && q.p.matA) && p.mat && typeof ARR_MAT === "object") { const m = String(p.mat).toUpperCase().replace(/\s+/g, ""); p.matA = /^PTFE\+BR/.test(m) ? "PTFEBR" : /TEFLON|^PTFE/.test(m) ? "PTFE" : /POM|ACETAL/.test(m) ? "POM" : /NYLON|PEAD/.test(m) ? "NYLON" : /CELERON/.test(m) ? "CELERON" : /NBR|BORRACHA/.test(m) ? "NBR" : "PU"; }   // arruelas (ciclo/semch/psa108): material -> ferramentas
   if (!p.aloj && /ALOJ/i.test(q.desc || "")) p.aloj = "S";              // "ALOJAMENTO" na descricao: altura menor (4 %, 0,3 a 1 mm)

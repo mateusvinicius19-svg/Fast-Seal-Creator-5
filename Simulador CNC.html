@@ -317,7 +317,7 @@ body.printing #dwgModal .dwgf{display:none}
       <label>Aprovado (nome)<input data-d="apr" value=""></label>
       <label>Quantidade<input data-d="qtd" value="1"></label>
       <label>Observação<input data-d="obs" value=""></label>
-      <label>Cód. interno (item)<input data-d="cod" value=""></label>
+      <label title="Ao salvar/imprimir o desenho, vai para a fila do ARGUS: Anexo 1 = PDF e Código do programa no cadastro do item">Cód. interno (item) → Anexo 1 ARGUS<input data-d="cod" value="" inputmode="numeric" placeholder="ex.: 45996"></label>
       <label>Folha<input data-d="folha" value="1/1"></label>
     </div>
     <div class="sheet" id="dwgSheet"></div>
@@ -1913,7 +1913,24 @@ async function saveDrawingPdf(p, num, dd, keepIfExists){
   const nm = desenhoFolderName(p, num), sub = await fam.getDirectoryHandle(nm, { create: true });
   if (await fileExists(sub, nm + ".pdf")){ if (keepIfExists) return " · desenho já existe (mantido)"; if (!confirm(`O desenho "${nm}.pdf" já existe. Substituir?`)) return " · PDF mantido"; }
   await writeFile(sub, nm + ".pdf", await drawingPdfBytes(p));
-  return ` · desenho: DESENHOS\\${desFam(p)}\\${nm}\\${nm}.pdf`;
+  let ped = "";
+  state.lastDrawing = { dd, p, num, pdf: `${DESENHOS_W}\\${desFam(p)}\\${nm}\\${nm}.pdf` };   // imprimir depois (pvPrint) também grava o pedido
+  try { ped = await pedidoArgus(dd, p, num, state.lastDrawing.pdf); } catch(e){ ped = " · pedido ARGUS NÃO gravado: " + e.message; }
+  return ` · desenho: DESENHOS\\${desFam(p)}\\${nm}\\${nm}.pdf${ped}`;
+}
+// v5.6.0 (usuário 10/11/2026): com o "Cód. interno (item)" preenchido, ao salvar o desenho grava um pedido em
+// DESENHOS\_PEDIDOS ARGUS\<item>_<programa>.json. O Claude (rotina / "processar pedidos ARGUS") abre o item no
+// Kuru > Pargus > Catálogo de Itens, põe o PDF no Anexo 1 e o programa no Código do programa e salva (F9).
+const DESENHOS_W = "W:\\Parts\\PartsSeals\\PROJETOS\\DESENHOS";
+async function pedidoArgus(dd, p, num, pdf){
+  const el = document.querySelector("#dwgFields [data-d=cod]"), cod = String(el ? el.value : "").trim();
+  if (!cod) return " · sem Cód. interno: Anexo 1 do ARGUS não pedido";
+  if (!/^\d+$/.test(cod)) return ` · Cód. interno "${cod}" não é número: pedido ARGUS não gravado`;
+  const pd = await dd.getDirectoryHandle("_PEDIDOS ARGUS", { create: true });
+  const prog = String(num || "").replace(/\D/g, "");
+  const rec = { item: cod, programa: prog, anexo1: pdf, perfil: desFam(p), criado: new Date().toISOString(), status: "pendente" };
+  await writeFile(pd, `${cod}_${prog || "sem-programa"}.json`, new TextEncoder().encode(JSON.stringify(rec, null, 2)));
+  return ` · pedido ARGUS: item ${cod} (Anexo 1${prog ? " + programa " + prog : ""}) na fila`;
 }
 // próximo número livre: a pasta tem ~50 mil arquivos (listar tudo pela rede demora), então parte do último número
 // conhecido e só confere se NNNNNN.PIT já existe, avançando até achar um livre
@@ -3235,7 +3252,10 @@ $("dwgPrint").onclick = openPreview;
 function closePreview(){ $("pvModal").classList.remove("show"); document.body.classList.remove("pvopen"); }
 $("pvClose").onclick = closePreview;
 document.addEventListener("keydown", e => { if (e.key === "Escape" && $("pvModal").classList.contains("show")) closePreview(); });
-$("pvPrint").onclick = () => { if (!state.genParams) return; updatePrintCss(); window.print(); };
+$("pvPrint").onclick = async () => { if (!state.genParams) return;
+  const ld = state.lastDrawing;   // código interno digitado só na hora de imprimir: grava o pedido do Anexo 1 do desenho já salvo
+  if (ld) try { const m = await pedidoArgus(ld.dd, ld.p, ld.num, ld.pdf); $("genMsg").textContent = "Impressão" + m + "."; } catch(e){ $("genMsg").textContent = "Pedido ARGUS NÃO gravado: " + e.message; }
+  updatePrintCss(); window.print(); };
 $("dwgSvg").onclick = () => { const p = state.genParams; saveBytes(new TextEncoder().encode(drawingSVG(p)), `${pieceFile(p)}.svg`, "image/svg+xml", "svg"); };
 $("dwgDxf").onclick = () => { const p = state.genParams; saveBytes(new TextEncoder().encode(dxfOf(p)), `${pieceFile(p)}.dxf`, "application/dxf", "dxf"); };
 

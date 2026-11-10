@@ -6,6 +6,10 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.9.4 — 10/11/2026
+- Arruelas em Teflon (PTFE puro e PTFE+BR): bucha **automática** com 2 mm de sobremetal nos 2 diâmetros (Ø int − 2 × Ø ext + 2;
+  ex.: 20x28 → 18X30), em vez de "----". Bucha digitada igual à sugerida não vira exceção no nome; diferente → "NNNNNN BIxBO".
+- PSA 108: custo "por peça" e "Peças/ciclo" do histórico agora usam as peças por ciclo (antes contava 1 e mostrava o custo do ciclo).
 ## 5.9.3 — 10/11/2026
 - Arruelas em Teflon saindo de **TARUGO**: desbaste interno com o 1º passe em **Ø16** e depois passes de no máximo **8 no Ø**
   até Ø int − 2 (acabamento 2). Ex.: 30x38 → Ø16, 22, 28; 50x58 → Ø16, 24, 32, 40, 48. Ø int pequeno (Ø int − 2 < 16): 1º passe em Ø int − 2.

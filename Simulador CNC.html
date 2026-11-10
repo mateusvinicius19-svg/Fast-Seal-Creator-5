@@ -1410,7 +1410,7 @@ function generate(){
   }
   const fname = (type === "iso" || type === "psa108" || type === "lip" || type === "pso" || type === "pse106" || type === "psh106" || type === "psh117" || type === "psh105" || type === "pse105" || type === "pse107" || type === "psh107" || type === "psr102" || type === "psr211") ? pieceFile(p) + (buchaIsException(p) || (state.alterNum && p.bi !== "" && p.bo !== "") ? ` ${gen15(p.bi)}X${gen15(p.bo)}` : "") : `PSA108 ${gen15(p.dint)}X${gen15(p.dext)}X${gen15(p.h)} - ${xround(p.n,0)} pcs`;
   load(lines.join("\n"), fname);
-  if (!g.check(p)) try { $("genMsg").textContent += costTxt(pieceCost(lines.join("\n"), ["ciclo", "semch"].includes(type) ? xround(p.n, 0) : 1)); } catch(e){}
+  if (!g.check(p)) try { $("genMsg").textContent += costTxt(pieceCost(lines.join("\n"), ["ciclo", "semch"].includes(type) ? xround(p.n, 0) : type === "psa108" ? cicloPcs(p) : 1)); } catch(e){}
 }
 // bucha digitada à mão só vira exceção ("NNNNNN BIxBO") quando é diferente da que o Simulador escolheria sozinho
 function autoBucha(p){
@@ -1421,6 +1421,7 @@ function autoBucha(p){
     if (p.tipoGen === "psr102"){ const g = psr102Geom(q); return [g.bi, g.bo]; }
     if (p.tipoGen === "lip"){ const b = lipBucha(q, lipGeom(q)); return [b.bi, b.bo]; }
     if (p.tipoGen === "pso"){ const b = psoBucha(q); return [b.bi, b.bo]; }
+    if (["psa108", "ciclo", "semch"].includes(p.tipoGen) && arrTeflon(p)) return arrBuchaAuto(q);   // v5.9.4: Teflon digitado = sugerido não é exceção
   } catch(e){}
   return null;
 }
@@ -1472,7 +1473,9 @@ function arrRough(p, mode, zEnd, xBack, feed){
   return L;
 }
 // bucha da arruela: digitada, ou (PU) a mais leve da lista que serve — tubo antes de tarugo; NBR e outros: só digitada
+// v5.9.4 (usuário 10/11): Teflon (PTFE puro e PTFE+BR) sugere bucha com 2 mm de sobremetal nos 2 diâmetros: Ø int − 2 × Ø ext + 2
 function arrBuchaAuto(p){
+  if (p.matA === "PTFE" || p.matA === "PTFEBR") return (p.dint > 2 && p.dext > p.dint) ? [+(p.dint - 2).toFixed(3), +(p.dext + 2).toFixed(3)] : null;
   if ((p.matA || "PU") !== "PU") return null;
   const fit = buchasList().filter(([a, b]) => a <= p.dint - BUCHA_FOLGA + 1e-9 && b >= p.dext + BUCHA_FOLGA - 1e-9);
   return fit.sort((x, y) => buchaRank(...x) - buchaRank(...y))[0] || null;   // a mais barata por mm (tabela PU 27/01/25)
@@ -1741,7 +1744,7 @@ for (const k of ["ciclo", "semch", "psa108"]){
       if (w.length) m += (m ? " " : "") + "ATENÇÃO (Teflon, passe único): " + w.join("; ") + " — conferir a bucha."; }
     return m;
   };
-  GEN[k].main.splice(nm, 0, ["matA", "Material", "PU"], ["bi", "Bucha Ø interno (vazio = automática no PU)", ""], ["bo", "Bucha Ø externo (vazio = automática no PU)", ""]);
+  GEN[k].main.splice(nm, 0, ["matA", "Material", "PU"], ["bi", "Bucha Ø interno (vazio = automática no PU e Teflon)", ""], ["bo", "Bucha Ø externo (vazio = automática no PU e Teflon)", ""]);
 }
 // custo de material por peça: bucha do programa (TUBE a/b ou ;BUCHA AXB) × mm consumidos por ciclo (avanço do G92) ÷ peças por ciclo
 function pieceCost(text, perCycle){
@@ -1982,7 +1985,7 @@ const HIST_COLS = ["Data", "Programa", "Perfil", "Nominais", "Comentario", "Peca
 function formSnapshot(){ const vals = {}; document.querySelectorAll("#genBox input[data-k], #genBox select[data-k]").forEach(el => vals[el.dataset.k] = el.value); return JSON.stringify({ type: $("genType").value, vals }); }
 function histRecord(p, type, text, pitName, mcsName, pdfMsg){
   const f3 = v => (v === "" || v === undefined || v === null || isNaN(v)) ? "" : Number(v).toFixed(3);
-  const c = (() => { try { return pieceCost(text, ["ciclo", "semch"].includes(type) ? xround(p.n, 0) : 1); } catch(e){ return null; } })();
+  const c = (() => { try { return pieceCost(text, ["ciclo", "semch"].includes(type) ? xround(p.n, 0) : type === "psa108" ? cicloPcs(p) : 1); } catch(e){ return null; } })();
   const dext = type === "lip" ? p.dint + 2 * p.sec : p.dext;
   const perfil = ["ciclo", "semch"].includes(type) ? `PSA 108 (ciclo ${xround(p.n, 0)} pç${type === "semch" ? " sem chanfro" : ""})` : (() => { try { return pieceName(p); } catch(e){ return type; } })();
   const mat = ["ciclo", "semch"].includes(type) || p.matA ? ((ARR_MAT[p.matA] || ARR_MAT.PU)[0]) : (p.mat || "PU");
@@ -1990,7 +1993,7 @@ function histRecord(p, type, text, pitName, mcsName, pdfMsg){
   const pdf = (pdfMsg || "").match(/desenho: (.+?\.pdf)/);
   return { "Data": `${String(now.getDate()).padStart(2, "0")}-${M[now.getMonth()]}-${now.getFullYear()} ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`,
     "Programa": pitName.replace(/\.PIT$/i, ""), "Perfil": perfil, "Nominais": `${f3(p.dint)}/${f3(dext)}/${f3(p.h)}`, "Comentario": "",
-    "Pecas/ciclo": ["ciclo", "semch"].includes(type) ? String(xround(p.n, 0)) : "1",
+    "Pecas/ciclo": ["ciclo", "semch"].includes(type) ? String(xround(p.n, 0)) : type === "psa108" ? String(cicloPcs(p)) : "1",
     "Custo peca (R$)": c ? c.cost.toFixed(2).replace(".", ",") : "", "Material": mat,
     "Bucha I": c ? f3(c.a) : "", "Bucha E": c ? f3(c.b) : "", "Maquina": "FAGOR 1 / MCS 500",
     "Arquivo Fagor": pitName, "Arquivo MCS": mcsName, "Desenho": pdf ? pdf[1] : "", "Parametros": (() => { try { return formSnapshot(); } catch(e){ return ""; } })() };

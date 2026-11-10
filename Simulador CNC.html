@@ -1905,12 +1905,38 @@ async function kvSet(k, v){ try { const db = await kvDb(); await new Promise(res
 // v5.10.0 (usuário 10/11): pasta única PROJETOS — uma permissão por dia vale para Programas_CNC, MCS 500 e DESENHOS
 // (o navegador esquece a permissão ao fechar; com 3 pastas separadas só a 1ª era liberada no clique do Salvar)
 const ROOT_SUB = { dirProgramasCNC: ["Programas_CNC"], dirMCS500: ["Programas_CNC", "MCS 500"], dirDesenhos: ["DESENHOS"] };
+// v5.11.0 (usuário 10/11: "deixar fixo"): aberto pelo servidor local (servidor_simulador.ps1, http://localhost:8765) o Simulador
+// grava direto no W:\Parts\PartsSeals\PROJETOS pelo servidor — sem escolher pasta e sem pedir permissão, nunca.
+// srvDir/srvFile imitam as pastas do navegador (getDirectoryHandle, getFileHandle, entries, getFile, createWritable).
+const SRV = /^https?:$/.test(location.protocol) && location.port === "8765" ? location.origin : null;
+const srvUrl = (op, path) => `${SRV}/fs/${op}?p=${encodeURIComponent(path)}`;
+const srvErr = (name, path) => new DOMException(`${path}: ${name}`, name);
+async function srvStat(path){ const r = await fetch(srvUrl("stat", path)); if (r.status === 404) return null; if (!r.ok) throw new Error("servidor: " + await r.text()); return (await r.json()).kind; }
+function srvFile(path, name){
+  return { kind: "file", name,
+    async getFile(){ const r = await fetch(srvUrl("read", path)); if (!r.ok) throw srvErr("NotFoundError", path); return new File([await r.blob()], name); },
+    async createWritable(){ const parts = []; return { async write(b){ parts.push(b); }, async close(){ const r = await fetch(srvUrl("write", path), { method: "PUT", body: new Blob(parts) }); if (!r.ok) throw new Error("servidor não gravou " + path + ": " + await r.text()); } }; } };
+}
+function srvDir(path, name){
+  const sub = n => path ? path + "/" + n : n;
+  return { kind: "directory", name,
+    async queryPermission(){ return "granted"; }, async requestPermission(){ return "granted"; },
+    async getDirectoryHandle(n, o = {}){ const k = await srvStat(sub(n)); if (k === "directory") return srvDir(sub(n), n); if (k) throw srvErr("TypeMismatchError", sub(n));
+      if (!o.create) throw srvErr("NotFoundError", sub(n)); const r = await fetch(srvUrl("mkdir", sub(n)), { method: "POST" }); if (!r.ok) throw new Error(await r.text()); return srvDir(sub(n), n); },
+    async getFileHandle(n, o = {}){ const k = await srvStat(sub(n)); if (k === "file") return srvFile(sub(n), n); if (k) throw srvErr("TypeMismatchError", sub(n));
+      if (!o.create) throw srvErr("NotFoundError", sub(n)); return srvFile(sub(n), n); },
+    async *entries(){ const r = await fetch(srvUrl("list", path)); if (!r.ok) throw srvErr("NotFoundError", path);
+      for (const e of await r.json()) yield [e.n, e.k === "d" ? srvDir(sub(e.n), e.n) : srvFile(sub(e.n), e.n)]; },
+    async *values(){ for await (const [, h] of this.entries()) yield h; } };
+}
 async function rootDir(silent){
+  if (SRV) return srvDir("", "PROJETOS");
   const h = await kvGet("dirProjetos"); if (!h) return null;
   try { let q = await h.queryPermission({ mode: "readwrite" }); if (q !== "granted" && !silent) q = await h.requestPermission({ mode: "readwrite" }); return q === "granted" ? h : null; } catch(e){ return null; }
 }
 async function isProjetosDir(h){ try { await h.getDirectoryHandle("Programas_CNC"); await h.getDirectoryHandle("DESENHOS"); return true; } catch(e){ return false; } }
 async function pickDir(key, id, forceNew, silent, label){
+  if (SRV && ROOT_SUB[key]){ let d = await rootDir(true); for (const n of ROOT_SUB[key]) d = await d.getDirectoryHandle(n); return d; }
   if (!window.showDirectoryPicker) return null;
   if (!forceNew && ROOT_SUB[key]){ const r = await rootDir(silent); if (r) try { let d = r; for (const n of ROOT_SUB[key]) d = await d.getDirectoryHandle(n); return d; } catch(e){} }
   let h = forceNew ? null : await kvGet(key);
@@ -1984,6 +2010,9 @@ async function pedidoArgus(dd, p, num, pdf){
 const PROG_SEED = 46007;   // último programa visto no Programas_CNC (06/11/2026)
 async function nextFreeProg(dir){
   let n = PROG_SEED; try { n = Math.max(n, +localStorage.getItem("ps_lastProg") || 0); } catch(e){}
+  // pelo servidor: a lista da pasta vem de uma vez, então também conta "046140 CICLO 5 PÇ.PIT", "037512 53X91.PIT" etc.
+  if (SRV) try { const used = new Set(); for await (const [nm] of dir.entries()){ const m = /^(\d{6})/.exec(nm); if (m) used.add(m[1]); }
+    for (let i = 0; i < 5000; i++){ n++; const nm = String(n).padStart(6, "0"); if (!used.has(nm)) return nm; } } catch(e){}
   for (let i = 0; i < 500; i++){ n++; const nm = String(n).padStart(6, "0"); if (!(await fileExists(dir, nm + ".PIT"))) return nm; }
   return "";
 }
@@ -2136,13 +2165,23 @@ async function saveProgram(auto){
 $("btnSave").onclick = () => saveProgram(false);
 $("btnDirRoot").onclick = async () => {
   const msg = (t, bad) => { $("genMsg").textContent = t; $("genMsg").style.color = bad ? "#b2221f" : ""; };
+  if (SRV) return msg("🔒 Aberto pelo servidor: grava direto no W:\\Parts\\PartsSeals\\PROJETOS (Programas_CNC, MCS 500 e DESENHOS), sem pedir pasta.");
   if (!window.showDirectoryPicker) return msg("Este navegador não salva em pastas (use o Edge ou o Chrome).", true);
   if (await kvGet("dirProjetos")){ if (await rootDir(false)) return msg("🔓 Pastas liberadas: Programas_CNC, MCS 500 e DESENHOS (PROJETOS)."); }
   let h; try { h = await window.showDirectoryPicker({ id: "projetos", mode: "readwrite" }); } catch(e){ return msg("Pasta PROJETOS não escolhida.", true); }
   if (!(await isProjetosDir(h))) return msg(`A pasta "${h.name}" não é a W:\Parts\PartsSeals\PROJETOS (não tem Programas_CNC e DESENHOS). Clique em 🔓 PROJETOS e escolha a certa.`, true);
   await kvSet("dirProjetos", h); msg("🔓 PROJETOS lembrada. Nos próximos dias: clique em 🔓 PROJETOS (ou em Salvar) e Permitir — sem escolher pasta.");
 };
-(async () => { try { const h = await kvGet("dirProjetos"); if (h && !(await rootDir(true))){ $("btnDirRoot").style.outline = "2px solid #e8590c"; $("btnDirRoot").title = "Clique e Permitir para liberar as pastas de hoje"; } } catch(e){} })();
+// leva as buchas/ajustes guardados neste navegador para o endereço do servidor (localStorage é separado por endereço)
+function srvOpen(){ const d = {}; for (let i = 0; i < localStorage.length; i++){ const k = localStorage.key(i); if (/^ps_/.test(k) && k !== "ps_hist_cache") d[k] = localStorage.getItem(k); }
+  window.open("http://localhost:8765/#import=" + encodeURIComponent(JSON.stringify(d)), "_blank"); }
+if (SRV){
+  try { const m = /^#import=(.*)$/.exec(location.hash); if (m){ const d = JSON.parse(decodeURIComponent(m[1])); for (const [k, v] of Object.entries(d)) if (/^ps_/.test(k)) localStorage.setItem(k, v); history.replaceState(null, "", location.pathname); setTimeout(() => location.reload(), 50); } } catch(e){}
+  $("btnDirRoot").innerHTML = "&#x1F512; FIXO (servidor)"; $("btnDirRoot").title = "Aberto pelo servidor local: grava direto no W:\\Parts\\PartsSeals\\PROJETOS sem pedir pasta";
+} else fetch("http://localhost:8765/ping").then(r => r.ok && r.json()).then(j => { if (!j || !j.ok) return;
+  const b = document.createElement("button"); b.className = "btn"; b.innerHTML = "&#x1F512; Abrir FIXO"; b.title = "O servidor está ligado: abre o Simulador por ele (grava sem pedir pasta) e leva as buchas/ajustes deste navegador";
+  b.onclick = srvOpen; $("btnDirRoot").after(b); }).catch(() => {});
+(async () => { try { if (SRV) return; const h = await kvGet("dirProjetos"); if (h && !(await rootDir(true))){ $("btnDirRoot").style.outline = "2px solid #e8590c"; $("btnDirRoot").title = "Clique e Permitir para liberar as pastas de hoje"; } } catch(e){} })();
 $("btnDirProg").onclick = async () => { const h = await progDir(true, false); if (h){ $("genMsg").textContent = "Pasta do programa: " + h.name; $("genMsg").style.color = ""; } };
 $("btnHist").onclick = () => { $("histBox").scrollIntoView({ behavior: "smooth" }); histLoadInline(true); };
 // ---- ✏️ Alterar programa (usuário 09/11/2026): digita o número + a bucha nova → abre NNNNNN.PIT do Programas_CNC e muda SÓ o desbaste

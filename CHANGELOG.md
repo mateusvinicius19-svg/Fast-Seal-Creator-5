@@ -6,6 +6,15 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.11.0 — 10/11/2026
+- **Pastas fixas** (`Servidor Simulador.ps1`, novo): servidor local em PowerShell que liga junto com o Windows (`-Instalar`). O Simulador
+  aberto por **http://localhost:8765** (atalho "Simulador CNC (fixo)" na área de trabalho) grava direto em `W:\Parts\PartsSeals\PROJETOS`
+  (Programas_CNC, MCS 500, DESENHOS, _PEDIDOS ARGUS, histórico), sem escolher pasta e sem pedir permissão. Segurança: só localhost,
+  só dentro de PROJETOS, não apaga, recusa pedido de outro site (Sec-Fetch-Site) e Host diferente de localhost.
+- Simulador: aberto pelo servidor, o botão vira "🔒 FIXO (servidor)". Aberto pelo arquivo com o servidor ligado, aparece "🔒 Abrir FIXO",
+  que abre pelo servidor levando as buchas e os ajustes guardados no navegador (ps_*).
+- Pelo servidor, o "próximo número livre" confere a pasta toda (também `046140 CICLO 5 PÇ`, `037512 53X91`), não só `NNNNNN.PIT`.
+- Testado com servidor de teste em Python (mesma API). O `Servidor Simulador.ps1` não foi testado no Windows (sem PowerShell aqui).
 ## 5.10.0 — 10/11/2026
 - Simulador: botão **🔓 PROJETOS** = pasta única `W:\Parts\PartsSeals\PROJETOS`. Escolhe uma vez; o Programas_CNC, o MCS 500 e o DESENHOS
   saem dela. Nos outros dias o navegador só pede **Permitir** (1 clique, no 🔓 PROJETOS ou no Salvar), sem escolher pasta. Antes eram

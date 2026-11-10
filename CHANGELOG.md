@@ -6,6 +6,14 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.12.0 — 10/11/2026
+- **Celular**: `Servidor Simulador.ps1 -Instalar -Rede` (PowerShell como administrador) abre o servidor para o Wi-Fi da empresa
+  (reserva da porta 8765 + regra no Firewall, perfis Domínio/Privado) e cria na área de trabalho `Simulador no celular.txt` com o link
+  `http://<IP do PC>:8765/entrar?k=<senha>`. Abrindo esse link uma vez, o celular fica com a senha (cookie de 1 ano) e usa o Simulador
+  inteiro: gerar, simular e **salvar no W:** (Programas_CNC, MCS 500, DESENHOS, pedido ARGUS). Sem a senha: recusa. Senha em
+  `%APPDATA%\SimuladorCNC\senha.txt`. Só funciona dentro da empresa, com o PC ligado. `-Desinstalar` também tira a porta e o Firewall.
+- Simulador na tela do celular: cabeçalho e barras quebram linha, nada passa da largura da tela (antes cortava à direita).
+- Não testado no Windows (sem PowerShell aqui): o modo -Rede, a senha e o Firewall.
 ## 5.11.0 — 10/11/2026
 - **Pastas fixas** (`Servidor Simulador.ps1`, novo): servidor local em PowerShell que liga junto com o Windows (`-Instalar`). O Simulador
   aberto por **http://localhost:8765** (atalho "Simulador CNC (fixo)" na área de trabalho) grava direto em `W:\Parts\PartsSeals\PROJETOS`

@@ -178,7 +178,10 @@ body.printing #dwgModal .dwgf{display:none}
   .codecol{position:static;height:480px;max-height:none}
 }
 @media (max-width:640px){
-  .wrap{grid-template-columns:1fr;grid-template-areas:"form" "code" "sim"}
+  /* v5.11.1 celular: cabeçalho e barras quebram linha; nada mais largo que a tela */
+  header{flex-wrap:wrap;padding:10px 12px} header .spacer{display:none} header .btn{flex:1 1 auto;justify-content:center}
+  .wrap{padding:8px;gap:10px} .toolbar,.row,.btns,.controls{flex-wrap:wrap} .status{min-width:0;text-align:left}
+  .wrap{grid-template-columns:minmax(0,1fr);grid-template-areas:"form" "code" "sim"}
   .left{position:static;height:auto}
   .codecol{height:380px}
   .stage{min-height:340px;height:auto}

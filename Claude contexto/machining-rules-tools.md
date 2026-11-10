@@ -32,3 +32,10 @@ metadata:
 - 09/11/2026 (usuário): desenho PSH (106/105/117/107): cota de secção à direita = lábio ext → lábio int (extAp − intAp)/2 ±tol, igual ao PSE (ex. 54,50→44,00 = 5,25 = soma das 3 cotas), não mais calcanhar até ponta do lábio.
 - 09/11/2026 (usuário): PSH 129 (DH) tolerância padrão (campo vazio): Ø int e Ø ext 0/−0,2, altura 0/−0,1. PSE 108 e PSH 129: desenho SEM o O-ring ativador por enquanto (const DESENHO_ORING = false).
 - 09/11/2026 (usuário): PSA 108 tolerância padrão (campo vazio): Ø int e Ø ext ±0,2, altura 0/−0,1. Nome da pasta/PDF do desenho arredonda a 3 casas.
+- 10/11/2026 (usuário) — REGRAS PARA O CLAUDE AO FAZER PROGRAMAS DE PSA 108 (arruela). Seguir sempre, gerando pelo Simulador/gerar.ps1 (v5.9.1 já aplica):
+  - Fazer PRIMEIRO o programa de 1 peça por ciclo e DEPOIS o de várias peças por ciclo (dois programas, dois números).
+  - Programa de várias peças: a quantidade vai no NÚMERO/arquivo do programa: `046140 CICLO 5 PÇ.PIT` (Fagor) e `46140 CICLO 5 PÇ.txt` (MCS 500). 1 peça = só o número.
+  - Bucha: calcular o comprimento para o total de peças pedido (total = peças por ciclo × (1 + RPT N0); consumo por ciclo = avanço do G92). Ex.: 50x58x2, 12 pç: 1 pç RPT N11 (3,1 mm/pç ≈ 37,2 mm) ou 6 pç RPT N1 (17,85 mm/ciclo ≈ 35,7 mm), mais a fixação.
+  - Desbaste em Z (NBR, POM, Nylon, Celeron): comprimento máximo 40 mm (limita as peças por ciclo) e NUNCA de uma vez: dividir em etapas de até 20 mm, sempre pelo menos 2.
+  - PU: NÃO usar a regra do desbaste em Z (sem limite de 40 mm e sem etapas) — desbaste como sempre, bucha automática da tabela de buchas PU.
+  - Teflon (PTFE puro e PTFE+BR): externo e interno num PASSE SÓ (o de acabamento), a bucha de Teflon fica bem próxima da medida; bucha digitada; avisar se sobrar ≥ 5 no Ø.

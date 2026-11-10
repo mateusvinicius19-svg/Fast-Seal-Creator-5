@@ -1443,8 +1443,10 @@ function roughLevels(from, finish, dir){   // dir +1 = externo (desce), -1 = int
 // v5.9.0 (usuário 10/11/2026): Teflon (PTFE puro e PTFE+BR) — bucha bem próxima da medida: externo e interno num passe só (o de acabamento)
 const arrPU = p => (p.matA || "PU") === "PU";
 const arrTeflon = p => p.matA === "PTFE" || p.matA === "PTFEBR";
+const arrTeflonPasse = p => arrTeflon(p) && buchaOf(p).bi > 0;   // passe único: Teflon saindo de bucha, não de tarugo
 function arrRough(p, mode, zEnd, xBack, feed){
-  if (arrTeflon(p)) return [];
+  // v5.9.2 (usuário 10/11): só quando sai de BUCHA (tubo); de TARUGO (Ø int. 0) desbasta normal
+  if (arrTeflonPasse(p)) return [];
   const b = buchaOf(p); if (b.txt === "----") return [];
   const lv = mode === "od" ? roughLevels(b.bo, p.dext, 1) : roughLevels(b.bi, p.dint, -1);
   if (!lv.length) return [];
@@ -1725,7 +1727,7 @@ for (const k of ["ciclo", "semch", "psa108"]){
   const ck = GEN[k].check;   // Teflon: avisa se a bucha deixa muito para tirar num passe só (5 ou mais no Ø, a mesma regra do passe único)
   GEN[k].check = function(p){
     let m = ck ? (ck.call(this, p) || "") : "";
-    if (arrTeflon(p)){ const b = buchaOf(p), w = [];
+    if (arrTeflonPasse(p)){ const b = buchaOf(p), w = [];
       if (b.bo - p.dext >= 5) w.push(`externo: bucha Ø${gen15(b.bo)} deixa ${fx(b.bo - p.dext, 1)} no Ø`);
       if (b.bi > 0 && p.dint - b.bi >= 5) w.push(`interno: bucha Ø${gen15(b.bi)} deixa ${fx(p.dint - b.bi, 1)} no Ø`);
       if (w.length) m += (m ? " " : "") + "ATENÇÃO (Teflon, passe único): " + w.join("; ") + " — conferir a bucha."; }

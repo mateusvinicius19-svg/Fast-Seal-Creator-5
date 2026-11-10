@@ -38,4 +38,5 @@ metadata:
   - Bucha: calcular o comprimento para o total de peças pedido (total = peças por ciclo × (1 + RPT N0); consumo por ciclo = avanço do G92). Ex.: 50x58x2, 12 pç: 1 pç RPT N11 (3,1 mm/pç ≈ 37,2 mm) ou 6 pç RPT N1 (17,85 mm/ciclo ≈ 35,7 mm), mais a fixação.
   - Desbaste em Z (NBR, POM, Nylon, Celeron): comprimento máximo 40 mm (limita as peças por ciclo) e NUNCA de uma vez: dividir em etapas de até 20 mm, sempre pelo menos 2.
   - PU: NÃO usar a regra do desbaste em Z (sem limite de 40 mm e sem etapas) — desbaste como sempre, bucha automática da tabela de buchas PU.
-  - Teflon (PTFE puro e PTFE+BR): externo e interno num PASSE SÓ (o de acabamento), a bucha de Teflon fica bem próxima da medida; bucha digitada; avisar se sobrar ≥ 5 no Ø.
+  - Teflon (PTFE puro e PTFE+BR) saindo de BUCHA (tubo): externo e interno num PASSE SÓ (o de acabamento), a bucha de Teflon fica bem próxima da medida; bucha digitada; avisar se sobrar ≥ 5 no Ø.
+  - Teflon saindo de TARUGO: NÃO usa o passe único — desbaste normal (máx. 8 no Ø, acabamento 2) + limite de 40 mm e etapas em Z de até 20 mm.

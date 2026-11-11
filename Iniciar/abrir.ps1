@@ -33,7 +33,7 @@ $url = "http://localhost:$Port"
 $ok = $false
 if ((Test-Path -LiteralPath $srv) -and $alvo) {
   $args2 = "-NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File `"$srv`" -Porta $Port" + $(if ($rede) { ' -Rede' } else { '' })
-  Start-Process powershell.exe -WindowStyle Hidden -WorkingDirectory $App -ArgumentList $args2
+  Start-Process powershell.exe -WindowStyle Hidden -WorkingDirectory ([Environment]::GetFolderPath('LocalApplicationData')) -ArgumentList $args2
   for ($i = 0; $i -lt 40 -and -not $ok; $i++) {
     Start-Sleep -Milliseconds 250
     try { Invoke-WebRequest "$url/ping" -UseBasicParsing -TimeoutSec 2 | Out-Null; $ok = $true } catch {}

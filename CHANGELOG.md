@@ -6,6 +6,12 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.14.1 — 11/11/2026
+- `Abrir Simulador.bat`: corrige "O processo não pode acessar o arquivo ...\FastSealCreator\app porque ele está sendo usado"
+  — o servidor ligado rodava de dentro da pasta `app` e o .bat tentava desligá-lo por um endereço que não existe (`/api/quit`).
+  Agora cada versão vai para `app-<commit>`; o servidor novo é ligado e só depois as pastas antigas são apagadas
+  (se ainda estiverem em uso, ficam para a próxima vez). O servidor não roda mais de dentro da pasta da versão.
+- O `.bat` agora só baixa e roda `Iniciar\atualizar.ps1` da main: as próximas correções chegam **sem trocar o .bat**.
 ## 5.14.0 — 11/11/2026
 - Material **VITON (FKM)** novo nas gaxetas/raspadores e nas arruelas, com o mesmo padrão do NBR (externo T7D7, interno T4D4,
   face/corte como no PU, bucha digitada). Linha `;MATERIAL: USER DEFINED VITON ...`. Rotina (`gerar.ps1`) reconhece VITON/FKM.

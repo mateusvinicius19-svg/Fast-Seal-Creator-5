@@ -6,6 +6,11 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.18.3 — 11/11/2026
+- Biblioteca: **fotos de verdade** do usuário (vista de cima) onde a foto chegou como arquivo: T1D1 (H200 + VCGT 110304),
+  T4D4 e T1D45 (mesmo suporte H200; pastilha DCGT 070204) e T4D14 (as 2 barras R0.3 · 4.9 / R0.2 · 3.5), com o corretor.
+- Tirados os redesenhos que não batiam com as fotos (T2D2, T2D12, T5D5, T8D8, T6D16, T6D6): ficam "foto pendente" até o usuário
+  colar a foto (📷 / Ctrl+V) ou mandar de novo. T3D3 e perfis do anel continuam.
 ## 5.18.2 — 11/11/2026
 - Biblioteca: as ferramentas que tinham ficado sem desenho ganharam o **redesenho da foto que o usuário mandou**, com o corretor:
   T2D2 / T2D12 (suporte H100, lado de dentro / de cima), T1D1 (H200 + VCGT 110304), T4D4 e T1D45 (H200 + DCGT 070204),

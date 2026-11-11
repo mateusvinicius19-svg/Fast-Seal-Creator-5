@@ -6,6 +6,11 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.17.0 — 11/11/2026
+- Corte (usuário): **secção da peça > 14,8 → corta com a T6D16 (bedame H1002 de 2 mm) no lugar da T8D8** (1 mm), em todos os
+  geradores que usam a T8D8 (PSA 108, ciclos de arruela, ISO, DH, gaxetas/raspadores em PTFE). Como a lâmina é 1 mm mais grossa:
+  o **G92 sobe 1 mm** e, nas arruelas, o bedame vira 2 (intervalo entre as peças acompanha). Comentário da ferramenta: NOSEW 2.
+  Mensagem ao gerar avisa a troca. (Antes só avisava "ATENÇÃO".)
 ## 5.16.5 — 11/11/2026
 - Biblioteca: **T8D8** = bedame **H1002 de 1 mm** de espessura (antes a ficha dizia 2 mm).
 - Biblioteca: **T6D16** (corte do Celeron) = bedame **H1002 de 2 mm**.

@@ -987,7 +987,7 @@ const GEN = {
         p.n0 === 0 ? "G00 X" + gen15(p.dext + p.afX) + " Z" + c(39) : "G00 Z" + c(39), "M05", "M30");
       return L;
     },
-    check(p){ const m = []; if (!(p.dext > p.dint)) m.push("diâmetro externo tem que ser maior que o interno"); if (p.n > 10) m.push("máximo de 10 peças (usado 10)"); if (p.bed < 0.8 || p.bed > 1) m.push("bedame fora de 0,8 a 1 mm"); return m.length ? "ATENÇÃO: " + m.join("; ") + "." : ""; }
+    check(p){ const m = []; if (!(p.dext > p.dint)) m.push("diâmetro externo tem que ser maior que o interno"); if (p.n > 10) m.push("máximo de 10 peças (usado 10)"); if (!p.bedD16 && (p.bed < 0.8 || p.bed > 1)) m.push("bedame fora de 0,8 a 1 mm"); return m.length ? "ATENÇÃO: " + m.join("; ") + "." : ""; }
   },
 
   semch: {
@@ -1402,7 +1402,17 @@ function generate(){
   p.tipoGen = type; if (type === "lip") p.dext = p.dint + 2 * p.sec; if (type === "pso"){ p.dext = p.dint + 2 * p.sec; p.h = p.sec; }
   for (const [k] of g.main.concat(g.params)) if (!TEXT_KEYS.has(k) && !OPT_KEYS.has(k) && (p[k] === "" || isNaN(p[k]))) { $("genMsg").textContent = "Preencha: " + k; return; }
   const alojTxt = applyAloj(p);
-  const lines = g.build(p);
+  // v5.17.0 (usuário 11/11/2026): T8D8 (bedame 1 mm) corta secção de no máximo 14,8 → acima disso corta com a T6D16 (bedame 2 mm).
+  // A lâmina é 1 mm mais grossa: nas arruelas o "bed" vira 2 (intervalo entre as peças acompanha) e o G92 sobe 1 mm.
+  const secCorte = (Number(p.dext) - Number(p.dint)) / 2, bed2 = secCorte > 14.8 + 1e-9;
+  if (bed2 && "bed" in p && type !== "psr211"){ p.bedOrig = p.bed; p.bed = 2; p.bedD16 = true; }
+  let lines = g.build(p), d16 = false;
+  if (bed2 && lines.some(l => /\bT8D8\b/.test(String(l)))){
+    d16 = true;
+    lines = lines.map(l => { l = String(l).replace(/\bT8D8\b/g, "T6D16").replace(/NOSEW 1(\s)/, "NOSEW 2$1");
+      return /^\s*G92\s*Z-?[\d.]+/i.test(l) ? l.replace(/(G92\s*Z)(-?[\d.]+)/i, (m, a, v) => a + (Number(v) + 1).toFixed((v.split(".")[1] || "").length || 1)) : l; });
+    p.cutD16 = true;
+  } else if (p.bedD16){ p.bed = p.bedOrig; delete p.bedD16; }
   $("genMsg").textContent = (g.check(p) || `${g.name}: ${lines.length} linhas geradas.`) + (alojTxt ? " · " + alojTxt : "");
   $("genMsg").style.color = g.check(p) ? "#a2231d" : "";
   state.genType = type; state.genParams = p; saveForm();
@@ -1417,9 +1427,8 @@ function generate(){
   const fname = (type === "iso" || type === "psa108" || type === "lip" || type === "pso" || type === "pse106" || type === "psh106" || type === "psh117" || type === "psh105" || type === "pse105" || type === "pse107" || type === "psh107" || type === "psr102" || type === "psr211") ? pieceFile(p) + (buchaIsException(p) || (state.alterNum && p.bi !== "" && p.bo !== "") ? ` ${gen15(p.bi)}X${gen15(p.bo)}` : "") : `PSA108 ${gen15(p.dint)}X${gen15(p.dext)}X${gen15(p.h)} - ${xround(p.n,0)} pcs`;
   load(lines.join("\n"), fname);
   if (!g.check(p)) try { $("genMsg").textContent += costTxt(pieceCost(lines.join("\n"), ["ciclo", "semch"].includes(type) ? xround(p.n, 0) : type === "psa108" ? cicloPcs(p) : 1)); } catch(e){}
-  // 🧰 limites das ferramentas (usuário 11/11/2026): T8D8 (bedame 1 mm) corta secção de no máximo 14,8
-  try { const sec = (Number(p.dext) - Number(p.dint)) / 2, usa = lines.some(l => /^;?\s*T8D8\b/i.test(String(l).trim()));
-    if (usa && sec > 14.8 + 1e-9){ $("genMsg").textContent += ` · ⚠ ATENÇÃO: a T8D8 (bedame 1 mm) corta secção de no máximo 14,8 — esta peça tem ${fmtN(sec, 2)}.`; $("genMsg").style.color = "#a2231d"; } } catch(e){}
+  // 🧰 T8D8 → T6D16 quando a secção passa de 14,8 (feito acima, antes de montar o programa)
+  if (d16){ $("genMsg").textContent += ` · Secção ${fmtN(secCorte, 2)} > 14,8: corte com a T6D16 (bedame 2 mm) no lugar da T8D8 — G92 +1 mm${p.bedD16 ? ", bedame 2 nas peças" : ""}.`; }
 }
 // bucha digitada à mão só vira exceção ("NNNNNN BIxBO") quando é diferente da que o Simulador escolheria sozinho
 function autoBucha(p){
@@ -1732,7 +1741,7 @@ GEN.psa108 = {
   },
   check(p){ psaFill(p); const m = []; if (!(p.dext > p.dint)) m.push("diâmetro externo tem que ser maior que o interno"); if (p.n > 10) m.push("máximo de 10 peças (usado 10)");
     if (p.n > psaMaxN(p)) m.push(`desbaste em Z passaria de ${p.zMax > 0 ? p.zMax : 40} mm: máximo ${psaMaxN(p)} peças por ciclo (usado ${Math.min(10, psaMaxN(p))})`);
-    if (p.bed < 0.8 || p.bed > 1) m.push("bedame fora de 0,8 a 1 mm"); if (!(p.h > 2 * Math.max(p.chE, p.chI))) m.push("chanfros maiores que a metade da altura");
+    if (!p.bedD16 && (p.bed < 0.8 || p.bed > 1)) m.push("bedame fora de 0,8 a 1 mm"); if (!(p.h > 2 * Math.max(p.chE, p.chI))) m.push("chanfros maiores que a metade da altura");
     if (p.chI * TAN(30) > (p.dext - p.dint) / 4) m.push("chanfro interno grande para a secção"); return m.length ? "ATENÇÃO: " + m.join("; ") + "." : ""; }
 };
 for (const k of ["ciclo", "semch", "psa108"]){
@@ -2466,11 +2475,11 @@ const FERR = [
   { c: "T1D51", tipo: "int", nome: "Interno sem costas (D12 afiada)", uso: "PSO 109 (O-ring usinado) com Ø interno de 21 a 28", mat: "PU", min: 21, obs: "É a D12 afiada sem as costas." },
   { c: "T1D11", tipo: "int", nome: "Interno PSO", uso: "PSO 109 (O-ring usinado) com Ø interno ≥ 28", mat: "PU", min: 21, obs: "" },
   { c: "T5D5", tipo: "corte", nome: "Corte (lâmina H1111)", uso: "CUTTING das gaxetas, raspadores e arruelas", mat: "PU, NBR, Viton, POM", pastilha: "lâmina H1111", obs: "Lâmina de corte tipo faca, ponta fina, código H1111 (foto do usuário, 11/11/2026). Avanço F0,220. G92 = 15 + H + 0,768 + 0,0265 × corte radial (PSHPSE106)." },
-  { c: "T8D8", tipo: "corte", nome: "Bedame 1 mm (H1002)", uso: "Corte das arruelas (todos os materiais, menos Celeron) e das gaxetas/raspadores em PTFE / PTFE+BR", mat: "Arruelas: todos menos Celeron · Gaxetas: PTFE, PTFE+BR", pastilha: "lâmina H1002 · 1 mm", maxSec: 14.8, obs: "Lâmina de bedame H1002 com 1 mm de espessura (usuário, 11/11/2026); corta secção de peça de no MÁXIMO 14,8 mm (o Simulador avisa se passar) — é a \"espessura do bedame\" das arruelas (0,8 a 1 mm). Gaxetas em PTFE: avanço F0,100 e G92 = 15 + |Z do corte| + 1,25." },
+  { c: "T8D8", tipo: "corte", nome: "Bedame 1 mm (H1002)", uso: "Corte das arruelas (todos os materiais, menos Celeron) e das gaxetas/raspadores em PTFE / PTFE+BR", mat: "Arruelas: todos menos Celeron · Gaxetas: PTFE, PTFE+BR", pastilha: "lâmina H1002 · 1 mm", maxSec: 14.8, obs: "Lâmina de bedame H1002 com 1 mm de espessura (usuário, 11/11/2026); corta secção de peça de no MÁXIMO 14,8 mm — acima disso o Simulador troca sozinho para a T6D16 (bedame 2 mm) e sobe o G92 1 mm — é a \"espessura do bedame\" das arruelas (0,8 a 1 mm). Gaxetas em PTFE: avanço F0,100 e G92 = 15 + |Z do corte| + 1,25." },
   { c: "T6D6", tipo: "ranhura", nome: "Canal martelo 65°", uso: "OUTSIDE ANGLE HAMMER GROOVE do PSR 211 (lábio raspador a 65°)", mat: "PU", obs: "Bedame do canal de trás tem 2 mm: desbaste e acabamento externos vão até Z −(H + 2)." },
   { c: "T2D54", tipo: "ext", nome: "Externo Celeron", uso: "Externo das arruelas em Celeron", mat: "Celeron", obs: "" },
   { c: "T2D64", tipo: "int", nome: "Interno Celeron", uso: "Interno das arruelas em Celeron", mat: "Celeron", obs: "" },
-  { c: "T6D16", tipo: "corte", nome: "Bedame 2 mm (H1002)", uso: "Corte das arruelas em Celeron", mat: "Celeron", pastilha: "lâmina H1002 · 2 mm", obs: "Lâmina de bedame H1002 com 2 mm de espessura (usuário, 11/11/2026) — a mesma da T8D8, que é de 1 mm." },
+  { c: "T6D16", tipo: "corte", nome: "Bedame 2 mm (H1002)", uso: "Corte das arruelas em Celeron e no lugar da T8D8 quando a secção da peça passa de 14,8 (arruelas e gaxetas em PTFE)", mat: "Celeron · e qualquer material com secção > 14,8", pastilha: "lâmina H1002 · 2 mm", obs: "Lâmina de bedame H1002 com 2 mm de espessura (usuário, 11/11/2026) — a mesma da T8D8, que é de 1 mm." },
   ...Object.entries(OR107).map(([cs, [z, t]]) => ({ c: t, alt: t.replace(/^T4/, "T2"), tipo: "canal", nome: `Perfil do anel O-ring ${cs.replace(".", ",")}`,
     uso: `FRONT GROOVE do PSE 107 / PSH 107 (canal do O-ring ${cs.replace(".", ",")}): só entra e volta, Z −${String(z).replace(".", ",")}`, mat: "PU, PTFE na T4 · NBR e Viton na T2",
     obs: `Ferramenta de forma (largura = secção do O-ring, fundo R${(Number(cs) / 2).toFixed(3).replace(".", ",")}). Em NBR/Viton fica na posição T2 (${t.replace(/^T4/, "T2")}).` + (Number(cs) >= 6 ? " O-ring 6,99: entra em etapas (Z −5, −4, −7,2)." : "") }))

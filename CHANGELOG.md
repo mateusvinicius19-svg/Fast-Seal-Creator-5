@@ -6,6 +6,9 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.14.2 — 11/11/2026
+- Desenho custom **PSE 124 E (15.9 X 25.5 X 3.25)** (`Desenhos custom/`): secção em U com fundo R1,85, lábios Ø16 / Ø25,
+  canal 2,3 (Ø23, fundo 2,1, abertura (2,5) até Ø(18)), conforme o DESENHO COTADO.png do Inventor; corte A-A + secção ampliada.
 ## 5.14.1 — 11/11/2026
 - `Abrir Simulador.bat`: corrige "O processo não pode acessar o arquivo ...\FastSealCreator\app porque ele está sendo usado"
   — o servidor ligado rodava de dentro da pasta `app` e o .bat tentava desligá-lo por um endereço que não existe (`/api/quit`).

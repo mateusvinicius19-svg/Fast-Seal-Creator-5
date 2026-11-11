@@ -74,6 +74,24 @@ Junta as branches paralelas (5.12.0 servidor/celular, 5.7.x Cód. interno/cancel
   (ex.: 31205/2) ficavam fora da fila. Vale também quando o PDF já existia. Item vazio ou com letra: anota na obs.
 - Rotina\pedidos_argus.ps1: `-Item <cod> -Programa <num> [-Pdf <caminho>]` cria o pedido de um desenho já salvo; sem `-Pdf`, acha
   o PDF em `DESENHOS\<PERFIL>\<... NNNNN>\` pelo número do programa.
+### Branch paralela (números repetidos, já incluída na 5.13.0)
+#### 5.7.2 — 10/11/2026
+- Rotina\cancelar.ps1 (novo): cancela programa duplicado — MOVE (não apaga) .PIT/variantes, .txt do MCS 500, pasta do desenho
+  e pedido ARGUS para `Rotina\backup\cancelados\<num>`, anota em `Rotina\Programas cancelados.csv`. Confere que o original existe
+  e pede S para confirmar. Uso: `cancelar.ps1 -Num 046166 -Dup 046125` (046166 feito em duplicado do 046125).
+#### 5.7.1 — 10/11/2026
+- Prévia de impressão: o botão **Imprimir / PDF** (e o Ctrl+P com a prévia aberta) pergunta o **Cód. interno** ANTES da
+  janela de impressão, já preenchido com o código da peça (Enter confirma, Cancelar não imprime). Não precisa mais fechar
+  a prévia para editar. Se o código mudou depois de salvar, regrava o PDF em DESENHOS e o pedido ARGUS com o código novo.
+- Correção: o pedido ARGUS da impressão só usa o último desenho salvo se for da MESMA peça.
+#### 5.7.0 — 10/11/2026
+- Simulador (desenho): pergunta o **Cód. interno (item)** ANTES de mostrar o desenho — no botão do desenho e no
+  Salvar programa (depois do número, antes de gravar o PDF/pedido ARGUS). Uma vez por peça (`askCod`, chave `pieceFile`):
+  peça nova começa em branco (não reaproveita o código do item anterior); Cancelar não abre o desenho / não salva.
+#### 5.6.3 — 10/11/2026
+- Desenho avulso: `Desenhos avulsos/PLUG (18 X 53.3)/` — PLUG Ø18 x 53,3 (colar Ø18 x 2, canal Ø11 x 2,5, corpo Ø12,
+  chanfro 1 x 45°, furo Ø4,1 x 5,5 ponta 118°) na folha Parts Seals (drawingSVG modo "custom"); PDF/SVG/PNG + `gerar_desenho.js`.
+  Chanfros 0,5 x 45° e quebra 0,2 estimados da imagem (não cotados). Material/programa/cód. interno em branco.
 ## 5.6.2 — 10/11/2026
 - ESPEC Kuru: a tela "Pedidos do Simulador" fica na aba Projeto do Kuru (não na Usinagem CNC nem no Pargus).
 ## 5.6.1 — 10/11/2026

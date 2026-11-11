@@ -6,6 +6,13 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.18.0 — 11/11/2026
+- Biblioteca: **fotos reais pelo próprio Simulador** — clicar no quadro da foto e colar (Ctrl+V) ou usar 📷 Foto para escolher o
+  arquivo. Ficam em `W:\Parts\PartsSeals\PROJETOS\FERRAMENTAS SIMULADOR\<código>.png` (aparecem em todos os PCs); sem acesso à
+  pasta PROJETOS (abriu pelo arquivo sem liberar a pasta), ficam só naquele PC.
+- Tirados os desenhos de pastilha que estavam errados (usuário: só o da T3D3 estava certo — ficou).
+- Perfis do anel (T4D42/52/62/72/82, T2 em NBR/Viton): desenho da ferramenta **inteira na medida do anel** — corpo reto com a
+  largura do O-ring (1,78 / 2,62 / 3,53 / 5,33 / 6,99) e ponta em meio círculo (R = metade).
 ## 5.17.0 — 11/11/2026
 - Corte (usuário): **secção da peça > 14,8 → corta com a T6D16 (bedame H1002 de 2 mm) no lugar da T8D8** (1 mm), em todos os
   geradores que usam a T8D8 (PSA 108, ciclos de arruela, ISO, DH, gaxetas/raspadores em PTFE). Como a lâmina é 1 mm mais grossa:

@@ -6,25 +6,74 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
-## 5.7.0 — 11/11/2026
-- **`Iniciar\Abrir Simulador.bat`** (fica na Área de Trabalho): baixa do GitHub a versão mais nova (a branch com o maior `VERSION`;
-  só baixa se mudou), guarda em `%LOCALAPPDATA%\FastSealCreator\app`, copia o `Simulador CNC.html` para
-  `W:\...\PADRONIZAÇÃO\Arruela Padronizada` (só se mudou) e abre o Simulador. Sem internet: abre a última versão baixada.
-- **`Iniciar\servidor.ps1`**: servidor local (só `localhost:8765`) que serve o Simulador e lê/grava nas pastas da rede
-  (`W:\Parts\PartsSeals` ou `\\172.16.99.40\dados\Parts\PartsSeals` se o W: não estiver mapeado). Nada fora dessas pastas.
-- Simulador aberto pelo servidor: as pastas Programas_CNC, MCS 500 e DESENHOS vêm do **caminho salvo no localStorage**
-  (padrão já é o W: certo) — não pede mais para escolher a pasta todo dia. O botão 📁 agora pede o caminho em texto.
-  Aberto direto pelo arquivo (file://), continua como antes.
-## 5.6.4 — 11/11/2026
-- Simulador (✏️ Alterar programa): acha o programa também quando ele só existe com a bucha no nome
-  (ex.: `046158 194X222.PIT`, sem `046158.PIT`). Procura na lista do Ver programa / Histórico e, se não estiver, lê a pasta.
-  Mais de uma variante: ignora as CICLO e usa a mais nova. Pode digitar "046158" ou "046158 194X222".
-  Salva como `046158 <bucha nova>`; se o nome já existir, pergunta antes de substituir.
-## 5.6.3 — 11/11/2026
-- Simulador (✏️ Alterar programa): quando não acha o `NNNNNN.PIT`, a mensagem agora diz o motivo — qual pasta está lembrada
-  (e avisa se ela não parece a Programas_CNC), se só existem variantes `NNNNNN BIxBO.PIT`, ou se só existe o `.txt` no MCS 500.
-  Também aceita o arquivo com extensão minúscula (`.pit`).
+## 5.13.0 — 11/11/2026
+Junta as branches paralelas (5.12.0 servidor/celular, 5.7.x Cód. interno/cancelar/PLUG) com esta.
+- **`Iniciar\Abrir Simulador.bat`** (fica na Área de Trabalho): pega no GitHub a versão mais nova (a branch com o maior `VERSION`;
+  só baixa se mudou) em `%LOCALAPPDATA%\FastSealCreator\app`, copia o `Simulador CNC.html` para
+  `W:\...\PADRONIZAÇÃO\Arruela Padronizada` (só se mudou), religa o `Servidor Simulador.ps1` desta versão (mantém o `-Rede`
+  do celular se estava ligado) e abre `http://localhost:8765` — pastas fixas, não pede pasta.
+  Rede da empresa: usa o proxy do Windows com o login do usuário, tenta também o `curl.exe` do Windows e lê a lista de branches
+  pelo github.com (sem a API). Mostra o motivo de cada falha e grava em `%LOCALAPPDATA%\FastSealCreator\log.txt`.
+  Sem GitHub e sem nada baixado: abre a cópia do W:.
+- Servidor: `/fs/read` manda a data do arquivo (X-Mtime); o Simulador usa como `lastModified`.
+- ✏️ Alterar programa: acha o programa que só existe com a bucha no nome (`046158 194X222.PIT`); várias variantes → sem CICLO,
+  a mais nova. Quando não acha, diz por quê (pasta, variantes, só .txt no MCS 500). Aceita `.pit` minúsculo.
 - Desenhos custom: `Desenhos custom/PSO 11 E R (153.5 X 180 X 11.25)` (corpo + anel GR06) e `render.js` (gera PDF/PNG).
+## 5.12.0 — 10/11/2026
+- **Celular**: `Servidor Simulador.ps1 -Instalar -Rede` (PowerShell como administrador) abre o servidor para o Wi-Fi da empresa
+  (reserva da porta 8765 + regra no Firewall, perfis Domínio/Privado) e cria na área de trabalho `Simulador no celular.txt` com o link
+  `http://<IP do PC>:8765/entrar?k=<senha>`. Abrindo esse link uma vez, o celular fica com a senha (cookie de 1 ano) e usa o Simulador
+  inteiro: gerar, simular e **salvar no W:** (Programas_CNC, MCS 500, DESENHOS, pedido ARGUS). Sem a senha: recusa. Senha em
+  `%APPDATA%\SimuladorCNC\senha.txt`. Só funciona dentro da empresa, com o PC ligado. `-Desinstalar` também tira a porta e o Firewall.
+- Simulador na tela do celular: cabeçalho e barras quebram linha, nada passa da largura da tela (antes cortava à direita).
+- Não testado no Windows (sem PowerShell aqui): o modo -Rede, a senha e o Firewall.
+## 5.11.0 — 10/11/2026
+- **Pastas fixas** (`Servidor Simulador.ps1`, novo): servidor local em PowerShell que liga junto com o Windows (`-Instalar`). O Simulador
+  aberto por **http://localhost:8765** (atalho "Simulador CNC (fixo)" na área de trabalho) grava direto em `W:\Parts\PartsSeals\PROJETOS`
+  (Programas_CNC, MCS 500, DESENHOS, _PEDIDOS ARGUS, histórico), sem escolher pasta e sem pedir permissão. Segurança: só localhost,
+  só dentro de PROJETOS, não apaga, recusa pedido de outro site (Sec-Fetch-Site) e Host diferente de localhost.
+- Simulador: aberto pelo servidor, o botão vira "🔒 FIXO (servidor)". Aberto pelo arquivo com o servidor ligado, aparece "🔒 Abrir FIXO",
+  que abre pelo servidor levando as buchas e os ajustes guardados no navegador (ps_*).
+- Pelo servidor, o "próximo número livre" confere a pasta toda (também `046140 CICLO 5 PÇ`, `037512 53X91`), não só `NNNNNN.PIT`.
+- Testado com servidor de teste em Python (mesma API). O `Servidor Simulador.ps1` não foi testado no Windows (sem PowerShell aqui).
+## 5.10.0 — 10/11/2026
+- Simulador: botão **🔓 PROJETOS** = pasta única `W:\Parts\PartsSeals\PROJETOS`. Escolhe uma vez; o Programas_CNC, o MCS 500 e o DESENHOS
+  saem dela. Nos outros dias o navegador só pede **Permitir** (1 clique, no 🔓 PROJETOS ou no Salvar), sem escolher pasta. Antes eram
+  3 pastas separadas, e no Salvar só a 1ª era liberada (o navegador dá uma permissão por clique), então o DESENHOS tinha que ser escolhido de novo.
+  O botão fica com contorno laranja quando falta liberar. Os botões 📁 de cada pasta continuam para quem não usar a pasta única.
+## 5.9.4 — 10/11/2026
+- Arruelas em Teflon (PTFE puro e PTFE+BR): bucha **automática** com 2 mm de sobremetal nos 2 diâmetros (Ø int − 2 × Ø ext + 2;
+  ex.: 20x28 → 18X30), em vez de "----". Bucha digitada igual à sugerida não vira exceção no nome; diferente → "NNNNNN BIxBO".
+- PSA 108: custo "por peça" e "Peças/ciclo" do histórico agora usam as peças por ciclo (antes contava 1 e mostrava o custo do ciclo).
+## 5.9.3 — 10/11/2026
+- Arruelas em Teflon saindo de **TARUGO**: desbaste interno com o 1º passe em **Ø16** e depois passes de no máximo **8 no Ø**
+  até Ø int − 2 (acabamento 2). Ex.: 30x38 → Ø16, 22, 28; 50x58 → Ø16, 24, 32, 40, 48. Ø int pequeno (Ø int − 2 < 16): 1º passe em Ø int − 2.
+  Só Teflon (PTFE puro e PTFE+BR); PU e os outros continuam como antes (tarugo começa em Ø7).
+## 5.9.2 — 10/11/2026
+- Arruelas em Teflon: o passe único (externo e interno) vale só para peça que sai de **BUCHA** (tubo). Saindo de **TARUGO**
+  (Ø int. 0), desbasta normal (máx. 8 no Ø, acabamento 2), com o limite de 40 mm e as etapas em Z de até 20 mm, e sem o aviso do passe único.
+## 5.9.1 — 10/11/2026
+- PSA 108 em **PU**: sem a regra da v5.8.0 (limite de 40 mm e desbaste em Z em etapas). PU volta a sair igual a antes
+  (conferido: mesmas linhas da v5.7.0), com a bucha automática da tabela. A regra fica para NBR, POM, Nylon, Celeron e Teflon
+  (no Teflon só o limite de 40 mm, porque ele não tem desbaste). O nome "NNNNNN CICLO N PÇ" continua para todos.
+## 5.9.0 — 10/11/2026
+- Arruelas (PSA 108, ciclo e ciclo sem chanfro) em **Teflon** (PTFE puro e PTFE+BR): externo e interno num **passe só** (o de
+  acabamento), sem passes de desbaste nem etapas em Z, porque a bucha de Teflon fica bem próxima da medida nos diâmetros.
+  ATENÇÃO se a bucha digitada deixar 5 mm ou mais no Ø (externo ou interno). PU, NBR e os outros materiais não mudam.
+## 5.8.0 — 10/11/2026
+- PSA 108 (Simulador): desbaste em Z com limite de **40 mm** de comprimento (param. `zMax`): as peças por ciclo ficam limitadas a
+  (40 − paralelo) ÷ (altura + bedame − sobreposição), com ATENÇÃO quando passar. O desbaste nunca vai de uma vez: é dividido em
+  etapas de até **20 mm** (param. `zSeg`), **sempre pelo menos 2**. Cada etapa passa todos os Ø, de fora para dentro, antes de descer.
+  Os outros ciclos de arruela (ciclo/semch) não mudam.
+- PSA 108 com várias peças por ciclo: o arquivo leva a quantidade no número, `046140 CICLO 5 PÇ.PIT` / `46140 CICLO 5 PÇ.txt`
+  (Simulador ao salvar e Rotina\gerar.ps1). Com 1 peça, o nome continua só o número.
+- Exemplo testado: 50 x 58 x 2, 1 pç com RPT N11 (12 peças, 3,1 mm por peça) e 6 pç por ciclo com RPT N1 (12 peças, 17,85 mm por ciclo).
+## 5.7.0 — 10/11/2026
+- Rotina\gerar.ps1: desenho gerado pela rotina agora também grava o pedido do ARGUS (Anexo 1 = PDF + Código do programa) em
+  `DESENHOS\_PEDIDOS ARGUS\<item>_<programa>.json`, igual ao Simulador. Antes só o Simulador na tela gravava, e as OPs da rotina
+  (ex.: 31205/2) ficavam fora da fila. Vale também quando o PDF já existia. Item vazio ou com letra: anota na obs.
+- Rotina\pedidos_argus.ps1: `-Item <cod> -Programa <num> [-Pdf <caminho>]` cria o pedido de um desenho já salvo; sem `-Pdf`, acha
+  o PDF em `DESENHOS\<PERFIL>\<... NNNNN>\` pelo número do programa.
 ## 5.6.2 — 10/11/2026
 - ESPEC Kuru: a tela "Pedidos do Simulador" fica na aba Projeto do Kuru (não na Usinagem CNC nem no Pargus).
 ## 5.6.1 — 10/11/2026

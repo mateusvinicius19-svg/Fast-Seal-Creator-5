@@ -1193,7 +1193,8 @@ function isPSH(p){ return ["psh106","psh117","psh105","psh107","psr211"].include
 // 107: ferramenta de perfil para o canal do O-ring (só entra e volta) — tirado dos programas atuais (SS06P)
 const OR107 = { "1.78": [1.9, "T4D42"], "2.62": [2.8, "T4D52"], "3.53": [3.7, "T4D62"], "5.33": [5.5, "T4D72"], "6.99": [7.2, "T4D82"] };
 function orDepth(cs){ const e = OR107[Number(cs).toFixed(2)]; return e ? e[0] : xround(cs + 0.18, 2); }
-function orTool(cs){ const e = OR107[Number(cs).toFixed(2)]; return e ? e[1] : "T4D62"; }
+// NBR e VITON (usuário 11/11/2026): a ferramenta do anel (canal do O-ring) fica na posição T2 do torno — T4D62 → T2D62
+function orTool(cs, mat){ const e = OR107[Number(cs).toFixed(2)], t = e ? e[1] : "T4D62"; return isBorracha(mat) ? t.replace(/^T4/, "T2") : t; }
 function oc107(sec, p){ const v = Number(String(p.oc ?? "").replace(",", ".")); if (v > 0) return v; const L = [1.78, 2.62, 3.53, 5.33, 6.99].filter(c => c <= 0.57 * sec); return L.length ? L[L.length - 1] : 1.78; }
 GEN.psh106 = Object.assign({}, GEN.pse106, { name: "PSH 106" });
 GEN.psh117 = Object.assign({}, GEN.pse106, { name: "PSH 117", params: [...GEN.pse106.params.filter(f => f[0] !== "fe"),
@@ -1310,9 +1311,9 @@ function applyAloj(p){
   p[k] = xround(H0 - red, 2); p.alojDone = true; p.alojK = k; p.alojH0 = H0;   // altura do alojamento guardada: vai no NOME do desenho (cadastro); o desenho usa a final
   return `Alojamento: altura ${fmtN(H0, 2)} → ${fmtN(p[k], 2)} (−${fmtN(red, 2)})`;
 }
-const GAX_MAT = [["PU", "PU"], ["NBR", "NBR / borracha"], ["PTFE PURO", "PTFE puro (Teflon)"], ["PTFE+BR", "PTFE+BR (mesmas ferram. do PTFE puro)"]];   // valor = texto da linha ;MATERIAL (PTFE: isTeflon)
+const GAX_MAT = [["PU", "PU"], ["NBR", "NBR / borracha"], ["VITON", "Viton (FKM) · mesmo padrão do NBR"], ["PTFE PURO", "PTFE puro (Teflon)"], ["PTFE+BR", "PTFE+BR (mesmas ferram. do PTFE puro)"]];   // valor = texto da linha ;MATERIAL (PTFE: isTeflon)
 // material salvo antes como texto livre (ex.: "TEFLON", "nbr") → opção da lista; vazio/desconhecido = PU
-function matFromText(v){ const m = String(v || "").toUpperCase().trim(); return /NBR|BORRACHA/.test(m) ? "NBR" : /\+\s*BR/.test(m) ? "PTFE+BR" : /PTFE|TEFLON/.test(m) ? "PTFE PURO" : "PU"; }
+function matFromText(v){ const m = String(v || "").toUpperCase().trim(); return /VITON|FKM/.test(m) ? "VITON" : /NBR|BORRACHA/.test(m) ? "NBR" : /\+\s*BR/.test(m) ? "PTFE+BR" : /PTFE|TEFLON/.test(m) ? "PTFE PURO" : "PU"; }
 function fieldHTML([k, label, def], wide){
   if (k === "aloj") return `<label>${label}<select data-k="aloj" class="orient" style="width:100%"><option value="N"${def !== "S" ? " selected" : ""}>Não · medidas da peça</option><option value="S"${def === "S" ? " selected" : ""}>${ALOJ_RASP[$("genType").value] ? "Sim · altura menor −4 % (0,3 a 1 mm)" : "Sim · altura −10 % (máx. 1 mm até 20; máx. 2 mm acima)"}</option></select></label>`;
   if (k === "sec" && $("genType").value === "pso") return `<label>${label}<input data-k="sec" type="text" inputmode="decimal" list="psoSecList" value="${String(def).replace(".", ",")}" placeholder="1,78 · 2,62 · 3,53 · 5,33 · 6,99 · 8,4 ou outra"><datalist id="psoSecList">${[1.78, 2.62, 3.53, 5.33, 6.99, 8.4].map(v => `<option value="${String(v).replace(".", ",")}">Parker ±${String(parkerTol(50, v).wTol).replace(".", ",")}</option>`).join("")}</datalist></label>`;   // PSO 109: secção livre, 5 padrão Parker sugeridas
@@ -1651,7 +1652,7 @@ function buchaOf(p){
   if (a) return { bi: ok(p.bi) ? p.bi : a[0], bo: ok(p.bo) ? p.bo : a[1], txt: gen15(ok(p.bi) ? p.bi : a[0]) + "X" + gen15(ok(p.bo) ? p.bo : a[1]), auto: true };
   return { bi: p.dint, bo: p.dext, txt: "----", auto: false };
 }
-const ARR_MAT = { PU: ["PU", "T7D7", "T4D4", "", true], NBR: ["NBR / borracha", "T7D7", "T4D4", "", true], PTFE: ["PTFE puro (Teflon)", "T7D7", "T4D4", "", true], PTFEBR: ["PTFE+BR (mesmas ferram. do PTFE puro)", "T7D7", "T4D4", "", true], POM: ["POM (poliacetal)", "T7D7", "T4D4", "", true],
+const ARR_MAT = { PU: ["PU", "T7D7", "T4D4", "", true], NBR: ["NBR / borracha", "T7D7", "T4D4", "", true], VITON: ["Viton (FKM)", "T7D7", "T4D4", "", true], PTFE: ["PTFE puro (Teflon)", "T7D7", "T4D4", "", true], PTFEBR: ["PTFE+BR (mesmas ferram. do PTFE puro)", "T7D7", "T4D4", "", true], POM: ["POM (poliacetal)", "T7D7", "T4D4", "", true],
                   NYLON: ["Nylon / PEAD", "T7D7", "T4D4", "", true], CELERON: ["Celeron (T2D54 · T2D64 · T6D16)", "T2D54", "T2D64", "T6D16", true] };
 function applyArrMat(L, p){
   const [lab, e, i, c, comp] = ARR_MAT[p.matA] || ARR_MAT.PU;
@@ -2713,11 +2714,13 @@ function isTeflon(p){ const m = String(p.mat || "").toUpperCase().trim(); return
 // PU (usuário 09/11/2026, todos os perfis): sobremetal externo > 10 no Ø (bucha ext − Ø ext) → passes acima do Ø ext vão 1 mm a mais em Z (sem mudar o G92)
 function isPU(mat){ return !isTeflon({ mat }) && /\bPU\b/i.test(String(mat || "PU")); }
 function deepAbove(p, tO){ return isPU(p.mat) && tO - p.dext > 10 ? { x: Number(p.dext), dz: 1 } : null; }
+// v5.14.0 (usuário 11/11/2026): VITON (FKM) usa o mesmo padrão do NBR (ferramentas, bucha digitada)
+function isBorracha(mat){ return /NBR|BORRACHA|VITON|FKM/i.test(String(mat || "")); }
 function fscTools(p, ext, intDef){
   const tf = isTeflon(p);
   if (tf) return { tf, ext: "T7D7", int: p.tInt || "T4D4", cut: "T8D8", fCut: "0.100" };
   // NBR (usuário 09/11/2026): externo e interno do cadastro das arruelas (ARR_MAT.NBR: T7D7 / T4D4); face e corte como no PU
-  if (/NBR|BORRACHA/i.test(String(p.mat || ""))) return { tf, ext: ARR_MAT.NBR[1], int: p.tInt || ARR_MAT.NBR[2], cut: "T5D5", fCut: "0.220" };
+  if (isBorracha(p.mat)) return { tf, ext: ARR_MAT.NBR[1], int: p.tInt || ARR_MAT.NBR[2], cut: "T5D5", fCut: "0.220" };
   return { tf, ext, int: p.tInt || intDef, cut: "T5D5", fCut: "0.220" };
 }
 // maior profundidade em Z (valor positivo) alcançada pelas ferramentas num programa em G90
@@ -2759,7 +2762,7 @@ function pseFscBuild(p, gOver){
   if (g.O107){
     // PSE/PSH 107: canal do O-ring com ferramenta de perfil — só entra e volta (como nos programas atuais)
     const dz = orDepth(g.OC);
-    L.push("", ...sec("FRONT GROOVE"), "G0 Z70", `${orTool(g.OC)}; (FRONTAL ${g.OC.toFixed(2)})`, ";", ";", `G0 X${f3(g.Dm)} Z3`);
+    L.push("", ...sec("FRONT GROOVE"), "G0 Z70", `${orTool(g.OC, p.mat)}; (FRONTAL ${g.OC.toFixed(2)})`, ";", ";", `G0 X${f3(g.Dm)} Z3`);
     if (g.OC >= 6) L.push("G1 Z-5", "G1 Z-4", `G1 Z-${dz}`); else L.push(`G1 Z-${dz}`);
     L.push("G0 Z3");
   } else {  // canal: centro da ferramenta a r dos flancos e do fundo (raio Rg - r, tangente); referência na ponta: v = (-r, 0)

@@ -6,6 +6,11 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.14.0 — 11/11/2026
+- Material **VITON (FKM)** novo nas gaxetas/raspadores e nas arruelas, com o mesmo padrão do NBR (externo T7D7, interno T4D4,
+  face/corte como no PU, bucha digitada). Linha `;MATERIAL: USER DEFINED VITON ...`. Rotina (`gerar.ps1`) reconhece VITON/FKM.
+- PSE 107 / PSH 107 em **NBR e VITON**: a ferramenta do anel (canal do O-ring, FRONT GROOVE) vai na posição **T2**
+  (T4D42 → T2D42, T4D52 → T2D52, … T4D82 → T2D82). PU e PTFE continuam em T4.
 ## 5.13.1 — 11/11/2026
 - `Abrir Simulador.bat`: corrige "Não existe um objeto no caminho especificado C:\Users\JSLSBO~1" — a pasta TEMP vem com o nome
   curto (usuário com espaço) e o Expand-Archive não aceita. Agora baixa e descompacta em `%LOCALAPPDATA%\FastSealCreator`

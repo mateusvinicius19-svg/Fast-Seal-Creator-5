@@ -30,5 +30,6 @@ Ao terminar qualquer alteração (mesmo pequena):
 - `Servidor Simulador.ps1` — servidor local (pastas fixas; `-Rede` = celular).
 - `Iniciar/` — `Abrir Simulador.bat` e `abrir.ps1`.
 - `Claude contexto/` — regras de usinagem, catálogo de perfis, rotina em lote (`Rotina/*.ps1`).
+- `RODAR FILA DE PROGRAMAS.md` + `Kuru - fila ARGUS/` — guia e módulo testado para o Kuru aplicar a fila `_PEDIDOS ARGUS` no ARGUS.
 - `Desenhos custom/`, `Desenhos avulsos/` — desenhos especiais na folha Parts Seals.
 - Idioma: português do Brasil; escrever "secção" (com ç) nos desenhos.

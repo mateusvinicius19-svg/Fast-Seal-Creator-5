@@ -6,6 +6,11 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.6.3 — 11/11/2026
+- Simulador (✏️ Alterar programa): quando não acha o `NNNNNN.PIT`, a mensagem agora diz o motivo — qual pasta está lembrada
+  (e avisa se ela não parece a Programas_CNC), se só existem variantes `NNNNNN BIxBO.PIT`, ou se só existe o `.txt` no MCS 500.
+  Também aceita o arquivo com extensão minúscula (`.pit`).
+- Desenhos custom: `Desenhos custom/PSO 11 E R (153.5 X 180 X 11.25)` (corpo + anel GR06) e `render.js` (gera PDF/PNG).
 ## 5.6.2 — 10/11/2026
 - ESPEC Kuru: a tela "Pedidos do Simulador" fica na aba Projeto do Kuru (não na Usinagem CNC nem no Pargus).
 ## 5.6.1 — 10/11/2026

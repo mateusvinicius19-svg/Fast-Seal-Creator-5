@@ -2175,12 +2175,32 @@ function altRough(txt, bi, bo){
   });
   return { text: out.join("\n").replace(/\n+$/, ""), old, notes, shifted };
 }
+// v5.6.3 (usuário 11/11/2026): "Não achei 046158.PIT" sem dizer por quê → mostra a pasta lembrada, se ela parece a Programas_CNC,
+// e o que existe com esse número (variantes NNNNNN BIxBO.PIT na lista do Ver programa / Histórico, .txt no MCS 500)
+async function altNotFound(dir, num){
+  const n5 = num.replace(/^0+(?=\d)/, ""), reP = new RegExp("^" + num + "(?!\\d).*\\.pit$", "i");
+  let mcs = null; try { mcs = await dir.getDirectoryHandle("MCS 500"); } catch(e){}
+  const pasta = `Pasta lembrada: "${dir.name}"` + (mcs ? "" : ` — não parece a Programas_CNC (não tem a subpasta MCS 500). Clique em 📁 Programas_CNC e escolha W:\\Parts\\PartsSeals\\PROJETOS\\Programas_CNC`);
+  const vars = new Set();
+  try { if (!VER_IDX) VER_IDX = await kvGet("verIdx"); if (VER_IDX) VER_IDX.P.filter(n => reP.test(n)).forEach(n => vars.add(n)); } catch(e){}
+  try { const rows = await histRead(dir), h = rows[0] || [], fi = h.indexOf("Arquivo Fagor"); if (fi >= 0) rows.slice(1).forEach(r => { if (reP.test(r[fi] || "")) vars.add(r[fi]); }); } catch(e){}
+  const ok = []; for (const n of vars) if (await fileExists(dir, n)) ok.push(n);
+  let txtMcs = false; if (mcs) txtMcs = await fileExists(mcs, n5 + ".txt");
+  let t = `Não achei ${num}.PIT no Programas_CNC. ${pasta}.`;
+  if (ok.length) t += ` Existe(m) só a(s) variante(s): ${ok.sort().join(", ")} — o programa padrão ${num}.PIT não está na pasta.`;
+  else if (txtMcs) t += ` Só existe o ${n5}.txt no MCS 500 (sem o .PIT do Fagor) — o Alterar precisa do .PIT.`;
+  else if (mcs) t += " Também não tem no MCS 500 — confira o número (🔎 Ver programa)."; 
+  return t;
+}
 async function altRun(num, bi, bo){
   const msg = (t, err) => { $("genMsg").textContent = t; $("genMsg").style.color = err ? "#b2221f" : ""; };
   let dir = await progDir(false, true); if (!dir) dir = await progDir(false, false); if (!dir) return;
   let txt = "";
-  try { const buf = new Uint8Array(await (await (await dir.getFileHandle(num + ".PIT")).getFile()).arrayBuffer()); for (const b of buf) txt += String.fromCharCode(b); }
-  catch(e){ return msg(`Não achei ${num}.PIT no Programas_CNC.`, true); }
+  let fh = null;
+  for (const nm of [num + ".PIT", num + ".pit", num + ".Pit"]) { try { fh = await dir.getFileHandle(nm); break; } catch(e){} }
+  if (!fh) return msg(await altNotFound(dir, num), true);
+  try { const buf = new Uint8Array(await (await fh.getFile()).arrayBuffer()); for (const b of buf) txt += String.fromCharCode(b); }
+  catch(e){ return msg(`Achei ${num}.PIT mas não consegui ler (${e.message}) — o arquivo pode estar aberto em outro programa.`, true); }
   const r = altRough(txt, bi, bo);
   if (r.err) return msg(`✏️ ${num}: ${r.err}. Nada foi salvo.`, true);
   const sfx = `${gen15(bi)}X${gen15(bo)}`, h = (txt.split(/\r?\n/)[0] || "").trim();

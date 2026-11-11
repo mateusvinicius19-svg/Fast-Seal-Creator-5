@@ -1488,7 +1488,9 @@ function arrRough(p, mode, zEnd, xBack, feed){
   // v5.8.0 (usuário 10/11/2026, PSA 108): com p.zSeg o desbaste em Z é dividido em etapas de até zSeg mm, sempre pelo menos 2
   // (nunca o comprimento todo de uma vez); cada etapa passa todos os Ø de fora para dentro antes de descer a próxima.
   // v5.9.1 (usuário 10/11): no PU essa regra NÃO vale (desbaste como antes, de uma vez)
-  const D = -zEnd, k = p.zSeg > 0 && !arrPU(p) ? Math.max(2, Math.ceil(D / p.zSeg - 1e-9)) : 1;
+  // v5.20.2 (usuário 11/11): peça curta (comprimento ≤ zMin, padrão 10 mm) vai numa etapa só — 2 etapas repetiam o mesmo passe
+  const zMin = p.zMin > 0 ? p.zMin : 10;
+  const D = -zEnd, k = p.zSeg > 0 && !arrPU(p) && D > zMin + 1e-9 ? Math.max(2, Math.ceil(D / p.zSeg - 1e-9)) : 1;
   const L = ["G90", "; (DESBASTE " + (mode === "od" ? "EXTERNO" : "INTERNO") + " - MAX. 8 NO DIAMETRO, ACABAMENTO 2" + (k > 1 ? ", EM Z " + k + " ETAPAS DE " + fx(D / k, 3) : "") + ")"];
   let first = true;
   for (let s = 1; s <= k; s++){
@@ -1720,7 +1722,7 @@ GEN.psa108 = {
            ["fExt","Avanço externo F",0.15],["fInt","Avanço interno F",0.1],["fCor","Avanço corte F",0.1],["z0","Z inicial (G0 Z)",50],
            ["zExt","Z afastamento externo",70],["zInt","Z afastamento interno",50],["g92","Valor do G92 Z",1.1],["zN20","Z do bloco N20",100],
            ["zFim","Z final (G00)",250],["afX","Afastamento final em X (se N0 = 0)",50],["S","Rotação S (vazio = tabela pelo Ø ext.)",""],
-           ["zMax","Desbaste em Z: comprimento máximo (mm)",40],["zSeg","Desbaste em Z: máximo por etapa (mm, sempre ≥ 2 etapas)",20]],
+           ["zMax","Desbaste em Z: comprimento máximo (mm)",40],["zSeg","Desbaste em Z: máximo por etapa (mm, ≥ 2 etapas acima do mínimo)",20],["zMin","Desbaste em Z: até este comprimento vai de uma vez (mm)",10]],
   build(p){
     psaFill(p); const fx3 = v => fx(v, 3);
     const prol = (p.bed - p.sobrep) / 2, cE = p.chE, cI = p.chI;
@@ -2182,7 +2184,7 @@ async function saveProgram(auto){
       try { pdfMsg = await saveDrawingPdf(gp, base.match(/^\d+/) ? base.match(/^\d+/)[0] : base, dd, !!suf); } catch(e){ pdfMsg = " · PDF não salvo: " + e.message; }
     }
     try { const rec = histRecord(auto ? {} : (gp || {}), auto ? "" : (state.genType || ""), fagor, pitName, mcsName, pdfMsg); if (auto && state.alterRec) Object.assign(rec, state.alterRec); await histAppend(dir, rec); histLoadInline(false); } catch(e){ pdfMsg += " · histórico não gravado: " + e.message; }
-    $("genMsg").textContent = `Salvo: ${pitName} (Programas_CNC) e ${mcsName} (MCS 500, convertido)${pdfMsg}.`; state.tolResetPending = true;   // v5.20.1: tolerâncias voltam ao padrão quando começar a peça seguinte (a impressão desta continua com as dela) $("genMsg").style.color = /NÃO salvo/.test(pdfMsg) ? "#b2221f" : "";
+    $("genMsg").textContent = `Salvo: ${pitName} (Programas_CNC) e ${mcsName} (MCS 500, convertido)${pdfMsg}.`; state.tolResetPending = true; /* v5.20.1: tolerâncias voltam ao padrão quando começar a peça seguinte (a impressão desta continua com as dela) */ $("genMsg").style.color = /NÃO salvo/.test(pdfMsg) ? "#b2221f" : "";
     if (auto) $("genMsg").textContent = `✏️ ${state.alterNote || ""} Salvo: ${pitName} (Programas_CNC) e ${mcsName} (MCS 500)${pdfMsg}. O ${state.alterNum} original não mudou.`;
     if (!auto && gp && DESENHO_TYPES.includes(gp.tipoGen) && !/NÃO salvo|não salvo/.test(pdfMsg)) setTimeout(() => { openPreview(); setTimeout(() => { updatePrintCss(); window.print(); }, 400); }, 100);   // imprime o desenho salvo
     return true;

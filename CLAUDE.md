@@ -14,7 +14,9 @@ Ao terminar qualquer alteração (mesmo pequena):
 4. Confira que a `main` no GitHub ficou com o `VERSION` novo.
 
 ## Como o usuário usa
-- `Iniciar\Abrir Simulador.bat` (cópia na Área de Trabalho): baixa a `main` para `%LOCALAPPDATA%\FastSealCreator\app`, copia o
+- `Iniciar\Abrir Simulador.bat` (cópia na Área de Trabalho) só baixa e roda `Iniciar\atualizar.ps1` da main (mude a lógica
+  lá, não no .bat). O atualizador baixa a `main` para `%LOCALAPPDATA%\FastSealCreator\app-<commit>` (uma pasta por versão: a
+  antiga pode estar em uso pelo servidor), roda `Iniciar\abrir.ps1`, que copia o
   `Simulador CNC.html` para `W:\Parts\PartsSeals\PROJETOS\PROGRAMAÇÃO\PADRONIZAÇÃO\Arruela Padronizada`, religa o
   `Servidor Simulador.ps1` e abre `http://localhost:8765` (pastas fixas, não pede pasta). Log: `%LOCALAPPDATA%\FastSealCreator\log.txt`.
 - O usuário NÃO copia arquivos à mão: entregar = estar na `main`.

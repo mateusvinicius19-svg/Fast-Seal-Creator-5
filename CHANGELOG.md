@@ -6,6 +6,9 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.18.7 — 11/11/2026
+- Biblioteca: **T6D16** com a foto real do bedame H1002 (2,0 mm) e **T8D8** com a mesma foto trocando a medida para **1,0 mm**
+  (a T8D8 é igual, só que de 1 mm — usuário).
 ## 5.18.6 — 11/11/2026
 - Biblioteca: **T5D5** com a foto real da faca H1111 (do usuário).
 ## 5.18.5 — 11/11/2026

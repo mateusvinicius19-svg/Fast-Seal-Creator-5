@@ -6,6 +6,10 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.16.2 — 11/11/2026
+- Biblioteca (fotos do usuário): **T1D45** = suporte H200 com pastilha **VCGT 110304** (rômbica 35°, R0,4);
+  **T4D4** = suporte igual, pastilha **DCGT 070204** (rômbica 55°, R0,4) — faz no máximo **30° nas costas**.
+  Ficha mostra o código da pastilha; a busca também acha pela pastilha (ex.: "VCGT").
 ## 5.16.1 — 11/11/2026
 - Biblioteca: **T2D2 e T2D12 = o mesmo suporte H100** na posição T2 — lado de DENTRO = D2 (externo), lado de CIMA = D12 (interno);
   pastilha rômbica 35° (tipo V) com raio de ponta 0,4 (foto do usuário). Busca da biblioteca agora também procura nas observações (ex.: "H100").

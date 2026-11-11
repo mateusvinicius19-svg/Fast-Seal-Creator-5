@@ -6,6 +6,15 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.21.1 — 11/11/2026
+- PSG 101 (guia) — regras do corte (usuário):
+  - o corte é feito **depois, no acabamento**, em ângulo: campo novo **"Ângulo do corte da guia (°)"** (30 · 45 · 60, padrão 45);
+  - serra de **1,8 mm**: por isso POM e Celeron saem **+0,9 nos Ø**. Os outros materiais também são cortados, mas **sem perda**
+    (medida nominal);
+  - programa: `;PSG 101 (GUIA) - CORTE NO ACABAMENTO A 45 GRAUS - SERRA 1.8 (POR ISSO +0.9 NOS DIAMETROS)` ou `... - SEM PERDA`;
+  - desenho: a abertura aparece na vista frontal e há a vista nova **"CORTE DA GUIA (vista de fora)"**, com o ângulo;
+  - tolerância da **secção +0 / −0,05** no desenho do PSG 101.
+
 ## 5.21.0 — 11/11/2026
 - Novo perfil **PSG 101 (guia)**, no grupo "Guias" da escolha por imagem (imagem do catálogo enviada pelo usuário). É uma cópia
   do PSA 108 (mesmo programa, chanfros, tolerâncias, bucha, desbaste, D16 acima de 14,8), com regras próprias:

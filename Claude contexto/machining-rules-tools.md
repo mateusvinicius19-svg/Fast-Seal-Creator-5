@@ -44,4 +44,6 @@ metadata:
 ## PSG 101 (guia) — usuário 11/11/2026
 - Cópia do PSA 108 (arruela). Guias são mais altas (padrão 9,7).
 - POM e Celeron: usinar 0,9 mm MAIOR nos 2 diâmetros (desenho com a medida nominal).
-- Depois de usinada, a guia leva um CORTE (abertura). Parâmetros do corte: A DEFINIR com o usuário.
+- Depois de usinada, a guia leva um CORTE em ângulo, feito no ACABAMENTO (fora do programa CNC): mais comuns 30°, 45° e 60°; serra de 1,8 mm.
+- O +0,9 nos Ø é só para POM e Celeron (perda da serra). Outros materiais também são cortados, mas sem perda.
+- Secção no desenho: +0 / −0,05.

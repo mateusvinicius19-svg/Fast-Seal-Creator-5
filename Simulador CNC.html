@@ -1492,8 +1492,11 @@ function arrRough(p, mode, zEnd, xBack, feed){
   // v5.9.1 (usuário 10/11): no PU essa regra NÃO vale (desbaste como antes, de uma vez)
   // v5.20.2 (usuário 11/11): peça curta (comprimento ≤ zMin, padrão 10 mm) vai numa etapa só — 2 etapas repetiam o mesmo passe
   const zMin = p.zMin > 0 ? p.zMin : 10;
+  // v5.21.3 (usuário 11/11): Celeron corta com a T6D16 (bedame 2 mm) → desbaste 1 mm mais fundo em Z
+  // (se a peça já usa bedame 2 por causa da secção > 14,8, o comprimento já conta os 2 mm)
+  const cel = p.matA === "CELERON" && !p.bedD16; if (cel) zEnd -= 1;
   const D = -zEnd, k = p.zSeg > 0 && !arrPU(p) && D > zMin + 1e-9 ? Math.max(2, Math.ceil(D / p.zSeg - 1e-9)) : 1;
-  const L = ["G90", "; (DESBASTE " + (mode === "od" ? "EXTERNO" : "INTERNO") + " - MAX. 8 NO DIAMETRO, ACABAMENTO 2" + (k > 1 ? ", EM Z " + k + " ETAPAS DE " + fx(D / k, 3) : "") + ")"];
+  const L = ["G90", "; (DESBASTE " + (mode === "od" ? "EXTERNO" : "INTERNO") + " - MAX. 8 NO DIAMETRO, ACABAMENTO 2" + (k > 1 ? ", EM Z " + k + " ETAPAS DE " + fx(D / k, 3) : "") + (cel ? ", +1 EM Z: CORTE COM D16 2MM" : "") + ")"];
   let first = true;
   for (let s = 1; s <= k; s++){
     if (k > 1) L.push("; (ETAPA " + s + " - ATE Z" + g3(-D * s / k) + ")");

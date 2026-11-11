@@ -48,3 +48,4 @@ metadata:
 - O +0,9 nos Ø é só para POM e Celeron (perda da serra). Outros materiais também são cortados, mas sem perda.
 - Secção no desenho: +0 / −0,05.
 - Celeron: chanfro externo a 30° (medida em Z, 30° com o eixo), em vez de 45°.
+- Celeron (todas as arruelas/guias): desbaste 1 mm mais fundo em Z — corte com a T6D16 de 2 mm.

@@ -6,6 +6,11 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.21.3 — 11/11/2026
+- Arruelas e guias em **Celeron** (PSG 101, PSA 108 e Programa Arruela/ciclo): o desbaste externo e interno vai **1 mm mais
+  fundo em Z**, porque o corte é com a T6D16 (bedame 2 mm). Ex.: PSG 101 50x55x9,7, 1 peça: Z−11,25 → Z−12,25. O comentário do
+  desbaste ganha `+1 EM Z: CORTE COM D16 2MM`. Se a peça já usa bedame 2 (secção > 14,8), não soma de novo. Outros materiais: igual.
+
 ## 5.21.2 — 11/11/2026
 - PSG 101 (guia) em **Celeron**: chanfro externo a **30°** (como o interno: medida em Z, 30° com o eixo; no X entra
   2 × Z × tg 30°). Programa (`;... CHANFRO EXT 0.970 X 30 ...`), perfil e cotas do desenho seguem o ângulo. Outros materiais e

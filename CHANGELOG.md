@@ -6,6 +6,8 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.18.6 — 11/11/2026
+- Biblioteca: **T5D5** com a foto real da faca H1111 (do usuário).
 ## 5.18.5 — 11/11/2026
 - Biblioteca: **T2D12** com a foto própria (H100, pastilha do lado de cima), mandada pelo usuário.
 ## 5.18.4 — 11/11/2026

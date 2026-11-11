@@ -11,6 +11,7 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
   geradores que usam a T8D8 (PSA 108, ciclos de arruela, ISO, DH, gaxetas/raspadores em PTFE). Como a lâmina é 1 mm mais grossa:
   o **G92 sobe 1 mm** e, nas arruelas, o bedame vira 2 (intervalo entre as peças acompanha). Comentário da ferramenta: NOSEW 2.
   Mensagem ao gerar avisa a troca. (Antes só avisava "ATENÇÃO".)
+- Biblioteca: **T6D6** (canal martelo 65° do PSR 211) = lâmina **H1001 de 2 mm**.
 ## 5.16.5 — 11/11/2026
 - Biblioteca: **T8D8** = bedame **H1002 de 1 mm** de espessura (antes a ficha dizia 2 mm).
 - Biblioteca: **T6D16** (corte do Celeron) = bedame **H1002 de 2 mm**.

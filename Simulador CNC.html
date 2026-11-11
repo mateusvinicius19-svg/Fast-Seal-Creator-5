@@ -1417,6 +1417,9 @@ function generate(){
   const fname = (type === "iso" || type === "psa108" || type === "lip" || type === "pso" || type === "pse106" || type === "psh106" || type === "psh117" || type === "psh105" || type === "pse105" || type === "pse107" || type === "psh107" || type === "psr102" || type === "psr211") ? pieceFile(p) + (buchaIsException(p) || (state.alterNum && p.bi !== "" && p.bo !== "") ? ` ${gen15(p.bi)}X${gen15(p.bo)}` : "") : `PSA108 ${gen15(p.dint)}X${gen15(p.dext)}X${gen15(p.h)} - ${xround(p.n,0)} pcs`;
   load(lines.join("\n"), fname);
   if (!g.check(p)) try { $("genMsg").textContent += costTxt(pieceCost(lines.join("\n"), ["ciclo", "semch"].includes(type) ? xround(p.n, 0) : type === "psa108" ? cicloPcs(p) : 1)); } catch(e){}
+  // 🧰 limites das ferramentas (usuário 11/11/2026): T8D8 (bedame 1 mm) corta secção de no máximo 14,8
+  try { const sec = (Number(p.dext) - Number(p.dint)) / 2, usa = lines.some(l => /^;?\s*T8D8\b/i.test(String(l).trim()));
+    if (usa && sec > 14.8 + 1e-9){ $("genMsg").textContent += ` · ⚠ ATENÇÃO: a T8D8 (bedame 1 mm) corta secção de no máximo 14,8 — esta peça tem ${fmtN(sec, 2)}.`; $("genMsg").style.color = "#a2231d"; } } catch(e){}
 }
 // bucha digitada à mão só vira exceção ("NNNNNN BIxBO") quando é diferente da que o Simulador escolheria sozinho
 function autoBucha(p){
@@ -2463,7 +2466,7 @@ const FERR = [
   { c: "T1D51", tipo: "int", nome: "Interno sem costas (D12 afiada)", uso: "PSO 109 (O-ring usinado) com Ø interno de 21 a 28", mat: "PU", min: 21, obs: "É a D12 afiada sem as costas." },
   { c: "T1D11", tipo: "int", nome: "Interno PSO", uso: "PSO 109 (O-ring usinado) com Ø interno ≥ 28", mat: "PU", min: 21, obs: "" },
   { c: "T5D5", tipo: "corte", nome: "Corte (lâmina H1111)", uso: "CUTTING das gaxetas, raspadores e arruelas", mat: "PU, NBR, Viton, POM", pastilha: "lâmina H1111", obs: "Lâmina de corte tipo faca, ponta fina, código H1111 (foto do usuário, 11/11/2026). Avanço F0,220. G92 = 15 + H + 0,768 + 0,0265 × corte radial (PSHPSE106)." },
-  { c: "T8D8", tipo: "corte", nome: "Bedame 1 mm (H1002)", uso: "Corte das arruelas (todos os materiais, menos Celeron) e das gaxetas/raspadores em PTFE / PTFE+BR", mat: "Arruelas: todos menos Celeron · Gaxetas: PTFE, PTFE+BR", pastilha: "lâmina H1002 · 1 mm", obs: "Lâmina de bedame H1002 com 1 mm de espessura (usuário, 11/11/2026) — é a \"espessura do bedame\" das arruelas (0,8 a 1 mm). Gaxetas em PTFE: avanço F0,100 e G92 = 15 + |Z do corte| + 1,25." },
+  { c: "T8D8", tipo: "corte", nome: "Bedame 1 mm (H1002)", uso: "Corte das arruelas (todos os materiais, menos Celeron) e das gaxetas/raspadores em PTFE / PTFE+BR", mat: "Arruelas: todos menos Celeron · Gaxetas: PTFE, PTFE+BR", pastilha: "lâmina H1002 · 1 mm", maxSec: 14.8, obs: "Lâmina de bedame H1002 com 1 mm de espessura (usuário, 11/11/2026); corta secção de peça de no MÁXIMO 14,8 mm (o Simulador avisa se passar) — é a \"espessura do bedame\" das arruelas (0,8 a 1 mm). Gaxetas em PTFE: avanço F0,100 e G92 = 15 + |Z do corte| + 1,25." },
   { c: "T6D6", tipo: "ranhura", nome: "Canal martelo 65°", uso: "OUTSIDE ANGLE HAMMER GROOVE do PSR 211 (lábio raspador a 65°)", mat: "PU", obs: "Bedame do canal de trás tem 2 mm: desbaste e acabamento externos vão até Z −(H + 2)." },
   { c: "T2D54", tipo: "ext", nome: "Externo Celeron", uso: "Externo das arruelas em Celeron", mat: "Celeron", obs: "" },
   { c: "T2D64", tipo: "int", nome: "Interno Celeron", uso: "Interno das arruelas em Celeron", mat: "Celeron", obs: "" },
@@ -2491,7 +2494,7 @@ function ferrCard(f){
     <div style="flex:none;width:120px;height:90px;border-radius:8px;background:#f2f3f5;display:flex;align-items:center;justify-content:center;overflow:hidden;color:#999;font-size:11px;text-align:center">${foto ? `<img src="${foto}" style="max-width:100%;max-height:100%">` : "foto<br>pendente"}</div>
     <div style="flex:1;min-width:0;font:12.5px Segoe UI,Arial;color:#333">
       <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap"><b style="font:700 17px Consolas,monospace;color:#b2221f">${f.c}</b>${f.alt ? `<b style="font:700 13px Consolas,monospace;color:#b2221f">/ ${f.alt}</b>` : ""}<b>${esc(f.nome)}</b><span class="kindtag">${FERR_TIPOS[f.tipo]}</span></div>
-      <div style="color:#666;margin:2px 0">Posição T${tD ? tD[1] : "?"}${f.alt ? " (ou T" + f.alt.match(/^T(\d+)/)[1] + ")" : ""} · corretor D${tD ? tD[2] : "?"}${f.pastilha ? ` · pastilha ${f.pastilha}` : ""}${f.raio ? ` · raio de ponta R${String(f.raio).replace(".", ",")}` : ""}${f.min ? ` · trabalha a partir de Ø${f.min}` : ""}</div>
+      <div style="color:#666;margin:2px 0">Posição T${tD ? tD[1] : "?"}${f.alt ? " (ou T" + f.alt.match(/^T(\d+)/)[1] + ")" : ""} · corretor D${tD ? tD[2] : "?"}${f.pastilha ? ` · pastilha ${f.pastilha}` : ""}${f.raio ? ` · raio de ponta R${String(f.raio).replace(".", ",")}` : ""}${f.min ? ` · trabalha a partir de Ø${f.min}` : ""}${f.maxSec ? ` · corta secção até ${String(f.maxSec).replace(".", ",")}` : ""}</div>
       <div><b>Uso:</b> ${esc(f.uso)}</div><div><b>Materiais:</b> ${esc(f.mat)}</div>${f.obs ? `<div style="color:#555"><b>Obs.:</b> ${esc(f.obs)}</div>` : ""}</div></div>`;
 }
 function openFerr(sel){

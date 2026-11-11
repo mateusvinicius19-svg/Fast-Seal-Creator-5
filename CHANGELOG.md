@@ -9,6 +9,7 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 ## 5.16.5 — 11/11/2026
 - Biblioteca: **T8D8** = bedame **H1002 de 1 mm** de espessura (antes a ficha dizia 2 mm).
 - Biblioteca: **T6D16** (corte do Celeron) = bedame **H1002 de 2 mm**.
+- T8D8 corta secção de peça de no **máximo 14,8 mm**: ao gerar um programa com T8D8 e secção maior, o Simulador mostra ATENÇÃO.
 ## 5.16.4 — 11/11/2026
 - Biblioteca (usuário): **T1D45 = igual à T4D4** (pastilha DCGT 070204, rômbica 55°, R0,4, máx. 30° nas costas).
   A foto do suporte H200 com VCGT 110304 é da **T1D1** (nova na biblioteca; os geradores ainda não usam).

@@ -6,6 +6,10 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.21.5 — 11/11/2026
+- Tela Gerar programa: tirados (a pedido) os botões **⧉ Copiar MCS**, **📁 Programas_CNC** e o do **cadeado** (🔓 PROJETOS /
+  🔒 FIXO (servidor)). As pastas continuam fixas pelo servidor; Salvar Fagor + MCS 500 grava como antes.
+
 ## 5.21.4 — 11/11/2026
 - Novo botão **👁 Ver desenho** (ao lado de "Salvar Fagor + MCS 500"): abre a visualização do desenho da peça atual **antes de
   salvar**, sem pedir o Cód. interno e sem gravar nada. Aparece nos perfis que têm desenho (como o botão 📐 Desenho).

@@ -6,6 +6,11 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.13.1 — 11/11/2026
+- `Abrir Simulador.bat`: corrige "Não existe um objeto no caminho especificado C:\Users\JSLSBO~1" — a pasta TEMP vem com o nome
+  curto (usuário com espaço) e o Expand-Archive não aceita. Agora baixa e descompacta em `%LOCALAPPDATA%\FastSealCreator`
+  com o ZipFile do .NET. Baixa **só a `main`** (antes: a branch com o maior VERSION).
+- `CLAUDE.md`: regra de sempre levar tudo para a `main` (PR + merge) e subir a versão a partir da main.
 ## 5.13.0 — 11/11/2026
 Junta as branches paralelas (5.12.0 servidor/celular, 5.7.x Cód. interno/cancelar/PLUG) com esta.
 - **`Iniciar\Abrir Simulador.bat`** (fica na Área de Trabalho): pega no GitHub a versão mais nova (a branch com o maior `VERSION`;

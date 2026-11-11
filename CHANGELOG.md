@@ -6,6 +6,9 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.18.1 — 11/11/2026
+- Biblioteca: perfis do anel com o **mesmo desenho da imagem do usuário** (cabeça em meio círculo maior que o corpo), só com o
+  corretor e a medida em cada um (D42 · 1,78 / D52 · 2,62 / D62 · 3,53 / D72 · 5,33 / D82 · 6,99).
 ## 5.18.0 — 11/11/2026
 - Biblioteca: **fotos reais pelo próprio Simulador** — clicar no quadro da foto e colar (Ctrl+V) ou usar 📷 Foto para escolher o
   arquivo. Ficam em `W:\Parts\PartsSeals\PROJETOS\FERRAMENTAS SIMULADOR\<código>.png` (aparecem em todos os PCs); sem acesso à

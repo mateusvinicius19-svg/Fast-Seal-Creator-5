@@ -2192,23 +2192,42 @@ async function altNotFound(dir, num){
   else if (mcs) t += " Também não tem no MCS 500 — confira o número (🔎 Ver programa)."; 
   return t;
 }
+// v5.6.4 (usuário 11/11/2026): muitos programas só existem com a bucha no nome ("046158 194X222.PIT", sem o 046158.PIT).
+// Procura: nome exato → variantes "NNNNNN ...PIT" (lista do Ver programa + Histórico; senão lê a pasta). Várias: tira os CICLO e usa a mais nova.
+async function altFind(dir, num, progress){
+  for (const nm of [num + ".PIT", num + ".pit", num + ".Pit"]) { try { return { fh: await dir.getFileHandle(nm), name: nm }; } catch(e){} }
+  const re = new RegExp("^" + num + "(?!\\d).*\\.pit$", "i"), cand = new Set();
+  try { if (!VER_IDX) VER_IDX = await kvGet("verIdx"); if (VER_IDX) VER_IDX.P.filter(n => re.test(n)).forEach(n => cand.add(n)); } catch(e){}
+  try { const rows = await histRead(dir), h = rows[0] || [], fi = h.indexOf("Arquivo Fagor"); if (fi >= 0) rows.slice(1).forEach(r => { if (re.test(r[fi] || "")) cand.add(r[fi]); }); } catch(e){}
+  let ok = [];
+  for (const n of cand) { try { ok.push({ name: n, fh: await dir.getFileHandle(n) }); } catch(e){} }
+  if (!ok.length){   // não está na lista guardada (programa novo): lê a pasta (~50 mil arquivos, pode demorar)
+    if (progress) progress(`Procurando ${num} *.PIT no Programas_CNC…`);
+    let i = 0; for await (const [n, h] of dir.entries()){ if (h.kind === "file" && re.test(n)) ok.push({ name: n, fh: h }); if (++i % 5000 === 0 && progress) progress(`Procurando ${num} *.PIT no Programas_CNC… ${i} arquivos`); }
+  }
+  if (!ok.length) return null;
+  const sem = ok.filter(o => !/CICLO/i.test(o.name)); if (sem.length) ok = sem;
+  if (ok.length > 1){ const t = await Promise.all(ok.map(async o => { try { return (await o.fh.getFile()).lastModified; } catch(e){ return 0; } })); ok = ok.map((o, k) => [o, t[k]]).sort((a, b) => b[1] - a[1]).map(x => x[0]); }
+  return ok[0];
+}
 async function altRun(num, bi, bo){
   const msg = (t, err) => { $("genMsg").textContent = t; $("genMsg").style.color = err ? "#b2221f" : ""; };
   let dir = await progDir(false, true); if (!dir) dir = await progDir(false, false); if (!dir) return;
   let txt = "";
-  let fh = null;
-  for (const nm of [num + ".PIT", num + ".pit", num + ".Pit"]) { try { fh = await dir.getFileHandle(nm); break; } catch(e){} }
-  if (!fh) return msg(await altNotFound(dir, num), true);
+  num = (String(num).match(/^\d{6}/) || [num])[0];   // digitou "046158 194X222": o número é só o 046158
+  const fd = await altFind(dir, num, t => msg(t));
+  if (!fd) return msg(await altNotFound(dir, num), true);
+  const fh = fd.fh, fname = fd.name;
   try { const buf = new Uint8Array(await (await fh.getFile()).arrayBuffer()); for (const b of buf) txt += String.fromCharCode(b); }
-  catch(e){ return msg(`Achei ${num}.PIT mas não consegui ler (${e.message}) — o arquivo pode estar aberto em outro programa.`, true); }
+  catch(e){ return msg(`Achei ${fname} mas não consegui ler (${e.message}) — o arquivo pode estar aberto em outro programa.`, true); }
   const r = altRough(txt, bi, bo);
   if (r.err) return msg(`✏️ ${num}: ${r.err}. Nada foi salvo.`, true);
   const sfx = `${gen15(bi)}X${gen15(bo)}`, h = (txt.split(/\r?\n/)[0] || "").trim();
   load(r.text, `${num} ${sfx}`);
   state.alterNum = num;
   const hm = h.match(/^%\s*([^ ,]+)\s+([\d.\/]+)/), mt = txt.match(/;MATERIAL: USER DEFINED (.+?) [\d.]+\/[\d.]+/i);
-  state.alterRec = { "Perfil": hm ? hm[1] : "", "Nominais": hm ? hm[2] : "", "Material": mt ? mt[1].trim() : "", "Bucha I": bi.toFixed(3), "Bucha E": bo.toFixed(3), "Comentario": `alterado de ${num} (só desbaste)`, "Parametros": "" };
-  state.alterNote = `${num}: só o desbaste refeito para a bucha ${gen15(bi)}x${gen15(bo)} (antes: ${gen15(r.old[0])}x${gen15(r.old[1])})` + (r.notes.length ? " · " + r.notes.join(", ") : "") + ". Perfil e acabamento iguais ao original.";
+  state.alterRec = { "Perfil": hm ? hm[1] : "", "Nominais": hm ? hm[2] : "", "Material": mt ? mt[1].trim() : "", "Bucha I": bi.toFixed(3), "Bucha E": bo.toFixed(3), "Comentario": `alterado de ${fname.replace(/\.pit$/i, "")} (só desbaste)`, "Parametros": "" };
+  state.alterNote = `${fname.replace(/\.pit$/i, "")}: só o desbaste refeito para a bucha ${gen15(bi)}x${gen15(bo)} (antes: ${gen15(r.old[0])}x${gen15(r.old[1])})` + (r.notes.length ? " · " + r.notes.join(", ") : "") + ". Perfil e acabamento iguais ao original.";
   window.scrollTo({ top: 0, behavior: "smooth" });
   msg(`✏️ ${state.alterNote} Salvando…`);
   if (await saveProgram(true)){ state.alterNum = ""; state.alterRec = null; }

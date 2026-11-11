@@ -6,6 +6,11 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.6.4 — 11/11/2026
+- Simulador (✏️ Alterar programa): acha o programa também quando ele só existe com a bucha no nome
+  (ex.: `046158 194X222.PIT`, sem `046158.PIT`). Procura na lista do Ver programa / Histórico e, se não estiver, lê a pasta.
+  Mais de uma variante: ignora as CICLO e usa a mais nova. Pode digitar "046158" ou "046158 194X222".
+  Salva como `046158 <bucha nova>`; se o nome já existir, pergunta antes de substituir.
 ## 5.6.3 — 11/11/2026
 - Simulador (✏️ Alterar programa): quando não acha o `NNNNNN.PIT`, a mensagem agora diz o motivo — qual pasta está lembrada
   (e avisa se ela não parece a Programas_CNC), se só existem variantes `NNNNNN BIxBO.PIT`, ou se só existe o `.txt` no MCS 500.

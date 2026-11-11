@@ -11,6 +11,7 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
   com o nome da 🧰 biblioteca (ex.: "T3D3 Faceamento · T4D72 Perfil do anel O-ring 5,33 · T2D12 Interno grande · T2D2 Externo PU ·
   T5D5 Corte"). Sai também no PDF salvo. Desenho custom: lista em `customTools` (vazio = não mostra).
 - Biblioteca: T8D8 = "Bedame" (arruelas de todos os materiais menos Celeron + gaxetas em PTFE).
+- Biblioteca: T3D3 = pastilha rômbica 35° (tipo V) com **raio de ponta 0,4** (usuário); desenho da pastilha no lugar da foto até a foto chegar.
 ## 5.15.0 — 11/11/2026
 - Simulador: **🧰 Biblioteca de ferramentas** (botão ao lado do Histórico). 21 ferramentas que já usamos, pelo corretor (T = posição,
   D = corretor): T3D3, T2D2, T7D7, T7D17, T4D4, T4D14, T1D45, T2D12, T1D51, T1D11, T5D5, T8D8, T6D6, T2D54, T2D64, T6D16 e os

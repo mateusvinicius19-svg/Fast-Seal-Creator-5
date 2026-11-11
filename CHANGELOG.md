@@ -6,6 +6,15 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.21.14 — 11/11/2026
+- Corrige de vez (5.21.11 / 5.21.13): com bedame 2 (Celeron ou secção > 14,8) **uma peça entrava na outra** e o X saía
+  "invertido" (degrau subindo para o Ø da peça depois do chanfro). O trecho a mais do acabamento foi **retirado**: o acabamento
+  volta a ser como sempre (paralelo no fundo do chanfro) e é o **desbaste que para no mesmo Z do acabamento**,
+  −(N × B6 + paralelo − meio bedame), dentro da faixa do corte. Ex.: PSG 101 35x40x5,6 Celeron, 1 peça: desbaste e acabamento
+  até Z−7,175; a peça seguinte começa em Z−7,7 (avanço do G92).
+- Conferido com simulação de todos os movimentos (Celeron 1 e 3 peças, com e sem bucha; POM 50x90; Nylon 60x92): nenhuma
+  ferramenta de externo/interno passa do início da peça seguinte. Bedame 1 (outros materiais, secção ≤ 14,8): sem mudança.
+
 ## 5.21.13 — 11/11/2026
 - Corrige (5.21.11): no Celeron com RPT/várias peças **uma peça entrava na outra** — o trecho a mais do acabamento (até o fim do
   desbaste) era feito no diâmetro do fundo do chanfro e passava ~0,45 mm para dentro da peça seguinte. Agora o acabamento sai

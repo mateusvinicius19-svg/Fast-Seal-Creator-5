@@ -1327,8 +1327,15 @@ function fieldHTML([k, label, def], wide){
   const ph = {tiS:"+0,1",tiI:"-0,1",teS:"+0,2",teI:"0",thS:"+0,1",thI:"-0,1",tolG:"ex.: Demais cotas NBR ISO 2768-1 classe média"}[k] || "";
   return `<label class="${wide || k === "nome" ? "wide" : ""}">${label}<input data-k="${k}" ${isText ? 'type="text"' : 'type="text" inputmode="decimal"'} placeholder="${ph}" value="${String(def).replace(".", isText ? "." : ",")}"></label>`;
 }
+// tolerâncias do desenho de volta ao padrão (campos vazios = "sem"/tabela), sem regerar o programa já salvo
+function resetTolDefaults(){
+  state.tolVals = null;
+  document.querySelectorAll("#genBox [data-k]").forEach(el => { if (TOL_KEYS.includes(el.dataset.k)) el.value = el.tagName === "SELECT" ? (el.querySelector('option[value=""]') ? "" : el.options[0].value) : ""; });
+  try { syncTolRows(); state.genParams = readParams(); saveForm(); } catch(e){}
+}
 function buildForm(){
   state.alterNum = "";   // trocou de perfil: sai do modo "Alterar programa"
+  state.tolVals = null;  // v5.20.0 (usuário): item novo → tolerâncias do desenho voltam ao padrão
   const g = GEN[$("genType").value];
   $("genMain").innerHTML = g.main.map(f => fieldHTML(f)).join("");
   if (ALOJ_GAX.includes($("genType").value) || ALOJ_RASP[$("genType").value]) $("genMain").insertAdjacentHTML("beforeend", fieldHTML(["aloj", ALOJ_RASP[$("genType").value] ? "Medidas do alojamento? (só a altura menor)" : "Medidas do alojamento?", "N"]));
@@ -1630,7 +1637,7 @@ function psoBucha(p){
   // automática: a mais barata da tabela que serve E tem furo para a ferramenta interna (sem tarugo); senão, a regra geral
   const tmin = psoIntTool(p.dint).min;
   const fit = buchasList().filter(([a, b]) => a >= tmin && a <= p.dint - BUCHA_FOLGA + 1e-9 && b >= De + BUCHA_FOLGA - 1e-9).sort((x, y) => buchaRank(...x) - buchaRank(...y));
-  const a = fit[0] || buchaPick(p.dint, De) || [p.dint, De];
+  const a = teflonBucha(p, p.dint, De) || fit[0] || buchaPick(p.dint, De) || [p.dint, De];
   const bi = ok(p.bi) ? p.bi : a[0], bo = ok(p.bo) ? p.bo : a[1];
   return { bi, bo, txt: gen15(bi) + "X" + gen15(bo) };
 }
@@ -1646,7 +1653,7 @@ function psoIdLevels(bi, dint, tmin){
 function lipBucha(p, g){
   const ok = v => v !== "" && v !== undefined && v !== null && !isNaN(v) && v >= 0;
   if (ok(p.bi) && ok(p.bo) && p.bo > p.bi) return { bi: p.bi, bo: p.bo, txt: gen15(p.bi) + "X" + gen15(p.bo), auto: false };
-  const a = buchaPick(p.dint, g.Dext) || [p.dint, g.Dext];
+  const a = teflonBucha(p, p.dint, g.Dext) || buchaPick(p.dint, g.Dext) || [p.dint, g.Dext];
   const bi = ok(p.bi) ? p.bi : a[0], bo = ok(p.bo) ? p.bo : a[1];
   return { bi, bo, txt: gen15(bi) + "X" + gen15(bo), auto: true };
 }
@@ -2174,7 +2181,7 @@ async function saveProgram(auto){
       try { pdfMsg = await saveDrawingPdf(gp, base.match(/^\d+/) ? base.match(/^\d+/)[0] : base, dd, !!suf); } catch(e){ pdfMsg = " · PDF não salvo: " + e.message; }
     }
     try { const rec = histRecord(auto ? {} : (gp || {}), auto ? "" : (state.genType || ""), fagor, pitName, mcsName, pdfMsg); if (auto && state.alterRec) Object.assign(rec, state.alterRec); await histAppend(dir, rec); histLoadInline(false); } catch(e){ pdfMsg += " · histórico não gravado: " + e.message; }
-    $("genMsg").textContent = `Salvo: ${pitName} (Programas_CNC) e ${mcsName} (MCS 500, convertido)${pdfMsg}.`; $("genMsg").style.color = /NÃO salvo/.test(pdfMsg) ? "#b2221f" : "";
+    $("genMsg").textContent = `Salvo: ${pitName} (Programas_CNC) e ${mcsName} (MCS 500, convertido)${pdfMsg}.`; resetTolDefaults(); $("genMsg").style.color = /NÃO salvo/.test(pdfMsg) ? "#b2221f" : "";
     if (auto) $("genMsg").textContent = `✏️ ${state.alterNote || ""} Salvo: ${pitName} (Programas_CNC) e ${mcsName} (MCS 500)${pdfMsg}. O ${state.alterNum} original não mudou.`;
     if (!auto && gp && DESENHO_TYPES.includes(gp.tipoGen) && !/NÃO salvo|não salvo/.test(pdfMsg)) setTimeout(() => { openPreview(); setTimeout(() => { updatePrintCss(); window.print(); }, 400); }, 100);   // imprime o desenho salvo
     return true;
@@ -2632,6 +2639,9 @@ const BUCHA_FOLGA = 1;                          // mm no diâmetro: bucha ≥ 1 
 // buchas: lista da tabela + as adicionadas na tela (salvas neste computador); escolha = 1ª que serve, como na tabela
 function buchasAll(){ let x = [], h = []; try { x = JSON.parse(localStorage.getItem("ps_buchas_extra") || "[]"); h = JSON.parse(localStorage.getItem("ps_buchas_hide") || "[]"); } catch(e){} const hide = new Set(Array.isArray(h) ? h : []); return { base: PSE_BUCHAS_BASE.filter(([a, b]) => !hide.has(a + "/" + b)), extra: Array.isArray(x) ? x : [], hide }; }
 // escolha: entre as buchas que servem (Ø int ≤ lábio int. − 1 e Ø ext ≥ lábio ext. + 1), a de menor área da secção (mais leve/barata); empate = parede mais fina
+// v5.20.0 (usuário 11/11/2026): Teflon (PTFE puro e PTFE+BR) em QUALQUER perfil → bucha sugerida com 2 mm de sobremetal
+// no interno e no externo, a partir dos Ø extremos da peça: Ø int − 2 × Ø ext + 2 (como já era nas arruelas desde a 5.9.4)
+function teflonBucha(p, dMin, dMax){ const tf = isTeflon(p) || p.matA === "PTFE" || p.matA === "PTFEBR"; return tf && dMax > dMin && dMin > 2 ? [+(dMin - 2).toFixed(3), +(dMax + 2).toFixed(3)] : null; }
 function buchaPick(intAp, extAp){ let best = null, bC = Infinity; for (const [a, b] of buchasList()){ if (!(a <= intAp - BUCHA_FOLGA + 1e-9 && b >= extAp + BUCHA_FOLGA - 1e-9)) continue; const C = buchaRank(a, b); if (C < bC - 1e-9 || (Math.abs(C - bC) < 1e-9 && b * b - a * a < best[1] * best[1] - best[0] * best[0])){ best = [a, b]; bC = C; } } return best; }
 function buchasList(){ const { base, extra } = buchasAll(), m = new Map(); [...base, ...extra].forEach(([a, b]) => m.set(a + "/" + b, [Number(a), Number(b)])); return [...m.values()].sort((u, v) => u[0] - v[0] || u[1] - v[1]); }function pse106Geom(p){
   const opt = v => (v === "" || v === null || v === undefined || isNaN(v)) ? null : Number(v);
@@ -2647,7 +2657,7 @@ function buchasList(){ const { base, extra } = buchasAll(), m = new Map(); [...b
   let bi = opt(p.bi), bo = opt(p.bo);
   if (bi === null || bo === null){
     let hit = null;
-    hit = buchaPick(intAp, extAp);
+    hit = teflonBucha(p, intAp, extAp) || buchaPick(intAp, extAp);
     if (bi === null) bi = hit ? hit[0] : null;
     if (bo === null) bo = hit ? hit[1] : null;
   }
@@ -2723,7 +2733,7 @@ function pseFscGeom(p){
   // bucha: a mais leve da lista que serve; se nenhuma serve, tubo sob medida (3 mm para cada lado no diâmetro, como nos programas)
   let bi = opt(p.bi), bo = opt(p.bo), sobMedida = false;
   if (bi === null || bo === null){
-    const hit = buchaPick(intAp, extAp);
+    const hit = teflonBucha(p, intAp, extAp) || buchaPick(intAp, extAp);
     if (!hit) sobMedida = true;
     if (bi === null) bi = hit ? hit[0] : Math.max(0, Math.floor(intAp - 3));
     if (bo === null) bo = hit ? hit[1] : Math.ceil(extAp + 3);
@@ -3113,7 +3123,7 @@ function psr102Geom(p){
   const ramp = Math.min(opt(p.rampa) ?? xround(H / 2, 2), H - cI - 0.3);               // rampa interna = altura ÷ 2
   let bi = opt(p.bi), bo = opt(p.bo), sobMedida = false;
   if (bi === null || bo === null){
-    const hit = buchaPick(tip, De); if (!hit) sobMedida = true;
+    const hit = teflonBucha(p, tip, De) || buchaPick(tip, De); if (!hit) sobMedida = true;
     if (bi === null) bi = hit ? hit[0] : Math.max(0, Math.floor(tip - 3));
     if (bo === null) bo = hit ? hit[1] : Math.ceil(De + 3);
   }
@@ -3585,7 +3595,8 @@ sizeCanvas(); draw();
   if (s && s.type && GEN[s.type]) $("genType").value = s.type;
   buildForm();
   if (!s || s.type !== $("genType").value) return;
-  for (const [k, v] of Object.entries(s.vals || {})){ const el = document.querySelector(`#genBox [data-k="${k}"]`); if (el) el.value = k === "mat" ? matFromText(v) : v; }
+  for (const [k, v] of Object.entries(s.vals || {})){ if (TOL_KEYS.includes(k)) continue;   // tolerâncias não voltam: começam no padrão
+    const el = document.querySelector(`#genBox [data-k="${k}"]`); if (el) el.value = k === "mat" ? matFromText(v) : v; }
   for (const [k, v] of Object.entries(s.dwg || {})){ const el = document.querySelector(`#dwgFields [data-d="${k}"]`); if (el) el.value = v; }
   syncTolRows(); generate();
 })();

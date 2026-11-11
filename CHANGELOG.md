@@ -6,6 +6,11 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.21.12 — 11/11/2026
+- Celeron: o campo **"Espessura do bedame"** passa a mostrar **2** (travado) quando o material é Celeron — também com várias
+  peças por ciclo (intervalo entre os cortes = altura + 2 − sobreposição, G92 +1). Ao trocar para outro material o campo volta
+  ao valor de antes (1).
+
 ## 5.21.11 — 11/11/2026
 - **Celeron** (PSA 108, PSG 101, Programa Arruela/ciclo): corta sempre com a T6D16, então agora entra a mesma regra da
   secção > 14,8 — **bedame 2** nas peças (intervalo entre peças e comprimento do desbaste já contam os 2 mm) e **G92 +1 mm**.

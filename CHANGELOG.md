@@ -6,6 +6,12 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.21.15 — 11/11/2026
+- Bedame 2 (Celeron / secção > 14,8): desbaste em Z **um pouco mais fundo** — vai até o **fim da faixa do corte** (último corte
+  + 2 mm do bedame = N × B6 + sobreposição), 0,1 mm antes da peça seguinte. Ex.: PSG 101 35x40x5,6 Celeron, 1 peça:
+  desbaste até Z−7,6 (era −7,175); acabamento continua em Z−7,175; peça seguinte começa em Z−7,7. Conferido na simulação de
+  todos os movimentos: nada passa para a peça seguinte. Bedame 1: sem mudança.
+
 ## 5.21.14 — 11/11/2026
 - Corrige de vez (5.21.11 / 5.21.13): com bedame 2 (Celeron ou secção > 14,8) **uma peça entrava na outra** e o X saía
   "invertido" (degrau subindo para o Ø da peça depois do chanfro). O trecho a mais do acabamento foi **retirado**: o acabamento

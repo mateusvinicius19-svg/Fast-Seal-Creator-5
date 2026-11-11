@@ -6,6 +6,14 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.21.13 — 11/11/2026
+- Corrige (5.21.11): no Celeron com RPT/várias peças **uma peça entrava na outra** — o trecho a mais do acabamento (até o fim do
+  desbaste) era feito no diâmetro do fundo do chanfro e passava ~0,45 mm para dentro da peça seguinte. Agora o acabamento sai
+  do chanfro para o **Ø da peça** e só então desce até o fim do desbaste (`;(ATE O FIM DO DESBASTE, NO DIAMETRO DA PECA)`),
+  no externo e no interno. Conferido na trajetória: nada abaixo do Ø da peça dentro da peça seguinte.
+- As regras do bedame 2 valem também para **secção > 14,8** (PSA 108 / PSG 101 / ciclo, qualquer material): campo do bedame
+  mostra 2 (travado) e acabamento até o fim do desbaste pelo Ø da peça (G92 +1 e T6D16 já eram assim).
+
 ## 5.21.12 — 11/11/2026
 - Celeron: o campo **"Espessura do bedame"** passa a mostrar **2** (travado) quando o material é Celeron — também com várias
   peças por ciclo (intervalo entre os cortes = altura + 2 − sobreposição, G92 +1). Ao trocar para outro material o campo volta

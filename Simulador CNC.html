@@ -1417,8 +1417,8 @@ function generate(fromInput){
   const secCorte = (Number(p.dext) - Number(p.dint)) / 2, celD16 = p.matA === "CELERON" && "bed" in p, bed2 = secCorte > 14.8 + 1e-9 || celD16;
   { // v5.21.12 (usuário 11/11): no Celeron o campo do bedame mostra 2 (travado); ao trocar de material volta para o que era
     const bi = document.querySelector('#genBox [data-k="bed"]');
-    if (bi && celD16 && !bi.readOnly){ bi.dataset.prev = String(bi.value).trim() === "2" ? "1" : bi.value; bi.value = "2"; bi.readOnly = true; bi.title = "Celeron: corte com a T6D16 — bedame 2"; }
-    else if (bi && !celD16 && bi.readOnly){ bi.value = bi.dataset.prev || "1"; bi.readOnly = false; bi.title = ""; p.bed = Number(String(bi.value).replace(",", ".")) || 1; } }
+    if (bi && bed2 && !bi.readOnly){ bi.dataset.prev = String(bi.value).trim() === "2" ? "1" : bi.value; bi.value = "2"; bi.readOnly = true; bi.title = "Corte com a T6D16 (Celeron ou secção > 14,8) — bedame 2"; }
+    else if (bi && !bed2 && bi.readOnly){ bi.value = bi.dataset.prev || "1"; bi.readOnly = false; bi.title = ""; p.bed = Number(String(bi.value).replace(",", ".")) || 1; } }
   if (bed2 && "bed" in p && type !== "psr211"){ p.bedOrig = p.bed; p.bed = 2; p.bedD16 = true; }
   let lines = g.build(p), d16 = false;
   if (bed2 && (celD16 || lines.some(l => /\bT8D8\b/.test(String(l))))){
@@ -1753,10 +1753,14 @@ GEN.psa108 = {
       "T7D7; (EXTERNO) PECA 1", "G0 X" + c(p.dext) + " Z" + c(p.zAp) + "; (DIAMETRO EXTERNO) PECA 1", "G91",
       "X" + c(B7 - p.dext), "Z" + c(-p.zAp), "G1 X" + c(-B9) + " F" + gF(p.fExt), "G0 Z" + c(p.zAp), ...arrRough(p, "od", -(N * B6 + p.par), B8, p.fExt), "X" + c(B10 - B8), "G1 Z" + c(-(p.zAp - prol))];
     for (let i = 1; i <= N; i++) L.push(";(INICIO PERFIL PEÇA " + i + ")", "G42 X" + c(E3) + " Z" + c(-E4), "Z" + c(-(p.h - 2 * cE)) + " ;(VALOR PARA ALTERAR NA ALTURA)", "X" + c(-E3) + " Z" + c(-E4), "; (FIM DO PERFIL PEÇA " + i + ")");
-    const parF = p.matA === "CELERON" ? p.par + prol : p.par;   // v5.21.11: Celeron — acabamento desce até o mesmo Z do desbaste
-    L.push("G1 Z" + c(-parF), "X" + c(p.recE), "G90", "G0 G40 Z" + c(p.zAp), "Z" + c(p.zExt), "T4D4", "G0 X" + c(p.dint) + " Z" + c(p.zAp), ...arrRough(p, "id", -(N * B6 + p.par), p.dint, p.fInt).slice(0, -1), "G91", "X" + c(I3), "G1 Z" + c(-(p.zAp - prol)) + " F" + gF(p.fInt));
+    // v5.21.11/5.21.13: Celeron — acabamento desce até o mesmo Z do desbaste, mas o trecho a mais é feito NO DIÂMETRO DA PEÇA
+    // (sai do fundo do chanfro para o Ø externo/interno antes de descer): no fundo do chanfro ele entrava na peça seguinte
+    const cel = p.matA === "CELERON" || !!p.bedD16, parF = p.par + prol;   // v5.21.13: também secção > 14,8 (bedame 2)
+    const endE = cel ? ["G1 X" + c(E3), "Z" + c(-parF) + " ;(ATE O FIM DO DESBASTE, NO DIAMETRO DA PECA)", "X" + c(p.recE - E3)] : ["G1 Z" + c(-p.par), "X" + c(p.recE)];
+    const endI = cel ? ["G1 X" + c(-I3), "Z" + c(-parF) + " ;(ATE O FIM DO DESBASTE, NO DIAMETRO DA PECA)", "X" + c(-p.recI + I3)] : ["G1 Z" + c(-p.par), "X" + c(-p.recI)];
+    L.push(...endE, "G90", "G0 G40 Z" + c(p.zAp), "Z" + c(p.zExt), "T4D4", "G0 X" + c(p.dint) + " Z" + c(p.zAp), ...arrRough(p, "id", -(N * B6 + p.par), p.dint, p.fInt).slice(0, -1), "G91", "X" + c(I3), "G1 Z" + c(-(p.zAp - prol)) + " F" + gF(p.fInt));
     for (let i = 1; i <= N; i++) L.push("; (INICIO DO PERFIL PEÇA " + i + ")", "G41 X" + c(-I3) + " Z" + c(-I4), "Z" + c(-(p.h - 2 * cI)) + " ;(VALOR PARA ALTERAR NA ALTURA)", "X" + c(I3) + " Z" + c(-I4), "; (FIM DO PERFIL PEÇA " + i + ")");
-    L.push("G1 Z" + c(-parF), "X" + c(-p.recI), "G90", "G0 G40 Z" + c(p.zAp), "Z" + c(p.zInt), "T8D8", "G0 X" + c(p.dext) + " Z" + c(p.zAp), "G91", "X" + c(p.recE));
+    L.push(...endI, "G90", "G0 G40 Z" + c(p.zAp), "Z" + c(p.zInt), "T8D8", "G0 X" + c(p.dext) + " Z" + c(p.zAp), "G91", "X" + c(p.recE));
     for (let i = 1; i <= N; i++) L.push("; (CORTE PEÇA " + i + ")", "Z" + c(i === 1 ? -(p.zAp + p.h) : -B6) + " ;(VALOR PARA ALTERAR NA ALTURA)", "G1 X" + g3(-(p.dext + p.recE - (p.dint - p.xAb))) + " F" + gF(p.fCor), "G0 X" + g3(p.dext + p.recE - (p.dint - p.xAb)));
     L.push("G90", "G92 Z" + c(p.g92), "N20 G00 Z" + c(p.zN20), "(RPT N10,N20)N" + gen15(p.n0), "G54",
       p.n0 === 0 ? "G00 X" + gen15(p.dext + p.afX) + " Z" + c(p.zFim) : "G00 Z" + c(p.zFim), "M05", "M30");

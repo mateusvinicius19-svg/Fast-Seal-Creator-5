@@ -6,6 +6,11 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.16.0 — 11/11/2026
+- Desenho: o carimbo (quadro DESCRIÇÃO) mostra as **FERRAMENTAS** que o programa da peça usa, na ordem em que entram,
+  com o nome da 🧰 biblioteca (ex.: "T3D3 Faceamento · T4D72 Perfil do anel O-ring 5,33 · T2D12 Interno grande · T2D2 Externo PU ·
+  T5D5 Corte"). Sai também no PDF salvo. Desenho custom: lista em `customTools` (vazio = não mostra).
+- Biblioteca: T8D8 = "Bedame" (arruelas de todos os materiais menos Celeron + gaxetas em PTFE).
 ## 5.15.0 — 11/11/2026
 - Simulador: **🧰 Biblioteca de ferramentas** (botão ao lado do Histórico). 21 ferramentas que já usamos, pelo corretor (T = posição,
   D = corretor): T3D3, T2D2, T7D7, T7D17, T4D4, T4D14, T1D45, T2D12, T1D51, T1D11, T5D5, T8D8, T6D6, T2D54, T2D64, T6D16 e os

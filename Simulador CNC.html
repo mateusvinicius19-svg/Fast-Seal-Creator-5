@@ -2462,7 +2462,7 @@ const FERR = [
   { c: "T1D51", tipo: "int", nome: "Interno sem costas (D12 afiada)", uso: "PSO 109 (O-ring usinado) com Ø interno de 21 a 28", mat: "PU", min: 21, obs: "É a D12 afiada sem as costas." },
   { c: "T1D11", tipo: "int", nome: "Interno PSO", uso: "PSO 109 (O-ring usinado) com Ø interno ≥ 28", mat: "PU", min: 21, obs: "" },
   { c: "T5D5", tipo: "corte", nome: "Corte", uso: "CUTTING das gaxetas, raspadores e arruelas", mat: "PU, NBR, Viton, POM", obs: "Avanço F0,220. G92 = 15 + H + 0,768 + 0,0265 × corte radial (PSHPSE106)." },
-  { c: "T8D8", tipo: "corte", nome: "Bedame (PTFE)", uso: "Corte em PTFE / PTFE+BR (gaxetas, raspadores, arruelas)", mat: "PTFE, PTFE+BR", obs: "Avanço F0,100. G92 = 15 + |Z do corte| + 1,25. Bedame 2 mm de largura." },
+  { c: "T8D8", tipo: "corte", nome: "Bedame", uso: "Corte das arruelas (todos os materiais, menos Celeron) e das gaxetas/raspadores em PTFE / PTFE+BR", mat: "Arruelas: todos menos Celeron · Gaxetas: PTFE, PTFE+BR", obs: "Gaxetas em PTFE: avanço F0,100 e G92 = 15 + |Z do corte| + 1,25. Bedame 2 mm de largura." },
   { c: "T6D6", tipo: "ranhura", nome: "Canal martelo 65°", uso: "OUTSIDE ANGLE HAMMER GROOVE do PSR 211 (lábio raspador a 65°)", mat: "PU", obs: "Bedame do canal de trás tem 2 mm: desbaste e acabamento externos vão até Z −(H + 2)." },
   { c: "T2D54", tipo: "ext", nome: "Externo Celeron", uso: "Externo das arruelas em Celeron", mat: "Celeron", obs: "" },
   { c: "T2D64", tipo: "int", nome: "Interno Celeron", uso: "Interno das arruelas em Celeron", mat: "Celeron", obs: "" },
@@ -3159,6 +3159,13 @@ function psrViewsSVG(p, PT){
   });
   return g;
 }
+// ferramentas do programa do desenho (código do editor, na ordem); desenho custom: p.customTools (lista) ou nenhuma
+function drawingTools(p){
+  if (p && p.tipoGen === "custom") return Array.isArray(p.customTools) ? p.customTools : [];
+  let txt = ""; try { txt = currentText(); } catch(e){ return []; }
+  const out = []; String(txt).split(/\r?\n/).forEach(l => { const s = l.trim(); if (/^;\(/.test(s)) return; const m = s.match(/^;?\s*(T\d+D\d+)\b/i); if (m && !out.includes(m[1].toUpperCase())) out.push(m[1].toUpperCase()); });
+  return out;
+}
 function drawingSVG(p){  const PT = state.orient === "portrait";
   const info = dwgInfo();
   const W = PT ? 794 : 1123, H = PT ? 1123 : 794;                     // A4 paisagem (96 dpi)
@@ -3309,6 +3316,12 @@ function drawingSVG(p){  const PT = state.orient === "portrait";
   const r1 = yT + 34, r2 = yBot - 40, cx1 = c2 + (PT ? 140 : 230), e1 = R - (PT ? 270 : 330), e2 = R - (PT ? 180 : 225), e3 = R - (PT ? 90 : 120);
   t += `<line x1="${c2}" y1="${r1}" x2="${R}" y2="${r1}" class="tb"/><line x1="${c2}" y1="${r2}" x2="${R}" y2="${r2}" class="tb"/><line x1="${cx1}" y1="${yT}" x2="${cx1}" y2="${r1}" class="tb"/>`;
   t += lbl(c2 + 5, yT + 12, "PROGRAMA Nº.:") + val(c2 + 10, yT + 28, info.prog, "tv big") + lbl(cx1 + 5, yT + 12, "DIMENSÃO:") + val(cx1 + 10, yT + 28, dimTxt + (PT ? "" : `   (secção ${f2(sec)})`), "tv big");
+  // v5.16.0 (usuário 11/11/2026): ferramentas que o programa usa, na ordem em que entram, com o nome da 🧰 biblioteca
+  { const tl = drawingTools(p); if (tl.length){
+      const items = tl.map(c => { let f = null; try { f = ferrInfo(c); } catch(e){} return c + (f ? " " + f.nome : ""); }), maxC = PT ? 62 : 92, lines = [];
+      let cur = "FERRAMENTAS: "; items.forEach((it, k) => { const piece = (k ? " · " : "") + it; if ((cur + piece).length > maxC && cur.trim() !== "FERRAMENTAS:"){ lines.push(cur); cur = "   " + it; } else cur += piece; }); lines.push(cur);
+      const y0 = r1 + (alojTxt2 ? 108 : 94);
+      lines.slice(0, 3).forEach((ln, k) => t += `<text x="${c2 + 14}" y="${y0 + k * 12}" class="tv sm" style="font-size:9.5px;font-weight:${k ? 400 : 700}">${esc(ln)}</text>`); } }
   t += lbl(c2 + 5, r1 + 13, "DESCRIÇÃO / DENOMINAÇÃO:") + val(c2 + 14, r1 + 52, pieceName(p), "tv huge") + val(c2 + 14, r1 + 76, `Ø interno ${f2(p.dint)}  ·  Ø externo ${f2(p.dext)}  ·  ${altTxt}  ·  secção ${f2(sec)}`, PT ? "tv sm" : "tv") + (alojTxt2 ? val(c2 + 14, r1 + 94, alojTxt2, PT ? "tv sm" : "tv") : "");
   t += `<line x1="${e1}" y1="${r2}" x2="${e1}" y2="${yBot}" class="tb"/><line x1="${e2}" y1="${r2}" x2="${e2}" y2="${yBot}" class="tb"/><line x1="${e3}" y1="${r2}" x2="${e3}" y2="${yBot}" class="tb"/>`;
   t += lbl(c2 + 5, r2 + 12, "COD INTERNO:") + val(c2 + 10, r2 + 31, info.cod || "") + lbl(e1 + 5, r2 + 12, "ESCALA") + val(e1 + 10, r2 + 31, "S/E") + lbl(e2 + 5, r2 + 12, "FOLHA:") + val(e2 + 10, r2 + 31, info.folha) + lbl(e3 + 5, r2 + 12, "FORMATO:") + `<text x="${(e3 + R) / 2}" y="${yBot - 6}" class="tv" style="font-size:22px;font-weight:400" text-anchor="middle">A4</text>`;

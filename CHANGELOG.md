@@ -6,6 +6,8 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.16.3 — 11/11/2026
+- Biblioteca: **T4D14** (interno pequeno, Ø int < 11) com as duas opções de barra das fotos: R0,3 · 4,9 e R0,2 · 3,5.
 ## 5.16.2 — 11/11/2026
 - Biblioteca (fotos do usuário): **T1D45** = suporte H200 com pastilha **VCGT 110304** (rômbica 35°, R0,4);
   **T4D4** = suporte igual, pastilha **DCGT 070204** (rômbica 55°, R0,4) — faz no máximo **30° nas costas**.

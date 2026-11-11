@@ -6,6 +6,8 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.18.4 — 11/11/2026
+- Biblioteca: **T2D2 e T2D12** com a foto real do suporte H100 (do usuário), com o corretor (D2 · lado de dentro / D12 · lado de cima).
 ## 5.18.3 — 11/11/2026
 - Biblioteca: **fotos de verdade** do usuário (vista de cima) onde a foto chegou como arquivo: T1D1 (H200 + VCGT 110304),
   T4D4 e T1D45 (mesmo suporte H200; pastilha DCGT 070204) e T4D14 (as 2 barras R0.3 · 4.9 / R0.2 · 3.5), com o corretor.

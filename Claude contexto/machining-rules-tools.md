@@ -40,3 +40,8 @@ metadata:
   - PU: NÃO usar a regra do desbaste em Z (sem limite de 40 mm e sem etapas) — desbaste como sempre, bucha automática da tabela de buchas PU.
   - Teflon (PTFE puro e PTFE+BR) saindo de BUCHA (tubo): externo e interno num PASSE SÓ (o de acabamento), a bucha de Teflon fica bem próxima da medida; bucha sugerida = Ø int − 2 × Ø ext + 2 (2 mm de sobremetal nos 2 diâmetros, v5.9.4) — usar a da OP de prensagem quando houver; avisar se sobrar ≥ 5 no Ø.
   - Teflon saindo de TARUGO: NÃO usa o passe único — desbaste interno com 1º passe em Ø16, depois passes de no máximo 8 no Ø até Ø int − 2 (acabamento 2); limite de 40 mm e etapas em Z de até 20 mm. (Só Teflon; PU/outros: tarugo como antes.)
+
+## PSG 101 (guia) — usuário 11/11/2026
+- Cópia do PSA 108 (arruela). Guias são mais altas (padrão 9,7).
+- POM e Celeron: usinar 0,9 mm MAIOR nos 2 diâmetros (desenho com a medida nominal).
+- Depois de usinada, a guia leva um CORTE (abertura). Parâmetros do corte: A DEFINIR com o usuário.

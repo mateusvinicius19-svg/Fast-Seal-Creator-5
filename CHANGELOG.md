@@ -6,6 +6,15 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.21.0 — 11/11/2026
+- Novo perfil **PSG 101 (guia)**, no grupo "Guias" da escolha por imagem (imagem do catálogo enviada pelo usuário). É uma cópia
+  do PSA 108 (mesmo programa, chanfros, tolerâncias, bucha, desbaste, D16 acima de 14,8), com regras próprias:
+  - padrão mais alto (50 x 55 x **9,7**) e material padrão POM;
+  - **POM e Celeron: usinado 0,9 mm maior nos dois diâmetros** (param. `psgAcr`); o desenho e o nome do arquivo ficam
+    com a medida nominal, e o programa traz a linha `;POM: USINADO 0.90 MAIOR NOS DIAMETROS (...)`;
+  - linha `;PSG 101 (GUIA) - DEPOIS DE USINADA: CORTE DA GUIA (PARAMETROS DO CORTE A DEFINIR)` — o corte será definido depois;
+  - arquivos: `PSG 101 <dint>x<dext>x<h>`, desenhos em `DESENHOS\PSG 101\`.
+
 ## 5.20.3 — 11/11/2026
 - Novo: **`RODAR FILA DE PROGRAMAS.md`** — guia para o operador do Kuru Nuvem ligar a fila `_PEDIDOS ARGUS` (Anexo 1 + Código do
   programa no ARGUS) com segurança: módulo isolado e testado `Kuru - fila ARGUS/filaPedidosArgus.js` (só `fs`/`path`, modo

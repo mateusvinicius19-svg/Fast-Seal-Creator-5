@@ -6,6 +6,11 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.21.17 — 11/11/2026
+- **Ciclo arruelas várias peças SEM CHANFRO** agora tem desenho (👁 Ver desenho / 📐 e PDF ao salvar), igual ao da PSA 108
+  sem os chanfros (cantos vivos, sem chamadas de chanfro), com as mesmas tolerâncias da PSA 108 e nota "Sem chanfro · Ciclo N pç".
+  Pasta/nome do PDF: PSA 108 (como as arruelas).
+
 ## 5.21.16 — 11/11/2026
 - Bedame 2 (Celeron / secção > 14,8): o **acabamento** agora termina no **mesmo Z do desbaste** (fim da faixa do corte), sem
   degrau — o paralelo no fundo do chanfro passa a ser meio bedame + sobreposição (1,025 em vez de 0,6). Ex.: PSG 101 35x40x5,6

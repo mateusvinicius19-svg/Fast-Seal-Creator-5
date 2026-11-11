@@ -552,7 +552,9 @@ function renderCode(){
 }
 function renderLegend(){
   const lg = $("legend"); lg.innerHTML = "";
-  state.tools.forEach(t => { const s = document.createElement("span"); s.innerHTML = `<i style="background:${state.toolColor[t]}"></i>${t}`; lg.appendChild(s); });
+  state.tools.forEach(t => { const s = document.createElement("span"); s.innerHTML = `<i style="background:${state.toolColor[t]}"></i>${t}`;
+    try { const f = ferrInfo(t); if (f){ s.title = f.nome + " — clique para ver na biblioteca"; s.style.cursor = "pointer"; s.onclick = () => openFerr(t); } } catch(e){}   // 🧰 biblioteca
+    lg.appendChild(s); });
   const r = document.createElement("span"); r.innerHTML = `<i style="background:repeating-linear-gradient(90deg,var(--rapid) 0 4px,transparent 4px 7px)"></i>Rápido G0`; lg.appendChild(r);
   if (state.tube){ const tb = document.createElement("span"); tb.innerHTML = `<i style="background:#e9dcc6;height:9px"></i>Tubo ${state.tube.i}/${state.tube.o}`; lg.appendChild(tb); }
 }
@@ -2445,6 +2447,59 @@ $("btnAlt").onclick = () => {
     m.remove(); altRun(num, bi, bo);   // ainda dentro do clique: pode pedir a pasta Programas_CNC
   };
 };
+// ---- 🧰 Biblioteca de ferramentas (v5.15.0, usuário 11/11/2026): as que já usamos, pelo corretor (T posição · D corretor) ----
+// Fotos: o usuário manda a foto de cada uma → embutir em FERR_FOTO[código] = "data:image/jpeg;base64,..." (vale em todos os PCs).
+const FERR_TIPOS = { face: "Faceamento", ext: "Externo", int: "Interno", corte: "Corte / bedame", canal: "Canal frontal (anel)", ranhura: "Ranhura externa" };
+const FERR = [
+  { c: "T3D3", tipo: "face", nome: "Faceamento", uso: "FACING / FACING DOWNWARD de todas as gaxetas e raspadores; também faz o recuo do lábio e os canais da face (PSE/PSH 106, 105, 117)", mat: "PU, NBR, Viton, PTFE", obs: "Desce usinando direto (rampa tangente + arco R0,4 no canal)." },
+  { c: "T2D2", tipo: "ext", nome: "Externo PU", uso: "OUTSIDE (desbaste + acabamento) das gaxetas e raspadores em PU", mat: "PU", obs: "Raio de ponta 0,4 compensado nas coordenadas. Desbaste máx. 8 no Ø por passe, acabamento 2." },
+  { c: "T7D7", tipo: "ext", nome: "Externo", uso: "Arruelas (PSA 108, ISO, ciclos) — externo e face; gaxetas em PTFE, NBR e Viton", mat: "PU, NBR, Viton, PTFE, PTFE+BR, POM, Nylon/PEAD", obs: "Nylon/PEAD: sem compensação (sem G41/G42)." },
+  { c: "T7D17", tipo: "ext", nome: "Externo sem costas (D7 afiada)", uso: "Externo que mergulha em canais em V", mat: "—", obs: "É a D7 afiada sem as costas." },
+  { c: "T4D4", tipo: "int", nome: "Interno", uso: "Arruelas; gaxetas em PTFE, NBR e Viton; PSO 109 com Ø interno < 21", mat: "PU (arruelas), NBR, Viton, PTFE, POM, Nylon", min: 14, obs: "Corta no máximo 35° nas costas (chanfro interno do calcanhar sempre a 30°). PSO 109: \"D4 afiada\"." },
+  { c: "T4D14", tipo: "int", nome: "Interno pequeno", uso: "Interno das gaxetas em PU com Ø interno < 11", mat: "PU", obs: "" },
+  { c: "T1D45", tipo: "int", nome: "Interno médio", uso: "Interno das gaxetas em PU com Ø interno de 11 a 40", mat: "PU", min: 11, obs: "Corta no máximo 35° nas costas (chanfro interno a 30°)." },
+  { c: "T2D12", tipo: "int", nome: "Interno grande", uso: "Interno das gaxetas em PU com Ø interno > 40", mat: "PU", min: 40, obs: "" },
+  { c: "T1D51", tipo: "int", nome: "Interno sem costas (D12 afiada)", uso: "PSO 109 (O-ring usinado) com Ø interno de 21 a 28", mat: "PU", min: 21, obs: "É a D12 afiada sem as costas." },
+  { c: "T1D11", tipo: "int", nome: "Interno PSO", uso: "PSO 109 (O-ring usinado) com Ø interno ≥ 28", mat: "PU", min: 21, obs: "" },
+  { c: "T5D5", tipo: "corte", nome: "Corte", uso: "CUTTING das gaxetas, raspadores e arruelas", mat: "PU, NBR, Viton, POM", obs: "Avanço F0,220. G92 = 15 + H + 0,768 + 0,0265 × corte radial (PSHPSE106)." },
+  { c: "T8D8", tipo: "corte", nome: "Bedame (PTFE)", uso: "Corte em PTFE / PTFE+BR (gaxetas, raspadores, arruelas)", mat: "PTFE, PTFE+BR", obs: "Avanço F0,100. G92 = 15 + |Z do corte| + 1,25. Bedame 2 mm de largura." },
+  { c: "T6D6", tipo: "ranhura", nome: "Canal martelo 65°", uso: "OUTSIDE ANGLE HAMMER GROOVE do PSR 211 (lábio raspador a 65°)", mat: "PU", obs: "Bedame do canal de trás tem 2 mm: desbaste e acabamento externos vão até Z −(H + 2)." },
+  { c: "T2D54", tipo: "ext", nome: "Externo Celeron", uso: "Externo das arruelas em Celeron", mat: "Celeron", obs: "" },
+  { c: "T2D64", tipo: "int", nome: "Interno Celeron", uso: "Interno das arruelas em Celeron", mat: "Celeron", obs: "" },
+  { c: "T6D16", tipo: "corte", nome: "Corte Celeron", uso: "Corte das arruelas em Celeron", mat: "Celeron", obs: "" },
+  ...Object.entries(OR107).map(([cs, [z, t]]) => ({ c: t, alt: t.replace(/^T4/, "T2"), tipo: "canal", nome: `Perfil do anel O-ring ${cs.replace(".", ",")}`,
+    uso: `FRONT GROOVE do PSE 107 / PSH 107 (canal do O-ring ${cs.replace(".", ",")}): só entra e volta, Z −${String(z).replace(".", ",")}`, mat: "PU, PTFE na T4 · NBR e Viton na T2",
+    obs: `Ferramenta de forma (largura = secção do O-ring, fundo R${(Number(cs) / 2).toFixed(3).replace(".", ",")}). Em NBR/Viton fica na posição T2 (${t.replace(/^T4/, "T2")}).` + (Number(cs) >= 6 ? " O-ring 6,99: entra em etapas (Z −5, −4, −7,2)." : "") }))
+];
+const FERR_FOTO = {};   // código → data URL da foto (a preencher com as fotos do usuário)
+function ferrInfo(code){ const c = String(code || "").toUpperCase(); return FERR.find(f => f.c === c || f.alt === c) || null; }
+function ferrCard(f){
+  const tD = f.c.match(/^T(\d+)D(\d+)$/), foto = FERR_FOTO[f.c];
+  return `<div class="ferrc" data-q="${esc((f.c + " " + (f.alt || "") + " " + f.nome + " " + f.uso + " " + f.mat + " " + FERR_TIPOS[f.tipo]).toLowerCase())}" data-t="${f.tipo}" style="border:1px solid #d5d9de;border-radius:10px;background:#fff;display:flex;gap:12px;padding:10px">
+    <div style="flex:none;width:120px;height:90px;border-radius:8px;background:#f2f3f5;display:flex;align-items:center;justify-content:center;overflow:hidden;color:#999;font-size:11px;text-align:center">${foto ? `<img src="${foto}" style="max-width:100%;max-height:100%">` : "foto<br>pendente"}</div>
+    <div style="flex:1;min-width:0;font:12.5px Segoe UI,Arial;color:#333">
+      <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap"><b style="font:700 17px Consolas,monospace;color:#b2221f">${f.c}</b>${f.alt ? `<b style="font:700 13px Consolas,monospace;color:#b2221f">/ ${f.alt}</b>` : ""}<b>${esc(f.nome)}</b><span class="kindtag">${FERR_TIPOS[f.tipo]}</span></div>
+      <div style="color:#666;margin:2px 0">Posição T${tD ? tD[1] : "?"}${f.alt ? " (ou T" + f.alt.match(/^T(\d+)/)[1] + ")" : ""} · corretor D${tD ? tD[2] : "?"}${f.min ? ` · trabalha a partir de Ø${f.min}` : ""}</div>
+      <div><b>Uso:</b> ${esc(f.uso)}</div><div><b>Materiais:</b> ${esc(f.mat)}</div>${f.obs ? `<div style="color:#555"><b>Obs.:</b> ${esc(f.obs)}</div>` : ""}</div></div>`;
+}
+function openFerr(sel){
+  let m = $("ferrModal"); if (m) m.remove();
+  m = document.createElement("div"); m.id = "ferrModal"; m.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:30px 12px";
+  m.innerHTML = `<div style="background:#f7f8fa;border-radius:12px;max-width:900px;width:100%;padding:16px 18px;box-shadow:0 10px 40px rgba(0,0,0,.35);color:#222">
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px"><b style="font:700 17px Segoe UI,Arial">🧰 Biblioteca de ferramentas</b><span style="color:#666;font-size:12px">${FERR.length} ferramentas · T = posição na torre · D = corretor</span><span style="flex:1"></span><button class="btn" type="button" id="ferrClose">Fechar</button></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px"><input id="ferrQ" placeholder="buscar: T4D4, interno, PTFE, PSR 211…" style="flex:1;min-width:200px;padding:7px 9px;border:1px solid #ccd;border-radius:6px;font:14px Segoe UI,Arial">
+      <select id="ferrT" class="orient"><option value="">Todos os tipos</option>${Object.entries(FERR_TIPOS).map(([k, v]) => `<option value="${k}">${v}</option>`).join("")}</select></div>
+    <div id="ferrList" style="display:grid;gap:8px">${FERR.map(ferrCard).join("")}</div></div>`;
+  document.body.appendChild(m);
+  m.onclick = e => { if (e.target === m) m.remove(); };
+  $("ferrClose").onclick = () => m.remove();
+  const filt = () => { const q = $("ferrQ").value.trim().toLowerCase(), t = $("ferrT").value;
+    m.querySelectorAll(".ferrc").forEach(el => el.style.display = (!t || el.dataset.t === t) && (!q || q.split(/\s+/).every(w => el.dataset.q.includes(w))) ? "flex" : "none"); };
+  $("ferrQ").oninput = filt; $("ferrT").onchange = filt;
+  if (sel){ $("ferrQ").value = sel.toLowerCase(); filt(); }
+  $("ferrQ").focus();
+}
+{ const hb = $("btnHist"); if (hb){ const b = document.createElement("button"); b.className = "btn"; b.id = "btnFerr"; b.type = "button"; b.title = "Biblioteca de ferramentas (posição, corretor, uso, materiais)"; b.innerHTML = "&#x1F9F0; Ferramentas"; b.onclick = () => openFerr(); hb.after(b); } }
 document.addEventListener("DOMContentLoaded", () => {   // a seção do histórico fica depois deste script
   $("histRefresh").onclick = () => histLoadInline(true);
   $("histQi").oninput = () => histRenderInline(HIST_ROWS);

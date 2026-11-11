@@ -2225,7 +2225,7 @@ async function saveProgram(auto){
     if (!auto && gp && DESENHO_TYPES.includes(gp.tipoGen)){   // alterar programa: o desenho do original continua valendo (não mexe)
       try { pdfMsg = await saveDrawingPdf(gp, base.match(/^\d+/) ? base.match(/^\d+/)[0] : base, dd, !!suf); } catch(e){ pdfMsg = " · PDF não salvo: " + e.message; }
     }
-    try { const rec = histRecord(auto ? {} : (gp || {}), auto ? "" : (state.genType || ""), fagor, pitName, mcsName, pdfMsg); if (auto && state.alterRec) Object.assign(rec, state.alterRec); await histAppend(dir, rec); histLoadInline(false); } catch(e){ pdfMsg += " · histórico não gravado: " + e.message; }
+    try { const rec = histRecord(auto ? {} : (gp || {}), auto ? "" : (state.genType || ""), fagor, pitName, mcsName, pdfMsg); if (auto && state.alterRec) Object.assign(rec, state.alterRec); await histAppend(dir, rec); if (histOpen()) histLoadInline(false); } catch(e){ pdfMsg += " · histórico não gravado: " + e.message; }
     $("genMsg").textContent = `Salvo: ${pitName} (Programas_CNC) e ${mcsName} (MCS 500, convertido)${pdfMsg}.`; state.tolResetPending = true; /* v5.20.1: tolerâncias voltam ao padrão quando começar a peça seguinte (a impressão desta continua com as dela) */ $("genMsg").style.color = /NÃO salvo/.test(pdfMsg) ? "#b2221f" : "";
     if (auto) $("genMsg").textContent = `✏️ ${state.alterNote || ""} Salvo: ${pitName} (Programas_CNC) e ${mcsName} (MCS 500)${pdfMsg}. O ${state.alterNum} original não mudou.`;
     if (!auto && gp && DESENHO_TYPES.includes(gp.tipoGen) && !/NÃO salvo|não salvo/.test(pdfMsg)) setTimeout(() => { openPreview(); setTimeout(() => { updatePrintCss(); window.print(); }, 400); }, 100);   // imprime o desenho salvo
@@ -2254,7 +2254,9 @@ if (SRV){
   b.onclick = srvOpen; $("btnDirRoot").after(b); }).catch(() => {});
 (async () => { try { if (SRV) return; const h = await kvGet("dirProjetos"); if (h && !(await rootDir(true))){ $("btnDirRoot").style.outline = "2px solid #e8590c"; $("btnDirRoot").title = "Clique e Permitir para liberar as pastas de hoje"; } } catch(e){} })();
 $("btnDirProg").onclick = async () => { const h = await progDir(true, false); if (h){ $("genMsg").textContent = "Pasta do programa: " + h.name; $("genMsg").style.color = ""; } };
-$("btnHist").onclick = () => { $("histBox").scrollIntoView({ behavior: "smooth" }); histLoadInline(true); };
+// v5.21.6 (usuário 11/11): "Programas salvos" só aparece (e só carrega) quando clica em 📋 Histórico; clicar de novo esconde
+const histOpen = () => $("histBox").style.display !== "none";
+$("btnHist").onclick = () => { const b = $("histBox"); if (histOpen()){ b.style.display = "none"; return; } b.style.display = ""; histLoadInline(true); b.scrollIntoView({ behavior: "smooth" }); };
 // ---- ✏️ Alterar programa (usuário 09/11/2026): digita o número + a bucha nova → abre NNNNNN.PIT do Programas_CNC e muda SÓ o desbaste
 // (perfil, acabamentos e desenho ficam iguais). Salva sozinho "NNNNNN BIxBO" (.PIT + .txt MCS); o programa padrão nunca é sobrescrito.
 //  · linha ;MATERIAL / TUBE com a bucha nova
@@ -2634,7 +2636,7 @@ function openFerr(sel){
 document.addEventListener("DOMContentLoaded", () => {   // a seção do histórico fica depois deste script
   $("histRefresh").onclick = () => histLoadInline(true);
   $("histQi").oninput = () => histRenderInline(HIST_ROWS);
-  histLoadInline(false);
+  $("histHide").onclick = () => { $("histBox").style.display = "none"; };
 });
 $("btnDirMcs").onclick = async () => { const h = await mcsDirPick(true, false); if (h){ $("genMsg").textContent = "Pasta MCS 500: " + h.name; $("genMsg").style.color = ""; } };
 $("btnDirDes").onclick = async () => { const h = await desDir(true, false); if (h){ const okD = await isDesenhosDir(h); $("genMsg").textContent = okD ? "Pasta dos desenhos: " + h.name : `A pasta "${h.name}" não parece ser a DESENHOS (não tem PSA 108 / PSE 106). Escolha W:\\Parts\\PartsSeals\\PROJETOS\\DESENHOS.`; $("genMsg").style.color = okD ? "" : "#b2221f"; } };
@@ -3664,12 +3666,13 @@ document.addEventListener("input", e => { if (e.target.closest && e.target.close
 document.addEventListener("input", e => { const a = e.target.dataset && e.target.dataset.ak; if (a && alojMode(a) === "aloj"){ clearTimeout(window.__alojT); window.__alojT = setTimeout(() => alojApply(a), 250); } });
 document.addEventListener("change", e => { const d = e.target.dataset || {}; if (d.amode && d.ak2) alojSetMode(d.ak2, d.amode); });
 </script>
-<section id="histBox" style="margin:14px;background:#fff;border:1px solid #dde1e6;border-radius:12px;padding:12px 14px;font:13px Segoe UI,Arial;color:#222">
+<section id="histBox" style="display:none;margin:14px;background:#fff;border:1px solid #dde1e6;border-radius:12px;padding:12px 14px;font:13px Segoe UI,Arial;color:#222">
   <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px">
     <b style="font:700 15px Segoe UI,Arial">&#x1F4CB; Programas salvos</b>
     <span id="histInfo" style="color:#666;font-size:12px"></span>
     <input id="histQi" placeholder="filtrar (programa, perfil, medida, material...)" style="flex:1;min-width:220px;padding:6px 8px;border:1px solid #ccd;border-radius:6px">
     <button class="btn" id="histRefresh" type="button">&#x21BB; Atualizar</button>
+    <button class="btn" id="histHide" type="button">Fechar</button>
   </div>
   <div style="max-height:420px;overflow:auto;border:1px solid #e3e6ea;border-radius:8px"><table id="histTi" style="border-collapse:collapse;width:100%;font:12px Segoe UI,Arial"></table></div>
 </section>

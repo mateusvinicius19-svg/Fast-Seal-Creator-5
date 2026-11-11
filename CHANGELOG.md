@@ -6,6 +6,10 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.21.8 — 11/11/2026
+- Tela Gerar programa: tirado (a pedido) o botão **📁 MCS 500** (só escondido; a pasta continua fixa pelo servidor e o
+  Salvar Fagor + MCS 500 grava como antes).
+
 ## 5.21.7 — 11/11/2026
 - Tela Gerar programa: tirado (a pedido) o botão **⧉ Copiar** (só escondido; o código continua).
 

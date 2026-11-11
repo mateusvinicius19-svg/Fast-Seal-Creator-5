@@ -1408,7 +1408,7 @@ function saveForm(){
 function generate(fromInput){
   if (state.tolResetPending && fromInput){ state.tolResetPending = false; resetTolDefaults(); }   // mexeu na peça depois de salvar = item novo
   const type = $("genType").value, g = GEN[type], p = readParams();
-  p.tipoGen = type; if (type === "lip") p.dext = p.dint + 2 * p.sec; if (type === "pso"){ p.dext = p.dint + 2 * p.sec; p.h = p.sec; }
+  p.tipoGen = type; if (type === "psg101") p.angE = psgAngE(p); if (type === "lip") p.dext = p.dint + 2 * p.sec; if (type === "pso"){ p.dext = p.dint + 2 * p.sec; p.h = p.sec; }
   for (const [k] of g.main.concat(g.params)) if (!TEXT_KEYS.has(k) && !OPT_KEYS.has(k) && (p[k] === "" || isNaN(p[k]))) { $("genMsg").textContent = "Preencha: " + k; return; }
   const alojTxt = applyAloj(p);
   // v5.17.0 (usuário 11/11/2026): T8D8 (bedame 1 mm) corta secção de no máximo 14,8 → acima disso corta com a T6D16 (bedame 2 mm).
@@ -1711,7 +1711,7 @@ function psaChSug(h){ return xround(Math.min(1, Math.max(0.2, 0.10 * (Number(h) 
 function psaFill(p){
   const s = psaChSug(p.h), e = v => v === "" || v === undefined || v === null || isNaN(v);
   if (e(p.chE)) p.chE = s; if (e(p.chI)) p.chI = s;
-  p.chF = p.chT = p.chE; p.angI = 60; p.angLbl = 30; p.tipoP = "arruela";   // perfil/desenho usam o mesmo meio perfil da arruela (chI em Z, 30° com o eixo)
+  p.chF = p.chT = p.chE; p.angI = 60; p.angE = p.tipoGen === "psg101" ? psgAngE(p) : (p.angE > 0 ? p.angE : 45); p.angLbl = 30; p.tipoP = "arruela";   // perfil/desenho usam o mesmo meio perfil da arruela (chI em Z, 30° com o eixo)
   return s;
 }
 GEN.psa108 = {
@@ -1729,7 +1729,8 @@ GEN.psa108 = {
     psaFill(p); const fx3 = v => fx(v, 3);
     const prol = (p.bed - p.sobrep) / 2, cE = p.chE, cI = p.chI;
     const N = Math.max(1, Math.min(10, xround(p.n, 0), psaMaxN(p)));
-    const E3 = rounddown3(2 * (cE + prol)), E4 = cE + prol;                       // externo 45°: em X (diâm.) = 2 × Z
+    const aE = p.angE > 0 && p.angE < 90 ? p.angE : 45;                           // v5.21.2: PSG 101 em Celeron = 30° (com o eixo, cE em Z)
+    const E3 = rounddown3(2 * (cE + prol) * TAN(aE)), E4 = cE + prol;             // externo: em X (diâm.) = 2 × Z × tg(ângulo); 45° = 2 × Z
     const I3 = rounddown3(2 * (cI + prol) * TAN(30)), I4 = cI + prol;             // interno 30° com o eixo
     const B6 = p.h + 2 * prol;
     const B7 = Math.max(p.dext, buchaOf(p).bo) + p.recE, B8 = Math.min(p.dint, buchaOf(p).bi) - p.xAb, B9 = B7 - B8, B10 = p.dext - E3;
@@ -1739,7 +1740,7 @@ GEN.psa108 = {
       ";T7D7 (EXTERNO)  CUTA 93 - NOSEA 35 - NOSEW 16  - R0.4 - F3",
       ";T4D4 (INTERNO)   CUTA 93 - NOSEA 55 - NOSEW 7   - R0.4 - F5",
       ";T8D8 (BEDAME)   CUTA 90 - NOSEA 90 - NOSEW 1   - R0   - F21",
-      ";BUCHA " + buchaOf(p).txt, `;${N} PECA(S) POR CICLO - CHANFRO EXT ${fx3(cE)} X 45 - INT ${fx3(cI)} X 30`, "G90", "G95", "G54", "G97 S" + c(S) + " M3", "N10", "G0 Z" + c(p.z0),
+      ";BUCHA " + buchaOf(p).txt, `;${N} PECA(S) POR CICLO - CHANFRO EXT ${fx3(cE)} X ${fx(aE, 0)} - INT ${fx3(cI)} X 30`, "G90", "G95", "G54", "G97 S" + c(S) + " M3", "N10", "G0 Z" + c(p.z0),
       "T7D7; (EXTERNO) PECA 1", "G0 X" + c(p.dext) + " Z" + c(p.zAp) + "; (DIAMETRO EXTERNO) PECA 1", "G91",
       "X" + c(B7 - p.dext), "Z" + c(-p.zAp), "G1 X" + c(-B9) + " F" + gF(p.fExt), "G0 Z" + c(p.zAp), ...arrRough(p, "od", -(N * B6 + p.par), B8, p.fExt), "X" + c(B10 - B8), "G1 Z" + c(-(p.zAp - prol))];
     for (let i = 1; i <= N; i++) L.push(";(INICIO PERFIL PEÇA " + i + ")", "G42 X" + c(E3) + " Z" + c(-E4), "Z" + c(-(p.h - 2 * cE)) + " ;(VALOR PARA ALTERAR NA ALTURA)", "X" + c(-E3) + " Z" + c(-E4), "; (FIM DO PERFIL PEÇA " + i + ")");
@@ -1784,6 +1785,8 @@ const isPSA = t => t === "psa108" || t === "psg101";
 // v5.21.1 (usuário 11/11): corte da guia feito DEPOIS, no acabamento, em ângulo (mais comuns 30°, 45° e 60°); serra de 1,8 mm.
 // POM e Celeron: +0,9 nos Ø por causa da serra; outros materiais também são cortados, mas sem perda. Secção: +0 / −0,05.
 const PSG_SERRA = 1.8;
+// v5.21.2 (usuário 11/11): PSG 101 em Celeron = chanfro externo a 30° (como o interno: medida em Z, 30° com o eixo)
+const psgAngE = p => p.matA === "CELERON" ? 30 : 45;
 const psgAng = p => { const v = Number(p.angC); return v > 0 && v < 90 ? v : 45; };
 const psgAcr = p => (p.matA === "POM" || p.matA === "CELERON") ? (Number(p.psgAcr) >= 0 ? Number(p.psgAcr) : 0.9) : 0;
 GEN.psg101 = {
@@ -1792,7 +1795,7 @@ GEN.psg101 = {
     m.splice(m.findIndex(f => f[0] === "nome"), 0, ["angC", "Ângulo do corte da guia (°)", 45]); return m; })(),
   params: [...GEN.psa108.params, ["psgAcr", "POM / Celeron: usinar maior nos diâmetros (mm)", 0.9]],
   build(p){
-    const a = psgAcr(p), q = Object.assign({}, p, { tipoGen: "psa108", dint: p.dint + a, dext: p.dext + a });
+    const a = psgAcr(p), q = Object.assign({}, p, { tipoGen: "psa108", dint: p.dint + a, dext: p.dext + a, angE: psgAngE(p) });
     if (p.chE === "" || p.chE === undefined) q.chE = psaChSug(p.h);
     if (p.chI === "" || p.chI === undefined) q.chI = psaChSug(p.h);
     const L = GEN.psa108.build(q);
@@ -3038,10 +3041,11 @@ function lipProfile(p){
 function psoProfile(p){ const R = p.sec / 2, cr = (p.dint + p.sec) / 2, o = []; for (let k = 0; k < 48; k++){ const a = 2 * Math.PI * k / 48; o.push([-R + R * Math.cos(a), cr + R * Math.sin(a)]); } return o; }
 function profileOf(p){ return p.tipoGen === "pso" ? psoProfile(p) : p.tipoGen === "custom" ? p.customProfile : p.tipoGen === "psr102" ? psrProfile(p) : p.tipoGen === "psr211" ? psr211Profile(p) : p.tipoGen === "lip" ? lipProfile(p) : ["pse106","psh106","psh117","psh105","pse105","pse107","psh107","psr211"].includes(p.tipoGen) ? pseFscProfile(p) : isoProfile(p); }
 function isoProfile(p){
+  const eT = p.angE > 0 && p.angE < 90 ? TAN(p.angE) : 1;   // chanfro externo: chF em Z, chF × tg(ângulo) no raio (45° = igual)
   // meio perfil (corte) no plano Z x R: z de 0 (frente) a -h; r de Dint/2 a Dext/2
   const ri = p.dint / 2, re = p.dext / 2, h = p.h, cI = p.chI * (1 / TAN(p.angI));   // chanfro interno: chI em Z, cI no raio
   return [
-    [0, re - p.chF], [-p.chF, re], [-(h - p.chT), re], [-h, re - p.chT],
+    [0, re - p.chF * eT], [-p.chF, re], [-(h - p.chT), re], [-h, re - p.chT * eT],
     [-h, ri + cI], [-(h - p.chI), ri], [-p.chI, ri], [0, ri + cI], [0, re - p.chF]
   ];
 }
@@ -3373,8 +3377,8 @@ function drawingSVG(p){  const PT = state.orient === "portrait";
     g += `<text x="${M(-p.b) - 6}" y="${yS + 14}" class="tn" text-anchor="end">${fmtN(p.af, 0)}°</text>`;
   } else {
   const cI = p.chI / TAN(p.angI);
-  g += call(DX(-p.chF / 2), DY(re - p.chF / 2), dzf - 28, dyE - 6, `${fmtN(p.chF, 2)} x 45°`);
-  g += call(DX(-(h - p.chT / 2)), DY(re - p.chT / 2), dzb + 16, dyE + 20, `${fmtN(p.chT, 2)} x 45°`);
+  g += call(DX(-p.chF / 2), DY(re - p.chF / 2), dzf - 28, dyE - 6, `${fmtN(p.chF, 2)} x ${fmtN(p.angE || 45, 0)}°`);
+  g += call(DX(-(h - p.chT / 2)), DY(re - p.chT / 2), dzb + 16, dyE + 20, `${fmtN(p.chT, 2)} x ${fmtN(p.angE || 45, 0)}°`);
   g += call(DX(-p.chI / 2), DY(ri + cI / 2), dzf - 28, dyI + 18, `${fmtN(p.chI, 2)} x ${fmtN(p.angLbl ?? p.angI, 0)}°`);
   g += call(DX(-(h - p.chI / 2)), DY(ri + cI / 2), dzb + 16, dyI + 18, `${fmtN(p.chI, 2)} x ${fmtN(p.angLbl ?? p.angI, 0)}°`);
   }
@@ -3398,7 +3402,7 @@ function drawingSVG(p){  const PT = state.orient === "portrait";
     g += `<text x="${cx}" y="${by + bh + 31}" class="n" text-anchor="middle">${psgAcr(p) > 0 ? "serra " + fmtN(PSG_SERRA, 1) + " mm · usinado +" + fmtN(psgAcr(p), 1) + " nos Ø" : "corte sem perda"}</text><text x="${cx}" y="${by + bh + 43}" class="n" text-anchor="middle">feito no acabamento</text>`;
   }
   }
-  const notes = p.tipoGen === "custom" ? [p.customNotes || "cotas em mm"] : p.tipoGen === "pso" ? [`O-ring usinado · secção Ø${fv3(p.sec)} · Ø interno ${fv3(p.dint)} · Ø externo ${fv3(p.dint + 2 * p.sec)} · cotas em mm`] : p.tipoGen === "psr102" ? (() => { const G = psr102Geom(p); return [`Ponta Ø${fv3(G.tip)} (−${fv3(G.ap)}) · calcanhar int. Ø${fv3(G.calc)} (+${fv3(G.fi)}) · lábio na face Ø${fv3(G.lipf)} · ponta ${fv3(G.tth)} · rampa ${fv3(G.ramp)} · externo sem folga · secção ±${fv3(G.tol.sec)} · cotas em mm`]; })() : ["pse106","psh106","psh117","psh105","pse105","pse107","psh107","psr211"].includes(p.tipoGen) ? (() => { const G = p.tipoGen === "psr211" ? psr211Geom(p) : pseFscGeom(p); return [`Lábio ext. Ø${fv3(G.extAp)} (+${fv3(G.extAp - p.dext)} ±${fv3(G.tol.D)}) · ${G.PSH ? `calcanhar int. Ø${fv3(G.intCalc)} (+${fv3(G.intCalc - p.dint)} ±${fv3(G.tol.B)})` : `calcanhar ext. Ø${fv3(G.extCalc)} (−${fv3(p.dext - G.extCalc)} ±${fv3(G.tol.C)})`} · lábio int. Ø${fv3(G.intAp)} (−${fv3(p.dint - G.intAp)} ±${fv3(G.tol.A)}) · ${G.PSH ? "externo" : "interno"} sem folga ·${G.O107 ? ` O-ring ${fv3(G.OC)} x Ø int. ${fv3(G.Dm - G.OC)} ·` : ""}${G.P117 ? ` V Ø${fv3(G.Vd)} ·` : ""} canal R${fv3(G.Rg)} ±${fv3(G.tol.F)} · secção ±${fv3(G.tol.sec)} · cotas em mm`]; })() : p.tipoGen === "lip" ? [`Chanfro externo: ${fmtN(p.ch,2)} x 45° (2 cantos)   ·   Lábio interno: flanco ${fmtN(p.af,0)}° com o degrau, base ${fmtN(p.ab,0)}°   ·   Degrau ${fmtN(p.h2,3)} x ${fmtN(p.b,3)}   ·   Cotas em mm`] : [`Chanfro externo frente: ${fmtN(p.chF,2)} x 45°   ·   Chanfro externo trás: ${fmtN(p.chT,2)} x 45°   ·   Chanfro interno (frente e trás): ${fmtN(p.chI,2)} em Z x ${fmtN(p.angLbl ?? p.angI,0)}°   ·   Cotas em mm`];
+  const notes = p.tipoGen === "custom" ? [p.customNotes || "cotas em mm"] : p.tipoGen === "pso" ? [`O-ring usinado · secção Ø${fv3(p.sec)} · Ø interno ${fv3(p.dint)} · Ø externo ${fv3(p.dint + 2 * p.sec)} · cotas em mm`] : p.tipoGen === "psr102" ? (() => { const G = psr102Geom(p); return [`Ponta Ø${fv3(G.tip)} (−${fv3(G.ap)}) · calcanhar int. Ø${fv3(G.calc)} (+${fv3(G.fi)}) · lábio na face Ø${fv3(G.lipf)} · ponta ${fv3(G.tth)} · rampa ${fv3(G.ramp)} · externo sem folga · secção ±${fv3(G.tol.sec)} · cotas em mm`]; })() : ["pse106","psh106","psh117","psh105","pse105","pse107","psh107","psr211"].includes(p.tipoGen) ? (() => { const G = p.tipoGen === "psr211" ? psr211Geom(p) : pseFscGeom(p); return [`Lábio ext. Ø${fv3(G.extAp)} (+${fv3(G.extAp - p.dext)} ±${fv3(G.tol.D)}) · ${G.PSH ? `calcanhar int. Ø${fv3(G.intCalc)} (+${fv3(G.intCalc - p.dint)} ±${fv3(G.tol.B)})` : `calcanhar ext. Ø${fv3(G.extCalc)} (−${fv3(p.dext - G.extCalc)} ±${fv3(G.tol.C)})`} · lábio int. Ø${fv3(G.intAp)} (−${fv3(p.dint - G.intAp)} ±${fv3(G.tol.A)}) · ${G.PSH ? "externo" : "interno"} sem folga ·${G.O107 ? ` O-ring ${fv3(G.OC)} x Ø int. ${fv3(G.Dm - G.OC)} ·` : ""}${G.P117 ? ` V Ø${fv3(G.Vd)} ·` : ""} canal R${fv3(G.Rg)} ±${fv3(G.tol.F)} · secção ±${fv3(G.tol.sec)} · cotas em mm`]; })() : p.tipoGen === "lip" ? [`Chanfro externo: ${fmtN(p.ch,2)} x 45° (2 cantos)   ·   Lábio interno: flanco ${fmtN(p.af,0)}° com o degrau, base ${fmtN(p.ab,0)}°   ·   Degrau ${fmtN(p.h2,3)} x ${fmtN(p.b,3)}   ·   Cotas em mm`] : [`Chanfro externo frente: ${fmtN(p.chF,2)}${(p.angE || 45) !== 45 ? " em Z" : ""} x ${fmtN(p.angE || 45,0)}°   ·   Chanfro externo trás: ${fmtN(p.chT,2)}${(p.angE || 45) !== 45 ? " em Z" : ""} x ${fmtN(p.angE || 45,0)}°   ·   Chanfro interno (frente e trás): ${fmtN(p.chI,2)} em Z x ${fmtN(p.angLbl ?? p.angI,0)}°   ·   Cotas em mm`];
   if (p.tipoGen === "psg101") notes[0] = notes[0].replace(/\s*·\s*Cotas em mm/i, "") + `   ·   Corte ${fmtN(psgAng(p), 0)}°${psgAcr(p) > 0 ? ` (serra ${fmtN(PSG_SERRA, 1)})` : " sem perda"}   ·   Cotas em mm`;
   // DP (PSE 108) e DH (PSH 129): anel ativador PSO 109 (O-ring Parker) escolhido pelo alojamento do catálogo
   if (DESENHO_ORING) try { const al = state.alojAtiv;

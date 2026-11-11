@@ -6,6 +6,12 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.21.9 — 11/11/2026
+- Corrige: **desenho saindo sem MATERIAL**. O carimbo só preenchia sozinho nos PSE/PSH/PSR; nas arruelas (PSA 108, ciclo),
+  guias (PSG 101) e DH PSH 129 ficava vazio quando o campo Material do cabeçalho não era digitado. Agora vale, nesta ordem:
+  o que for digitado no cabeçalho > o material escolhido no perfil (ex.: POM, PTFE+BR, Celeron, NBR / borracha) > a linha
+  `;MATERIAL` do programa. PSO 109 e Arruela ISO não têm material no perfil: continuam pelo campo do cabeçalho.
+
 ## 5.21.8 — 11/11/2026
 - Tela Gerar programa: tirado (a pedido) o botão **📁 MCS 500** (só escondido; a pasta continua fixa pelo servidor e o
   Salvar Fagor + MCS 500 grava como antes).

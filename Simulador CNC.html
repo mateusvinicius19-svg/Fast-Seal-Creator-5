@@ -1760,7 +1760,10 @@ GEN.psa108 = {
       "T7D7; (EXTERNO) PECA 1", "G0 X" + c(p.dext) + " Z" + c(p.zAp) + "; (DIAMETRO EXTERNO) PECA 1", "G91",
       "X" + c(B7 - p.dext), "Z" + c(-p.zAp), "G1 X" + c(-B9) + " F" + gF(p.fExt), "G0 Z" + c(p.zAp), ...arrRough(p, "od", zRough, B8, p.fExt), "X" + c(B10 - B8), "G1 Z" + c(-(p.zAp - prol))];
     for (let i = 1; i <= N; i++) L.push(";(INICIO PERFIL PEÇA " + i + ")", "G42 X" + c(E3) + " Z" + c(-E4), "Z" + c(-(p.h - 2 * cE)) + " ;(VALOR PARA ALTERAR NA ALTURA)", "X" + c(-E3) + " Z" + c(-E4), "; (FIM DO PERFIL PEÇA " + i + ")");
-    const endE = ["G1 Z" + c(-p.par), "X" + c(p.recE)], endI = ["G1 Z" + c(-p.par), "X" + c(-p.recI)];   // acabamento: como sempre (5.21.14 desfez o trecho a mais)
+    // v5.21.16 (usuário 11/11): com bedame 2 o acabamento termina no MESMO Z do desbaste (fim da faixa do corte), sem degrau:
+    // paralelo no fundo do chanfro = meio bedame + sobreposição → fim em −(N × B6 + sobreposição), 0,1 antes da peça seguinte
+    const parA = bed2f ? prol + p.sobrep : p.par;
+    const endE = ["G1 Z" + c(-parA), "X" + c(p.recE)], endI = ["G1 Z" + c(-parA), "X" + c(-p.recI)];   // acabamento: como sempre (5.21.14 desfez o trecho a mais)
     L.push(...endE, "G90", "G0 G40 Z" + c(p.zAp), "Z" + c(p.zExt), "T4D4", "G0 X" + c(p.dint) + " Z" + c(p.zAp), ...arrRough(p, "id", zRough, p.dint, p.fInt).slice(0, -1), "G91", "X" + c(I3), "G1 Z" + c(-(p.zAp - prol)) + " F" + gF(p.fInt));
     for (let i = 1; i <= N; i++) L.push("; (INICIO DO PERFIL PEÇA " + i + ")", "G41 X" + c(-I3) + " Z" + c(-I4), "Z" + c(-(p.h - 2 * cI)) + " ;(VALOR PARA ALTERAR NA ALTURA)", "X" + c(I3) + " Z" + c(-I4), "; (FIM DO PERFIL PEÇA " + i + ")");
     L.push(...endI, "G90", "G0 G40 Z" + c(p.zAp), "Z" + c(p.zInt), "T8D8", "G0 X" + c(p.dext) + " Z" + c(p.zAp), "G91", "X" + c(p.recE));

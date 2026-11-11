@@ -6,6 +6,11 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.18.2 — 11/11/2026
+- Biblioteca: as ferramentas que tinham ficado sem desenho ganharam o **redesenho da foto que o usuário mandou**, com o corretor:
+  T2D2 / T2D12 (suporte H100, lado de dentro / de cima), T1D1 (H200 + VCGT 110304), T4D4 e T1D45 (H200 + DCGT 070204),
+  T4D14 (2 barras R0.3 · 4.9 / R0.2 · 3.5), T5D5 (faca H1111), T8D8 (H1002 1 mm), T6D16 (H1002 2 mm), T6D6 (H1001 2 mm).
+  Foto colada pelo usuário (📷) continua tendo prioridade sobre o desenho.
 ## 5.18.1 — 11/11/2026
 - Biblioteca: perfis do anel com o **mesmo desenho da imagem do usuário** (cabeça em meio círculo maior que o corpo), só com o
   corretor e a medida em cada um (D42 · 1,78 / D52 · 2,62 / D62 · 3,53 / D72 · 5,33 / D82 · 6,99).

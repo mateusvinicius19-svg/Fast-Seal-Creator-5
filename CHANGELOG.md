@@ -6,6 +6,11 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.21.6 — 11/11/2026
+- **Programas salvos** (histórico) não aparece mais embaixo da tela ao abrir: só aparece e só carrega quando clica em
+  **📋 Histórico**. Clicar de novo (ou em **Fechar**) esconde. O Simulador abre mais rápido (não lê o CSV da rede na abertura).
+  Salvar continua gravando no histórico normalmente.
+
 ## 5.21.5 — 11/11/2026
 - Tela Gerar programa: tirados (a pedido) os botões **⧉ Copiar MCS**, **📁 Programas_CNC** e o do **cadeado** (🔓 PROJETOS /
   🔒 FIXO (servidor)). As pastas continuam fixas pelo servidor; Salvar Fagor + MCS 500 grava como antes.

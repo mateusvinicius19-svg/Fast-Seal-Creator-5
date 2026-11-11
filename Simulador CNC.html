@@ -3396,9 +3396,11 @@ function drawingSVG(p){  const PT = state.orient === "portrait";
   t += `<line x1="${c2}" y1="${r1}" x2="${R}" y2="${r1}" class="tb"/><line x1="${c2}" y1="${r2}" x2="${R}" y2="${r2}" class="tb"/><line x1="${cx1}" y1="${yT}" x2="${cx1}" y2="${r1}" class="tb"/>`;
   t += lbl(c2 + 5, yT + 12, "PROGRAMA Nº.:") + val(c2 + 10, yT + 28, info.prog, "tv big") + lbl(cx1 + 5, yT + 12, "DIMENSÃO:") + val(cx1 + 10, yT + 28, dimTxt + (PT ? "" : `   (secção ${f2(sec)})`), "tv big");
   // v5.19.0 (usuário 11/11/2026): ferramentas do programa (na ordem em que entram) com a FOTO da 🧰 biblioteca, código e nome
-  { const tl = drawingTools(p); if (tl.length){
-      const y0 = r1 + (alojTxt2 ? 100 : 86), avail = r2 - y0 - 2, n = tl.length, cw = Math.min(70, (R - c2 - 18) / n);
-      const th = Math.max(12, Math.min(30, avail - 21)), tw = Math.min(th * 4 / 3, cw - 4), mc = Math.max(6, Math.floor(cw / 3.6));
+  // v5.19.1 (usuário: "muito pequeno"): com ferramentas, nome e medidas sobem e as fotos ficam com o resto do quadro (≈ 2× maiores)
+  const tlD = drawingTools(p), yNm = tlD.length ? 36 : 52, yDm = tlD.length ? 52 : 76, yAl = tlD.length ? 65 : 94;
+  { const tl = tlD; if (tl.length){
+      const y0 = r1 + (alojTxt2 ? yAl + 5 : yDm + 5), avail = r2 - y0 - 2, n = tl.length, cw = Math.min(PT ? 74 : 120, (R - c2 - 18) / n);
+      let th = Math.max(14, avail - 25), tw = th * 4 / 3; if (tw > cw - 4){ tw = cw - 4; th = tw * 3 / 4; } const mc = Math.max(6, Math.floor(cw / 3.6));
       t += `<text x="${c2 + 14}" y="${y0 + 6}" class="tv sm" style="font-size:7.5px;font-weight:700">FERRAMENTAS:</text>`;
       tl.forEach((c, k) => { let f = null; try { f = ferrInfo(c); } catch(e){}
         const x = c2 + 14 + k * cw, cx = x + cw / 2 - 2, img = (typeof FERR_PNG === "object" && FERR_PNG[c]) || (typeof FERR_FOTO === "object" && FERR_FOTO[(f && f.c) || c]) || "";
@@ -3406,7 +3408,7 @@ function drawingSVG(p){  const PT = state.orient === "portrait";
         else t += `<rect x="${(cx - tw / 2).toFixed(1)}" y="${y0 + 9}" width="${tw.toFixed(1)}" height="${th.toFixed(1)}" fill="none" stroke="#bbb" stroke-width="0.6"/>`;
         const nm = f ? f.nome : ""; t += `<text x="${cx.toFixed(1)}" y="${(y0 + 9 + th + 8).toFixed(1)}" class="tv sm" style="font-size:8px;font-weight:700" text-anchor="middle">${esc(c)}</text>`;
         if (nm) t += `<text x="${cx.toFixed(1)}" y="${(y0 + 9 + th + 15).toFixed(1)}" class="tv sm" style="font-size:6.2px;font-weight:400" text-anchor="middle">${esc(nm.length > mc ? nm.slice(0, mc - 1) + "…" : nm)}</text>`; }); } }
-  t += lbl(c2 + 5, r1 + 13, "DESCRIÇÃO / DENOMINAÇÃO:") + val(c2 + 14, r1 + 52, pieceName(p), "tv huge") + val(c2 + 14, r1 + 76, `Ø interno ${f2(p.dint)}  ·  Ø externo ${f2(p.dext)}  ·  ${altTxt}  ·  secção ${f2(sec)}`, PT ? "tv sm" : "tv") + (alojTxt2 ? val(c2 + 14, r1 + 94, alojTxt2, PT ? "tv sm" : "tv") : "");
+  t += lbl(c2 + 5, r1 + 13, "DESCRIÇÃO / DENOMINAÇÃO:") + val(c2 + 14, r1 + yNm, pieceName(p), "tv huge") + val(c2 + 14, r1 + yDm, `Ø interno ${f2(p.dint)}  ·  Ø externo ${f2(p.dext)}  ·  ${altTxt}  ·  secção ${f2(sec)}`, PT ? "tv sm" : "tv") + (alojTxt2 ? val(c2 + 14, r1 + yAl, alojTxt2, PT ? "tv sm" : "tv") : "");
   t += `<line x1="${e1}" y1="${r2}" x2="${e1}" y2="${yBot}" class="tb"/><line x1="${e2}" y1="${r2}" x2="${e2}" y2="${yBot}" class="tb"/><line x1="${e3}" y1="${r2}" x2="${e3}" y2="${yBot}" class="tb"/>`;
   t += lbl(c2 + 5, r2 + 12, "COD INTERNO:") + val(c2 + 10, r2 + 31, info.cod || "") + lbl(e1 + 5, r2 + 12, "ESCALA") + val(e1 + 10, r2 + 31, "S/E") + lbl(e2 + 5, r2 + 12, "FOLHA:") + val(e2 + 10, r2 + 31, info.folha) + lbl(e3 + 5, r2 + 12, "FORMATO:") + `<text x="${(e3 + R) / 2}" y="${yBot - 6}" class="tv" style="font-size:22px;font-weight:400" text-anchor="middle">A4</text>`;
 

@@ -6,6 +6,13 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.21.11 — 11/11/2026
+- **Celeron** (PSA 108, PSG 101, Programa Arruela/ciclo): corta sempre com a T6D16, então agora entra a mesma regra da
+  secção > 14,8 — **bedame 2** nas peças (intervalo entre peças e comprimento do desbaste já contam os 2 mm) e **G92 +1 mm**.
+  O "+1 em Z" da 5.21.3 deixa de ser somado à parte (já está no bedame 2).
+- PSA 108 / PSG 101 em Celeron: o **acabamento** (externo e interno) desce até o **mesmo Z do desbaste** (paralelo final
+  + meio bedame). Ex.: PSG 101 35x40x5,6, 1 peça: desbaste e acabamento até Z−8,15. Outros materiais: sem mudança.
+
 ## 5.21.10 — 11/11/2026
 - Nome do programa salvo (Programas_CNC e MCS 500) com várias peças por ciclo: o **CICLO N PÇ** vai logo depois do número —
   `045000 CICLO 5 PÇ.PIT` / `45000 CICLO 5 PÇ.txt`; com bucha especial `045001 CICLO 5 PÇ 9X30.PIT` (antes `045001 9X30 CICLO 5 PÇ`).

@@ -32,7 +32,7 @@ $inj = @'
   if (q.type === "lip") p.dext = p.dint + 2 * p.sec;
   for (const [k,v] of Object.entries(Object.assign({prog: q.num || ""}, q.dwg || {}))) { const el = document.querySelector('#dwgFields [data-d="'+k+'"]'); if (el) el.value = v; }
   const lines = GEN[q.type].build(p), fag = lines.join("\n");
-  const out = {ok:true, aloj: alojTxt, check: GEN[q.type].check ? (GEN[q.type].check(p) || "") : "", fagor: fag, mcs: fagorToMcs(fag),
+  const out = {ok:true, aloj: alojTxt, check: GEN[q.type].check ? (GEN[q.type].check(p) || "") : "", fagor: fag, mcs: fagorToMcs(fag), ciclo: (typeof cicloPcs === "function" ? cicloPcs(p) : 0),
                desFam: (DESENHO_TYPES.includes(q.type) ? desFam(p) : ""), desName: (DESENHO_TYPES.includes(q.type) ? desenhoFolderName(p, q.num || "0") : "")};
   if (DESENHO_TYPES.includes(q.type) && !(q.type === "iso" && pieceKind(p) === "dp")) {
     try { const b = await drawingPdfBytes(p); let s = ""; for (let i = 0; i < b.length; i++) s += String.fromCharCode(b[i]); out.pdf = btoa(s); } catch(e){ out.pdfErr = String(e); }
@@ -88,6 +88,13 @@ function Get-MaxNum {
 }
 
 # ---------- 4. gerar ----------
+# fila do ARGUS (mesmo formato do pedidoArgus() do Simulador e do pedidos_argus.ps1)
+function New-PedidoArgus([string]$item, [string]$prog, [string]$pdf, [string]$perfil) {
+  $q = 'W:\Parts\PartsSeals\PROJETOS\DESENHOS\_PEDIDOS ARGUS'; New-Item -ItemType Directory -Force $q | Out-Null
+  $rec = [ordered]@{ item = $item; programa = $prog; anexo1 = $pdf; perfil = $perfil; criado = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ss.fffZ'); status = 'pendente' }
+  [IO.File]::WriteAllText((Join-Path $q "$($item)_$prog.json"), ($rec | ConvertTo-Json), (New-Object Text.UTF8Encoding $false))
+  return "Pedido ARGUS na fila: item $item (Anexo 1 + programa $prog). "
+}
 $tmp = ConvertFrom-Json ([IO.File]::ReadAllText($Jobs, [Text.Encoding]::UTF8)); $jobsList = @(); foreach ($x in $tmp) { $jobsList += $x }
 # Destino (pedido do usuario 06/11/2026): pastas normais -> Programas_CNC (.PIT), Programas_CNC\MCS 500 (.txt), PROJETOS\DESENHOS (PDF).
 # Numero: antes de CADA programa rele o maior numero da pasta (o usuario tambem salva ao mesmo tempo) e nunca sobrescreve arquivo existente.
@@ -137,9 +144,11 @@ foreach ($j in $jobsList) {
     if ($exist.Count -and -not $j.forcar) { $r.status = 'JA EXISTE'; $r.numero = ($exist -join ', '); $r.obs = 'Programa com o mesmo perfil e medidas ja esta em Programas_CNC: so atribuir.'; $res += [pscustomobject]$r; continue }
     if ($o.check) { $r.obs += "Aviso do Simulador: $($o.check). " }
     if ($o.aloj)  { $r.obs += "$($o.aloj). " }
-    $r.numero = $num; $r.status = 'GERADO'; $next = $n + 1
+    $r.numero = $num; $r.status = 'GERADO'; if ([int]$o.ciclo -gt 1) { $r.obs += "Arquivo: $num CICLO $($o.ciclo) PÇ. " }; $next = $n + 1
     if (-not $DryRun) {
-      $fp = Join-Path $PROG "$num.PIT"; $fm = Join-Path $PROG "MCS 500\$n.txt"
+      # v5.8.0: PSA 108 com varias pecas por ciclo -> "046140 CICLO 5 PÇ.PIT" / "46140 CICLO 5 PÇ.txt"
+      $suf = if ([int]$o.ciclo -gt 1) { " CICLO $($o.ciclo) PÇ" } else { '' }
+      $fp = Join-Path $PROG "$num$suf.PIT"; $fm = Join-Path $PROG "MCS 500\$n$suf.txt"
       if ((Test-Path -LiteralPath $fp) -or (Test-Path -LiteralPath $fm)) { throw "numero $num ficou ocupado durante a geracao" }
       [IO.File]::WriteAllText($fp, (($o.fagor -replace "`r", '') -replace "`n", "`r`n"), $cp1252)
       [IO.File]::WriteAllText($fm, (($o.mcs -replace "`r", '') -replace "`n", "`r`n"), $cp1252)
@@ -147,6 +156,10 @@ foreach ($j in $jobsList) {
         $dd = Join-Path $DES "$($o.desFam)\$($o.desName)"; $pdf = Join-Path $dd "$($o.desName).pdf"
         if (Test-Path -LiteralPath $pdf) { $r.obs += 'Desenho ja existia (mantido). ' }
         else { New-Item -ItemType Directory -Force $dd | Out-Null; [IO.File]::WriteAllBytes($pdf, [Convert]::FromBase64String($o.pdf)); $r.desenho = "DESENHOS\$($o.desFam)\$($o.desName)\$($o.desName).pdf" }
+        # v5.7.0: pedido do Anexo 1 / Codigo do programa no ARGUS (antes so o Simulador na tela gravava; OP 31205/2 ficou de fora)
+        if ("$($j.item)".Trim() -match '^\d+$') {
+          try { $r.obs += (New-PedidoArgus "$($j.item)".Trim() $num $pdf $o.desFam) } catch { $r.obs += "Pedido ARGUS NAO gravado: $_. " }
+        } else { $r.obs += 'Sem item numerico: pedido ARGUS (Anexo 1) nao gravado. ' }
       } else { $r.obs += "Desenho: $($o.pdfErr). " }
     }
   } catch { $r.status = 'ERRO'; $r.obs = "$_" }

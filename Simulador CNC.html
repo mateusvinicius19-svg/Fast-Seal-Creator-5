@@ -178,7 +178,10 @@ body.printing #dwgModal .dwgf{display:none}
   .codecol{position:static;height:480px;max-height:none}
 }
 @media (max-width:640px){
-  .wrap{grid-template-columns:1fr;grid-template-areas:"form" "code" "sim"}
+  /* v5.11.1 celular: cabeçalho e barras quebram linha; nada mais largo que a tela */
+  header{flex-wrap:wrap;padding:10px 12px} header .spacer{display:none} header .btn{flex:1 1 auto;justify-content:center}
+  .wrap{padding:8px;gap:10px} .toolbar,.row,.btns,.controls{flex-wrap:wrap} .status{min-width:0;text-align:left}
+  .wrap{grid-template-columns:minmax(0,1fr);grid-template-areas:"form" "code" "sim"}
   .left{position:static;height:auto}
   .codecol{height:380px}
   .stage{min-height:340px;height:auto}
@@ -230,7 +233,7 @@ body.printing #dwgModal .dwgf{display:none}
       <details class="params" id="buchaBox" style="display:none"><summary>Buchas (tabela + adicionadas)</summary><div class="buchas" id="buchaList"></div><div class="fields"><label>Ø interno da bucha<input id="bNewI" type="text" inputmode="decimal"></label><label>Ø externo da bucha<input id="bNewO" type="text" inputmode="decimal"></label></div><button class="btn" id="bAdd" type="button">+ Adicionar bucha</button> <span class="note">Vermelha: a escolhida (a mais leve que serve, com 1 mm de folga). T = tarugo. Amarelas: adicionadas. ✕ remove. Mudanças ficam salvas neste computador.</span></details>
       <div class="genbar">
         <button class="btn primary" id="btnCopy">&#x29C9; Copiar</button>
-        <button class="btn" id="btnSave" title="Salva o Fagor (.PIT) no Programas_CNC e a versão convertida (.txt) no MCS 500">&#x1F4BE; Salvar Fagor + MCS 500</button><button class="btn" id="btnCopyMcs" title="Copia a versão convertida para o MCS 500">&#x29C9; Copiar MCS</button><button class="btn" id="btnDirProg" title="Escolher a pasta W:\Parts\PartsSeals\PROJETOS\Programas_CNC">&#x1F4C1; Programas_CNC</button><button class="btn" id="btnDirMcs" title="Escolher a pasta W:\Parts\PartsSeals\PROJETOS\Programas_CNC\MCS 500">&#x1F4C1; MCS 500</button><button class="btn" id="btnAlt" title="Abrir um programa do Programas_CNC pelo número e refazer com outra bucha (salva como NNNNNN BIxBO — o original não muda)">&#x270F;&#xFE0F; Alterar programa</button><button class="btn" id="btnVer" title="Digitar o número e ver o programa e as variantes (NNNNNN BIxBO...)">&#x1F50E; Ver programa</button><button class="btn" id="btnHist" title="Programas salvos pelo Simulador (Programas_CNC\Historico Simulador CNC.csv)">&#x1F4CB; Histórico</button><button class="btn" id="btnDirDes" title="Escolher a pasta W:\Parts\PartsSeals\PROJETOS\DESENHOS">&#x1F4C1; DESENHOS</button>
+        <button class="btn" id="btnSave" title="Salva o Fagor (.PIT) no Programas_CNC e a versão convertida (.txt) no MCS 500">&#x1F4BE; Salvar Fagor + MCS 500</button><button class="btn" id="btnCopyMcs" title="Copia a versão convertida para o MCS 500">&#x29C9; Copiar MCS</button><button class="btn" id="btnDirRoot" title="Pasta única W:\Parts\PartsSeals\PROJETOS (tem Programas_CNC, MCS 500 e DESENHOS): escolha uma vez; nos outros dias é só clicar e Permitir">&#x1F513; PROJETOS</button><button class="btn" id="btnDirProg" title="Escolher a pasta W:\Parts\PartsSeals\PROJETOS\Programas_CNC">&#x1F4C1; Programas_CNC</button><button class="btn" id="btnDirMcs" title="Escolher a pasta W:\Parts\PartsSeals\PROJETOS\Programas_CNC\MCS 500">&#x1F4C1; MCS 500</button><button class="btn" id="btnAlt" title="Abrir um programa do Programas_CNC pelo número e refazer com outra bucha (salva como NNNNNN BIxBO — o original não muda)">&#x270F;&#xFE0F; Alterar programa</button><button class="btn" id="btnVer" title="Digitar o número e ver o programa e as variantes (NNNNNN BIxBO...)">&#x1F50E; Ver programa</button><button class="btn" id="btnHist" title="Programas salvos pelo Simulador (Programas_CNC\Historico Simulador CNC.csv)">&#x1F4CB; Histórico</button><button class="btn" id="btnDirDes" title="Escolher a pasta W:\Parts\PartsSeals\PROJETOS\DESENHOS">&#x1F4C1; DESENHOS</button>
         <button class="btn" id="btnDraw" style="display:none">&#x1F4D0; Desenho</button>
         <span class="note" id="genMsg"></span>
       </div>
@@ -1410,7 +1413,7 @@ function generate(){
   }
   const fname = (type === "iso" || type === "psa108" || type === "lip" || type === "pso" || type === "pse106" || type === "psh106" || type === "psh117" || type === "psh105" || type === "pse105" || type === "pse107" || type === "psh107" || type === "psr102" || type === "psr211") ? pieceFile(p) + (buchaIsException(p) || (state.alterNum && p.bi !== "" && p.bo !== "") ? ` ${gen15(p.bi)}X${gen15(p.bo)}` : "") : `PSA108 ${gen15(p.dint)}X${gen15(p.dext)}X${gen15(p.h)} - ${xround(p.n,0)} pcs`;
   load(lines.join("\n"), fname);
-  if (!g.check(p)) try { $("genMsg").textContent += costTxt(pieceCost(lines.join("\n"), ["ciclo", "semch"].includes(type) ? xround(p.n, 0) : 1)); } catch(e){}
+  if (!g.check(p)) try { $("genMsg").textContent += costTxt(pieceCost(lines.join("\n"), ["ciclo", "semch"].includes(type) ? xround(p.n, 0) : type === "psa108" ? cicloPcs(p) : 1)); } catch(e){}
 }
 // bucha digitada à mão só vira exceção ("NNNNNN BIxBO") quando é diferente da que o Simulador escolheria sozinho
 function autoBucha(p){
@@ -1421,6 +1424,7 @@ function autoBucha(p){
     if (p.tipoGen === "psr102"){ const g = psr102Geom(q); return [g.bi, g.bo]; }
     if (p.tipoGen === "lip"){ const b = lipBucha(q, lipGeom(q)); return [b.bi, b.bo]; }
     if (p.tipoGen === "pso"){ const b = psoBucha(q); return [b.bi, b.bo]; }
+    if (["psa108", "ciclo", "semch"].includes(p.tipoGen) && arrTeflon(p)) return arrBuchaAuto(q);   // v5.9.4: Teflon digitado = sugerido não é exceção
   } catch(e){}
   return null;
 }
@@ -1440,17 +1444,41 @@ function roughLevels(from, finish, dir){   // dir +1 = externo (desce), -1 = int
   return out;
 }
 // passes retos em G90 até zEnd; termina onde estava (xBack, Z zAp) para o G91 seguinte continuar valendo
+// v5.9.0 (usuário 10/11/2026): Teflon (PTFE puro e PTFE+BR) — bucha bem próxima da medida: externo e interno num passe só (o de acabamento)
+const arrPU = p => (p.matA || "PU") === "PU";
+const arrTeflon = p => p.matA === "PTFE" || p.matA === "PTFEBR";
+const arrTeflonPasse = p => arrTeflon(p) && buchaOf(p).bi > 0;   // passe único: Teflon saindo de bucha, não de tarugo
+// v5.9.3 (usuário 10/11): Teflon saindo de TARUGO — interno: 1º passe em Ø16 e depois passes de no máximo 8 no Ø até Ø int − 2 (acabamento 2)
+function tarugoTeflonLevels(dint){
+  const last = dint - 2; if (!(last > 0)) return [];
+  const first = Math.min(16, last), out = [first];
+  const n = Math.ceil((last - first) / 8 - 1e-9);
+  for (let k = 1; k <= n; k++) out.push(+(first + (last - first) * k / n).toFixed(3));
+  return out;
+}
 function arrRough(p, mode, zEnd, xBack, feed){
+  // v5.9.2 (usuário 10/11): só quando sai de BUCHA (tubo); de TARUGO (Ø int. 0) desbasta normal
+  if (arrTeflonPasse(p)) return [];
   const b = buchaOf(p); if (b.txt === "----") return [];
-  const lv = mode === "od" ? roughLevels(b.bo, p.dext, 1) : roughLevels(b.bi, p.dint, -1);
+  const lv = mode === "od" ? roughLevels(b.bo, p.dext, 1) : (arrTeflon(p) && !(b.bi > 0)) ? tarugoTeflonLevels(p.dint) : roughLevels(b.bi, p.dint, -1);
   if (!lv.length) return [];
-  const L = ["G90", "; (DESBASTE " + (mode === "od" ? "EXTERNO" : "INTERNO") + " - MAX. 8 NO DIAMETRO, ACABAMENTO 2)"];
-  lv.forEach((x, i) => L.push("G0 X" + gen15(x), "G1 Z" + g3(zEnd) + (i ? "" : " F" + gF(feed)), "G1 X" + gen15(x + (mode === "od" ? 1 : -1)), "G0 Z" + g3(p.zAp)));
+  // v5.8.0 (usuário 10/11/2026, PSA 108): com p.zSeg o desbaste em Z é dividido em etapas de até zSeg mm, sempre pelo menos 2
+  // (nunca o comprimento todo de uma vez); cada etapa passa todos os Ø de fora para dentro antes de descer a próxima.
+  // v5.9.1 (usuário 10/11): no PU essa regra NÃO vale (desbaste como antes, de uma vez)
+  const D = -zEnd, k = p.zSeg > 0 && !arrPU(p) ? Math.max(2, Math.ceil(D / p.zSeg - 1e-9)) : 1;
+  const L = ["G90", "; (DESBASTE " + (mode === "od" ? "EXTERNO" : "INTERNO") + " - MAX. 8 NO DIAMETRO, ACABAMENTO 2" + (k > 1 ? ", EM Z " + k + " ETAPAS DE " + fx(D / k, 3) : "") + ")"];
+  let first = true;
+  for (let s = 1; s <= k; s++){
+    if (k > 1) L.push("; (ETAPA " + s + " - ATE Z" + g3(-D * s / k) + ")");
+    lv.forEach(x => { L.push("G0 X" + gen15(x), "G1 Z" + g3(-D * s / k) + (first ? " F" + gF(feed) : ""), "G1 X" + gen15(x + (mode === "od" ? 1 : -1)), "G0 Z" + g3(p.zAp)); first = false; });
+  }
   L.push("G0 X" + g3(xBack), "G91");
   return L;
 }
 // bucha da arruela: digitada, ou (PU) a mais leve da lista que serve — tubo antes de tarugo; NBR e outros: só digitada
+// v5.9.4 (usuário 10/11): Teflon (PTFE puro e PTFE+BR) sugere bucha com 2 mm de sobremetal nos 2 diâmetros: Ø int − 2 × Ø ext + 2
 function arrBuchaAuto(p){
+  if (p.matA === "PTFE" || p.matA === "PTFEBR") return (p.dint > 2 && p.dext > p.dint) ? [+(p.dint - 2).toFixed(3), +(p.dext + 2).toFixed(3)] : null;
   if ((p.matA || "PU") !== "PU") return null;
   const fit = buchasList().filter(([a, b]) => a <= p.dint - BUCHA_FOLGA + 1e-9 && b >= p.dext + BUCHA_FOLGA - 1e-9);
   return fit.sort((x, y) => buchaRank(...x) - buchaRank(...y))[0] || null;   // a mais barata por mm (tabela PU 27/01/25)
@@ -1650,6 +1678,8 @@ function psaTolFill(p){
     const t = pre === "th" ? 0 : psaDiaTol(dOf[pre]); p[pre + "S"] = t; p[pre + "I"] = pre === "th" ? -0.1 : -t; }
   return p;
 }
+// peças que cabem no limite de Z do desbaste: N × (altura + bedame − sobreposição) + paralelo ≤ zMax (usuário 10/11: 40 mm)
+function psaMaxN(p){ if (arrPU(p)) return 10; const B6 = p.h + (p.bed - p.sobrep), z = p.zMax > 0 ? p.zMax : 40; return Math.max(1, Math.floor((z - p.par) / B6 + 1e-9)); }
 function psaChSug(h){ return xround(Math.min(1, Math.max(0.2, 0.10 * (Number(h) || 0))), 2); }
 function psaFill(p){
   const s = psaChSug(p.h), e = v => v === "" || v === undefined || v === null || isNaN(v);
@@ -1666,11 +1696,12 @@ GEN.psa108 = {
            ["zAp","Z de aproximação",3],["recE","Recuo externo (diâm.)",4],["recI","Recuo interno (diâm.)",4],["xAb","Faceamento/corte: X abaixo do Dint",2.7],
            ["fExt","Avanço externo F",0.15],["fInt","Avanço interno F",0.1],["fCor","Avanço corte F",0.1],["z0","Z inicial (G0 Z)",50],
            ["zExt","Z afastamento externo",70],["zInt","Z afastamento interno",50],["g92","Valor do G92 Z",1.1],["zN20","Z do bloco N20",100],
-           ["zFim","Z final (G00)",250],["afX","Afastamento final em X (se N0 = 0)",50],["S","Rotação S (vazio = tabela pelo Ø ext.)",""]],
+           ["zFim","Z final (G00)",250],["afX","Afastamento final em X (se N0 = 0)",50],["S","Rotação S (vazio = tabela pelo Ø ext.)",""],
+           ["zMax","Desbaste em Z: comprimento máximo (mm)",40],["zSeg","Desbaste em Z: máximo por etapa (mm, sempre ≥ 2 etapas)",20]],
   build(p){
     psaFill(p); const fx3 = v => fx(v, 3);
-    const N = Math.max(1, Math.min(10, xround(p.n, 0)));
     const prol = (p.bed - p.sobrep) / 2, cE = p.chE, cI = p.chI;
+    const N = Math.max(1, Math.min(10, xround(p.n, 0), psaMaxN(p)));
     const E3 = rounddown3(2 * (cE + prol)), E4 = cE + prol;                       // externo 45°: em X (diâm.) = 2 × Z
     const I3 = rounddown3(2 * (cI + prol) * TAN(30)), I4 = cI + prol;             // interno 30° com o eixo
     const B6 = p.h + 2 * prol;
@@ -1694,6 +1725,7 @@ GEN.psa108 = {
     return L;
   },
   check(p){ psaFill(p); const m = []; if (!(p.dext > p.dint)) m.push("diâmetro externo tem que ser maior que o interno"); if (p.n > 10) m.push("máximo de 10 peças (usado 10)");
+    if (p.n > psaMaxN(p)) m.push(`desbaste em Z passaria de ${p.zMax > 0 ? p.zMax : 40} mm: máximo ${psaMaxN(p)} peças por ciclo (usado ${Math.min(10, psaMaxN(p))})`);
     if (p.bed < 0.8 || p.bed > 1) m.push("bedame fora de 0,8 a 1 mm"); if (!(p.h > 2 * Math.max(p.chE, p.chI))) m.push("chanfros maiores que a metade da altura");
     if (p.chI * TAN(30) > (p.dext - p.dint) / 4) m.push("chanfro interno grande para a secção"); return m.length ? "ATENÇÃO: " + m.join("; ") + "." : ""; }
 };
@@ -1706,7 +1738,16 @@ for (const k of ["ciclo", "semch", "psa108"]){
     return applyArrMat(b.call(this, p), p);
   };
   const nm = GEN[k].main.findIndex(f => f[0] === "nome");
-  GEN[k].main.splice(nm, 0, ["matA", "Material", "PU"], ["bi", "Bucha Ø interno (vazio = automática no PU)", ""], ["bo", "Bucha Ø externo (vazio = automática no PU)", ""]);
+  const ck = GEN[k].check;   // Teflon: avisa se a bucha deixa muito para tirar num passe só (5 ou mais no Ø, a mesma regra do passe único)
+  GEN[k].check = function(p){
+    let m = ck ? (ck.call(this, p) || "") : "";
+    if (arrTeflonPasse(p)){ const b = buchaOf(p), w = [];
+      if (b.bo - p.dext >= 5) w.push(`externo: bucha Ø${gen15(b.bo)} deixa ${fx(b.bo - p.dext, 1)} no Ø`);
+      if (b.bi > 0 && p.dint - b.bi >= 5) w.push(`interno: bucha Ø${gen15(b.bi)} deixa ${fx(p.dint - b.bi, 1)} no Ø`);
+      if (w.length) m += (m ? " " : "") + "ATENÇÃO (Teflon, passe único): " + w.join("; ") + " — conferir a bucha."; }
+    return m;
+  };
+  GEN[k].main.splice(nm, 0, ["matA", "Material", "PU"], ["bi", "Bucha Ø interno (vazio = automática no PU e Teflon)", ""], ["bo", "Bucha Ø externo (vazio = automática no PU e Teflon)", ""]);
 }
 // custo de material por peça: bucha do programa (TUBE a/b ou ;BUCHA AXB) × mm consumidos por ciclo (avanço do G92) ÷ peças por ciclo
 function pieceCost(text, perCycle){
@@ -1864,8 +1905,43 @@ function kvDb(){ return new Promise((res, rej) => { const r = indexedDB.open("si
 async function kvGet(k){ try { const db = await kvDb(); return await new Promise(res => { const q = db.transaction("kv").objectStore("kv").get(k); q.onsuccess = () => res(q.result); q.onerror = () => res(null); }); } catch(e){ return null; } }
 async function kvSet(k, v){ try { const db = await kvDb(); await new Promise(res => { const tx = db.transaction("kv", "readwrite"); tx.objectStore("kv").put(v, k); tx.oncomplete = res; tx.onerror = res; }); } catch(e){} }
 // pasta lembrada: silent = só devolve se já tiver permissão (sem abrir janela). Abrir janela/permissão precisa ser logo após um clique.
+// v5.10.0 (usuário 10/11): pasta única PROJETOS — uma permissão por dia vale para Programas_CNC, MCS 500 e DESENHOS
+// (o navegador esquece a permissão ao fechar; com 3 pastas separadas só a 1ª era liberada no clique do Salvar)
+const ROOT_SUB = { dirProgramasCNC: ["Programas_CNC"], dirMCS500: ["Programas_CNC", "MCS 500"], dirDesenhos: ["DESENHOS"] };
+// v5.11.0 (usuário 10/11: "deixar fixo"): aberto pelo servidor local (servidor_simulador.ps1, http://localhost:8765) o Simulador
+// grava direto no W:\Parts\PartsSeals\PROJETOS pelo servidor — sem escolher pasta e sem pedir permissão, nunca.
+// srvDir/srvFile imitam as pastas do navegador (getDirectoryHandle, getFileHandle, entries, getFile, createWritable).
+const SRV = /^https?:$/.test(location.protocol) && location.port === "8765" ? location.origin : null;
+const srvUrl = (op, path) => `${SRV}/fs/${op}?p=${encodeURIComponent(path)}`;
+const srvErr = (name, path) => new DOMException(`${path}: ${name}`, name);
+async function srvStat(path){ const r = await fetch(srvUrl("stat", path)); if (r.status === 404) return null; if (!r.ok) throw new Error("servidor: " + await r.text()); return (await r.json()).kind; }
+function srvFile(path, name){
+  return { kind: "file", name,
+    async getFile(){ const r = await fetch(srvUrl("read", path)); if (!r.ok) throw srvErr("NotFoundError", path); const lm = +r.headers.get("X-Mtime"); return new File([await r.blob()], name, lm ? { lastModified: lm } : {}); },
+    async createWritable(){ const parts = []; return { async write(b){ parts.push(b); }, async close(){ const r = await fetch(srvUrl("write", path), { method: "PUT", body: new Blob(parts) }); if (!r.ok) throw new Error("servidor não gravou " + path + ": " + await r.text()); } }; } };
+}
+function srvDir(path, name){
+  const sub = n => path ? path + "/" + n : n;
+  return { kind: "directory", name,
+    async queryPermission(){ return "granted"; }, async requestPermission(){ return "granted"; },
+    async getDirectoryHandle(n, o = {}){ const k = await srvStat(sub(n)); if (k === "directory") return srvDir(sub(n), n); if (k) throw srvErr("TypeMismatchError", sub(n));
+      if (!o.create) throw srvErr("NotFoundError", sub(n)); const r = await fetch(srvUrl("mkdir", sub(n)), { method: "POST" }); if (!r.ok) throw new Error(await r.text()); return srvDir(sub(n), n); },
+    async getFileHandle(n, o = {}){ const k = await srvStat(sub(n)); if (k === "file") return srvFile(sub(n), n); if (k) throw srvErr("TypeMismatchError", sub(n));
+      if (!o.create) throw srvErr("NotFoundError", sub(n)); return srvFile(sub(n), n); },
+    async *entries(){ const r = await fetch(srvUrl("list", path)); if (!r.ok) throw srvErr("NotFoundError", path);
+      for (const e of await r.json()) yield [e.n, e.k === "d" ? srvDir(sub(e.n), e.n) : srvFile(sub(e.n), e.n)]; },
+    async *values(){ for await (const [, h] of this.entries()) yield h; } };
+}
+async function rootDir(silent){
+  if (SRV) return srvDir("", "PROJETOS");
+  const h = await kvGet("dirProjetos"); if (!h) return null;
+  try { let q = await h.queryPermission({ mode: "readwrite" }); if (q !== "granted" && !silent) q = await h.requestPermission({ mode: "readwrite" }); return q === "granted" ? h : null; } catch(e){ return null; }
+}
+async function isProjetosDir(h){ try { await h.getDirectoryHandle("Programas_CNC"); await h.getDirectoryHandle("DESENHOS"); return true; } catch(e){ return false; } }
 async function pickDir(key, id, forceNew, silent, label){
+  if (SRV && ROOT_SUB[key]){ let d = await rootDir(true); for (const n of ROOT_SUB[key]) d = await d.getDirectoryHandle(n); return d; }
   if (!window.showDirectoryPicker) return null;
+  if (!forceNew && ROOT_SUB[key]){ const r = await rootDir(silent); if (r) try { let d = r; for (const n of ROOT_SUB[key]) d = await d.getDirectoryHandle(n); return d; } catch(e){} }
   let h = forceNew ? null : await kvGet(key);
   if (h){ try { let q = await h.queryPermission({ mode: "readwrite" }); if (q !== "granted" && !silent) q = await h.requestPermission({ mode: "readwrite" }); if (q === "granted") return h; } catch(e){} }
   if (silent) return null;
@@ -1937,6 +2013,9 @@ async function pedidoArgus(dd, p, num, pdf){
 const PROG_SEED = 46007;   // último programa visto no Programas_CNC (06/11/2026)
 async function nextFreeProg(dir){
   let n = PROG_SEED; try { n = Math.max(n, +localStorage.getItem("ps_lastProg") || 0); } catch(e){}
+  // pelo servidor: a lista da pasta vem de uma vez, então também conta "046140 CICLO 5 PÇ.PIT", "037512 53X91.PIT" etc.
+  if (SRV) try { const used = new Set(); for await (const [nm] of dir.entries()){ const m = /^(\d{6})/.exec(nm); if (m) used.add(m[1]); }
+    for (let i = 0; i < 5000; i++){ n++; const nm = String(n).padStart(6, "0"); if (!used.has(nm)) return nm; } } catch(e){}
   for (let i = 0; i < 500; i++){ n++; const nm = String(n).padStart(6, "0"); if (!(await fileExists(dir, nm + ".PIT"))) return nm; }
   return "";
 }
@@ -1947,7 +2026,7 @@ const HIST_COLS = ["Data", "Programa", "Perfil", "Nominais", "Comentario", "Peca
 function formSnapshot(){ const vals = {}; document.querySelectorAll("#genBox input[data-k], #genBox select[data-k]").forEach(el => vals[el.dataset.k] = el.value); return JSON.stringify({ type: $("genType").value, vals }); }
 function histRecord(p, type, text, pitName, mcsName, pdfMsg){
   const f3 = v => (v === "" || v === undefined || v === null || isNaN(v)) ? "" : Number(v).toFixed(3);
-  const c = (() => { try { return pieceCost(text, ["ciclo", "semch"].includes(type) ? xround(p.n, 0) : 1); } catch(e){ return null; } })();
+  const c = (() => { try { return pieceCost(text, ["ciclo", "semch"].includes(type) ? xround(p.n, 0) : type === "psa108" ? cicloPcs(p) : 1); } catch(e){ return null; } })();
   const dext = type === "lip" ? p.dint + 2 * p.sec : p.dext;
   const perfil = ["ciclo", "semch"].includes(type) ? `PSA 108 (ciclo ${xround(p.n, 0)} pç${type === "semch" ? " sem chanfro" : ""})` : (() => { try { return pieceName(p); } catch(e){ return type; } })();
   const mat = ["ciclo", "semch"].includes(type) || p.matA ? ((ARR_MAT[p.matA] || ARR_MAT.PU)[0]) : (p.mat || "PU");
@@ -1955,7 +2034,7 @@ function histRecord(p, type, text, pitName, mcsName, pdfMsg){
   const pdf = (pdfMsg || "").match(/desenho: (.+?\.pdf)/);
   return { "Data": `${String(now.getDate()).padStart(2, "0")}-${M[now.getMonth()]}-${now.getFullYear()} ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`,
     "Programa": pitName.replace(/\.PIT$/i, ""), "Perfil": perfil, "Nominais": `${f3(p.dint)}/${f3(dext)}/${f3(p.h)}`, "Comentario": "",
-    "Pecas/ciclo": ["ciclo", "semch"].includes(type) ? String(xround(p.n, 0)) : "1",
+    "Pecas/ciclo": ["ciclo", "semch"].includes(type) ? String(xround(p.n, 0)) : type === "psa108" ? String(cicloPcs(p)) : "1",
     "Custo peca (R$)": c ? c.cost.toFixed(2).replace(".", ",") : "", "Material": mat,
     "Bucha I": c ? f3(c.a) : "", "Bucha E": c ? f3(c.b) : "", "Maquina": "FAGOR 1 / MCS 500",
     "Arquivo Fagor": pitName, "Arquivo MCS": mcsName, "Desenho": pdf ? pdf[1] : "", "Parametros": (() => { try { return formSnapshot(); } catch(e){ return ""; } })() };
@@ -2031,13 +2110,14 @@ async function openHistory(){
   $("histQ").oninput = e => { const q = e.target.value.toLowerCase(); $("histT").querySelector("tbody").innerHTML = data.filter(r => r.join(" ").toLowerCase().includes(q)).map(tr).join(""); };
 }
 // auto = "Alterar programa": salva sem perguntar o número (usa o do programa + sufixo da bucha) e sem imprimir o desenho
+function cicloPcs(p){ if (p.tipoGen !== "psa108") return 0; return Math.max(1, Math.min(10, xround(p.n, 0), psaMaxN(p))); }
 async function saveProgram(auto){
   // pastas primeiro (ainda dentro do clique); se nenhuma janela abriu, ainda dá para pedir a DESENHOS
   let dir = null, dd = null;
   if (auto){
     dir = await progDir(false, true); dd = await desDir(false, true);
     if (!dir){ $("genMsg").textContent += " · NÃO salvo: sem acesso à pasta Programas_CNC — clique em 💾 Salvar."; $("genMsg").style.color = "#b2221f"; return; }
-  } else if (window.showDirectoryPicker){
+  } else if (window.showDirectoryPicker || SRV){
     dir = await progDir(false, true);
     if (!dir){ dir = await progDir(false, false); if (!dir) return; dd = await desDir(false, true); }
     else { dd = await desDir(false, true); if (!dd && state.genParams && DESENHO_TYPES.includes(state.genParams.tipoGen)) dd = await desDir(false, false); }
@@ -2049,13 +2129,16 @@ async function saveProgram(auto){
   else if (dir){ $("genMsg").textContent = "Procurando o próximo número livre…"; $("genMsg").style.color = ""; sug = await nextFreeProg(dir); }
   const num = auto ? sug : prompt("Número do programa" + (state.alterNum ? " (alterando " + sug + ")" : sug ? " (próximo livre: " + sug + ")" : " (ex.: 046004)") + (suf ? ` — bucha especial: vai salvar como "número ${suf[1]}"` : "") + ":", sug);
   if (num === null) return;
+  if (!auto && !askCod()) return;
   let base = num.trim().replace(/\.(pit|txt|nc)$/i, "");
   if (!base) return;
   if (/^\d{1,6}[A-Z]?$/i.test(base)) base = base.replace(/^(\d+)/, d => d.padStart(6, "0"));
   if (suf && !base.toUpperCase().includes(suf[1].toUpperCase())) base += " " + suf[1];
+  // v5.8.0 (usuário 10/11): PSA 108 com várias peças por ciclo leva a quantidade no nome — "046140 CICLO 5 PÇ"
+  { const gp0 = state.genParams, nc = gp0 && !auto ? cicloPcs(gp0) : 0; if (nc > 1 && !/CICLO/i.test(base)) base += ` CICLO ${nc} PÇ`; }
   const pitName = base + ".PIT", mcsName = base.replace(/^0+(?=\d)/, "") + ".txt";
   const fagor = currentText(), pitBytes = toCp1252(fagor.replace(/\n/g, "\r\n") + "\r\n"), mcsBytes = toCp1252(fagorToMcs(fagor));
-  if (!window.showDirectoryPicker){   // navegador sem acesso a pastas: baixa os dois arquivos
+  if (!window.showDirectoryPicker && !SRV){   // navegador sem acesso a pastas: baixa os dois arquivos
     await saveBytes(pitBytes, pitName, "text/plain", "pit"); await saveBytes(mcsBytes, mcsName, "text/plain", "txt");
     $("genMsg").textContent = `Baixados: ${pitName} e ${mcsName} — copie para Programas_CNC e MCS 500.`; return;
   }
@@ -2084,6 +2167,25 @@ async function saveProgram(auto){
   return false;
 }
 $("btnSave").onclick = () => saveProgram(false);
+$("btnDirRoot").onclick = async () => {
+  const msg = (t, bad) => { $("genMsg").textContent = t; $("genMsg").style.color = bad ? "#b2221f" : ""; };
+  if (SRV) return msg("🔒 Aberto pelo servidor: grava direto no W:\\Parts\\PartsSeals\\PROJETOS (Programas_CNC, MCS 500 e DESENHOS), sem pedir pasta.");
+  if (!window.showDirectoryPicker) return msg("Este navegador não salva em pastas (use o Edge ou o Chrome).", true);
+  if (await kvGet("dirProjetos")){ if (await rootDir(false)) return msg("🔓 Pastas liberadas: Programas_CNC, MCS 500 e DESENHOS (PROJETOS)."); }
+  let h; try { h = await window.showDirectoryPicker({ id: "projetos", mode: "readwrite" }); } catch(e){ return msg("Pasta PROJETOS não escolhida.", true); }
+  if (!(await isProjetosDir(h))) return msg(`A pasta "${h.name}" não é a W:\Parts\PartsSeals\PROJETOS (não tem Programas_CNC e DESENHOS). Clique em 🔓 PROJETOS e escolha a certa.`, true);
+  await kvSet("dirProjetos", h); msg("🔓 PROJETOS lembrada. Nos próximos dias: clique em 🔓 PROJETOS (ou em Salvar) e Permitir — sem escolher pasta.");
+};
+// leva as buchas/ajustes guardados neste navegador para o endereço do servidor (localStorage é separado por endereço)
+function srvOpen(){ const d = {}; for (let i = 0; i < localStorage.length; i++){ const k = localStorage.key(i); if (/^ps_/.test(k) && k !== "ps_hist_cache") d[k] = localStorage.getItem(k); }
+  window.open("http://localhost:8765/#import=" + encodeURIComponent(JSON.stringify(d)), "_blank"); }
+if (SRV){
+  try { const m = /^#import=(.*)$/.exec(location.hash); if (m){ const d = JSON.parse(decodeURIComponent(m[1])); for (const [k, v] of Object.entries(d)) if (/^ps_/.test(k)) localStorage.setItem(k, v); history.replaceState(null, "", location.pathname); setTimeout(() => location.reload(), 50); } } catch(e){}
+  $("btnDirRoot").innerHTML = "&#x1F512; FIXO (servidor)"; $("btnDirRoot").title = "Aberto pelo servidor local: grava direto no W:\\Parts\\PartsSeals\\PROJETOS sem pedir pasta";
+} else fetch("http://localhost:8765/ping").then(r => r.ok && r.json()).then(j => { if (!j || !j.ok) return;
+  const b = document.createElement("button"); b.className = "btn"; b.innerHTML = "&#x1F512; Abrir FIXO"; b.title = "O servidor está ligado: abre o Simulador por ele (grava sem pedir pasta) e leva as buchas/ajustes deste navegador";
+  b.onclick = srvOpen; $("btnDirRoot").after(b); }).catch(() => {});
+(async () => { try { if (SRV) return; const h = await kvGet("dirProjetos"); if (h && !(await rootDir(true))){ $("btnDirRoot").style.outline = "2px solid #e8590c"; $("btnDirRoot").title = "Clique e Permitir para liberar as pastas de hoje"; } } catch(e){} })();
 $("btnDirProg").onclick = async () => { const h = await progDir(true, false); if (h){ $("genMsg").textContent = "Pasta do programa: " + h.name; $("genMsg").style.color = ""; } };
 $("btnHist").onclick = () => { $("histBox").scrollIntoView({ behavior: "smooth" }); histLoadInline(true); };
 // ---- ✏️ Alterar programa (usuário 09/11/2026): digita o número + a bucha nova → abre NNNNNN.PIT do Programas_CNC e muda SÓ o desbaste
@@ -2175,20 +2277,59 @@ function altRough(txt, bi, bo){
   });
   return { text: out.join("\n").replace(/\n+$/, ""), old, notes, shifted };
 }
+// v5.6.3 (usuário 11/11/2026): "Não achei 046158.PIT" sem dizer por quê → mostra a pasta lembrada, se ela parece a Programas_CNC,
+// e o que existe com esse número (variantes NNNNNN BIxBO.PIT na lista do Ver programa / Histórico, .txt no MCS 500)
+async function altNotFound(dir, num){
+  const n5 = num.replace(/^0+(?=\d)/, ""), reP = new RegExp("^" + num + "(?!\\d).*\\.pit$", "i");
+  let mcs = null; try { mcs = await dir.getDirectoryHandle("MCS 500"); } catch(e){}
+  const pasta = `Pasta lembrada: "${dir.name}"` + (mcs ? "" : ` — não parece a Programas_CNC (não tem a subpasta MCS 500). Clique em 📁 Programas_CNC e escolha W:\\Parts\\PartsSeals\\PROJETOS\\Programas_CNC`);
+  const vars = new Set();
+  try { if (!VER_IDX) VER_IDX = await kvGet("verIdx"); if (VER_IDX) VER_IDX.P.filter(n => reP.test(n)).forEach(n => vars.add(n)); } catch(e){}
+  try { const rows = await histRead(dir), h = rows[0] || [], fi = h.indexOf("Arquivo Fagor"); if (fi >= 0) rows.slice(1).forEach(r => { if (reP.test(r[fi] || "")) vars.add(r[fi]); }); } catch(e){}
+  const ok = []; for (const n of vars) if (await fileExists(dir, n)) ok.push(n);
+  let txtMcs = false; if (mcs) txtMcs = await fileExists(mcs, n5 + ".txt");
+  let t = `Não achei ${num}.PIT no Programas_CNC. ${pasta}.`;
+  if (ok.length) t += ` Existe(m) só a(s) variante(s): ${ok.sort().join(", ")} — o programa padrão ${num}.PIT não está na pasta.`;
+  else if (txtMcs) t += ` Só existe o ${n5}.txt no MCS 500 (sem o .PIT do Fagor) — o Alterar precisa do .PIT.`;
+  else if (mcs) t += " Também não tem no MCS 500 — confira o número (🔎 Ver programa)."; 
+  return t;
+}
+// v5.6.4 (usuário 11/11/2026): muitos programas só existem com a bucha no nome ("046158 194X222.PIT", sem o 046158.PIT).
+// Procura: nome exato → variantes "NNNNNN ...PIT" (lista do Ver programa + Histórico; senão lê a pasta). Várias: tira os CICLO e usa a mais nova.
+async function altFind(dir, num, progress){
+  for (const nm of [num + ".PIT", num + ".pit", num + ".Pit"]) { try { return { fh: await dir.getFileHandle(nm), name: nm }; } catch(e){} }
+  const re = new RegExp("^" + num + "(?!\\d).*\\.pit$", "i"), cand = new Set();
+  try { if (!VER_IDX) VER_IDX = await kvGet("verIdx"); if (VER_IDX) VER_IDX.P.filter(n => re.test(n)).forEach(n => cand.add(n)); } catch(e){}
+  try { const rows = await histRead(dir), h = rows[0] || [], fi = h.indexOf("Arquivo Fagor"); if (fi >= 0) rows.slice(1).forEach(r => { if (re.test(r[fi] || "")) cand.add(r[fi]); }); } catch(e){}
+  let ok = [];
+  for (const n of cand) { try { ok.push({ name: n, fh: await dir.getFileHandle(n) }); } catch(e){} }
+  if (!ok.length){   // não está na lista guardada (programa novo): lê a pasta (~50 mil arquivos, pode demorar)
+    if (progress) progress(`Procurando ${num} *.PIT no Programas_CNC…`);
+    let i = 0; for await (const [n, h] of dir.entries()){ if (h.kind === "file" && re.test(n)) ok.push({ name: n, fh: h }); if (++i % 5000 === 0 && progress) progress(`Procurando ${num} *.PIT no Programas_CNC… ${i} arquivos`); }
+  }
+  if (!ok.length) return null;
+  const sem = ok.filter(o => !/CICLO/i.test(o.name)); if (sem.length) ok = sem;
+  if (ok.length > 1){ const t = await Promise.all(ok.map(async o => { try { return (await o.fh.getFile()).lastModified; } catch(e){ return 0; } })); ok = ok.map((o, k) => [o, t[k]]).sort((a, b) => b[1] - a[1]).map(x => x[0]); }
+  return ok[0];
+}
 async function altRun(num, bi, bo){
   const msg = (t, err) => { $("genMsg").textContent = t; $("genMsg").style.color = err ? "#b2221f" : ""; };
   let dir = await progDir(false, true); if (!dir) dir = await progDir(false, false); if (!dir) return;
   let txt = "";
-  try { const buf = new Uint8Array(await (await (await dir.getFileHandle(num + ".PIT")).getFile()).arrayBuffer()); for (const b of buf) txt += String.fromCharCode(b); }
-  catch(e){ return msg(`Não achei ${num}.PIT no Programas_CNC.`, true); }
+  num = (String(num).match(/^\d{6}/) || [num])[0];   // digitou "046158 194X222": o número é só o 046158
+  const fd = await altFind(dir, num, t => msg(t));
+  if (!fd) return msg(await altNotFound(dir, num), true);
+  const fh = fd.fh, fname = fd.name;
+  try { const buf = new Uint8Array(await (await fh.getFile()).arrayBuffer()); for (const b of buf) txt += String.fromCharCode(b); }
+  catch(e){ return msg(`Achei ${fname} mas não consegui ler (${e.message}) — o arquivo pode estar aberto em outro programa.`, true); }
   const r = altRough(txt, bi, bo);
   if (r.err) return msg(`✏️ ${num}: ${r.err}. Nada foi salvo.`, true);
   const sfx = `${gen15(bi)}X${gen15(bo)}`, h = (txt.split(/\r?\n/)[0] || "").trim();
   load(r.text, `${num} ${sfx}`);
   state.alterNum = num;
   const hm = h.match(/^%\s*([^ ,]+)\s+([\d.\/]+)/), mt = txt.match(/;MATERIAL: USER DEFINED (.+?) [\d.]+\/[\d.]+/i);
-  state.alterRec = { "Perfil": hm ? hm[1] : "", "Nominais": hm ? hm[2] : "", "Material": mt ? mt[1].trim() : "", "Bucha I": bi.toFixed(3), "Bucha E": bo.toFixed(3), "Comentario": `alterado de ${num} (só desbaste)`, "Parametros": "" };
-  state.alterNote = `${num}: só o desbaste refeito para a bucha ${gen15(bi)}x${gen15(bo)} (antes: ${gen15(r.old[0])}x${gen15(r.old[1])})` + (r.notes.length ? " · " + r.notes.join(", ") : "") + ". Perfil e acabamento iguais ao original.";
+  state.alterRec = { "Perfil": hm ? hm[1] : "", "Nominais": hm ? hm[2] : "", "Material": mt ? mt[1].trim() : "", "Bucha I": bi.toFixed(3), "Bucha E": bo.toFixed(3), "Comentario": `alterado de ${fname.replace(/\.pit$/i, "")} (só desbaste)`, "Parametros": "" };
+  state.alterNote = `${fname.replace(/\.pit$/i, "")}: só o desbaste refeito para a bucha ${gen15(bi)}x${gen15(bo)} (antes: ${gen15(r.old[0])}x${gen15(r.old[1])})` + (r.notes.length ? " · " + r.notes.join(", ") : "") + ". Perfil e acabamento iguais ao original.";
   window.scrollTo({ top: 0, behavior: "smooth" });
   msg(`✏️ ${state.alterNote} Salvando…`);
   if (await saveProgram(true)){ state.alterNum = ""; state.alterRec = null; }
@@ -3139,7 +3280,20 @@ function dxfOf(p){
   out.push("0","ENDSEC","0","EOF");
   return out.join("\r\n");
 }
-$("btnDraw").onclick = () => { if (!state.genParams) return; $("dwgSheet").innerHTML = drawingSVG(state.genParams); $("dwgModal").classList.add("show"); };
+// v5.7.0 (usuário 10/11/2026): cada item tem um código interno diferente — pergunta o Cód. interno ANTES de mostrar o desenho
+// (botão do desenho e Salvar programa). Uma vez por peça: na mesma peça não pergunta de novo; peça nova começa em branco.
+// v5.7.1: force = pergunta sempre (antes da janela de impressão), já preenchido com o código desta peça (Enter confirma)
+function askCod(force){
+  const p = state.genParams, el = document.querySelector("#dwgFields [data-d=cod]");
+  if (!p || !el || !DESENHO_TYPES.includes(p.tipoGen)) return true;
+  const key = pieceFile(p), same = state.codKey === key;
+  if (!force && same && el.value.trim()) return true;
+  const v = prompt("Cód. interno do item (vai no desenho e no Anexo 1 do ARGUS):", same ? el.value.trim() : "");
+  if (v === null) return false;
+  el.value = v.trim(); state.codKey = key; try { saveForm(); } catch(e){}
+  return true;
+}
+$("btnDraw").onclick = () => { if (!state.genParams || !askCod()) return; $("dwgSheet").innerHTML = drawingSVG(state.genParams); $("dwgModal").classList.add("show"); };
 $("dwgFields").addEventListener("input", () => { if (state.genParams) $("dwgSheet").innerHTML = drawingSVG(state.genParams); });
 $("dwgClose").onclick = () => $("dwgModal").classList.remove("show");
 /* visualização de impressão */
@@ -3252,8 +3406,17 @@ $("dwgPrint").onclick = openPreview;
 function closePreview(){ $("pvModal").classList.remove("show"); document.body.classList.remove("pvopen"); }
 $("pvClose").onclick = closePreview;
 document.addEventListener("keydown", e => { if (e.key === "Escape" && $("pvModal").classList.contains("show")) closePreview(); });
+// Ctrl+P com a prévia aberta passa pelo mesmo botão (pergunta o Cód. interno antes)
+document.addEventListener("keydown", e => { if ((e.ctrlKey || e.metaKey) && (e.key === "p" || e.key === "P") && $("pvModal").classList.contains("show")) { e.preventDefault(); $("pvPrint").click(); } });
 $("pvPrint").onclick = async () => { if (!state.genParams) return;
-  const ld = state.lastDrawing;   // código interno digitado só na hora de imprimir: grava o pedido do Anexo 1 do desenho já salvo
+  // v5.7.1 (usuário 10/11/2026): Cód. interno ANTES da janela de impressão (não precisa fechar a prévia para editar)
+  const codEl = document.querySelector("#dwgFields [data-d=cod]"), codOld = codEl ? codEl.value.trim() : "";
+  if (!askCod(true)) return;
+  const pvCod = document.querySelector("#pvSide [data-dd=cod]"); if (pvCod && codEl) pvCod.value = codEl.value;
+  rerenderDrawing();
+  const ld = state.lastDrawing && pieceFile(state.lastDrawing.p) === pieceFile(state.genParams) ? state.lastDrawing : null;   // só o desenho salvo DESTA peça
+  // código mudou depois de salvar: regrava o PDF do desenho na pasta DESENHOS com o código novo
+  if (ld && codEl && codEl.value.trim() !== codOld) try { const nm = desenhoFolderName(ld.p, ld.num), sub = await (await ld.dd.getDirectoryHandle(desFam(ld.p))).getDirectoryHandle(nm); await writeFile(sub, nm + ".pdf", await drawingPdfBytes(state.genParams)); } catch(e){ $("genMsg").textContent = "PDF NÃO regravado com o código novo: " + e.message; }   // código interno digitado só na hora de imprimir: grava o pedido do Anexo 1 do desenho já salvo
   if (ld) try { const m = await pedidoArgus(ld.dd, ld.p, ld.num, ld.pdf); $("genMsg").textContent = "Impressão" + m + "."; } catch(e){ $("genMsg").textContent = "Pedido ARGUS NÃO gravado: " + e.message; }
   updatePrintCss(); window.print(); };
 $("dwgSvg").onclick = () => { const p = state.genParams; saveBytes(new TextEncoder().encode(drawingSVG(p)), `${pieceFile(p)}.svg`, "image/svg+xml", "svg"); };
@@ -3269,7 +3432,7 @@ sizeCanvas(); draw();
   for (const [k, v] of Object.entries(s.dwg || {})){ const el = document.querySelector(`#dwgFields [data-d="${k}"]`); if (el) el.value = v; }
   syncTolRows(); generate();
 })();
-document.addEventListener("input", e => { if (e.target.closest && e.target.closest("#dwgFields")) saveForm(); });
+document.addEventListener("input", e => { if (e.target.closest && e.target.closest("#dwgFields")) saveForm(); if (e.target.matches && e.target.matches("#dwgFields [data-d=cod], #pvSide [data-dd=cod]") && state.genParams) try { state.codKey = pieceFile(state.genParams); } catch(_){} });
 document.addEventListener("input", e => { const a = e.target.dataset && e.target.dataset.ak; if (a && alojMode(a) === "aloj"){ clearTimeout(window.__alojT); window.__alojT = setTimeout(() => alojApply(a), 250); } });
 document.addEventListener("change", e => { const d = e.target.dataset || {}; if (d.amode && d.ak2) alojSetMode(d.ak2, d.amode); });
 </script>

@@ -2202,7 +2202,9 @@ async function saveProgram(auto){
   if (/^\d{1,6}[A-Z]?$/i.test(base)) base = base.replace(/^(\d+)/, d => d.padStart(6, "0"));
   if (suf && !base.toUpperCase().includes(suf[1].toUpperCase())) base += " " + suf[1];
   // v5.8.0 (usuário 10/11): PSA 108 com várias peças por ciclo leva a quantidade no nome — "046140 CICLO 5 PÇ"
-  { const gp0 = state.genParams, nc = gp0 && !auto ? cicloPcs(gp0) : 0; if (nc > 1 && !/CICLO/i.test(base)) base += ` CICLO ${nc} PÇ`; }
+  // v5.21.10 (usuário 11/11): o "CICLO N PÇ" vai logo depois do número (045000 CICLO 5 PÇ 9X30), também no Programa Arruela/ciclo
+  { const gp0 = state.genParams, nc = gp0 && !auto ? (["ciclo", "semch"].includes(gp0.tipoGen) ? xround(gp0.n, 0) : cicloPcs(gp0)) : 0;
+    if (nc > 1 && !/CICLO/i.test(base)){ const m = /^(\d+)(.*)$/.exec(base); base = m ? `${m[1]} CICLO ${nc} PÇ${m[2]}` : `${base} CICLO ${nc} PÇ`; } }
   const pitName = base + ".PIT", mcsName = base.replace(/^0+(?=\d)/, "") + ".txt";
   const fagor = currentText(), pitBytes = toCp1252(fagor.replace(/\n/g, "\r\n") + "\r\n"), mcsBytes = toCp1252(fagorToMcs(fagor));
   if (!window.showDirectoryPicker && !SRV){   // navegador sem acesso a pastas: baixa os dois arquivos

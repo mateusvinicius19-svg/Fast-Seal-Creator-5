@@ -47,3 +47,4 @@ metadata:
 - Depois de usinada, a guia leva um CORTE em ângulo, feito no ACABAMENTO (fora do programa CNC): mais comuns 30°, 45° e 60°; serra de 1,8 mm.
 - O +0,9 nos Ø é só para POM e Celeron (perda da serra). Outros materiais também são cortados, mas sem perda.
 - Secção no desenho: +0 / −0,05.
+- Celeron: chanfro externo a 30° (medida em Z, 30° com o eixo), em vez de 45°.

@@ -6,6 +6,11 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.21.2 — 11/11/2026
+- PSG 101 (guia) em **Celeron**: chanfro externo a **30°** (como o interno: medida em Z, 30° com o eixo; no X entra
+  2 × Z × tg 30°). Programa (`;... CHANFRO EXT 0.970 X 30 ...`), perfil e cotas do desenho seguem o ângulo. Outros materiais e
+  os outros perfis continuam com 45° (programas e desenhos conferidos iguais aos de antes).
+
 ## 5.21.1 — 11/11/2026
 - PSG 101 (guia) — regras do corte (usuário):
   - o corte é feito **depois, no acabamento**, em ângulo: campo novo **"Ângulo do corte da guia (°)"** (30 · 45 · 60, padrão 45);

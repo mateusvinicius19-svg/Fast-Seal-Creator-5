@@ -6,6 +6,15 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.7.0 — 11/11/2026
+- **`Iniciar\Abrir Simulador.bat`** (fica na Área de Trabalho): baixa do GitHub a versão mais nova (a branch com o maior `VERSION`;
+  só baixa se mudou), guarda em `%LOCALAPPDATA%\FastSealCreator\app`, copia o `Simulador CNC.html` para
+  `W:\...\PADRONIZAÇÃO\Arruela Padronizada` (só se mudou) e abre o Simulador. Sem internet: abre a última versão baixada.
+- **`Iniciar\servidor.ps1`**: servidor local (só `localhost:8765`) que serve o Simulador e lê/grava nas pastas da rede
+  (`W:\Parts\PartsSeals` ou `\\172.16.99.40\dados\Parts\PartsSeals` se o W: não estiver mapeado). Nada fora dessas pastas.
+- Simulador aberto pelo servidor: as pastas Programas_CNC, MCS 500 e DESENHOS vêm do **caminho salvo no localStorage**
+  (padrão já é o W: certo) — não pede mais para escolher a pasta todo dia. O botão 📁 agora pede o caminho em texto.
+  Aberto direto pelo arquivo (file://), continua como antes.
 ## 5.6.4 — 11/11/2026
 - Simulador (✏️ Alterar programa): acha o programa também quando ele só existe com a bucha no nome
   (ex.: `046158 194X222.PIT`, sem `046158.PIT`). Procura na lista do Ver programa / Histórico e, se não estiver, lê a pasta.

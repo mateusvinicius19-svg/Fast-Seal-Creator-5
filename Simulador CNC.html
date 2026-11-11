@@ -1864,7 +1864,45 @@ function kvDb(){ return new Promise((res, rej) => { const r = indexedDB.open("si
 async function kvGet(k){ try { const db = await kvDb(); return await new Promise(res => { const q = db.transaction("kv").objectStore("kv").get(k); q.onsuccess = () => res(q.result); q.onerror = () => res(null); }); } catch(e){ return null; } }
 async function kvSet(k, v){ try { const db = await kvDb(); await new Promise(res => { const tx = db.transaction("kv", "readwrite"); tx.objectStore("kv").put(v, k); tx.oncomplete = res; tx.onerror = res; }); } catch(e){} }
 // pasta lembrada: silent = só devolve se já tiver permissão (sem abrir janela). Abrir janela/permissão precisa ser logo após um clique.
+// ---- v5.7.0 (usuário 11/11/2026): aberto pelo "Abrir Simulador.bat" (http://localhost:8765, servidor.ps1) as pastas vêm do servidor
+// pelo CAMINHO guardado no localStorage (padrão = W:\...) — não pede mais a pasta todo dia. Os objetos imitam os "handles" do navegador
+// (getFileHandle / getDirectoryHandle / entries / getFile / createWritable), então o resto do código não muda.
+const SRV = /^https?:$/.test(location.protocol) && /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+const SRV_DEF = { dirProgramasCNC: "W:\\Parts\\PartsSeals\\PROJETOS\\Programas_CNC", dirMCS500: "W:\\Parts\\PartsSeals\\PROJETOS\\Programas_CNC\\MCS 500", dirDesenhos: "W:\\Parts\\PartsSeals\\PROJETOS\\DESENHOS" };
+function srvErr(name, m){ const e = new Error(m); e.name = name; return e; }
+async function srvApi(op, p, body){
+  const r = await fetch(`/api/${op}?p=${encodeURIComponent(p)}`, body !== undefined ? { method: "POST", body } : { cache: "no-store" });
+  if (r.status === 404) throw srvErr("NotFoundError", `${p} não existe`);
+  if (!r.ok) throw srvErr("Error", (await r.text()) || ("erro " + r.status));
+  return r;
+}
+const srvKind = async p => (await (await srvApi("stat", p)).json()).kind;
+function srvFile(path, name){ return { kind: "file", name, _p: path,
+  queryPermission: async () => "granted", requestPermission: async () => "granted",
+  async getFile(){ const r = await srvApi("read", path), buf = await r.arrayBuffer(), lm = +r.headers.get("X-Mtime") || Date.now();
+    return { name, size: buf.byteLength, lastModified: lm, arrayBuffer: async () => buf, text: async () => new TextDecoder().decode(buf) }; },
+  async createWritable(){ const parts = []; return { write: async d => { parts.push(d && d.data !== undefined ? d.data : d); }, close: async () => { await srvApi("write", path, new Blob(parts)); }, abort: async () => {} }; } }; }
+function srvDir(path){
+  path = path.replace(/[\\\/]+$/, ""); const j = n => path + "\\" + n;
+  return { kind: "directory", name: path.split(/[\\\/]/).pop(), _p: path,
+    queryPermission: async () => "granted", requestPermission: async () => "granted",
+    async getFileHandle(n, o = {}){ const k = await srvKind(j(n)); if (k === "directory") throw srvErr("TypeMismatchError", n + " é pasta"); if (!k && !o.create) throw srvErr("NotFoundError", n + " não existe"); return srvFile(j(n), n); },
+    async getDirectoryHandle(n, o = {}){ const k = await srvKind(j(n)); if (k === "file") throw srvErr("TypeMismatchError", n + " é arquivo"); if (!k){ if (!o.create) throw srvErr("NotFoundError", n + " não existe"); await srvApi("mkdir", j(n), ""); } return srvDir(j(n)); },
+    async *entries(){ const L = await (await srvApi("list", path)).json(); for (const n of L.dirs) yield [n, srvDir(j(n))]; for (const n of L.files) yield [n, srvFile(j(n), n)]; },
+    async *values(){ for await (const [, h] of this.entries()) yield h; },
+    async *keys(){ for await (const [n] of this.entries()) yield n; } };
+}
+async function srvPickDir(key, forceNew, silent, label){
+  const lk = "ps_path_" + key; let p = ""; try { p = localStorage.getItem(lk) || ""; } catch(e){}
+  if (forceNew){ const v = prompt(`Caminho da pasta ${label} (fica salvo neste computador):`, p || SRV_DEF[key] || ""); if (v === null) return null; p = v.trim().replace(/^"|"$/g, ""); }
+  p = p || SRV_DEF[key] || ""; if (!p) return null;
+  let k = null; try { k = await srvKind(p); } catch(e){ if (!silent){ $("genMsg").textContent = `Pasta ${label}: ${e.message}`; $("genMsg").style.color = "#b2221f"; } return null; }
+  if (k !== "directory"){ if (!silent){ $("genMsg").textContent = `Pasta ${label} não encontrada: ${p} — clique em 📁 ${label} e corrija o caminho.`; $("genMsg").style.color = "#b2221f"; } return null; }
+  try { localStorage.setItem(lk, p); } catch(e){}
+  return srvDir(p);
+}
 async function pickDir(key, id, forceNew, silent, label){
+  if (SRV) return srvPickDir(key, forceNew, silent, label);
   if (!window.showDirectoryPicker) return null;
   let h = forceNew ? null : await kvGet(key);
   if (h){ try { let q = await h.queryPermission({ mode: "readwrite" }); if (q !== "granted" && !silent) q = await h.requestPermission({ mode: "readwrite" }); if (q === "granted") return h; } catch(e){} }
@@ -2037,7 +2075,7 @@ async function saveProgram(auto){
   if (auto){
     dir = await progDir(false, true); dd = await desDir(false, true);
     if (!dir){ $("genMsg").textContent += " · NÃO salvo: sem acesso à pasta Programas_CNC — clique em 💾 Salvar."; $("genMsg").style.color = "#b2221f"; return; }
-  } else if (window.showDirectoryPicker){
+  } else if (window.showDirectoryPicker || SRV){
     dir = await progDir(false, true);
     if (!dir){ dir = await progDir(false, false); if (!dir) return; dd = await desDir(false, true); }
     else { dd = await desDir(false, true); if (!dd && state.genParams && DESENHO_TYPES.includes(state.genParams.tipoGen)) dd = await desDir(false, false); }
@@ -2055,7 +2093,7 @@ async function saveProgram(auto){
   if (suf && !base.toUpperCase().includes(suf[1].toUpperCase())) base += " " + suf[1];
   const pitName = base + ".PIT", mcsName = base.replace(/^0+(?=\d)/, "") + ".txt";
   const fagor = currentText(), pitBytes = toCp1252(fagor.replace(/\n/g, "\r\n") + "\r\n"), mcsBytes = toCp1252(fagorToMcs(fagor));
-  if (!window.showDirectoryPicker){   // navegador sem acesso a pastas: baixa os dois arquivos
+  if (!window.showDirectoryPicker && !SRV){   // navegador sem acesso a pastas: baixa os dois arquivos
     await saveBytes(pitBytes, pitName, "text/plain", "pit"); await saveBytes(mcsBytes, mcsName, "text/plain", "txt");
     $("genMsg").textContent = `Baixados: ${pitName} e ${mcsName} — copie para Programas_CNC e MCS 500.`; return;
   }

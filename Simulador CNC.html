@@ -1331,7 +1331,7 @@ function fieldHTML([k, label, def], wide){
 function resetTolDefaults(){
   state.tolVals = null;
   document.querySelectorAll("#genBox [data-k]").forEach(el => { if (TOL_KEYS.includes(el.dataset.k)) el.value = el.tagName === "SELECT" ? (el.querySelector('option[value=""]') ? "" : el.options[0].value) : ""; });
-  try { syncTolRows(); state.genParams = readParams(); saveForm(); } catch(e){}
+  try { syncTolRows(); } catch(e){}
 }
 function buildForm(){
   state.alterNum = "";   // trocou de perfil: sai do modo "Alterar programa"
@@ -1404,7 +1404,8 @@ function saveForm(){
     localStorage.setItem("ps_form", JSON.stringify({ type: $("genType").value, vals, dwg }));
   } catch(e){}
 }
-function generate(){
+function generate(fromInput){
+  if (state.tolResetPending && fromInput){ state.tolResetPending = false; resetTolDefaults(); }   // mexeu na peça depois de salvar = item novo
   const type = $("genType").value, g = GEN[type], p = readParams();
   p.tipoGen = type; if (type === "lip") p.dext = p.dint + 2 * p.sec; if (type === "pso"){ p.dext = p.dint + 2 * p.sec; p.h = p.sec; }
   for (const [k] of g.main.concat(g.params)) if (!TEXT_KEYS.has(k) && !OPT_KEYS.has(k) && (p[k] === "" || isNaN(p[k]))) { $("genMsg").textContent = "Preencha: " + k; return; }
@@ -1874,7 +1875,7 @@ document.addEventListener("keydown", e => {
   el.dispatchEvent(new Event("change", { bubbles: true }));
   const nx = list[i + 1]; if (nx){ nx.focus(); if (nx.select && nx.tagName === "INPUT") nx.select(); }
 });
-$("genBox").addEventListener("input", e => { if (e.target.matches("[data-k]")) { clearTimeout(genTimer); genTimer = setTimeout(generate, 250); } });
+$("genBox").addEventListener("input", e => { if (e.target.matches("[data-k]")) { const tol = TOL_KEYS.includes(e.target.dataset.k); clearTimeout(genTimer); genTimer = setTimeout(() => generate(!tol), 250); } });
 
 /* ----------------------- copiar / salvar ------------------------ */
 function currentText(){ const ta = $("code").querySelector("textarea"); return (ta ? ta.value : state.src).replace(/\r\n?/g, "\n"); }
@@ -2181,7 +2182,7 @@ async function saveProgram(auto){
       try { pdfMsg = await saveDrawingPdf(gp, base.match(/^\d+/) ? base.match(/^\d+/)[0] : base, dd, !!suf); } catch(e){ pdfMsg = " · PDF não salvo: " + e.message; }
     }
     try { const rec = histRecord(auto ? {} : (gp || {}), auto ? "" : (state.genType || ""), fagor, pitName, mcsName, pdfMsg); if (auto && state.alterRec) Object.assign(rec, state.alterRec); await histAppend(dir, rec); histLoadInline(false); } catch(e){ pdfMsg += " · histórico não gravado: " + e.message; }
-    $("genMsg").textContent = `Salvo: ${pitName} (Programas_CNC) e ${mcsName} (MCS 500, convertido)${pdfMsg}.`; resetTolDefaults(); $("genMsg").style.color = /NÃO salvo/.test(pdfMsg) ? "#b2221f" : "";
+    $("genMsg").textContent = `Salvo: ${pitName} (Programas_CNC) e ${mcsName} (MCS 500, convertido)${pdfMsg}.`; state.tolResetPending = true;   // v5.20.1: tolerâncias voltam ao padrão quando começar a peça seguinte (a impressão desta continua com as dela) $("genMsg").style.color = /NÃO salvo/.test(pdfMsg) ? "#b2221f" : "";
     if (auto) $("genMsg").textContent = `✏️ ${state.alterNote || ""} Salvo: ${pitName} (Programas_CNC) e ${mcsName} (MCS 500)${pdfMsg}. O ${state.alterNum} original não mudou.`;
     if (!auto && gp && DESENHO_TYPES.includes(gp.tipoGen) && !/NÃO salvo|não salvo/.test(pdfMsg)) setTimeout(() => { openPreview(); setTimeout(() => { updatePrintCss(); window.print(); }, 400); }, 100);   // imprime o desenho salvo
     return true;
@@ -3538,13 +3539,13 @@ function buildPvSide(){
 }
 $("pvSide").addEventListener("input", e => {
   const el = e.target;
-  if (el.dataset.src){ const src = document.querySelector(`#genBox [data-k="${el.dataset.src}"]`); if (src) src.value = el.value; syncTolRows(); state.genParams = readParams(); }
+  if (el.dataset.src){ const src = document.querySelector(`#genBox [data-k="${el.dataset.src}"]`); if (src) src.value = el.value; syncTolRows(); generate(); }
   else if (el.dataset.dd){ const src = document.querySelector(`#dwgFields input[data-d="${el.dataset.dd}"]`); if (src) src.value = el.value; }
   else if (el.dataset.tr){ const [i, j] = el.dataset.tr.split(",").map(Number); state.tolTable = (state.tolTable || DEFAULT_TOL).map(r => r.slice()); state.tolTable[i][j] = el.value; }
   rerenderDrawing();
 });
 // tolerâncias digitadas no formulário atualizam o desenho aberto sem refazer a simulação
-$("genBox").addEventListener("input", e => { if (e.target.matches("[data-k]") && TOL_KEYS.includes(e.target.dataset.k)) { syncTolRows(); state.genParams = readParams(); rerenderDrawing(); } });$("dwgPrint").onclick = openPreview;
+$("genBox").addEventListener("input", e => { if (e.target.matches("[data-k]") && TOL_KEYS.includes(e.target.dataset.k)) { syncTolRows(); generate(); rerenderDrawing(); } });$("dwgPrint").onclick = openPreview;
 /* impressão: com a visualização aberta, o botão ou o Ctrl+P imprimem só a folha */
 function updatePrintCss(){
   const P = state.orient === "portrait";

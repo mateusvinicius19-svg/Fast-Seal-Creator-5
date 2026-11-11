@@ -6,6 +6,11 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.20.1 — 11/11/2026
+- Corrige: **desenho parou de abrir para imprimir** depois de salvar (5.20.0) — a volta das tolerâncias ao padrão trocava os dados
+  da peça do desenho por uma versão sem o tipo do perfil. Agora as tolerâncias voltam ao padrão quando o usuário começa a peça
+  seguinte (mexe numa medida depois de salvar); a impressão da peça salva continua com as tolerâncias dela.
+- Mexer numa tolerância com a prévia aberta regera na hora (antes o desenho ficava 250 ms sem o tipo da peça).
 ## 5.20.0 — 11/11/2026
 - **Teflon (PTFE puro e PTFE+BR) em todos os perfis**: ao escolher o material, a bucha sugerida já vem com **2 mm de sobremetal**
   no interno e no externo, a partir dos Ø extremos da peça (lábios com aperto): Ø int − 2 × Ø ext + 2. Ex.: PSE 106 100x120 PTFE

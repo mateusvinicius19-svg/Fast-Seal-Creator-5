@@ -6,6 +6,10 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.21.4 — 11/11/2026
+- Novo botão **👁 Ver desenho** (ao lado de "Salvar Fagor + MCS 500"): abre a visualização do desenho da peça atual **antes de
+  salvar**, sem pedir o Cód. interno e sem gravar nada. Aparece nos perfis que têm desenho (como o botão 📐 Desenho).
+
 ## 5.21.3 — 11/11/2026
 - Arruelas e guias em **Celeron** (PSG 101, PSA 108 e Programa Arruela/ciclo): o desbaste externo e interno vai **1 mm mais
   fundo em Z**, porque o corte é com a T6D16 (bedame 2 mm). Ex.: PSG 101 50x55x9,7, 1 peça: Z−11,25 → Z−12,25. O comentário do

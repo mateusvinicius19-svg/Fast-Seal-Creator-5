@@ -1443,7 +1443,7 @@ function generate(fromInput){
   if (!g.check(p)) try { $("genMsg").textContent += costTxt(pieceCost(lines.join("\n"), ["ciclo", "semch"].includes(type) ? xround(p.n, 0) : isPSA(type) ? cicloPcs(p) : 1)); } catch(e){}
   // 🧰 T8D8 → T6D16 quando a secção passa de 14,8 (feito acima, antes de montar o programa)
   if (type === "psg101") $("genMsg").textContent += (psgAcr(p) > 0 ? ` · ${(ARR_MAT[p.matA] || [p.matA])[0].split(" ")[0]}: usinado ${fmtN(psgAcr(p), 2)} mm maior nos diâmetros (Ø${fmtN(p.dint + psgAcr(p), 3)} / Ø${fmtN(p.dext + psgAcr(p), 3)}) por causa da serra de ${fmtN(PSG_SERRA, 1)}; desenho com a medida nominal` : "") + ` · corte da guia a ${fmtN(psgAng(p), 0)}° no acabamento${psgAcr(p) > 0 ? "" : " (sem perda)"}.`;
-  if (d16 && celD16 && secCorte <= 14.8 + 1e-9){ $("genMsg").textContent += ` · Celeron: corte com a T6D16 — bedame 2 nas peças, G92 +1 mm e acabamento até o fim do desbaste.`; }
+  if (d16 && celD16 && secCorte <= 14.8 + 1e-9){ $("genMsg").textContent += ` · Celeron: corte com a T6D16 — bedame 2 nas peças, G92 +1 mm, desbaste e acabamento terminam no mesmo Z (sem passar para a peça seguinte).`; }
   else if (d16){ $("genMsg").textContent += ` · Secção ${fmtN(secCorte, 2)} > 14,8: corte com a T6D16 (bedame 2 mm) no lugar da T8D8 — G92 +1 mm${p.bedD16 ? ", bedame 2 nas peças" : ""}.`; }
 }
 // bucha digitada à mão só vira exceção ("NNNNNN BIxBO") quando é diferente da que o Simulador escolheria sozinho
@@ -1737,11 +1737,16 @@ GEN.psa108 = {
   build(p){
     psaFill(p); const fx3 = v => fx(v, 3);
     const prol = (p.bed - p.sobrep) / 2, cE = p.chE, cI = p.chI;
+    // v5.21.14 (usuário 11/11): com bedame 2 (Celeron / secção > 14,8) desbaste e acabamento terminam no MESMO Z, dentro da faixa
+    // do corte (antes do início da peça seguinte). O acabamento fica como sempre (paralelo p.par no fundo do chanfro) e o desbaste
+    // para ali também: −(N × B6 + par − prol). Nada passa para a peça seguinte (avanço do ciclo = N × B6 − 2 × prol + G92).
+    const bed2f = p.matA === "CELERON" || !!p.bedD16;
     const N = Math.max(1, Math.min(10, xround(p.n, 0), psaMaxN(p)));
     const aE = p.angE > 0 && p.angE < 90 ? p.angE : 45;                           // v5.21.2: PSG 101 em Celeron = 30° (com o eixo, cE em Z)
     const E3 = rounddown3(2 * (cE + prol) * TAN(aE)), E4 = cE + prol;             // externo: em X (diâm.) = 2 × Z × tg(ângulo); 45° = 2 × Z
     const I3 = rounddown3(2 * (cI + prol) * TAN(30)), I4 = cI + prol;             // interno 30° com o eixo
     const B6 = p.h + 2 * prol;
+    const zRough = -(N * B6 + p.par - (bed2f ? prol : 0));
     const B7 = Math.max(p.dext, buchaOf(p).bo) + p.recE, B8 = Math.min(p.dint, buchaOf(p).bi) - p.xAb, B9 = B7 - B8, B10 = p.dext - E3;
     const S = (p.S === "" || isNaN(p.S)) ? rpmLookup(Math.max(p.dext, buchaOf(p).bo), RPM_TABLE) : p.S;
     const c = g3, name = p.nome ? p.nome : `%PSA108 ${fx3(p.dint)}/${fx3(p.dext)}/${fx3(p.h)},MX,`;
@@ -1751,14 +1756,10 @@ GEN.psa108 = {
       ";T8D8 (BEDAME)   CUTA 90 - NOSEA 90 - NOSEW 1   - R0   - F21",
       ";BUCHA " + buchaOf(p).txt, `;${N} PECA(S) POR CICLO - CHANFRO EXT ${fx3(cE)} X ${fx(aE, 0)} - INT ${fx3(cI)} X 30`, "G90", "G95", "G54", "G97 S" + c(S) + " M3", "N10", "G0 Z" + c(p.z0),
       "T7D7; (EXTERNO) PECA 1", "G0 X" + c(p.dext) + " Z" + c(p.zAp) + "; (DIAMETRO EXTERNO) PECA 1", "G91",
-      "X" + c(B7 - p.dext), "Z" + c(-p.zAp), "G1 X" + c(-B9) + " F" + gF(p.fExt), "G0 Z" + c(p.zAp), ...arrRough(p, "od", -(N * B6 + p.par), B8, p.fExt), "X" + c(B10 - B8), "G1 Z" + c(-(p.zAp - prol))];
+      "X" + c(B7 - p.dext), "Z" + c(-p.zAp), "G1 X" + c(-B9) + " F" + gF(p.fExt), "G0 Z" + c(p.zAp), ...arrRough(p, "od", zRough, B8, p.fExt), "X" + c(B10 - B8), "G1 Z" + c(-(p.zAp - prol))];
     for (let i = 1; i <= N; i++) L.push(";(INICIO PERFIL PEÇA " + i + ")", "G42 X" + c(E3) + " Z" + c(-E4), "Z" + c(-(p.h - 2 * cE)) + " ;(VALOR PARA ALTERAR NA ALTURA)", "X" + c(-E3) + " Z" + c(-E4), "; (FIM DO PERFIL PEÇA " + i + ")");
-    // v5.21.11/5.21.13: Celeron — acabamento desce até o mesmo Z do desbaste, mas o trecho a mais é feito NO DIÂMETRO DA PEÇA
-    // (sai do fundo do chanfro para o Ø externo/interno antes de descer): no fundo do chanfro ele entrava na peça seguinte
-    const cel = p.matA === "CELERON" || !!p.bedD16, parF = p.par + prol;   // v5.21.13: também secção > 14,8 (bedame 2)
-    const endE = cel ? ["G1 X" + c(E3), "Z" + c(-parF) + " ;(ATE O FIM DO DESBASTE, NO DIAMETRO DA PECA)", "X" + c(p.recE - E3)] : ["G1 Z" + c(-p.par), "X" + c(p.recE)];
-    const endI = cel ? ["G1 X" + c(-I3), "Z" + c(-parF) + " ;(ATE O FIM DO DESBASTE, NO DIAMETRO DA PECA)", "X" + c(-p.recI + I3)] : ["G1 Z" + c(-p.par), "X" + c(-p.recI)];
-    L.push(...endE, "G90", "G0 G40 Z" + c(p.zAp), "Z" + c(p.zExt), "T4D4", "G0 X" + c(p.dint) + " Z" + c(p.zAp), ...arrRough(p, "id", -(N * B6 + p.par), p.dint, p.fInt).slice(0, -1), "G91", "X" + c(I3), "G1 Z" + c(-(p.zAp - prol)) + " F" + gF(p.fInt));
+    const endE = ["G1 Z" + c(-p.par), "X" + c(p.recE)], endI = ["G1 Z" + c(-p.par), "X" + c(-p.recI)];   // acabamento: como sempre (5.21.14 desfez o trecho a mais)
+    L.push(...endE, "G90", "G0 G40 Z" + c(p.zAp), "Z" + c(p.zExt), "T4D4", "G0 X" + c(p.dint) + " Z" + c(p.zAp), ...arrRough(p, "id", zRough, p.dint, p.fInt).slice(0, -1), "G91", "X" + c(I3), "G1 Z" + c(-(p.zAp - prol)) + " F" + gF(p.fInt));
     for (let i = 1; i <= N; i++) L.push("; (INICIO DO PERFIL PEÇA " + i + ")", "G41 X" + c(-I3) + " Z" + c(-I4), "Z" + c(-(p.h - 2 * cI)) + " ;(VALOR PARA ALTERAR NA ALTURA)", "X" + c(I3) + " Z" + c(-I4), "; (FIM DO PERFIL PEÇA " + i + ")");
     L.push(...endI, "G90", "G0 G40 Z" + c(p.zAp), "Z" + c(p.zInt), "T8D8", "G0 X" + c(p.dext) + " Z" + c(p.zAp), "G91", "X" + c(p.recE));
     for (let i = 1; i <= N; i++) L.push("; (CORTE PEÇA " + i + ")", "Z" + c(i === 1 ? -(p.zAp + p.h) : -B6) + " ;(VALOR PARA ALTERAR NA ALTURA)", "G1 X" + g3(-(p.dext + p.recE - (p.dint - p.xAb))) + " F" + gF(p.fCor), "G0 X" + g3(p.dext + p.recE - (p.dint - p.xAb)));

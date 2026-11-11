@@ -6,6 +6,11 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.21.10 — 11/11/2026
+- Nome do programa salvo (Programas_CNC e MCS 500) com várias peças por ciclo: o **CICLO N PÇ** vai logo depois do número —
+  `045000 CICLO 5 PÇ.PIT` / `45000 CICLO 5 PÇ.txt`; com bucha especial `045001 CICLO 5 PÇ 9X30.PIT` (antes `045001 9X30 CICLO 5 PÇ`).
+  Vale agora também para o **Programa Arruela/ciclo** (antes só PSA 108 / PSG 101). Desenho e pedido ARGUS continuam só com o número.
+
 ## 5.21.9 — 11/11/2026
 - Corrige: **desenho saindo sem MATERIAL**. O carimbo só preenchia sozinho nos PSE/PSH/PSR; nas arruelas (PSA 108, ciclo),
   guias (PSG 101) e DH PSH 129 ficava vazio quando o campo Material do cabeçalho não era digitado. Agora vale, nesta ordem:

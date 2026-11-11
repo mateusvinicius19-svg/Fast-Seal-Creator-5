@@ -6,6 +6,12 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.15.0 — 11/11/2026
+- Simulador: **🧰 Biblioteca de ferramentas** (botão ao lado do Histórico). 21 ferramentas que já usamos, pelo corretor (T = posição,
+  D = corretor): T3D3, T2D2, T7D7, T7D17, T4D4, T4D14, T1D45, T2D12, T1D51, T1D11, T5D5, T8D8, T6D6, T2D54, T2D64, T6D16 e os
+  perfis do anel T4D42/52/62/72/82 (T2Dx2 em NBR/Viton). Cada uma com uso, materiais, Ø mínimo e as regras dos programas; busca e
+  filtro por tipo. Na legenda do simulador, clicar na ferramenta abre a ficha dela.
+- Fotos: espaço reservado ("foto pendente"); as fotos vão embutidas em `FERR_FOTO` quando o usuário mandar.
 ## 5.14.2 — 11/11/2026
 - Desenho custom **PSE 124 E (15.9 X 25.5 X 3.25)** (`Desenhos custom/`): secção em U com fundo R1,85, lábios Ø16 / Ø25,
   canal 2,3 (Ø23, fundo 2,1, abertura (2,5) até Ø(18)), conforme o DESENHO COTADO.png do Inventor; corte A-A + secção ampliada.

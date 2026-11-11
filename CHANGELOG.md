@@ -6,6 +6,10 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.16.4 — 11/11/2026
+- Biblioteca (usuário): **T1D45 = igual à T4D4** (pastilha DCGT 070204, rômbica 55°, R0,4, máx. 30° nas costas).
+  A foto do suporte H200 com VCGT 110304 é da **T1D1** (nova na biblioteca; os geradores ainda não usam).
+- **T5D5** = lâmina de corte tipo faca **H1111**.
 ## 5.16.3 — 11/11/2026
 - Biblioteca: **T4D14** (interno pequeno, Ø int < 11) com as duas opções de barra das fotos: R0,3 · 4,9 e R0,2 · 3,5.
 ## 5.16.2 — 11/11/2026

@@ -6,6 +6,13 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.20.0 — 11/11/2026
+- **Teflon (PTFE puro e PTFE+BR) em todos os perfis**: ao escolher o material, a bucha sugerida já vem com **2 mm de sobremetal**
+  no interno e no externo, a partir dos Ø extremos da peça (lábios com aperto): Ø int − 2 × Ø ext + 2. Ex.: PSE 106 100x120 PTFE
+  → 96,5 x 123,5 (PU continua pela tabela). Vale para PSE/PSH 105/106/107/117, PSR 102, PSR 211, DH e PSO (arruelas já eram assim).
+  Bucha digitada igual à sugerida não vira exceção (sem sufixo).
+- **Tolerâncias do desenho voltam ao padrão em todo item novo**: ao trocar de perfil, depois de salvar um programa e ao abrir o
+  Simulador (não são mais lembradas de um item para o outro).
 ## 5.19.1 — 11/11/2026
 - Desenho: fotos das ferramentas no carimbo **cerca de 2× maiores** (usuário: "muito pequeno") — com ferramentas, o nome e a
   linha de medidas sobem no quadro DESCRIÇÃO e as fotos ocupam o resto da altura.

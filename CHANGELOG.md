@@ -7,7 +7,8 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
 ## 5.16.1 — 11/11/2026
-- Biblioteca: **T2D2** = pastilha rômbica 35° (tipo V) com raio de ponta 0,4, suporte H100 (foto do usuário); desenho da pastilha no lugar da foto.
+- Biblioteca: **T2D2 e T2D12 = o mesmo suporte H100** na posição T2 — lado de DENTRO = D2 (externo), lado de CIMA = D12 (interno);
+  pastilha rômbica 35° (tipo V) com raio de ponta 0,4 (foto do usuário). Busca da biblioteca agora também procura nas observações (ex.: "H100").
 ## 5.16.0 — 11/11/2026
 - Desenho: o carimbo (quadro DESCRIÇÃO) mostra as **FERRAMENTAS** que o programa da peça usa, na ordem em que entram,
   com o nome da 🧰 biblioteca (ex.: "T3D3 Faceamento · T4D72 Perfil do anel O-ring 5,33 · T2D12 Interno grande · T2D2 Externo PU ·

@@ -6,6 +6,10 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.19.0 — 11/11/2026
+- Desenho: no carimbo (quadro DESCRIÇÃO) as ferramentas do programa saem com a **FOTO** da 🧰 biblioteca, o código e o nome,
+  na ordem em que entram (ex. PSH 107 NBR: T3D3 · T2D72 · T4D4 · T7D7 · T5D5). Sem foto: quadro vazio com o código.
+  Fotos coladas pelo usuário (📷, salvas no W:) também entram. As imagens vão no desenho como PNG (o PDF aceita).
 ## 5.18.8 — 11/11/2026
 - Biblioteca: **T6D6** com a foto real da lâmina **H1000** de 2 mm (do usuário; antes a ficha dizia H1001).
 ## 5.18.7 — 11/11/2026

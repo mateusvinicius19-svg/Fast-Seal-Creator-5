@@ -2521,6 +2521,15 @@ async function ferrFotoSave(code, blob){
   try { localStorage.setItem("ps_ferrFoto_" + code, url); } catch(e){ throw new Error("foto grande demais para guardar neste PC (abra pelo Abrir Simulador para salvar no W:)"); }
   FERR_URL[code] = url; return "PC";
 }
+// v5.19.0: cópia em PNG de cada imagem da biblioteca para o desenho (o PDF só aceita imagem PNG/JPG)
+const FERR_PNG = {};
+function ferrRaster(code, src){ return new Promise(ok => { const im = new Image(); im.onload = () => { try {
+    const W = 240, H = 180, c = document.createElement("canvas"); c.width = W; c.height = H; const x = c.getContext("2d"); x.fillStyle = "#fff"; x.fillRect(0, 0, W, H);
+    if (/^data:image\/svg/.test(src) || !im.naturalWidth) x.drawImage(im, 0, 0, W, H);
+    else { const k = Math.min(W / im.naturalWidth, H / im.naturalHeight); x.drawImage(im, (W - im.naturalWidth * k) / 2, (H - im.naturalHeight * k) / 2, im.naturalWidth * k, im.naturalHeight * k); }
+    FERR_PNG[code] = c.toDataURL("image/png"); } catch(e){} ok(); }; im.onerror = () => ok(); im.src = src; }); }
+async function ferrPrep(){ for (const f of FERR){ let src = null; try { src = await ferrFotoGet(f.c); } catch(e){} src = src || FERR_FOTO[f.c]; if (src){ await ferrRaster(f.c, src); if (f.alt) FERR_PNG[f.alt] = FERR_PNG[f.c]; } } try { rerenderDrawing(); } catch(e){} }
+setTimeout(() => { ferrPrep().catch(() => {}); }, 1200);
 function ferrCard(f){
   const tD = f.c.match(/^T(\d+)D(\d+)$/), foto = FERR_FOTO[f.c];
   return `<div class="ferrc" data-q="${esc((f.c + " " + (f.alt || "") + " " + f.nome + " " + f.uso + " " + f.mat + " " + (f.obs || "") + " " + (f.pastilha || "") + " " + FERR_TIPOS[f.tipo]).toLowerCase())}" data-t="${f.tipo}" style="border:1px solid #d5d9de;border-radius:10px;background:#fff;display:flex;gap:12px;padding:10px">
@@ -2552,7 +2561,7 @@ function openFerr(sel){
   const msg = t => { const e = $("ferrMsg"); if (e) e.textContent = t; };
   const mark = c => { fsel = c; m.querySelectorAll(".ferrFoto").forEach(el => el.style.borderColor = el.dataset.c === c ? "#b2221f" : "transparent"); msg(`${c}: cole a foto agora (Ctrl+V) ou clique em 📷 Foto para escolher o arquivo.`); };
   const save = async (c, blob) => { msg(`Salvando a foto da ${c}…`);
-    try { const onde = await ferrFotoSave(c, blob); setImg(c, FERR_URL[c]);
+    try { const onde = await ferrFotoSave(c, blob); setImg(c, FERR_URL[c]); ferrRaster(c, FERR_URL[c]).then(() => { const ff = ferrInfo(c); if (ff && ff.alt) FERR_PNG[ff.alt] = FERR_PNG[c]; });
       msg(onde === "W" ? `✔ Foto da ${c} salva em PROJETOS\\${FERR_DIR} — aparece em todos os computadores.` : `✔ Foto da ${c} guardada só neste computador (sem acesso à pasta PROJETOS — abra pelo Abrir Simulador para salvar no W:).`); }
     catch(e){ msg("Não salvei a foto: " + e.message); } };
   m.querySelectorAll(".ferrFoto").forEach(el => el.onclick = () => mark(el.dataset.c));
@@ -3386,12 +3395,17 @@ function drawingSVG(p){  const PT = state.orient === "portrait";
   const r1 = yT + 34, r2 = yBot - 40, cx1 = c2 + (PT ? 140 : 230), e1 = R - (PT ? 270 : 330), e2 = R - (PT ? 180 : 225), e3 = R - (PT ? 90 : 120);
   t += `<line x1="${c2}" y1="${r1}" x2="${R}" y2="${r1}" class="tb"/><line x1="${c2}" y1="${r2}" x2="${R}" y2="${r2}" class="tb"/><line x1="${cx1}" y1="${yT}" x2="${cx1}" y2="${r1}" class="tb"/>`;
   t += lbl(c2 + 5, yT + 12, "PROGRAMA Nº.:") + val(c2 + 10, yT + 28, info.prog, "tv big") + lbl(cx1 + 5, yT + 12, "DIMENSÃO:") + val(cx1 + 10, yT + 28, dimTxt + (PT ? "" : `   (secção ${f2(sec)})`), "tv big");
-  // v5.16.0 (usuário 11/11/2026): ferramentas que o programa usa, na ordem em que entram, com o nome da 🧰 biblioteca
+  // v5.19.0 (usuário 11/11/2026): ferramentas do programa (na ordem em que entram) com a FOTO da 🧰 biblioteca, código e nome
   { const tl = drawingTools(p); if (tl.length){
-      const items = tl.map(c => { let f = null; try { f = ferrInfo(c); } catch(e){} return c + (f ? " " + f.nome : ""); }), maxC = PT ? 62 : 92, lines = [];
-      let cur = "FERRAMENTAS: "; items.forEach((it, k) => { const piece = (k ? " · " : "") + it; if ((cur + piece).length > maxC && cur.trim() !== "FERRAMENTAS:"){ lines.push(cur); cur = "   " + it; } else cur += piece; }); lines.push(cur);
-      const y0 = r1 + (alojTxt2 ? 108 : 94);
-      lines.slice(0, 3).forEach((ln, k) => t += `<text x="${c2 + 14}" y="${y0 + k * 12}" class="tv sm" style="font-size:9.5px;font-weight:${k ? 400 : 700}">${esc(ln)}</text>`); } }
+      const y0 = r1 + (alojTxt2 ? 100 : 86), avail = r2 - y0 - 2, n = tl.length, cw = Math.min(70, (R - c2 - 18) / n);
+      const th = Math.max(12, Math.min(30, avail - 21)), tw = Math.min(th * 4 / 3, cw - 4), mc = Math.max(6, Math.floor(cw / 3.6));
+      t += `<text x="${c2 + 14}" y="${y0 + 6}" class="tv sm" style="font-size:7.5px;font-weight:700">FERRAMENTAS:</text>`;
+      tl.forEach((c, k) => { let f = null; try { f = ferrInfo(c); } catch(e){}
+        const x = c2 + 14 + k * cw, cx = x + cw / 2 - 2, img = (typeof FERR_PNG === "object" && FERR_PNG[c]) || (typeof FERR_FOTO === "object" && FERR_FOTO[(f && f.c) || c]) || "";
+        if (img) t += `<image x="${(cx - tw / 2).toFixed(1)}" y="${y0 + 9}" width="${tw.toFixed(1)}" height="${th.toFixed(1)}" href="${img}" preserveAspectRatio="xMidYMid meet"/>`;
+        else t += `<rect x="${(cx - tw / 2).toFixed(1)}" y="${y0 + 9}" width="${tw.toFixed(1)}" height="${th.toFixed(1)}" fill="none" stroke="#bbb" stroke-width="0.6"/>`;
+        const nm = f ? f.nome : ""; t += `<text x="${cx.toFixed(1)}" y="${(y0 + 9 + th + 8).toFixed(1)}" class="tv sm" style="font-size:8px;font-weight:700" text-anchor="middle">${esc(c)}</text>`;
+        if (nm) t += `<text x="${cx.toFixed(1)}" y="${(y0 + 9 + th + 15).toFixed(1)}" class="tv sm" style="font-size:6.2px;font-weight:400" text-anchor="middle">${esc(nm.length > mc ? nm.slice(0, mc - 1) + "…" : nm)}</text>`; }); } }
   t += lbl(c2 + 5, r1 + 13, "DESCRIÇÃO / DENOMINAÇÃO:") + val(c2 + 14, r1 + 52, pieceName(p), "tv huge") + val(c2 + 14, r1 + 76, `Ø interno ${f2(p.dint)}  ·  Ø externo ${f2(p.dext)}  ·  ${altTxt}  ·  secção ${f2(sec)}`, PT ? "tv sm" : "tv") + (alojTxt2 ? val(c2 + 14, r1 + 94, alojTxt2, PT ? "tv sm" : "tv") : "");
   t += `<line x1="${e1}" y1="${r2}" x2="${e1}" y2="${yBot}" class="tb"/><line x1="${e2}" y1="${r2}" x2="${e2}" y2="${yBot}" class="tb"/><line x1="${e3}" y1="${r2}" x2="${e3}" y2="${yBot}" class="tb"/>`;
   t += lbl(c2 + 5, r2 + 12, "COD INTERNO:") + val(c2 + 10, r2 + 31, info.cod || "") + lbl(e1 + 5, r2 + 12, "ESCALA") + val(e1 + 10, r2 + 31, "S/E") + lbl(e2 + 5, r2 + 12, "FOLHA:") + val(e2 + 10, r2 + 31, info.folha) + lbl(e3 + 5, r2 + 12, "FORMATO:") + `<text x="${(e3 + R) / 2}" y="${yBot - 6}" class="tv" style="font-size:22px;font-weight:400" text-anchor="middle">A4</text>`;

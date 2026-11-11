@@ -6,6 +6,10 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.20.3 — 11/11/2026
+- Novo: **`RODAR FILA DE PROGRAMAS.md`** — guia para o operador do Kuru Nuvem ligar a fila `_PEDIDOS ARGUS` (Anexo 1 + Código do
+  programa no ARGUS) com segurança: módulo isolado e testado `Kuru - fila ARGUS/filaPedidosArgus.js` (só `fs`/`path`, modo
+  simular, liga/desliga, uma estação, lock, conflito sem sobrescrever, nada apagado) + `teste-fila.js` (tem que dar TESTE OK).
 ## 5.20.2 — 11/11/2026
 - Corrige: **PSA 108 com desbaste duplicado** em peça curta (ex.: 1 peça 50x60x2,9, bucha 30x70: comprimento 4,45 mm saía em
   2 etapas de 2,225, repetindo o mesmo passe). Agora até **10 mm** de comprimento (param. `zMin`) o desbaste em Z vai de uma vez;

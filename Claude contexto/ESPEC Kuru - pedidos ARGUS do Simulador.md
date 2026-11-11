@@ -1,5 +1,7 @@
 # Kuru Nuvem: gravar no ARGUS os pedidos do Simulador CNC
 
+> **Implementação:** veja `RODAR FILA DE PROGRAMAS.md` (raiz do repositório) e o módulo pronto em `Kuru - fila ARGUS/`.
+
 Especificação para quem mantém o Kuru Nuvem. Pedido do usuário (Mateus, 10/11/2026): **quando ele salva ou imprime um
 desenho no Simulador CNC, o cadastro do item no ARGUS deve receber, sozinho, o PDF no Anexo 1 e o número do programa no
 Código do programa.**

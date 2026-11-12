@@ -6,6 +6,14 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.23.1 — PSH 108: canal com a abertura do 106, fundo reto e dois raios
+- Canal do PSH 108 refeito (pedido do usuário): **mesma abertura na face do PSH 106**, 1/3 da profundidade, **fundo reto** e um
+  raio no canto externo e outro no interno, de **0,5 a 1 mm** (0,4 × profundidade; campo "ESPECIAL: raio do canal" continua
+  valendo). Flancos no mesmo ângulo do 106. Ex.: 100x120x12 → abertura 5,75, prof. 1,67, 2x R0,65.
+- Programa: em cada nível, cada lado faz flanco + raio + fundo reto até o meio do canal (T3D3).
+- Desenho: "2x R" no raio do canal e "canal fundo reto, 2x R…" nas notas. Imagem nova do PSH 108 na escolha do perfil.
+- Demais perfis sem mudança (fundo reto só no PSH 108).
+
 ## 5.23.0 — Perfil novo PSH 108 (PSH 106 com canal raso)
 - Novo gerador **PSH 108** (veio): tudo igual ao PSH 106 (externo sem folga, lábios, calcanhar, chanfros), só o canal com
   **1/3 da profundidade** do PSH 106 (secção ÷ 6 em vez de secção ÷ 2).

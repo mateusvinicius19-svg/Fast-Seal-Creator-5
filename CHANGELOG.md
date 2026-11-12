@@ -6,6 +6,13 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.21.22 — PSA 108: ângulo do chanfro interno de TRÁS
+- Campo novo "Ângulo do chanfro interno de TRÁS (° com o eixo, vazio = 30)". O comprimento em Z continua o do chanfro interno.
+- Programa: a volta do perfil interno (X+ Z−) usa o ângulo escolhido; com várias peças, um ajuste em X no meio do bedame
+  volta para o chanfro da frente da peça seguinte (30°). Cabeçalho mostra "(TRAS X ang)".
+- Desenho: perfil, chamada do chanfro de trás e nota com o ângulo novo. Aviso se passar de 30° (a T4D4 faz no máximo 30° nas costas).
+- Vazio = programa idêntico ao anterior.
+
 ## 5.21.21 — Tolerância da secção no bloco "Tolerâncias do desenho"
 - Nova linha **Secção** (sem / ± / + / − / + e −) junto de Ø interno, Ø externo e Altura, em todos os perfis com desenho
   (PSA 108, ciclos, ISO/DP, PSG 101, PSO 109, PSE/PSH, PSR 102/211, DH PSH 129).

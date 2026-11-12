@@ -6,6 +6,12 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.21.24 — Tolerâncias dos diâmetros reduzidas em 1/3 (todos os perfis)
+- Tolerâncias automáticas dos DIÂMETROS × 2/3 (2 casas): PSA 108 / sem chanfro / PSG 101 (tabela ±0,1…0,5 → ±0,07…0,33),
+  PSO 109 (Ø int.), DH PSH 129 (0/−0,2 → 0/−0,13), DP (+0,1 → +0,07), gaxetas e raspadores PSE/PSH/PSR 211 (lábios ±0,5 → ±0,33,
+  calcanhar ±0,3 → ±0,2 etc., também nas notas).
+- Não mudam: altura, secção, raio do canal e o que for digitado em "Tolerâncias do desenho".
+
 ## 5.21.23 — PSR 211: Ø do lábio também na parte de trás
 - Vista DIÂMETROS: a cota do Ø do lábio (ex.: Ø198 ±0,8), que já aparecia na frente, agora também aparece do lado de trás,
   puxada da ponta do raspador (mesmo Ø e mesma tolerância).

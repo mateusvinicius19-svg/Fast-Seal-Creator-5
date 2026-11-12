@@ -6,6 +6,12 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.21.18 — T2D14 no interno abaixo de Ø14 (PTFE, PTFE+BR, POM, PEAD)
+- Arruelas (PSA 108, ciclos com e sem chanfro, PSG 101) em PTFE puro, PTFE+BR, POM e Nylon/PEAD: a T4D4 faz no mínimo Ø14;
+  com Ø interno menor que 14 o interno passa a ser a **T2D14**.
+- Gaxetas/raspadores em PTFE / PTFE+BR: mesma regra (interno T2D14 abaixo de Ø14, se o campo de ferramenta estiver vazio).
+- Catálogo de ferramentas: incluída a T2D14.
+
 ## 5.21.17 — 11/11/2026
 - **Ciclo arruelas várias peças SEM CHANFRO** agora tem desenho (👁 Ver desenho / 📐 e PDF ao salvar), igual ao da PSA 108
   sem os chanfros (cantos vivos, sem chamadas de chanfro), com as mesmas tolerâncias da PSA 108 e nota "Sem chanfro · Ciclo N pç".

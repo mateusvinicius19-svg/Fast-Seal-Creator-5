@@ -1179,9 +1179,11 @@ const GEN = {
 };
 
 /* ------------------------- formulário --------------------------- */
-const TEXT_KEYS = new Set(["aloj","sf","tExt","tInt","tBed","nome","desc","mat","tipoP","tiT","tiV","tiV2","teT","teV","teV2","thT","thV","thV2","tolG"]);
-const TOL_KEYS = ["tipoP","tiT","tiV","tiV2","teT","teV","teV2","thT","thV","thV2","tolG"];
-const TOL_DIMS = [["ti","Ø interno"],["te","Ø externo"],["th","Altura"]];
+const TEXT_KEYS = new Set(["aloj","sf","tExt","tInt","tBed","nome","desc","mat","tipoP","tiT","tiV","tiV2","teT","teV","teV2","thT","thV","thV2","tsT","tsV","tsV2","tolG"]);
+const TOL_KEYS = ["tipoP","tiT","tiV","tiV2","teT","teV","teV2","thT","thV","thV2","tsT","tsV","tsV2","tolG"];
+const TOL_DIMS = [["ti","Ø interno"],["te","Ø externo"],["th","Altura"],["ts","Secção"]];   // Secção: v5.21.21 ("sem" = tolerância padrão do perfil)
+// v5.21.21: tolerância da secção escolhida no bloco "Tolerâncias do desenho" (substitui a padrão do perfil); null = usar a padrão
+function secTolOv(p, base){ return p && p.tsT && (p.tsS !== "" || p.tsI !== "") && p.tsS !== undefined ? tolMk(base, String(p.tsS === "" ? 0 : p.tsS), String(p.tsI === "" ? 0 : p.tsI)) : null; }
 // regra: peça é DP quando o maior chanfro externo > 1,5 x chanfro interno (ou escolha manual)
 function pieceKind(p){
   const manual = p.tipoP || "";
@@ -3106,7 +3108,7 @@ function tolMk(base, sS, iS, small = 9){
 // PSE 106: duas vistas ampliadas no padrão dos desenhos salvos (DIÂMETROS e SECÇÃO), canal à direita
 function pseViewsSVG(p, PT){
   const G = p.tipoGen === "psr211" ? psr211Geom(p) : pseFscGeom(p), H = p.h, prof = profileOf(p);
-  const f = v => fmtN(v, 2), tl = (base, t) => t ? tolMk(base, String(t), String(-t)) : esc(base), tm = (base, t) => t ? tolMk(base, "0", String(-t)) : esc(base);
+  const f = v => fmtN(v, 2), tl = (base, t, sc) => (sc && secTolOv(p, base)) || (t ? tolMk(base, String(t), String(-t)) : esc(base)), tm = (base, t, sc) => (sc && secTolOv(p, base)) || (t ? tolMk(base, "0", String(-t)) : esc(base));
   const rTop = Math.max(G.extAp, G.xo1) / 2, rBot = Math.min(G.intAp, G.xi1) / 2;
   const boxes = PT ? [[30, 28, 764, 452], [30, 458, 764, 814]] : [[30, 30, 555, 495], [568, 30, 1093, 495]];
   const ML = 118, MR = 150, MT = 108, MB = 120;
@@ -3163,7 +3165,7 @@ function pseViewsSVG(p, PT){
       const xs = xb - 44;
       g += ln(PX(G.wiper ? -G.Hb + G.chc : -H + G.chc), PY(G.extCalc / 2), xs - 5, PY(G.extCalc / 2), "e") + (G.wiper ? ln(PX(-H + G.cT), PY(G.tipIn / 2), xs - 5, PY(G.tipIn / 2), "e") : ln(PX(-H + (G.chcZ ?? G.chc)), PY(G.intCalc / 2), xs - 5, PY(G.intCalc / 2), "e"));   // PSR 211: puxada na ponta do lábio raspador (como no Fast Seal)
       if (G.P117) g += ln(PX(-H + G.aVb), PY(G.Vd / 2), xs - 5, PY(G.Vd / 2), "e");   // PSH 117: secção do calcanhar vai até o fundo do V (Ø ext. − Ø V) / 2
-      g += G.wiper ? vdim(xs, PY(G.extCalc / 2), PY(G.tipIn / 2), f((G.extCalc - G.tipIn) / 2)) : G.P117 ? vdim(xs, PY(G.extCalc / 2), PY(G.Vd / 2), tm(f((G.extCalc - G.Vd) / 2), G.tol.sec)) : vdim(xs, PY(G.extCalc / 2), PY(G.intCalc / 2), tm(f((G.extCalc - G.intCalc) / 2), G.tol.sec));
+      g += G.wiper ? vdim(xs, PY(G.extCalc / 2), PY(G.tipIn / 2), f((G.extCalc - G.tipIn) / 2)) : G.P117 ? vdim(xs, PY(G.extCalc / 2), PY(G.Vd / 2), tm(f((G.extCalc - G.Vd) / 2), G.tol.sec, 1)) : vdim(xs, PY(G.extCalc / 2), PY(G.intCalc / 2), tm(f((G.extCalc - G.intCalc) / 2), G.tol.sec, 1));
       g += call(PX((G.wiper ? -G.Hb : -H) + G.chc / 2), PY((G.extCalc + G.xoBack) / 4), xb - 12, PY(G.extCalc / 2) - 22, `${f(G.chc)} x 45°`, "end");
       if (G.wiper) g += call(PX(-H + G.cT / 2), PY(G.tipIn / 2 + G.cT / 2), xb - 12, PY(G.tipIn / 2) + 18, `${f(G.cT)} x 45°`, "end");
       else if (!G.P117) g += call(PX(-H + (G.chcZ ?? G.chc) / 2), PY((G.intCalc + G.xiBack) / 4), xb - 12, PY(G.intCalc / 2) + 24, G.chcZ ? `${f(G.chc)} x 30°` : `${f(G.chc)} x 45°`, "end");
@@ -3177,7 +3179,7 @@ function pseViewsSVG(p, PT){
       g += vdim(xc, PY(G.xgIn / 2), PY(G.intAp / 2), f((G.xgIn - G.intAp) / 2), 1);
       // secção: do lábio externo ao lábio interno (Ø ext. do lábio → Ø int. do lábio) em todos, PSH também
       // (usuário 09/11/2026: 54,50 → 44,00 = 5,25 = 1,30 + 2,55 + 1,40; antes o PSH media do calcanhar → ponta do lábio)
-      g += vdim(xt, PY(G.extAp / 2), PY(G.intAp / 2), tl(f((G.extAp - G.intAp) / 2), G.tol.sec), 1);
+      g += vdim(xt, PY(G.extAp / 2), PY(G.intAp / 2), tl(f((G.extAp - G.intAp) / 2), G.tol.sec, 1), 1);
       g += call(PX(G.zO - G.chO / 2), PY((G.xo1 + G.extAp) / 4), xf + 8, yTop - 8, `${f(G.chO)} x 45°`, "start");
       g += call(PX(G.zI - G.chI / 2), PY((G.xi1 + G.intAp) / 4), xf + 8, yBot + 14, `${f(G.chI)} x 45°`, "start");
       if (G.wiper) g += call(PX(-H + G.cT + 0.2), PY(G.tipOut / 2), xb + 6, yBot + 52, `corpo ${f(G.Hb)} · raspador ${f(G.prot)} a ${fmtN(G.wAng, 0)}° · ponta ${f(G.tth)} · raiz Ø${f(G.rootOut)}`, "start");
@@ -3279,7 +3281,7 @@ function psr102Build(p){
 }
 function psrViewsSVG(p, PT){
   const G = psr102Geom(p), H = G.H, prof = psrProfile(p), De = Number(p.dext);
-  const f = v => fmtN(v, 2), tl = (base, t) => t ? tolMk(base, String(t), String(-t)) : esc(base), tm = (base, t) => t ? tolMk(base, "0", String(-t)) : esc(base);
+  const f = v => fmtN(v, 2), tl = (base, t, sc) => (sc && secTolOv(p, base)) || (t ? tolMk(base, String(t), String(-t)) : esc(base)), tm = (base, t, sc) => (sc && secTolOv(p, base)) || (t ? tolMk(base, "0", String(-t)) : esc(base));
   const rTop = De / 2, rBot = G.tip / 2;
   const boxes = PT ? [[30, 28, 764, 452], [30, 458, 764, 814]] : [[30, 30, 555, 495], [568, 30, 1093, 495]];
   const ML = 118, MR = 150, MT = 108, MB = 120, MBv = [MB, 62], ihv = boxes.map((b, i) => b[3] - b[1] - MT - MBv[i]);
@@ -3315,10 +3317,10 @@ function psrViewsSVG(p, PT){
     } else {
       const xs = xb - 44;
       g += ln(PX(-H + G.cI), PY(rTop), xs - 5, PY(rTop), "e") + ln(PX(-H + G.cI), PY(G.calc / 2), xs - 5, PY(G.calc / 2), "e");
-      g += vdim(xs, PY(rTop), PY(G.calc / 2), tm(f((De - G.calc) / 2), G.tol.sec));
+      g += vdim(xs, PY(rTop), PY(G.calc / 2), tm(f((De - G.calc) / 2), G.tol.sec, 1));
       const xc = xf + 34, xt = xf + 84;
       g += ln(xh, PY(rTop), xt + 5, PY(rTop), "e") + ln(xf, PY(G.tip / 2), xt + 5, PY(G.tip / 2), "e") + ln(xf, PY(G.tipo / 2), xc + 5, PY(G.tipo / 2), "e");
-      g += vdim(xc, PY(G.tipo / 2), PY(G.tip / 2), f(G.tth), 1) + vdim(xt, PY(rTop), PY(G.tip / 2), tl(f((De - G.tip) / 2), G.tol.sec), 1);
+      g += vdim(xc, PY(G.tipo / 2), PY(G.tip / 2), f(G.tth), 1) + vdim(xt, PY(rTop), PY(G.tip / 2), tl(f((De - G.tip) / 2), G.tol.sec, 1), 1);
       const rb = yBot + 34;
       g += ln(PX(-G.ramp), PY(G.calc / 2) + 3, PX(-G.ramp), rb + 6, "e") + ln(xf, PY(G.tip / 2) + 3, xf, rb + 6, "e") + hdim(PX(-G.ramp), xf, rb, f(G.ramp));
       g += call(PX(-G.prot - G.cE / 2), PY(rTop - G.cE / 2), xh + 16, yTop - 10, `${f(G.cE)} x 45°`, "start");
@@ -3392,7 +3394,7 @@ function drawingSVG(p){  const PT = state.orient === "portrait";
   const dS = p.tipoGen === "lip" ? dzb + 48 : dzb + 118;   // arruela/DP: secção depois das chamadas de chanfro da direita
   const secTol = p.tipoGen === "lip" || (p.tipoGen === "iso" && pieceKind(p) === "dp");   // DH PSH 129 e DP: secção +0,1 / −0,05
   const psoW = p.tipoGen === "pso" ? parkerTol(p.dint, sec).wTol : 0;                       // PSO 109: secção ±W (Parker)
-  g += ext(dzb + 4, dyE, dS + 8, dyE) + ext(dzb + 4, dyI, dS + 8, dyI) + dimV(dS, dyE, dyI, psoW ? tolMk("Secção " + f2(sec), String(psoW), String(-psoW)) : p.tipoGen === "psg101" ? tolMk("Secção " + f2(sec), "0", "-0.05") : isPSA(p.tipoGen) || p.tipoGen === "semch" ? tolMk("Secção " + f2(sec), "0.1", "-0.1") : secTol ? tolMk("Secção " + f2(sec), "0.1", "-0.05") : "Secção " + f2(sec), 1);
+  g += ext(dzb + 4, dyE, dS + 8, dyE) + ext(dzb + 4, dyI, dS + 8, dyI) + dimV(dS, dyE, dyI, secTolOv(p, "Secção " + f2(sec)) || (psoW ? tolMk("Secção " + f2(sec), String(psoW), String(-psoW)) : p.tipoGen === "psg101" ? tolMk("Secção " + f2(sec), "0", "-0.05") : isPSA(p.tipoGen) || p.tipoGen === "semch" ? tolMk("Secção " + f2(sec), "0.1", "-0.1") : secTol ? tolMk("Secção " + f2(sec), "0.1", "-0.05") : "Secção " + f2(sec)), 1);
   const call = (x, y, tx, ty, txt) => `<line x1="${x}" y1="${y}" x2="${tx}" y2="${ty}" class="e"/><text x="${tx + (tx < x ? -4 : 4)}" y="${ty + 4}" class="tn" text-anchor="${tx < x ? "end" : "start"}">${txt}</text>`;
   if (p.tipoGen === "pse106") {
     const G = pseFscGeom(p);
@@ -3440,7 +3442,7 @@ function drawingSVG(p){  const PT = state.orient === "portrait";
     g += `<text x="${cx}" y="${by + bh + 31}" class="n" text-anchor="middle">${psgAcr(p) > 0 ? "serra " + fmtN(PSG_SERRA, 1) + " mm · usinado +" + fmtN(psgAcr(p), 1) + " nos Ø" : "corte sem perda"}</text><text x="${cx}" y="${by + bh + 43}" class="n" text-anchor="middle">feito no acabamento</text>`;
   }
   }
-  const notes = p.tipoGen === "custom" ? [p.customNotes || "cotas em mm"] : p.tipoGen === "pso" ? [`O-ring usinado · secção Ø${fv3(p.sec)} · Ø interno ${fv3(p.dint)} · Ø externo ${fv3(p.dint + 2 * p.sec)} · cotas em mm`] : p.tipoGen === "psr102" ? (() => { const G = psr102Geom(p); return [`Ponta Ø${fv3(G.tip)} (−${fv3(G.ap)}) · calcanhar int. Ø${fv3(G.calc)} (+${fv3(G.fi)}) · lábio na face Ø${fv3(G.lipf)} · ponta ${fv3(G.tth)} · rampa ${fv3(G.ramp)} · externo sem folga · secção ±${fv3(G.tol.sec)} · cotas em mm`]; })() : ["pse106","psh106","psh117","psh105","pse105","pse107","psh107","psr211"].includes(p.tipoGen) ? (() => { const G = p.tipoGen === "psr211" ? psr211Geom(p) : pseFscGeom(p); return [`Lábio ext. Ø${fv3(G.extAp)} (+${fv3(G.extAp - p.dext)} ±${fv3(G.tol.D)}) · ${G.PSH ? `calcanhar int. Ø${fv3(G.intCalc)} (+${fv3(G.intCalc - p.dint)} ±${fv3(G.tol.B)})` : `calcanhar ext. Ø${fv3(G.extCalc)} (−${fv3(p.dext - G.extCalc)} ±${fv3(G.tol.C)})`} · lábio int. Ø${fv3(G.intAp)} (−${fv3(p.dint - G.intAp)} ±${fv3(G.tol.A)}) · ${G.PSH ? "externo" : "interno"} sem folga ·${G.O107 ? ` O-ring ${fv3(G.OC)} x Ø int. ${fv3(G.Dm - G.OC)} ·` : ""}${G.P117 ? ` V Ø${fv3(G.Vd)} ·` : ""} canal R${fv3(G.Rg)} ±${fv3(G.tol.F)} · secção ±${fv3(G.tol.sec)} · cotas em mm`]; })() : p.tipoGen === "lip" ? [`Chanfro externo: ${fmtN(p.ch,2)} x 45° (2 cantos)   ·   Lábio interno: flanco ${fmtN(p.af,0)}° com o degrau, base ${fmtN(p.ab,0)}°   ·   Degrau ${fmtN(p.h2,3)} x ${fmtN(p.b,3)}   ·   Cotas em mm`] : p.tipoGen === "semch" ? [`Sem chanfro (cantos vivos)   ·   Ciclo ${xround(p.n, 0)} pç   ·   Cotas em mm`] : [`Chanfro externo frente: ${fmtN(p.chF,2)}${(p.angE || 45) !== 45 ? " em Z" : ""} x ${fmtN(p.angE || 45,0)}°   ·   Chanfro externo trás: ${fmtN(p.chT,2)}${(p.angE || 45) !== 45 ? " em Z" : ""} x ${fmtN(p.angE || 45,0)}°   ·   Chanfro interno (frente e trás): ${fmtN(p.chI,2)} em Z x ${fmtN(p.angLbl ?? p.angI,0)}°   ·   Cotas em mm`];
+  const notes = p.tipoGen === "custom" ? [p.customNotes || "cotas em mm"] : p.tipoGen === "pso" ? [`O-ring usinado · secção Ø${fv3(p.sec)} · Ø interno ${fv3(p.dint)} · Ø externo ${fv3(p.dint + 2 * p.sec)} · cotas em mm`] : p.tipoGen === "psr102" ? (() => { const G = psr102Geom(p); return [`Ponta Ø${fv3(G.tip)} (−${fv3(G.ap)}) · calcanhar int. Ø${fv3(G.calc)} (+${fv3(G.fi)}) · lábio na face Ø${fv3(G.lipf)} · ponta ${fv3(G.tth)} · rampa ${fv3(G.ramp)} · externo sem folga · secção ±${fv3(G.tol.sec, 1)} · cotas em mm`]; })() : ["pse106","psh106","psh117","psh105","pse105","pse107","psh107","psr211"].includes(p.tipoGen) ? (() => { const G = p.tipoGen === "psr211" ? psr211Geom(p) : pseFscGeom(p); return [`Lábio ext. Ø${fv3(G.extAp)} (+${fv3(G.extAp - p.dext)} ±${fv3(G.tol.D)}) · ${G.PSH ? `calcanhar int. Ø${fv3(G.intCalc)} (+${fv3(G.intCalc - p.dint)} ±${fv3(G.tol.B)})` : `calcanhar ext. Ø${fv3(G.extCalc)} (−${fv3(p.dext - G.extCalc)} ±${fv3(G.tol.C)})`} · lábio int. Ø${fv3(G.intAp)} (−${fv3(p.dint - G.intAp)} ±${fv3(G.tol.A)}) · ${G.PSH ? "externo" : "interno"} sem folga ·${G.O107 ? ` O-ring ${fv3(G.OC)} x Ø int. ${fv3(G.Dm - G.OC)} ·` : ""}${G.P117 ? ` V Ø${fv3(G.Vd)} ·` : ""} canal R${fv3(G.Rg)} ±${fv3(G.tol.F)} · secção ±${fv3(G.tol.sec, 1)} · cotas em mm`]; })() : p.tipoGen === "lip" ? [`Chanfro externo: ${fmtN(p.ch,2)} x 45° (2 cantos)   ·   Lábio interno: flanco ${fmtN(p.af,0)}° com o degrau, base ${fmtN(p.ab,0)}°   ·   Degrau ${fmtN(p.h2,3)} x ${fmtN(p.b,3)}   ·   Cotas em mm`] : p.tipoGen === "semch" ? [`Sem chanfro (cantos vivos)   ·   Ciclo ${xround(p.n, 0)} pç   ·   Cotas em mm`] : [`Chanfro externo frente: ${fmtN(p.chF,2)}${(p.angE || 45) !== 45 ? " em Z" : ""} x ${fmtN(p.angE || 45,0)}°   ·   Chanfro externo trás: ${fmtN(p.chT,2)}${(p.angE || 45) !== 45 ? " em Z" : ""} x ${fmtN(p.angE || 45,0)}°   ·   Chanfro interno (frente e trás): ${fmtN(p.chI,2)} em Z x ${fmtN(p.angLbl ?? p.angI,0)}°   ·   Cotas em mm`];
   if (p.tipoGen === "psg101") notes[0] = notes[0].replace(/\s*·\s*Cotas em mm/i, "") + `   ·   Corte ${fmtN(psgAng(p), 0)}°${psgAcr(p) > 0 ? ` (serra ${fmtN(PSG_SERRA, 1)})` : " sem perda"}   ·   Cotas em mm`;
   // DP (PSE 108) e DH (PSH 129): anel ativador PSO 109 (O-ring Parker) escolhido pelo alojamento do catálogo
   if (DESENHO_ORING) try { const al = state.alojAtiv;

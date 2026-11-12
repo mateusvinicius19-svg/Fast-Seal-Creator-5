@@ -6,6 +6,9 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.22.1 — PSH 103: imagem nova na escolha do perfil
+- Trocada a imagem do PSH 103 em "Escolher pela imagem" (Veio) pela imagem 3D enviada pelo usuário (lábio recuado com O-ring).
+
 ## 5.22.0 — Perfil novo PSH 103 (PSH 105 + O-ring do PSH 107)
 - Novo gerador **PSH 103** (veio): lábios, folga do calcanhar interno (0,134 × secção) e lábio interno recuado
   (0,12 × secção) iguais ao PSH 105; no canal, o O-ring do PSH 107 (secção automática = a maior até 0,57 × secção,

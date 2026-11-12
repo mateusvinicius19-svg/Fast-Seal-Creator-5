@@ -6,6 +6,10 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.21.19 — Desenho custom VEDADOR (272 x 291 x 19)
+- `Desenhos custom/VEDADOR (272 X 291 X 19)` (.js / .pdf / .png): programa 46219, cód. interno 46146, medidas do esboço do Inventor
+  (rampa 45° de Ø289 a Ø272, fundo 1,5, degrau 9 até Ø277, canal 2,3 x 3 com boca 4 na face).
+
 ## 5.21.18 — T2D14 no interno abaixo de Ø14 (PTFE, PTFE+BR, POM, PEAD)
 - Arruelas (PSA 108, ciclos com e sem chanfro, PSG 101) em PTFE puro, PTFE+BR, POM e Nylon/PEAD: a T4D4 faz no mínimo Ø14;
   com Ø interno menor que 14 o interno passa a ser a **T2D14**.

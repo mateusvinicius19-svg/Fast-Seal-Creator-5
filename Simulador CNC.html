@@ -3158,6 +3158,7 @@ function pseViewsSVG(p, PT){
       g += ord(xb - (G.P117 ? 62 : G.wiper ? 28 : 34), PY(G.intCalc / 2), yB, PX(G.P117 ? -H + 2 * G.aV : G.wiper ? -H + G.rampL : -H + (G.chcZ ?? G.chc)), (G.fi ? tl("Ø " + f(G.intCalc), G.tol.B) : tolMk("Ø " + f(G.intCalc), p.tiS, p.tiI)));
       g += ord(xb - (G.P117 ? 90 : G.wiper ? 106 : 68), PY(G.extCalc / 2), yB, PX(G.wiper ? -G.Hb + G.chc : -H + G.chc), (G.fe ? tl("Ø " + f(G.extCalc), G.tol.C) : tolMk("Ø " + f(G.extCalc), p.teS, p.teI)));
       g += ord(xf + 28, PY(G.intAp / 2), yB, PX(G.zI - G.chI), tl("Ø " + f(G.intAp), G.tol.A));
+      if (G.wiper) g += ord(xb - 132, PY(G.tipIn / 2), yB, PX(-H + G.cT), tl("Ø " + f(G.tipIn), G.tol.A));   // v5.21.23: PSR 211 — Ø do lábio (ponta do raspador) também do lado de trás (usuário 12/11/2026)
       g += ord(xf + 56, PY(G.xgIn / 2), yB, PX(G.zI), "Ø " + f(G.xgIn));
       g += ord(xf + 84, PY(G.xgOut / 2), yB, PX(G.zO), "Ø " + f(G.xgOut));
       g += ord(xf + 112, PY(G.extAp / 2), yB, PX(G.zO - G.chO), tl("Ø " + f(G.extAp), G.tol.D));

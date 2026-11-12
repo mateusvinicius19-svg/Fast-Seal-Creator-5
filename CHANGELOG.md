@@ -6,6 +6,10 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.21.23 — PSR 211: Ø do lábio também na parte de trás
+- Vista DIÂMETROS: a cota do Ø do lábio (ex.: Ø198 ±0,8), que já aparecia na frente, agora também aparece do lado de trás,
+  puxada da ponta do raspador (mesmo Ø e mesma tolerância).
+
 ## 5.21.22 — PSA 108: ângulo do chanfro interno de TRÁS
 - Campo novo "Ângulo do chanfro interno de TRÁS (° com o eixo, vazio = 30)". O comprimento em Z continua o do chanfro interno.
 - Programa: a volta do perfil interno (X+ Z−) usa o ângulo escolhido; com várias peças, um ajuste em X no meio do bedame

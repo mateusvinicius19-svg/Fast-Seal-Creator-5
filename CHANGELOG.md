@@ -6,6 +6,10 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.23.2 — Escolha pela imagem: só o código do perfil
+- Nos quadros de "Escolher pela imagem" aparece só o código (PSH 108, PSE 107, DH PSH 129…), sem a descrição entre
+  parênteses; o nome completo continua ao passar o mouse e no botão do perfil. Ciclos, Arruela ISO e PSE 108 (DP) sem mudança.
+
 ## 5.23.1 — PSH 108: canal com a abertura do 106, fundo reto e dois raios
 - Canal do PSH 108 refeito (pedido do usuário): **mesma abertura na face do PSH 106**, 1/3 da profundidade, **fundo reto** e um
   raio no canto externo e outro no interno, de **0,5 a 1 mm** (0,4 × profundidade; campo "ESPECIAL: raio do canal" continua

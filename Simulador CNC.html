@@ -1919,6 +1919,9 @@ function profThumb(type){
   return `<svg viewBox="0 0 ${W} ${Hh}" width="${W}" height="${Hh}"><path d="${d}" fill="${col}" stroke="${col === "#e2dfd8" ? "#8d8a83" : "#222"}" stroke-width="1"/></svg>`;
 }
 function profOptText(t){ if (t === "dp") return "PSE 108 (DP)"; const o = [...$("genType").options].find(o => o.value === t); return o ? o.textContent : (GEN[t] && GEN[t].name) || t; }
+// quadros da escolha pela imagem: só o código do perfil (ex.: "PSH 108"), sem a descrição entre parênteses (usuário 12/11/2026);
+// o nome completo fica no title (passar o mouse). Ciclos / Arruela ISO não têm código e ficam com o nome todo; DP continua "PSE 108 (DP)"
+function profCode(t){ const s = profOptText(t), m = t === "dp" ? null : s.match(/^((?:DH )?PS[A-Z] \d+)\s*\(/); return m ? m[1] : s; }
 // botão do perfil: miniatura + nome do perfil atual (a lista de seleção fica escondida)
 function updateProfBtn(){
   const b = $("btnProf"); if (!b) return;
@@ -1933,7 +1936,7 @@ function openProfPicker(){
   m.innerHTML = `<div style="background:#fff;border-radius:12px;max-width:920px;width:100%;padding:18px 20px;box-shadow:0 10px 40px rgba(0,0,0,.35);color:#222">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px"><b style="font:700 17px Segoe UI,Arial">Escolha o perfil</b><button class="btn" id="profClose" type="button">Fechar</button></div>` +
     PROF_GROUPS.map(([gname, list]) => `<div style="margin:14px 0 6px;font:700 13px Segoe UI,Arial;color:#b2221f;text-transform:uppercase;letter-spacing:.5px">${gname}</div><div style="display:flex;flex-wrap:wrap;gap:10px">` +
-      list.filter(t => GEN[t] || t === "dp").map(t => `<button type="button" data-prof="${t}" title="${esc(profOptText(t))}" style="border:2px solid ${t === cur ? "#b2221f" : "#d5d9de"};border-radius:10px;background:#f7f8fa;padding:6px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;width:136px">${profThumb(t)}<span style="font:600 12px Segoe UI,Arial;color:#222;text-align:center;line-height:1.2">${esc(profOptText(t))}</span></button>`).join("") + `</div>`).join("") + `</div>`;
+      list.filter(t => GEN[t] || t === "dp").map(t => `<button type="button" data-prof="${t}" title="${esc(profOptText(t))}" style="border:2px solid ${t === cur ? "#b2221f" : "#d5d9de"};border-radius:10px;background:#f7f8fa;padding:6px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;width:136px">${profThumb(t)}<span style="font:600 12px Segoe UI,Arial;color:#222;text-align:center;line-height:1.2">${esc(profCode(t))}</span></button>`).join("") + `</div>`).join("") + `</div>`;
   $("profClose").onclick = () => m.remove();
   m.querySelectorAll("[data-prof]").forEach(b => b.onclick = () => {
     const dp = b.dataset.prof === "dp";

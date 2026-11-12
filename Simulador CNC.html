@@ -1690,8 +1690,11 @@ function buchaOf(p){
 }
 const ARR_MAT = { PU: ["PU", "T7D7", "T4D4", "", true], NBR: ["NBR / borracha", "T7D7", "T4D4", "", true], VITON: ["Viton (FKM)", "T7D7", "T4D4", "", true], PTFE: ["PTFE puro (Teflon)", "T7D7", "T4D4", "", true], PTFEBR: ["PTFE+BR (mesmas ferram. do PTFE puro)", "T7D7", "T4D4", "", true], POM: ["POM (poliacetal)", "T7D7", "T4D4", "", true],
                   NYLON: ["Nylon / PEAD", "T7D7", "T4D4", "", true], CELERON: ["Celeron (T2D54 · T2D64 · T6D16)", "T2D54", "T2D64", "T6D16", true] };
+// v5.21.18 (usuário 12/11/2026): PTFE puro, PTFE+BR, POM e PEAD — a T4D4 faz no mínimo Ø14; abaixo de Ø14 o interno é a T2D14
+const T4D4_MIN = 14;
 function applyArrMat(L, p){
-  const [lab, e, i, c, comp] = ARR_MAT[p.matA] || ARR_MAT.PU;
+  let [lab, e, i, c, comp] = ARR_MAT[p.matA] || ARR_MAT.PU;
+  if (["PTFE", "PTFEBR", "POM", "NYLON"].includes(p.matA) && Number(p.dint) < T4D4_MIN) i = "T2D14";   // v5.21.18
   let out = L.map(s => {
     if (p.matA === "CELERON" && /^;T\d+D\d+ \((EXTERNO|INTERNO|BEDAME|CORTE)\)/.test(s)) return ";" + ({EXTERNO: e, INTERNO: i}[s.match(/\((\w+)\)/)[1]] || c) + " " + s.match(/\(\w+\)/)[0];
     s = s.replace(/\bT7D7\b/g, e).replace(/\bT4D4\b/g, i);
@@ -2542,6 +2545,7 @@ const FERR = [
   { c: "T7D7", tipo: "ext", nome: "Externo", uso: "Arruelas (PSA 108, ISO, ciclos) — externo e face; gaxetas em PTFE, NBR e Viton", mat: "PU, NBR, Viton, PTFE, PTFE+BR, POM, Nylon/PEAD", obs: "Nylon/PEAD: sem compensação (sem G41/G42)." },
   { c: "T7D17", tipo: "ext", nome: "Externo sem costas (D7 afiada)", uso: "Externo que mergulha em canais em V", mat: "—", obs: "É a D7 afiada sem as costas." },
   { c: "T4D4", tipo: "int", nome: "Interno", uso: "Arruelas; gaxetas em PTFE, NBR e Viton; PSO 109 com Ø interno < 21", mat: "PU (arruelas), NBR, Viton, PTFE, POM, Nylon", min: 14, raio: 0.4, pastilha: "DCGT 070204", obs: "Suporte igual ao H200 (da T1D1), mas com pastilha DCGT 070204 (rômbica 55°, R0,4): faz no MÁXIMO 30° nas costas (usuário, 11/11/2026) — chanfro interno do calcanhar sempre a 30°. PSO 109: \"D4 afiada\"." },
+  { c: "T2D14", tipo: "int", nome: "Interno pequeno (PTFE/POM/PEAD)", uso: "Interno das arruelas e gaxetas em PTFE puro, PTFE+BR, POM e PEAD com Ø interno < 14 (abaixo do mínimo da T4D4)", mat: "PTFE, PTFE+BR, POM, Nylon/PEAD", obs: "Usuário, 12/11/2026: a T4D4 faz no mínimo Ø14 nesses materiais; abaixo de 14 passa a ser a T2D14." },
   { c: "T4D14", tipo: "int", nome: "Interno pequeno", uso: "Interno das gaxetas em PU com Ø interno < 11", mat: "PU", pastilha: "barra inteiriça (2 opções)", obs: "Duas opções de barra (fotos do usuário, 11/11/2026): R0,3 com cota 4,9 e R0,2 com cota 3,5 (a cota da foto é o Ø mínimo do furo — confirmar). Furos menores: a de R0,2." },
   { c: "T1D45", tipo: "int", nome: "Interno médio", uso: "Interno das gaxetas em PU com Ø interno de 11 a 40", mat: "PU", min: 11, raio: 0.4, pastilha: "DCGT 070204", obs: "Igual à T4D4 (usuário, 11/11/2026): suporte igual ao H200 com pastilha DCGT 070204 (rômbica 55°, R0,4) — faz no MÁXIMO 30° nas costas; chanfro interno do calcanhar sempre a 30°." },
   { c: "T1D1", tipo: "int", nome: "Interno H200 (VCGT)", uso: "Ainda não usada pelos geradores do Simulador", mat: "—", raio: 0.4, pastilha: "VCGT 110304", obs: "Suporte H200 com pastilha VCGT 110304 (rômbica 35°, R0,4) (foto do usuário, 11/11/2026). Posição T1 — confirmar." },
@@ -2929,7 +2933,7 @@ function deepAbove(p, tO){ return isPU(p.mat) && tO - p.dext > 10 ? { x: Number(
 function isBorracha(mat){ return /NBR|BORRACHA|VITON|FKM/i.test(String(mat || "")); }
 function fscTools(p, ext, intDef){
   const tf = isTeflon(p);
-  if (tf) return { tf, ext: "T7D7", int: p.tInt || "T4D4", cut: "T8D8", fCut: "0.100" };
+  if (tf) return { tf, ext: "T7D7", int: p.tInt || (Number(p.dint) < T4D4_MIN ? "T2D14" : "T4D4"), cut: "T8D8", fCut: "0.100" };
   // NBR (usuário 09/11/2026): externo e interno do cadastro das arruelas (ARR_MAT.NBR: T7D7 / T4D4); face e corte como no PU
   if (isBorracha(p.mat)) return { tf, ext: ARR_MAT.NBR[1], int: p.tInt || ARR_MAT.NBR[2], cut: "T5D5", fCut: "0.220" };
   return { tf, ext, int: p.tInt || intDef, cut: "T5D5", fCut: "0.220" };

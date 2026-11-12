@@ -6,6 +6,10 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.21.20 — VEDADOR (272 x 291 x 19): corte A-A refeito e material TEFLON + GR
+- Corte A-A em escala real (sem a largura esticada), com a VISTA FRONTAL (anel Ø291/Ø272 e linha de corte A-A) ao lado.
+- Material do carimbo: TEFLON + GR.
+
 ## 5.21.19 — Desenho custom VEDADOR (272 x 291 x 19)
 - `Desenhos custom/VEDADOR (272 X 291 X 19)` (.js / .pdf / .png): programa 46219, cód. interno 46146, medidas do esboço do Inventor
   (rampa 45° de Ø289 a Ø272, fundo 1,5, degrau 9 até Ø277, canal 2,3 x 3 com boca 4 na face).

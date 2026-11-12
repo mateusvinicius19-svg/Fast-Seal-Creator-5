@@ -51,19 +51,34 @@ function views(p, PT){
     g += call(X(L - c / 2), Y(H - c / 2), X(L) - 70, yT - 18, `${fmtN(c, 1)} x 45° (3x)`);
     g += `<text x="${X(L / 2)}" y="${yd + 46}" class="vt" text-anchor="middle">SECÇÃO (ampliada)</text>`; }
 
-  // ---------- CORTE A-A (peça inteira) ----------
-  { const s = PT ? 0.8 : 0.85, ox = PT ? 400 : 140, oy = PT ? 225 : 330;
-    const X = a => ox + (a - L / 2) * s * 6, Y = r => oy - r * s;   // largura exagerada 4x para aparecer
+  // ---------- VISTA FRONTAL + CORTE A-A (escala real, mesma escala nas duas) ----------
+  { const s = PT ? 0.9 : 0.8, cx = PT ? 210 : 200, oy = PT ? 238 : 330, ox = PT ? 520 : 560;
+    const R = d => d / 2 * s;
+    // vista frontal: anéis Ø291 (externo), Ø272 (furo); Ø289 / Ø277 em linha fina (rampa e degrau vistos de frente)
+    const ring = r => `M${cx - r},${oy}A${r},${r} 0 1 0 ${cx + r},${oy}A${r},${r} 0 1 0 ${cx - r},${oy}Z`;
+    g += `<path d="${ring(R(M.de))}${ring(R(M.di))}" class="p" fill-rule="evenodd"/>`;
+    g += `<circle cx="${cx}" cy="${oy}" r="${R(M.dTop)}" class="e" style="fill:none"/><circle cx="${cx}" cy="${oy}" r="${R(M.dStep)}" class="e" style="fill:none"/>`;
+    g += `<line x1="${cx - R(M.de) - 12}" y1="${oy}" x2="${cx + R(M.de) + 12}" y2="${oy}" class="ax"/><line x1="${cx}" y1="${oy - R(M.de) - 12}" x2="${cx}" y2="${oy + R(M.de) + 12}" class="ax"/>`;
+    // linha de corte A-A (vertical, no centro)
+    const yA = oy - R(M.de) - 22, yA2 = oy + R(M.de) + 22;
+    g += `<line x1="${cx}" y1="${yA}" x2="${cx}" y2="${yA + 10}" class="p"/><line x1="${cx}" y1="${yA2 - 10}" x2="${cx}" y2="${yA2}" class="p"/>`;
+    g += `<line x1="${cx}" y1="${yA}" x2="${cx + 16}" y2="${yA}" class="p" marker-end="url(#a)"/><line x1="${cx}" y1="${yA2}" x2="${cx + 16}" y2="${yA2}" class="p" marker-end="url(#a)"/>`;
+    g += `<text x="${cx + 22}" y="${yA + 4}" class="t">A</text><text x="${cx + 22}" y="${yA2 + 4}" class="t">A</text>`;
+    g += `<text x="${cx}" y="${yA2 + 26}" class="vt" text-anchor="middle">VISTA FRONTAL</text>`;
+    // corte A-A em escala real (face com o canal para a direita)
+    const X = a => ox + (a - L / 2) * s, Y = r => oy - r * s;
     const half = sg => `<path d="${prof.map(([a, h], i) => `${i ? "L" : "M"}${X(a).toFixed(2)},${Y(sg * (RB + h)).toFixed(2)}`).join("")}Z" class="p"/>`;
-    g += half(1) + half(-1) + `<line x1="${X(-4)}" y1="${oy}" x2="${X(L + 4)}" y2="${oy}" class="ax"/>`;
-    const xe = X(0) - 50, xi = X(0) - 22;
-    g += ext(X(0), Y(RB + H), xe - 6, Y(RB + H)) + ext(X(0), Y(-RB - H), xe - 6, Y(-RB - H)) + dimV(xe, Y(RB + H), Y(-RB - H), `Ø ${f(M.de)}`, -1);
-    g += ext(X(aFlat), Y(RB), xi - 6, Y(RB)) + ext(X(aFlat), Y(-RB), xi - 6, Y(-RB)) + dimV(xi, Y(RB), Y(-RB), `Ø ${f(M.di)}`, -1);
-    g += `<text x="${ox}" y="${Y(-RB - H) + 30}" class="vt" text-anchor="middle">CORTE A-A (largura fora de escala)</text>`; }
+    g += half(1) + half(-1) + `<line x1="${X(-10)}" y1="${oy}" x2="${X(L + 10)}" y2="${oy}" class="ax"/>`;
+    g += ext(X(0), Y(RB), X(L), Y(RB)) + ext(X(0), Y(-RB), X(L), Y(-RB));   // furo visto em corte (linha de fundo)
+    const xe = X(L) + 60, xi = X(L) + 30;
+    g += ext(X(L), Y(RB + H), xe + 6, Y(RB + H)) + ext(X(L), Y(-RB - H), xe + 6, Y(-RB - H)) + dimV(xe, Y(RB + H), Y(-RB - H), `Ø ${f(M.de)}`, 1);
+    g += ext(X(aStep), Y(RB), xi + 6, Y(RB)) + ext(X(aStep), Y(-RB), xi + 6, Y(-RB)) + dimV(xi, Y(RB), Y(-RB), `Ø ${f(M.di)}`, 1);
+    g += ext(X(0), Y(RB + H) - 4, X(0), Y(RB + H) - 26) + ext(X(L), Y(RB + H) - 4, X(L), Y(RB + H) - 26) + dimH(X(0), X(L), Y(RB + H) - 20, f(L));
+    g += `<text x="${ox}" y="${yA2 + 26}" class="vt" text-anchor="middle">CORTE A-A</text>`; }
   return g;
 }
 
-const p = { tipoGen: "custom", desc: "VEDADOR", dint: M.di, dext: M.de, h: M.L,
+const p = { tipoGen: "custom", desc: "VEDADOR", mat: "TEFLON + GR", dint: M.di, dext: M.de, h: M.L,
   customProfile: prof.map(([a, h]) => [-a, RB + h]), customViews: views,
   customNotes: `Vedador Ø${f(M.di)} x Ø${f(M.de)} x ${f(M.L)} · rampa 45° de Ø${f(M.dTop)} a Ø${f(M.di)} · canal ${f(M.gDep)} x ${f(M.gW)} (boca ${f(M.gMouth)}) · cotas entre parênteses = referência · cotas em mm` };
 window.VEDADOR272 = p;

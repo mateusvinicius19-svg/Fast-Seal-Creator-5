@@ -6,6 +6,13 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.23.0 — Perfil novo PSH 108 (PSH 106 com canal raso)
+- Novo gerador **PSH 108** (veio): tudo igual ao PSH 106 (externo sem folga, lábios, calcanhar, chanfros), só o canal com
+  **1/3 da profundidade** do PSH 106 (secção ÷ 6 em vez de secção ÷ 2).
+- O canal mantém o raio do fundo e o ângulo dos flancos do PSH 106 (ex.: 100x120x12 → prof. 1,67, R1,5, 40,1°); por isso a
+  abertura na face fica menor e os lábios mais grossos. "ESPECIAL: profundidade do canal" continua valendo.
+- Programa com cabeçalho `%PSH108`, desenho e imagem do perfil (enviada pelo usuário) na escolha pela imagem, em Veio.
+
 ## 5.22.1 — PSH 103: imagem nova na escolha do perfil
 - Trocada a imagem do PSH 103 em "Escolher pela imagem" (Veio) pela imagem 3D enviada pelo usuário (lábio recuado com O-ring).
 
@@ -411,6 +418,6 @@ Junta as branches paralelas (5.12.0 servidor/celular, 5.7.x Cód. interno/cancel
 
 ## 5.0.0 — 09/11/2026
 - Primeira versão no GitHub (base do que já estava no W: em 09/11/2026).
-- Simulador CNC.html: gera Fagor .PIT + MCS 500 + desenho PDF para PSE/PSH 105/106/107, PSH 103, PSH 117, PSR 102/211,
+- Simulador CNC.html: gera Fagor .PIT + MCS 500 + desenho PDF para PSE/PSH 105/106/107, PSH 103, PSH 108, PSH 117, PSR 102/211,
   DH PSH 129, PSO 109, arruelas (ISO, ciclo com/sem chanfro); Alterar programa (só desbaste); Ver programa.
 - Rotina noturna (`Claude contexto/Rotina/*.ps1`): gerar, revisar, controle, imprimir, regerar, índice de .PIT, pit2mcs.

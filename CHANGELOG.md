@@ -6,6 +6,11 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.21.21 — Tolerância da secção no bloco "Tolerâncias do desenho"
+- Nova linha **Secção** (sem / ± / + / − / + e −) junto de Ø interno, Ø externo e Altura, em todos os perfis com desenho
+  (PSA 108, ciclos, ISO/DP, PSG 101, PSO 109, PSE/PSH, PSR 102/211, DH PSH 129).
+- "sem" = continua a tolerância padrão do perfil (ex.: PSA ±0,1, PSG +0/−0,05, gaxetas pela tabela); escolhendo outra, ela vai para a cota da secção no desenho.
+
 ## 5.21.20 — VEDADOR (272 x 291 x 19): corte A-A refeito e material TEFLON + GR
 - Corte A-A em escala real (sem a largura esticada), com a VISTA FRONTAL (anel Ø291/Ø272 e linha de corte A-A) ao lado.
 - Material do carimbo: TEFLON + GR.

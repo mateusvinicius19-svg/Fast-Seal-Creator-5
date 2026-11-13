@@ -2292,6 +2292,40 @@ function psh110Profile(p){
   if (C.k === "A") return [[0, rm + g.a], o[1], o[2], [-L, C.back[0]], [-L, C.back[1]], i[2], i[1], [0, rm - g.a]];
   return [o[0], o[1], [-L, C.back[0]], [-L, C.back[1]], i[1], i[0], [0, rm - C.notch], [-C.notch, rm], [0, rm + C.notch]];
 }
+// v5.41.0 (usuário 13/11/2026): T2D2 / T2D12 alcançam no máximo 7 mm de profundidade no raio (14 no Ø), contados do lábio da frente
+const PSH110_LIM = 14;
+// quanto o contorno desce (no Ø) a partir do 1º ponto (lábio da frente): sg = +1 externo, −1 interno
+function psh110Depth(pts, sg){ const r0 = pts[0][1]; return 2 * Math.max(...pts.map(q => sg * (r0 - q[1]))); }
+// corta o contorno no raio limite rl (externo: r ≥ rl; interno: r ≤ rl) e segue reto em Z no limite
+function psh110Clamp(pts, rl, sg){
+  const ok = q => sg * (q[1] - rl) >= -1e-9, out = [pts[0]];
+  for (let i = 1; i < pts.length; i++){
+    const a = pts[i - 1], b = pts[i];
+    if (ok(a) !== ok(b)){ const t = (rl - a[1]) / (b[1] - a[1]); out.push([a[0] + (b[0] - a[0]) * t, rl]); }
+    out.push(ok(b) ? b : [b[0], rl]);
+  }
+  const u = out.filter((q, i) => !i || Math.abs(q[0] - out[i - 1][0]) > 1e-9 || Math.abs(q[1] - out[i - 1][1]) > 1e-9);
+  return u.filter((q, i) => !(i > 0 && i < u.length - 1 && Math.abs(u[i - 1][1] - q[1]) < 1e-9 && Math.abs(u[i + 1][1] - q[1]) < 1e-9));   // tira pontos no meio de retas em Z
+}
+// desbaste da intermediária: retas + passadas de contorno escalonadas na parte de trás (sobremetal al + j·ap, do maior para o menor),
+// para não tirar o V de trás de uma vez só (usuário 13/11/2026)
+function psh110Rough(path, stock, mode, feed, ap, al, rn){
+  ap = ap > 0 ? ap : 3; al = al >= 0 ? al : 1.5;
+  const od = mode === "od", sg = od ? 1 : -1, xs = path.map(it => 2 * it.p[1]);
+  const peak = od ? Math.max(...xs) : Math.min(...xs), deep = od ? Math.min(...xs) : Math.max(...xs);
+  const prof = Math.abs(peak - deep) / 2, J = Math.max(0, Math.ceil((prof - al) / ap - 1e-9) - 1);
+  const L = []; let stk = stock;
+  for (let j = J; j >= 0; j--){
+    const sh = al + j * ap, Lj = roughPasses(path, stk, mode, feed, ap, sh, rn);
+    if (j > 0) Lj.unshift(`; (DESBASTE DA PARTE DE TRAS - SOBREMETAL ${fx(sh, 2)})`);   // passadas extras (sobremetal maior); j = 0 é a normal
+    L.push(...Lj);
+    // próximo: começa do nível da última reta desta chamada (as retas não repetem)
+    const step = 2 * ap, sft = 2 * sh; let k = 1, clip = stk;
+    for (;; k++){ const lvl = stk - sg * step * k; if (od ? lvl <= peak + sft : lvl >= peak - sft) break; clip = lvl; }
+    stk = clip;
+  }
+  return L;
+}
 function psh110Mat(p){ const k = psh110Piece(p), m = k === "M" ? (p.matM || "PU") : (p.matF || "NYLON"); return m; }
 function psh110MatLabel(m){ return m === "NYLON" ? "PEAD" : (ARR_MAT[m] ? ARR_MAT[m][0].replace(/ \(.*\)$/, "") : m); }
 GEN.psh110 = {
@@ -2332,14 +2366,20 @@ GEN.psh110 = {
     Lp.push("");
     // ---- externo ----
     Lp.push(...sec("OUTSIDE"), "G0 Z70", tools.ext, ";", ";");
-    const pout = tipPath(extendStart(C.outer, 1.0), r, "right", [-r, -r]);
-    const rOut = roughPasses(pout, bo, "od", "0.160", Number(p.apR), Number(p.alR), r);
+    // intermediária com T2D2 / T2D12: no máximo 14 no Ø de profundidade a partir do lábio da frente (o percurso para no limite)
+    let cOut = C.outer, cIn = C.inner;
+    if (k === "M"){
+      if (tools.ext === "T2D2" && psh110Depth(C.outer, 1) > PSH110_LIM + 1e-9) cOut = psh110Clamp(C.outer, C.outer[0][1] - PSH110_LIM / 2, 1);
+      if (tools.int === "T2D12" && psh110Depth(C.inner, -1) > PSH110_LIM + 1e-9) cIn = psh110Clamp(C.inner, C.inner[0][1] + PSH110_LIM / 2, -1);
+    }
+    const pout = tipPath(extendStart(cOut, 1.0), r, "right", [-r, -r]);
+    const rOut = k === "M" ? psh110Rough(pout, bo, "od", "0.160", Number(p.apR), Number(p.alR), r) : roughPasses(pout, bo, "od", "0.160", Number(p.apR), Number(p.alR), r);
     Lp.push(...rOut, ";( FINISH )", `G0 X${f3(2 * pout[0].p[1])} Z3.000`, `G1 X${f3(2 * pout[0].p[1])} Z${f3(pout[0].p[0])}`, ...tipLines(pout, r, "0.130"));
     const lo = pout[pout.length - 1].p; Lp.push(`G0 X${f3(bo + 1)} Z${f3(lo[0] + 0.2)}`, `G0 X${f3(bo + 1)} Z5.000`, "");
     // ---- interno ----
     Lp.push(...sec("INSIDE"), "G0 Z70", tools.int, ";", ";");
-    const pin = tipPath(extendStart(C.inner, 1.0), r, "left", [-r, r]);
-    if (bi > 0) Lp.push(...roughPasses(pin, bi, "id", "0.140", Number(p.apR), Number(p.alR), r));
+    const pin = tipPath(extendStart(cIn, 1.0), r, "left", [-r, r]);
+    if (bi > 0) Lp.push(...(k === "M" ? psh110Rough(pin, bi, "id", "0.140", Number(p.apR), Number(p.alR), r) : roughPasses(pin, bi, "id", "0.140", Number(p.apR), Number(p.alR), r)));
     Lp.push(";( FINISH )", `G0 X${f3(2 * pin[0].p[1])} Z3.000`, `G1 X${f3(2 * pin[0].p[1])} Z${f3(pin[0].p[0])}`, ...tipLines(pin, r, "0.140"));
     const li = pin[pin.length - 1].p; Lp.push(`G0 X${f3(Math.max(0, xMin - 2))} Z${f3(li[0] + 0.2)}`, `G0 X${f3(Math.max(0, xMin - 2))} Z5.000`, "");
     // ---- corte: na altura da peça (como nos programas VPA01B) ----
@@ -2354,6 +2394,11 @@ GEN.psh110 = {
     const g = psh110Geom(p), m = [];
     if (!(g.D > g.d)) m.push("Ø alojamento tem que ser maior que a haste");
     if (!(g.S >= 3)) m.push("secção muito pequena para chevron (mín. 3)");
+    if (psh110Piece(p) === "M" && psh110Mat(p) === "PU"){   // v5.41.0: T2D2 / T2D12 vão até 14 no Ø (7 no raio) de profundidade
+      const C = psh110Contours(p), dO = psh110Depth(C.outer, 1), dI = g.d >= 40 ? psh110Depth(C.inner, -1) : 0, w = [];
+      if (dO > PSH110_LIM + 1e-9) w.push(`externo (T2D2) ${fmtN(dO, 2)}`); if (dI > PSH110_LIM + 1e-9) w.push(`interno (T2D12) ${fmtN(dI, 2)}`);
+      if (w.length) m.push(`profundidade no Ø acima do limite de ${PSH110_LIM} da ferramenta (7 no raio): ${w.join(", ")} — o programa para em ${PSH110_LIM} e o V de trás fica incompleto (precisa de outra ferramenta)`);
+    }
     { const zs = -(g.L + g.pM / 2) + (g.S - g.sh) / 2; if (zs > -0.3) m.push("anel do meio baixo demais para os lábios: diminua a quantidade de anéis"); }
     if (!(g.L > Math.max(g.dM, g.dF) + 0.5)) m.push(`altura ${fmtN(g.L, 2)} por peça é pequena para o V (${fmtN(Math.max(g.dM, g.dF), 2)}): diminua a quantidade de intermediárias`);
     return m.length ? "ATENÇÃO: " + m.join("; ") + "." : "";

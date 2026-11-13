@@ -6,6 +6,14 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.41.0 — PSH 110: limite de profundidade da T2D2/T2D12 e desbaste da parte de trás da intermediária
+- Pedido do usuário: na intermediária em PU, a **T2D2** (externo) e a **T2D12** (interno) vão no máximo **7 mm de profundidade no raio
+  (14 no Ø)**, contados do lábio da frente. Acima disso o percurso para no limite (segue reto em Z) e aparece **ATENÇÃO** com a
+  profundidade pedida (ex.: 200x260 → 24,49 no Ø) — o V de trás fica incompleto e precisa de outra ferramenta.
+- **Desbaste da parte de trás** da intermediária em passadas de contorno escalonadas (sobremetal 1,5 + 3 mm por passada, do maior
+  para o menor) em vez de uma passada só — ex.: 140x170 (S 15) → passadas com 4,5 e 1,5 de sobremetal antes do acabamento.
+  Seções pequenas (ex.: 50x65) continuam iguais.
+
 ## 5.40.1 — PSH 110: reta em Z no fim do externo e do interno da intermediária
 - Pedido do usuário: na intermediária, o V de trás vai até a face de trás (borda do paralelo) e segue **reto em Z mais 0,6**, no
   externo e no interno; o desbaste termina nesse mesmo Z (como nos programas do Fast Seal). Ex.: 50x65x35 → externo X59,375 e

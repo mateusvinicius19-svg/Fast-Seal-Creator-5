@@ -6,6 +6,10 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.28.1 — PSH 124 (DHR): os dois chanfros internos a 30°
+- Pedido do usuário: chanfro interno da FRENTE também a **30° com o eixo** (antes 45°), igual ao de trás. Os dois campos
+  são o tamanho no raio; em Z ficam ÷ tg30 (ex.: 0,8 no raio → 1,39 em Z). Programa (T4D4), desenho e nota atualizados.
+
 ## 5.28.0 — Perfil novo PSH 124 (DHR): PSE 108 (DP) invertido
 - Novo gerador **PSH 124 (DHR)** (veio): anel de PTFE para HASTE, igual ao PSE 108 (DP) só que invertido — os chanfros
   GRANDES ficam no INTERNO e o pequeno no EXTERNO (O-ring ativador por fora).

@@ -1228,12 +1228,12 @@ GEN.psr211 = Object.assign({}, GEN.psh105, { name: "PSR 211",
 // PSE 103 (usuário 12/11/2026): PSE 105 (lábio externo recuado, folga externa 0,7) + O-ring do PSH/PSE 107 no canal (centrado no Ø médio)
 GEN.pse103 = Object.assign({}, GEN.pse105, { name: "PSE 103", params: [...GEN.pse105.params.filter(f => !["fO","fI"].includes(f[0])).map(f => [f[0], f[1].replace("PSE 105", "PSE 103"), f[2]]), ["oc","O-ring: secção (1,78 · 2,62 · 3,53 · 5,33 · 6,99 — vazio = automático)",""],["oID","O-ring: Ø interno (vazio = Ø médio − secção)",""]] });
 // ---- PSH 124 (DHR), usuário 12/11/2026: igual ao PSE 108 (DP) só que invertido — anel de PTFE para HASTE: chanfros GRANDES no
-// INTERNO (frente 45°; trás com o mesmo tamanho no raio, mas a 30° com o eixo = o máximo que a T4D4 faz nas costas) e o chanfro
+// INTERNO (frente e trás a 30° com o eixo — pedido do usuário; 30° é também o máximo que a T4D4 faz nas costas) e o chanfro
 // pequeno no EXTERNO (como o interno do DP: compr. em Z × ângulo, 60° = 30° com o eixo). O-ring ativador por fora (alojamento DH).
 const DHR_BACK = 30;   // ângulo do chanfro interno de trás com o eixo (T4D4: máximo 30° nas costas)
 function dhrGeom(p){
   const tb = TAN(DHR_BACK), cE = p.chE / TAN(p.angE > 0 && p.angE < 90 ? p.angE : 60);   // chanfro externo: chE em Z, cE no raio
-  return { cE, rF: p.chF, zF: p.chF, rB: p.chT, zB: p.chT / tb, tb };   // interno: frente 45° (chF x chF); trás: chT no raio, chT / tg30 em Z
+  return { cE, rF: p.chF, zF: p.chF / tb, rB: p.chT, zB: p.chT / tb, tb };   // interno (usuário 12/11/2026): frente e trás a 30° com o eixo — chF / chT no raio, ÷ tg30 em Z
 }
 function dhrProfile(p){
   const ri = p.dint / 2, re = p.dext / 2, h = p.h, G = dhrGeom(p);
@@ -1244,7 +1244,7 @@ function dhrProfile(p){
 }
 GEN.dhr = { name: "PSH 124 (DHR)",
   main: [["dint","Diâmetro interno – haste (mm)",50],["dext","Diâmetro externo (mm)",57.5],["h","Altura (mm)",4],
-         ["chF","Chanfro interno frente 45° (mm)",0.8],["chT","Chanfro interno trás, no raio (mm) — feito a 30° com o eixo",0.8],
+         ["chF","Chanfro interno frente, no raio (mm) — 30° com o eixo",0.8],["chT","Chanfro interno trás, no raio (mm) — 30° com o eixo",0.8],
          ["chE","Chanfro externo, compr. em Z (mm)",0.2],["angE","Ângulo do chanfro externo (°)",60],["rpt","Nº de repetições RPT (vazio = 0)",""]],
   params: GEN.iso.params,
   build(p){
@@ -1254,8 +1254,8 @@ GEN.dhr = { name: "PSH 124 (DHR)",
       2: p.dext - 2*p.chE*kE - 2*p.prolF*kE, 3: p.prolF, 4: p.dext, 5: -p.chE, 6: -(p.h - p.chE),
       7: p.dext - 2*p.chE*kE - 2*p.prolT*kE, 8: -(p.h + p.prolT), 9: -(p.h + p.prolT + p.parT),
       10: p.dext + p.sobra, 11: p.dint - p.sobra, 13: p.dext + p.recE,
-      // interno (chanfros grandes: frente 45°, trás a 30° com o eixo)
-      15: p.dint + 2*G.rF + 2*p.prolF, 16: p.prolF, 17: p.dint, 18: -G.zF, 19: -(p.h - G.zB),
+      // interno (chanfros grandes: frente e trás a 30° com o eixo)
+      15: p.dint + 2*G.rF + 2*p.prolF*G.tb, 16: p.prolF, 17: p.dint, 18: -G.zF, 19: -(p.h - G.zB),
       20: p.dint + 2*G.rB + 2*p.prolT*G.tb, 21: -(p.h + p.prolT), 22: -(p.h + p.prolT + p.parT), 23: p.dint - p.recI,
       24: p.zAp, 26: p.zSeg, 27: p.fExt, 28: p.fInt, 29: 0, 30: -p.h - p.cDZ, 31: p.dint - p.cPass, 32: p.fBed,
       33: p.dext + p.cPos, 34: p.zEnt
@@ -3518,9 +3518,9 @@ function drawingSVG(p){  const PT = state.orient === "portrait";
     g += `<line x1="${M(G.zLip)}" y1="${dyI}" x2="${dzf}" y2="${dyI}" class="e" stroke-dasharray="3 3"/><text x="${dzf + 6}" y="${dyI - 4}" class="tn">${fmtN(p.ab, 0)}°</text>`;
     g += `<text x="${M(-p.b) - 6}" y="${yS + 14}" class="tn" text-anchor="end">${fmtN(p.af, 0)}°</text>`;
   } else if (p.tipoGen === "semch") {   // v5.21.17: sem chanfro — cantos vivos, sem chamadas
-  } else if (p.tipoGen === "dhr") {    // PSH 124 (DHR): chanfros grandes no interno (frente 45°, trás 30° com o eixo), pequeno no externo
+  } else if (p.tipoGen === "dhr") {    // PSH 124 (DHR): chanfros grandes no interno (frente e trás a 30° com o eixo), pequeno no externo
     const G = dhrGeom(p);
-    g += call(DX(-G.zF / 2), DY(ri + G.rF / 2), dzf - 28, dyI + 18, `${fmtN(G.zF, 2)} x 45°`);
+    g += call(DX(-G.zF / 2), DY(ri + G.rF / 2), dzf - 28, dyI + 18, `${fmtN(G.rF, 2)} x ${fmtN(DHR_BACK, 0)}° (eixo)`);
     g += call(DX(-(h - G.zB / 2)), DY(ri + G.rB / 2), dzb + 16, dyI + 18, `${fmtN(G.rB, 2)} x ${fmtN(DHR_BACK, 0)}° (eixo)`);
     g += call(DX(-p.chE / 2), DY(re - G.cE / 2), dzf - 28, dyE - 6, `${fmtN(p.chE, 2)} x ${fmtN(p.angE || 60, 0)}°`);
     g += call(DX(-(h - p.chE / 2)), DY(re - G.cE / 2), dzb + 16, dyE + 20, `${fmtN(p.chE, 2)} x ${fmtN(p.angE || 60, 0)}°`);
@@ -3551,7 +3551,7 @@ function drawingSVG(p){  const PT = state.orient === "portrait";
     g += `<text x="${cx}" y="${by + bh + 31}" class="n" text-anchor="middle">${psgAcr(p) > 0 ? "serra " + fmtN(PSG_SERRA, 1) + " mm · usinado +" + fmtN(psgAcr(p), 1) + " nos Ø" : "corte sem perda"}</text><text x="${cx}" y="${by + bh + 43}" class="n" text-anchor="middle">feito no acabamento</text>`;
   }
   }
-  const notes = p.tipoGen === "custom" ? [p.customNotes || "cotas em mm"] : p.tipoGen === "pso" ? [`O-ring usinado · secção Ø${fv3(p.sec)} · Ø interno ${fv3(p.dint)} · Ø externo ${fv3(p.dint + 2 * p.sec)} · cotas em mm`] : p.tipoGen === "psr102" ? (() => { const G = psr102Geom(p); return [`Ponta Ø${fv3(G.tip)} (−${fv3(G.ap)}) · calcanhar int. Ø${fv3(G.calc)} (+${fv3(G.fi)}) · lábio na face Ø${fv3(G.lipf)} · ponta ${fv3(G.tth)} · rampa ${fv3(G.ramp)} · externo sem folga · secção ±${fv3(G.tol.sec, 1)} · cotas em mm`]; })() : ["pse106","psh106","psh108","psh117","psh105","pse105","pse107","psh107","psh103","pse103","pse118","psh121","psh125","psr211"].includes(p.tipoGen) ? (() => { const G = p.tipoGen === "psr211" ? psr211Geom(p) : pseFscGeom(p); return [`Lábio ext. Ø${fv3(G.extAp)} (+${fv3(G.extAp - p.dext)} ±${fv3(G.tol.D)}) · ${G.PSH ? `calcanhar int. Ø${fv3(G.intCalc)} (+${fv3(G.intCalc - p.dint)} ±${fv3(G.tol.B)})` : `calcanhar ext. Ø${fv3(G.extCalc)} (−${fv3(p.dext - G.extCalc)} ±${fv3(G.tol.C)})`} · lábio int. Ø${fv3(G.intAp)} (−${fv3(p.dint - G.intAp)} ±${fv3(G.tol.A)}) · ${G.PSH ? "externo" : "interno"} sem folga ·${G.O107 ? ` O-ring ${fv3(G.OC)} x Ø int. ${fv3(G.Dm - G.OC)} ·` : ""}${G.P117 ? ` V Ø${fv3(G.Vd)} ·` : ""} canal ${G.hb > 0 ? "fundo reto, 2x " : ""}R${fv3(G.Rg)} ±${fv3(G.tol.F)} · secção ±${fv3(G.tol.sec, 1)} · cotas em mm`]; })() : p.tipoGen === "lip" ? [`Chanfro externo: ${fmtN(p.ch,2)} x 45° (2 cantos)   ·   Lábio interno: flanco ${fmtN(p.af,0)}° com o degrau, base ${fmtN(p.ab,0)}°   ·   Degrau ${fmtN(p.h2,3)} x ${fmtN(p.b,3)}   ·   Cotas em mm`] : p.tipoGen === "semch" ? [`Sem chanfro (cantos vivos)   ·   Ciclo ${xround(p.n, 0)} pç   ·   Cotas em mm`] : p.tipoGen === "dhr" ? (() => { const G = dhrGeom(p); return [`PTFE para haste (DHR) · Chanfro interno frente: ${fmtN(G.zF,2)} x 45° · trás: ${fmtN(G.rB,2)} no raio x ${fmtN(DHR_BACK,0)}° com o eixo (${fmtN(G.zB,2)} em Z) · Chanfro externo (frente e trás): ${fmtN(p.chE,2)} em Z x ${fmtN(p.angE || 60,0)}° · O-ring ativador por fora (alojamento ISO 7425/2) · Cotas em mm`]; })() : [`Chanfro externo frente: ${fmtN(p.chF,2)}${(p.angE || 45) !== 45 ? " em Z" : ""} x ${fmtN(p.angE || 45,0)}°   ·   Chanfro externo trás: ${fmtN(p.chT,2)}${(p.angE || 45) !== 45 ? " em Z" : ""} x ${fmtN(p.angE || 45,0)}°   ·   ${p.angIB && p.angIB !== (p.angLbl ?? p.angI) ? `Chanfro interno: frente ${fmtN(p.chI,2)} em Z x ${fmtN(p.angLbl ?? p.angI,0)}° · trás ${fmtN(p.chI,2)} em Z x ${fmtN(p.angIB,0)}°` : `Chanfro interno (frente e trás): ${fmtN(p.chI,2)} em Z x ${fmtN(p.angLbl ?? p.angI,0)}°`}   ·   Cotas em mm`];
+  const notes = p.tipoGen === "custom" ? [p.customNotes || "cotas em mm"] : p.tipoGen === "pso" ? [`O-ring usinado · secção Ø${fv3(p.sec)} · Ø interno ${fv3(p.dint)} · Ø externo ${fv3(p.dint + 2 * p.sec)} · cotas em mm`] : p.tipoGen === "psr102" ? (() => { const G = psr102Geom(p); return [`Ponta Ø${fv3(G.tip)} (−${fv3(G.ap)}) · calcanhar int. Ø${fv3(G.calc)} (+${fv3(G.fi)}) · lábio na face Ø${fv3(G.lipf)} · ponta ${fv3(G.tth)} · rampa ${fv3(G.ramp)} · externo sem folga · secção ±${fv3(G.tol.sec, 1)} · cotas em mm`]; })() : ["pse106","psh106","psh108","psh117","psh105","pse105","pse107","psh107","psh103","pse103","pse118","psh121","psh125","psr211"].includes(p.tipoGen) ? (() => { const G = p.tipoGen === "psr211" ? psr211Geom(p) : pseFscGeom(p); return [`Lábio ext. Ø${fv3(G.extAp)} (+${fv3(G.extAp - p.dext)} ±${fv3(G.tol.D)}) · ${G.PSH ? `calcanhar int. Ø${fv3(G.intCalc)} (+${fv3(G.intCalc - p.dint)} ±${fv3(G.tol.B)})` : `calcanhar ext. Ø${fv3(G.extCalc)} (−${fv3(p.dext - G.extCalc)} ±${fv3(G.tol.C)})`} · lábio int. Ø${fv3(G.intAp)} (−${fv3(p.dint - G.intAp)} ±${fv3(G.tol.A)}) · ${G.PSH ? "externo" : "interno"} sem folga ·${G.O107 ? ` O-ring ${fv3(G.OC)} x Ø int. ${fv3(G.Dm - G.OC)} ·` : ""}${G.P117 ? ` V Ø${fv3(G.Vd)} ·` : ""} canal ${G.hb > 0 ? "fundo reto, 2x " : ""}R${fv3(G.Rg)} ±${fv3(G.tol.F)} · secção ±${fv3(G.tol.sec, 1)} · cotas em mm`]; })() : p.tipoGen === "lip" ? [`Chanfro externo: ${fmtN(p.ch,2)} x 45° (2 cantos)   ·   Lábio interno: flanco ${fmtN(p.af,0)}° com o degrau, base ${fmtN(p.ab,0)}°   ·   Degrau ${fmtN(p.h2,3)} x ${fmtN(p.b,3)}   ·   Cotas em mm`] : p.tipoGen === "semch" ? [`Sem chanfro (cantos vivos)   ·   Ciclo ${xround(p.n, 0)} pç   ·   Cotas em mm`] : p.tipoGen === "dhr" ? (() => { const G = dhrGeom(p); return [`PTFE para haste (DHR) · Chanfros internos a ${fmtN(DHR_BACK,0)}° com o eixo: frente ${fmtN(G.rF,2)} no raio (${fmtN(G.zF,2)} em Z) · trás ${fmtN(G.rB,2)} no raio (${fmtN(G.zB,2)} em Z) · Chanfro externo (frente e trás): ${fmtN(p.chE,2)} em Z x ${fmtN(p.angE || 60,0)}° · O-ring ativador por fora (alojamento ISO 7425/2) · Cotas em mm`]; })() : [`Chanfro externo frente: ${fmtN(p.chF,2)}${(p.angE || 45) !== 45 ? " em Z" : ""} x ${fmtN(p.angE || 45,0)}°   ·   Chanfro externo trás: ${fmtN(p.chT,2)}${(p.angE || 45) !== 45 ? " em Z" : ""} x ${fmtN(p.angE || 45,0)}°   ·   ${p.angIB && p.angIB !== (p.angLbl ?? p.angI) ? `Chanfro interno: frente ${fmtN(p.chI,2)} em Z x ${fmtN(p.angLbl ?? p.angI,0)}° · trás ${fmtN(p.chI,2)} em Z x ${fmtN(p.angIB,0)}°` : `Chanfro interno (frente e trás): ${fmtN(p.chI,2)} em Z x ${fmtN(p.angLbl ?? p.angI,0)}°`}   ·   Cotas em mm`];
   if (p.tipoGen === "psg101") notes[0] = notes[0].replace(/\s*·\s*Cotas em mm/i, "") + `   ·   Corte ${fmtN(psgAng(p), 0)}°${psgAcr(p) > 0 ? ` (serra ${fmtN(PSG_SERRA, 1)})` : " sem perda"}   ·   Cotas em mm`;
   // DP (PSE 108) e DH (PSH 129): anel ativador PSO 109 (O-ring Parker) escolhido pelo alojamento do catálogo
   if (DESENHO_ORING) try { const al = state.alojAtiv;

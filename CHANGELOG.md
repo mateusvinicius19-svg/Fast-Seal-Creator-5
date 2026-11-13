@@ -6,6 +6,9 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.23.4 — PSH 108: imagem 3D nova
+- Imagem do PSH 108 na escolha pela imagem trocada pela imagem 3D enviada pelo usuário (canal raso de fundo reto).
+
 ## 5.23.3 — PSH 108: imagem sem o texto
 - Imagem do PSH 108 na escolha pela imagem recortada sem o "PSH108" escrito (o código já aparece embaixo do quadro).
 

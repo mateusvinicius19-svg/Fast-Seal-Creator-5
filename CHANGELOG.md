@@ -6,6 +6,14 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.35.0 — PSE 125 (DPR): mesma tabela padrão e tolerância do PSH 129
+- Pedido do usuário: as medidas padrão do PSH 129 valem também para o PSE 125 (DPR). Altura (A), secção do rebaixo
+  frontal (C) e profundidade do rebaixo (D) vazias = tabela pela secção (B), proporcional fora da tabela; E = 10° (padrão).
+- Tolerância padrão dos diâmetros pelo tamanho (Ø interno e Ø externo cada um pelo seu): até Ø50 → 0,2 · até Ø100 → 0,3 ·
+  até Ø200 → 0,4 · até Ø300 → 0,6 · acima → 0,8. Como é pistão (espelho do DH), fica **para mais: +valor/0** (antes +0,13/0).
+  Altura 0/−0,1.
+- Rotina em lote (`gerar.ps1`) usa o mesmo para o PSE 125.
+
 ## 5.34.0 — PSH 129 (DH): linha da secção 6,5 e tolerância dos diâmetros pelo tamanho
 - Tabela padrão ganhou a linha **secção 6,5 → A 8 · C 4 · D 2,8** (pedido do usuário). Entre 5 e 6,5 fica proporcional
   (ex.: 5,75 → C 3,75); acima de 6,5, proporcional à linha de 6,5 (ex.: 8 → A 9,846 · C 4,923 · D 3,446).

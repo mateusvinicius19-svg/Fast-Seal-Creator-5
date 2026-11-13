@@ -1290,6 +1290,7 @@ GEN.dhr = { name: "PSH 124 (DHR)",
 // (encosta no cilindro), degrau na face da frente por fora, O-ring ativador por DENTRO. Interno liso com chanfro nos 2 cantos
 // a 30° com o eixo (a T4D4 faz no máximo 30° nas costas; mesmo critério do PSH 124). Entradas como no DH, espelhadas.
 function dprGeom(p){
+  lipFill(p);   // v5.35.0 (usuário 13/11/2026): mesma tabela padrão do PSH 129 (A altura · C secção do rebaixo · D profundidade)
   const Dint = p.dext - 2 * p.sec, Dstep = Dint + 2 * p.h2, drop = (p.dext - Dstep) / 2;
   const zLip = -(p.b + drop * TAN(p.af - 90));                 // bico do lábio (Z negativo a partir da face do degrau)
   const rise = (p.h + zLip) * TAN(p.ab), tb = TAN(30);
@@ -1302,8 +1303,8 @@ function dprProfile(p){
   return m.map(([z, r]) => [-H - z, r]);
 }
 GEN.dpr = { name: "PSE 125 (DPR)",
-  main: [["dext","E · Ø externo (bico) (mm)",100],["sec","B · Secção (mm)",6.5],["h","A · Altura (mm)",7.9],
-         ["h2","C · Altura do degrau (mm)",4.5],["b","D · Largura do degrau (mm)",3.247],["ch","Chanfro interno, no raio (mm) — 30° com o eixo",0.5],
+  main: [["dext","Ø externo (bico) (mm)",100],["sec","B · Secção total (mm)",6.5],["h","A · Altura (vazio = tabela padrão)",""],
+         ["h2","C · Secção do rebaixo frontal (vazio = tabela)",""],["b","D · Profundidade do rebaixo (vazio = tabela)",""],["ch","Chanfro interno, no raio (mm) — 30° com o eixo",0.5],
          ["rpt","Nº de repetições RPT (vazio = 0)",""],["desc","Descrição (desenho / arquivo)","PSE 125 (DPR)"],
          ["matA","Material","PU"],["bi","Bucha Ø interno (vazio = automática PU)",""],["bo","Bucha Ø externo (vazio = automática PU)",""]],
   params: GEN.lip.params,
@@ -1311,6 +1312,7 @@ GEN.dpr = { name: "PSE 125 (DPR)",
     const g = dprGeom(p), X = v => fx(v, 3), c = p.ch;
     const rpt = (p.rpt === "" || p.rpt === null || isNaN(p.rpt)) ? "0" : gen15(p.rpt);
     const bu = lipBucha(Object.assign({}, p, { dint: g.Dint }), { Dext: p.dext }), zR = -(p.h + p.prolT + p.parT);
+    { const d = dhPadrao(Number(p.sec)); for (const k of ["h", "h2", "b"]){ const el = document.querySelector("#genBox [data-k=" + k + "]"); if (el && d) el.placeholder = "tabela: " + fmtN(d[k], 3); } }
     const roughOD = [], roughID = [];
     for (const x of roughLevels(bu.bo, p.dext, 1)) roughOD.push("G00 X" + X(x), "G01 Z" + X(zR) + " F" + X(p.fExt), "G01 X" + X(x + 1), "G00 Z" + X(p.zEnt));
     for (const x of lipIdLevels(bu.bi, g.Dint)) roughID.push("G00 X" + X(x) + " Z" + X(p.zEnt), "G01 Z" + X(zR) + " F" + X(p.fInt), "G01 X" + X(x - 1), "G00 Z" + X(p.zEnt));
@@ -1521,10 +1523,8 @@ function readParams(){
   // DH PSH 129: diâmetros para menos quando o campo está vazio. v5.34.0 (usuário 13/11/2026): pelo diâmetro, valor cheio
   // (sem o × 2/3): até 50 → 0/−0,2 · até 100 → −0,3 · até 200 → −0,4 · até 300 → −0,6 · acima de 300 → −0,8. Altura 0/−0,1.
   if ($("genType").value === "lip") lipTolFill(p);
-  // PSE 125 (DPR): espelho do DH (0/−0,2) — diâmetros +0,2/0 (pistão: para mais) e altura 0/−0,1 quando o campo está vazio
-  if ($("genType").value === "dpr"){
-    for (const pre of ["ti", "te", "th"]) if ((p[pre + "S"] === "" || p[pre + "S"] === undefined) && (p[pre + "I"] === "" || p[pre + "I"] === undefined)){ if (pre === "th"){ p.thS = 0; p.thI = -0.1; } else { p[pre + "S"] = dTol(0.2); p[pre + "I"] = 0; } }
-  }
+  // PSE 125 (DPR): espelho do DH — mesma tolerância pelo diâmetro (v5.35.0), mas para mais (pistão): +0,2…+0,8 / 0; altura 0/−0,1
+  if ($("genType").value === "dpr") lipTolFill(p);
   // PSH 124 (DHR): espelho do DP (que é +0,1/0 nos diâmetros) — diâmetros 0/−0,1 e altura 0/−0,1 quando o campo está vazio
   if ($("genType").value === "dhr"){
     for (const pre of ["ti", "te", "th"]) if ((p[pre + "S"] === "" || p[pre + "S"] === undefined) && (p[pre + "I"] === "" || p[pre + "I"] === undefined)){ p[pre + "S"] = 0; p[pre + "I"] = pre === "th" ? -0.1 : -dTol(0.1); }
@@ -1554,7 +1554,7 @@ function saveForm(){
 function generate(fromInput){
   if (state.tolResetPending && fromInput){ state.tolResetPending = false; resetTolDefaults(); }   // mexeu na peça depois de salvar = item novo
   const type = $("genType").value, g = GEN[type], p = readParams();
-  p.tipoGen = type; if (isPSG(type)) p.angE = psgAngE(p); if (type === "lip"){ lipFill(p); p.dext = p.dint + 2 * p.sec; } if (type === "dpr") p.dint = p.dext - 2 * p.sec; if (type === "pso"){ p.dext = p.dint + 2 * p.sec; p.h = p.sec; }
+  p.tipoGen = type; if (isPSG(type)) p.angE = psgAngE(p); if (type === "lip"){ lipFill(p); p.dext = p.dint + 2 * p.sec; } if (type === "dpr"){ lipFill(p); p.dint = p.dext - 2 * p.sec; } if (type === "pso"){ p.dext = p.dint + 2 * p.sec; p.h = p.sec; }
   for (const [k] of g.main.concat(g.params)) if (!TEXT_KEYS.has(k) && !OPT_KEYS.has(k) && (p[k] === "" || isNaN(p[k]))) { $("genMsg").textContent = "Preencha: " + k; return; }
   const alojTxt = applyAloj(p);
   // v5.17.0 (usuário 11/11/2026): T8D8 (bedame 1 mm) corta secção de no máximo 14,8 → acima disso corta com a T6D16 (bedame 2 mm).
@@ -3463,10 +3463,12 @@ function dhPadrao(sec){
   else { const i = T.findIndex(t => t[0] >= sec), a = T[i - 1], b = T[i], f = (sec - a[0]) / (b[0] - a[0]); k = a.map((v, j) => v + (b[j] - v) * f); }
   return { h: r(k[1]), h2: r(k[2]), b: r(k[3]) };
 }
-function lipTolFill(p){   // usado pelo formulário e pelo gerar.ps1 (rotina em lote)
+function lipTolFill(p){   // PSH 129 (DH) e PSE 125 (DPR); usado pelo formulário e pelo gerar.ps1 (rotina em lote)
   const dhTol = d => d <= 50 ? 0.2 : d <= 100 ? 0.3 : d <= 200 ? 0.4 : d <= 300 ? 0.6 : 0.8;
-  const dia = { ti: Number(p.dint) || 0, te: (Number(p.dint) || 0) + 2 * (Number(p.sec) || 0) };
-  for (const pre of ["ti", "te", "th"]) if ((p[pre + "S"] === "" || p[pre + "S"] === undefined) && (p[pre + "I"] === "" || p[pre + "I"] === undefined)){ p[pre + "S"] = 0; p[pre + "I"] = pre === "th" ? -0.1 : -dhTol(dia[pre]); }
+  const pist = (p.tipoGen || $("genType").value) === "dpr", s = Number(p.sec) || 0;   // DPR (pistão): input = Ø externo, tolerância para mais
+  const dia = pist ? { ti: (Number(p.dext) || 0) - 2 * s, te: Number(p.dext) || 0 } : { ti: Number(p.dint) || 0, te: (Number(p.dint) || 0) + 2 * s };
+  for (const pre of ["ti", "te", "th"]) if ((p[pre + "S"] === "" || p[pre + "S"] === undefined) && (p[pre + "I"] === "" || p[pre + "I"] === undefined)){
+    if (pre === "th"){ p.thS = 0; p.thI = -0.1; } else if (pist){ p[pre + "S"] = dhTol(dia[pre]); p[pre + "I"] = 0; } else { p[pre + "S"] = 0; p[pre + "I"] = -dhTol(dia[pre]); } }
   return p;
 }
 function lipFill(p){

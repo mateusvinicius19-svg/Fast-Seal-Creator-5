@@ -6,6 +6,13 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.43.0 — Arruelas / PSG: desbaste em Z sem ir "até o meio e de novo"
+- Pedido do usuário (PSG 101, já corrigido antes na 5.20.2 para peças até 10 mm): peça de 9,7 de altura dá 11,25 mm de
+  desbaste em Z e saía em 2 etapas (até o meio da peça e depois de novo até o fim). Agora até **20 mm** (o máximo por etapa)
+  o desbaste em Z vai **de uma vez**; só acima disso divide em etapas de até 20 mm (pelo menos 2).
+- Vale para PSA 108, PSA 109, PSG 101/103/104 (não PU, que já ia de uma vez). Campo `zMin` padrão 20 e nunca menor que o
+  máximo por etapa (formulários salvos com 10 também passam a usar 20).
+
 ## 5.42.0 — PSE 108 (DP): tolerância dos diâmetros maior, igual ao PSE 125
 - Pedido do usuário: tolerância padrão dos diâmetros do PSE 108 (campo vazio), cada Ø pelo seu tamanho, para mais:
   até Ø50 → +0,2/0 · até Ø100 → +0,3/0 · até Ø200 → +0,4/0 · até Ø300 → +0,6/0 · acima → +0,8/0 (antes +0,07/0 em todos).

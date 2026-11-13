@@ -6,6 +6,11 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.32.2 — PSA 109: canal da face mais fundo
+- Pedido do usuário ("canal muito raso"): a profundidade padrão do canal passa a ser **12 % da altura** e o raio sai da conta
+  para o arco caber entre os paralelos (ex.: 52 x 57,1 x 2,9 → prof. 0,35 e R1,34; antes 0,21 e R2,04).
+- Profundidade digitada = usada; raio digitado (sem profundidade) = a profundidade sai da conta.
+
 ## 5.32.1 — PSA 109: paralelo na face junto ao externo e ao interno
 - Pedido do usuário: a face do PSA 109 tem um **paralelo** (parte reta) de **10 % da secção** junto ao externo e outro junto ao
   interno (medidos depois do chanfro da frente); o arco do raio fica entre os dois. Campo novo "Paralelo na face" (vazio = 10 %).

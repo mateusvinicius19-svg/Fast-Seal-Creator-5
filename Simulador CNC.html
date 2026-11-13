@@ -2122,9 +2122,11 @@ function psa109Geom(p){
   // digitada, o raio é que sai da conta.
   const aE = p.angE > 0 && p.angE < 90 ? p.angE : 45, pL = opt(p.pL) ?? xround(0.1 * sec, 3);
   const rOut = re - cEf * TAN(aE) - pL, rIn = ri + cIf / TAN(60) + pL, a = Math.max(0, (rOut - rIn) / 2), rc = (rOut + rIn) / 2;
-  let R, d; const dIn = opt(p.pF);
-  if (dIn !== null && dIn > 0){ d = dIn; R = xround((a * a + d * d) / (2 * d), 3); }
-  else { R = Math.max(opt(p.rF) ?? xround(0.8 * sec, 3), a); d = a > 0 ? xround(R - Math.sqrt(R * R - a * a), 3) : 0; }
+  // v5.32.2 (usuário 12/11/2026, "canal muito raso"): profundidade padrão = 12 % da altura e o raio sai da conta;
+  // raio digitado (sem profundidade) → a profundidade sai da conta
+  let R, d; const dIn = opt(p.pF), rTyp = opt(p.rF);
+  if (dIn === null && rTyp !== null && rTyp > 0){ R = Math.max(rTyp, a); d = a > 0 ? xround(R - Math.sqrt(R * R - a * a), 3) : 0; }
+  else { d = (dIn !== null && dIn > 0) ? dIn : xround(0.12 * p.h, 3); R = xround((a * a + d * d) / (2 * d), 3); }
   return { sec, R, d, a, rc, zc: R - d, cE, cI, cEf, cIf, pL };
 }
 function psa109Profile(p){
@@ -2146,7 +2148,7 @@ GEN.psa109 = {
   main: (() => { const m = GEN.psa108.main.filter(f => f[0] !== "n").map(f =>
       f[0] === "chE" ? ["chE", "Chanfro externo de TRÁS 45° (vazio = sugestão)", ""] : f[0] === "chI" ? ["chI", "Chanfro interno de TRÁS 30°, em Z (vazio = sugestão)", ""] : f);
     m.splice(m.findIndex(f => f[0] === "chI") + 1, 0, ["chEF", "Chanfro externo da FRENTE 45° (vazio = metade do de trás)", ""], ["chIF", "Chanfro interno da FRENTE 30°, em Z (vazio = metade do de trás)", ""],
-      ["pL", "Paralelo na face, no externo e no interno (vazio = 10 % da secção)", ""], ["rF", "Raio na face (vazio = 4/5 da secção)", ""], ["pF", "Profundidade do canal (vazio = sai do raio e dos paralelos)", ""]);
+      ["pL", "Paralelo na face, no externo e no interno (vazio = 10 % da secção)", ""], ["pF", "Profundidade do canal (vazio = 12 % da altura)", ""], ["rF", "Raio na face (vazio = sai da profundidade e dos paralelos)", ""]);
     return m; })(),
   params: GEN.psa108.params,
   build(p){

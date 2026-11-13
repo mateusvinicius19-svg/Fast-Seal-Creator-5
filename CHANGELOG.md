@@ -6,6 +6,12 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.39.1 — PSH 110: nomes das peças (base, intermediária, tampa)
+- Pedido do usuário: a peça do meio passa a se chamar **INTERMEDIÁRIA**; a do canal (entalhe) frontal, **TAMPA** (B); a do ângulo
+  grande na face (ponta em V), **BASE** (A). Mudou no seletor da peça, nos campos (quantidade e materiais), no comentário do
+  programa, no nome do arquivo ("… INTERMEDIARIA" / "… A (BASE)" / "… B (TAMPA)") e no desenho/conjunto montado.
+  Números ao salvar sem mudança: intermediária = número, base = número + A, tampa = número + B.
+
 ## 5.39.0 — PSH 110: salvar meio / A / B, campo Altura e imagem nova
 - Salvar (pedido do usuário): os **anéis do meio** salvam com o número normal (030249.PIT / 30249.txt); o **macho** com o mesmo
   número + **A** (030249A) e a **fêmea** + **B** (030249B). Ao salvar o macho ou a fêmea, o número sugerido é o do último meio

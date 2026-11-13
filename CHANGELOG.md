@@ -6,6 +6,10 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.45.1 — PSH 110: interno da intermediária só até Ø haste 21 (13/11/2026)
+- Intermediária em PU: interno com T2D12 a partir de Ø40 e com T1D45 de Ø40 até Ø21. Abaixo de Ø21 o V de 45° não dá
+  para fazer: aparece o aviso "use outro perfil".
+
 ## 5.45.0 — Mudança só no perfil pedido: desbaste contínuo só no PSG 101; peças por ciclo só no PSE 108
 - Regra do usuário: **quando falamos de um perfil, a mudança vale só para aquele perfil**, a não ser que ele peça para mais.
 - Desbaste em Z num passe contínuo (5.44.0) agora vale **só no PSG 101**. PSA 108, PSA 109, PSG 103, PSG 104 e os ciclos

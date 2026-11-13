@@ -2401,6 +2401,7 @@ GEN.psh110 = {
       const C = psh110Contours(p), dO = psh110Depth(C.outer, 1), dI = g.d >= 40 ? psh110Depth(C.inner, -1) : 0, w = [];
       if (dO > PSH110_LIM + 1e-9) w.push(`externo (T2D2) ${fmtN(dO, 2)}`); if (dI > PSH110_LIM + 1e-9) w.push(`interno (T2D12) ${fmtN(dI, 2)}`);
       if (w.length) m.push(`profundidade no Ø acima do limite de ${PSH110_LIM} da ferramenta (7 no raio): ${w.join(", ")} — o programa para em ${PSH110_LIM} e o V de trás fica incompleto (precisa de outra ferramenta)`);
+      if (g.d < 21) m.push(`Ø haste ${fmtN(g.d, 2)} abaixo de 21: o interno a 45° não dá para fazer (T2D12 só a partir de Ø40, T1D45 de Ø40 até Ø21) — use outro perfil`);   // v5.46.0 (usuário)
     }
     { const zs = -(g.L + g.pM / 2) + (g.S - g.sh) / 2; if (zs > -0.3) m.push("anel do meio baixo demais para os lábios: diminua a quantidade de anéis"); }
     if (!(g.L > Math.max(g.dM, g.dF) + 0.5)) m.push(`altura ${fmtN(g.L, 2)} por peça é pequena para o V (${fmtN(Math.max(g.dM, g.dF), 2)}): diminua a quantidade de intermediárias`);

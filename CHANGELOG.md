@@ -6,6 +6,17 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.32.0 — Perfil novo PSA 109 (arruela com raio na face)
+- Novo gerador **PSA 109** (arruelas): o PSA 108 com um **raio na face da frente** (canal raso em arco, centrado no Ø médio):
+  raio = **4/5 da secção**, profundidade = **15 % da altura** (campos "Raio na face" e "Profundidade do canal" para testar
+  outros valores).
+- Chanfros da **frente menores** que os de trás: campos novos "Chanfro externo/interno da FRENTE" (vazio = metade do de trás);
+  os de trás são os campos de sempre (vazio = sugestão). Todos editáveis.
+- Programa: **T3D3 faz a face e o canal** (G41, G3 de fora para dentro em Z0), antes da T7D7; a T7D7 não faceia mais (só
+  posiciona no ar) e faz o externo com o chanfro da frente menor; T4D4 interno idem; bedame como no PSA 108. 1 peça por ciclo
+  (a face das peças seguintes sai do bedame).
+- Desenho com o raio na face, as chamadas dos 4 chanfros e do raio, e nota própria; imagem do perfil em Arruelas.
+
 ## 5.31.1 — Desenho: detalhe B sobe na folha em pé
 - Pedido do usuário: na folha A4 em pé, o **detalhe B** (secção ampliada) subiu para o canto de cima à direita — antes ficava
   colado na vista frontal e o topo da folha ficava vazio. Vale para os desenhos do tipo arruela (PSA 108, PSG 101/103/104,
@@ -529,6 +540,6 @@ Junta as branches paralelas (5.12.0 servidor/celular, 5.7.x Cód. interno/cancel
 
 ## 5.0.0 — 09/11/2026
 - Primeira versão no GitHub (base do que já estava no W: em 09/11/2026).
-- Simulador CNC.html: gera Fagor .PIT + MCS 500 + desenho PDF para PSE/PSH 105/106/107, PSH 103, PSE 103, PSE 118, PSH 121, PSH 125, PSH 124 (DHR), PSE 125 (DPR), PSG 103, PSG 104, PSH 108, PSH 117, PSR 102/211,
+- Simulador CNC.html: gera Fagor .PIT + MCS 500 + desenho PDF para PSE/PSH 105/106/107, PSH 103, PSE 103, PSE 118, PSH 121, PSH 125, PSH 124 (DHR), PSE 125 (DPR), PSG 103, PSG 104, PSA 109, PSH 108, PSH 117, PSR 102/211,
   DH PSH 129, PSO 109, arruelas (ISO, ciclo com/sem chanfro); Alterar programa (só desbaste); Ver programa.
 - Rotina noturna (`Claude contexto/Rotina/*.ps1`): gerar, revisar, controle, imprimir, regerar, índice de .PIT, pit2mcs.

@@ -1666,7 +1666,9 @@ function arrRough(p, mode, zEnd, xBack, feed){
   // (nunca o comprimento todo de uma vez); cada etapa passa todos os Ø de fora para dentro antes de descer a próxima.
   // v5.9.1 (usuário 10/11): no PU essa regra NÃO vale (desbaste como antes, de uma vez)
   // v5.20.2 (usuário 11/11): peça curta (comprimento ≤ zMin, padrão 10 mm) vai numa etapa só — 2 etapas repetiam o mesmo passe
-  const zMin = p.zMin > 0 ? p.zMin : 10;
+  // v5.43.0 (usuário 13/11/2026, PSG 101 9,7 de altura: "indo até o meio da peça e depois desbastando de novo"): até o máximo por
+  // etapa (zSeg, 20 mm) vai SEMPRE de uma vez — só divide quando passa disso (aí em etapas de até 20, pelo menos 2)
+  const zMin = Math.max(p.zMin > 0 ? p.zMin : 20, p.zSeg > 0 ? p.zSeg : 0);
   // v5.21.3 (usuário 11/11): Celeron corta com a T6D16 (bedame 2 mm) → desbaste 1 mm mais fundo em Z
   // (se a peça já usa bedame 2 por causa da secção > 14,8, o comprimento já conta os 2 mm)
   const cel = p.matA === "CELERON" && !p.bedD16; if (cel) zEnd -= 1;
@@ -1910,7 +1912,7 @@ GEN.psa108 = {
            ["fExt","Avanço externo F",0.15],["fInt","Avanço interno F",0.1],["fCor","Avanço corte F",0.1],["z0","Z inicial (G0 Z)",50],
            ["zExt","Z afastamento externo",70],["zInt","Z afastamento interno",50],["g92","Valor do G92 Z",1.1],["zN20","Z do bloco N20",100],
            ["zFim","Z final (G00)",250],["afX","Afastamento final em X (se N0 = 0)",50],["S","Rotação S (vazio = tabela pelo Ø ext.)",""],
-           ["zMax","Desbaste em Z: comprimento máximo (mm)",40],["zSeg","Desbaste em Z: máximo por etapa (mm, ≥ 2 etapas acima do mínimo)",20],["zMin","Desbaste em Z: até este comprimento vai de uma vez (mm)",10]],
+           ["zMax","Desbaste em Z: comprimento máximo (mm)",40],["zSeg","Desbaste em Z: máximo por etapa (mm; até ele vai de uma vez)",20],["zMin","Desbaste em Z: até este comprimento vai de uma vez (mm, nunca menos que o máximo por etapa)",20]],
   build(p){
     psaFill(p); const fx3 = v => fx(v, 3);
     const prol = (p.bed - p.sobrep) / 2, cE = p.chE, cI = p.chI;

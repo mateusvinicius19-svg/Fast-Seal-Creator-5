@@ -6,6 +6,15 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.33.0 — PSH 129 (DH): medidas padrão pela secção (13/11/2026)
+- Tabela do usuário (A altura · B secção total · C secção do rebaixo frontal · D profundidade do rebaixo; E = ângulo de 10°,
+  que já era o padrão): B 1,1 → A 2 · C 0,7 · D 0,7; B 1,9 → 3 · 1,2 · 1; B 2,65 → 4 · 1,65 · 1,3; B 3,5 → 6 · 2,25 · 2;
+  B 5 → 8 · 4 · 2,8.
+- Altura (A), secção do rebaixo (C) e profundidade do rebaixo (D) agora começam **vazias = tabela pela secção**; o valor
+  aparece no campo ("tabela: …"). Digitou = usa o digitado.
+- Secção fora da tabela = **proporcional**: entre duas linhas, proporcional entre elas (ex.: B 3 → A 4,824 · C 1,897 ·
+  D 1,588); abaixo de 1,1 ou acima de 5, proporcional à linha da ponta (ex.: B 6,5 → A 10,4 · C 5,2 · D 3,64).
+
 ## 5.32.2 — PSA 109: canal da face mais fundo
 - Pedido do usuário ("canal muito raso"): a profundidade padrão do canal passa a ser **12 % da altura** e o raio sai da conta
   para o arco caber entre os paralelos (ex.: 52 x 57,1 x 2,9 → prof. 0,35 e R1,34; antes 0,21 e R2,04).

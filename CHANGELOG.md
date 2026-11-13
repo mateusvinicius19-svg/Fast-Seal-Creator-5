@@ -6,6 +6,10 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.33.1 — PSH 129 (DH): secção 5 com C = 3,5
+- Pedido do usuário: na secção 5 a secção do rebaixo frontal (C) passa de 4 para **3,5** (A 8 · C 3,5 · D 2,8).
+  Os valores proporcionais acompanham (ex.: secção 6,5 → C 4,55; secção 4 → C 2,75).
+
 ## 5.33.0 — PSH 129 (DH): medidas padrão pela secção (13/11/2026)
 - Tabela do usuário (A altura · B secção total · C secção do rebaixo frontal · D profundidade do rebaixo; E = ângulo de 10°,
   que já era o padrão): B 1,1 → A 2 · C 0,7 · D 0,7; B 1,9 → 3 · 1,2 · 1; B 2,65 → 4 · 1,65 · 1,3; B 3,5 → 6 · 2,25 · 2;

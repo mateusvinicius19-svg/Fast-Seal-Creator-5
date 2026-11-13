@@ -6,6 +6,12 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.25.0 — Perfil novo PSE 118 (PSE 107 com chanfro dos lábios 1/4)
+- Novo gerador **PSE 118** (pistão): tudo igual ao PSE 107 (O-ring no canal, folgas, ferramenta de perfil do canal), só o
+  chanfro frontal 45° dos lábios = **1/4 do PSE 107** (espessura do lábio ÷ 12 em vez de ÷ 3). Ex.: 100x120x12 → 0,26 x 45°
+  (no 107: 1,03). "ESPECIAL: chanfro frontal" continua valendo.
+- Programa com cabeçalho `%PSE118`, desenho e imagem do perfil (enviada pelo usuário) em Pistão na escolha pela imagem.
+
 ## 5.24.0 — Perfil novo PSE 103 (PSE 105 + O-ring do 107)
 - Novo gerador **PSE 103** (pistão): lábios, folga externa 0,7 e lábio EXTERNO recuado (0,12 × secção) iguais ao PSE 105;
   no canal, o O-ring do PSE/PSH 107 (secção automática = a maior até 0,57 × secção, ou campo "O-ring: secção"; centro no
@@ -444,6 +450,6 @@ Junta as branches paralelas (5.12.0 servidor/celular, 5.7.x Cód. interno/cancel
 
 ## 5.0.0 — 09/11/2026
 - Primeira versão no GitHub (base do que já estava no W: em 09/11/2026).
-- Simulador CNC.html: gera Fagor .PIT + MCS 500 + desenho PDF para PSE/PSH 105/106/107, PSH 103, PSE 103, PSH 108, PSH 117, PSR 102/211,
+- Simulador CNC.html: gera Fagor .PIT + MCS 500 + desenho PDF para PSE/PSH 105/106/107, PSH 103, PSE 103, PSE 118, PSH 108, PSH 117, PSR 102/211,
   DH PSH 129, PSO 109, arruelas (ISO, ciclo com/sem chanfro); Alterar programa (só desbaste); Ver programa.
 - Rotina noturna (`Claude contexto/Rotina/*.ps1`): gerar, revisar, controle, imprimir, regerar, índice de .PIT, pit2mcs.

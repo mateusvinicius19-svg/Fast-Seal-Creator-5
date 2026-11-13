@@ -6,6 +6,19 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.31.0 — Perfil novo PSG 104 (guia com rebaixo externo)
+- Novo gerador **PSG 104** (guias): igual ao PSG 103, mas o rebaixo fica no **Ø externo** (campos "Ø do rebaixo externo" e
+  "Altura do rebaixo"). Uma peça por vez, opção "Com corte" / "Sem corte", chanfros editáveis (vazio = sugestão limitada a 30 %
+  da parede do rebaixo). Exemplo padrão com secção 5: Ø50 x Ø60 x 9,7, rebaixo Ø56 x 4.
+- No torno o rebaixo é feito pela face de entrada (a T7D7 não faz degrau reto nas costas): o externo faz o chanfro no Ø do
+  rebaixo, o rebaixo até a altura, o degrau reto até o Ø externo e segue até o chanfro de trás (desbaste do rebaixo quando sai
+  5 ou mais no Ø). No desenho o rebaixo aparece na face oposta, como no PSG 103.
+- PSG 103 e PSG 104: a seta do chanfro do lado do rebaixo agora aponta para o canto do rebaixo.
+- PSG 103 e PSG 104: **chanfro 45° no canto vivo do rebaixo** (quina do degrau): campo novo "Chanfro 45° no canto do rebaixo"
+  (vazio = sugestão = chanfro da guia limitado a 40 % do degrau; 0 = sem chanfro). Programa: degrau + chanfro antes de seguir no
+  Ø; desenho com a chamada do chanfro; aviso se o chanfro for maior que o degrau.
+- Imagem do perfil em Guias: "PSG 104 (GUIA)".
+
 ## 5.30.1 — PSG 103: rebaixo na face oposta no desenho, exemplo com secção 5
 - Pedido do usuário: no desenho o rebaixo interno fica na **face oposta** (lado direito do detalhe B, como na imagem do
   perfil). No torno ele continua sendo feito pela face de entrada (a T4D4 não faz degrau reto nas costas) — a peça é simétrica,
@@ -510,6 +523,6 @@ Junta as branches paralelas (5.12.0 servidor/celular, 5.7.x Cód. interno/cancel
 
 ## 5.0.0 — 09/11/2026
 - Primeira versão no GitHub (base do que já estava no W: em 09/11/2026).
-- Simulador CNC.html: gera Fagor .PIT + MCS 500 + desenho PDF para PSE/PSH 105/106/107, PSH 103, PSE 103, PSE 118, PSH 121, PSH 125, PSH 124 (DHR), PSE 125 (DPR), PSG 103, PSH 108, PSH 117, PSR 102/211,
+- Simulador CNC.html: gera Fagor .PIT + MCS 500 + desenho PDF para PSE/PSH 105/106/107, PSH 103, PSE 103, PSE 118, PSH 121, PSH 125, PSH 124 (DHR), PSE 125 (DPR), PSG 103, PSG 104, PSH 108, PSH 117, PSR 102/211,
   DH PSH 129, PSO 109, arruelas (ISO, ciclo com/sem chanfro); Alterar programa (só desbaste); Ver programa.
 - Rotina noturna (`Claude contexto/Rotina/*.ps1`): gerar, revisar, controle, imprimir, regerar, índice de .PIT, pit2mcs.

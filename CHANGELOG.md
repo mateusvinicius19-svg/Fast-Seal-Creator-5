@@ -6,6 +6,13 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.40.0 — PSH 110: paralelo atrás da intermediária
+- Pedido do usuário: a parte de trás da intermediária não tem mais canto vivo — a ponta em V vira um **paralelo** (face reta) de
+  **0,25 × secção** (igual à reta do bico da base; 1,88 no 50x65). Os flancos de 45° continuam os mesmos, então o encaixe e a altura
+  do conjunto não mudam. No programa a ponta fica dentro do corte e o corte (T5D5) passa o paralelo inteiro.
+- Campo novo em Parâmetros fixos: "Paralelo atrás da intermediária" (vazio = 0,25 × secção; 0 = ponta viva). Desenho com a chamada
+  "paralelo".
+
 ## 5.39.1 — PSH 110: nomes das peças (base, intermediária, tampa)
 - Pedido do usuário: a peça do meio passa a se chamar **INTERMEDIÁRIA**; a do canal (entalhe) frontal, **TAMPA** (B); a do ângulo
   grande na face (ponta em V), **BASE** (A). Mudou no seletor da peça, nos campos (quantidade e materiais), no comentário do

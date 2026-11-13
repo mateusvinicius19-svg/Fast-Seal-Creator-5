@@ -1564,7 +1564,7 @@ function readParams(){
   }
   return p;
 }
-const OPT_KEYS = new Set(["pL","chEF","chIF","rF","pF","chR","angIT","rpt","S","rpm","ai","ae","fi","fe","chc","bi","bo","tInt","xLe","xHe","xLi","xHi","lLab","cLab","pCan","rCan","wCan","rec","vD","vL","oc","oID","tL","lipF","rampa","chE","hb"]);
+const OPT_KEYS = new Set(["pM","pL","chEF","chIF","rF","pF","chR","angIT","rpt","S","rpm","ai","ae","fi","fe","chc","bi","bo","tInt","xLe","xHe","xLi","xHi","lLab","cLab","pCan","rCan","wCan","rec","vD","vL","oc","oID","tL","lipF","rampa","chE","hb"]);
 let genTimer = 0;
 function saveForm(){
   try {
@@ -2243,7 +2243,10 @@ function psh110Geom(p){
   // lábios até D − 0,5 / d + 0,5, ponta de trás do meio na altura da peça; bico do macho com reta de meia-largura 0,125·S;
   // chanfro de trás de macho/fêmea 0,0571·S + 0,232 (0,66 no S 7,5 · 0,80 no S 10 · 2,03 no S 31,5, como nos desenhos)
   const L = (H + (n + 1) * dM) / (n + 2), a = 0.125 * S, c = 0.0571 * S + 0.232;
-  return { d, D, H, n, S, rm, dM, dF, L, a, c, iM: 0.064 * S + 0.07, sh: 0.5 };
+  // v5.40.0 (usuário 13/11/2026): atrás da intermediária sem canto vivo — paralelo (face reta) de 0,25·S (igual à reta do bico da base);
+  // os flancos de 45° continuam os mesmos (o encaixe e a altura do conjunto não mudam), a ponta fica dentro do corte
+  const pv = String(p.pM ?? "").replace(",", "."), pM = pv !== "" && !isNaN(pv) && Number(pv) >= 0 ? Number(pv) : 0.25 * S;
+  return { d, D, H, n, S, rm, dM, dF, L, a, c, pM, iM: 0.064 * S + 0.07, sh: 0.5 };
 }
 // nomes das peças (usuário 13/11/2026): intermediária = a do meio; base = ângulo grande (ponta em V) na face; tampa = canal (entalhe) frontal
 const PSH110_PECAS = { M: "INTERMEDIÁRIA (-3)", A: "BASE (A, -1)", B: "TAMPA (B, -2)" };
@@ -2252,7 +2255,7 @@ function psh110Piece(p){ const k = String(p.peca || "M").toUpperCase(); return k
 function psh110Contours(p){
   const g = psh110Geom(p), k = psh110Piece(p), L = g.L, R = x => x / 2, T30 = Math.tan(30 * Math.PI / 180);
   if (k === "M"){
-    const zA = -L, zs = zA + (g.S - g.sh) / 2;                                         // ponta de trás (virtual) e fim dos lábios
+    const zA = -(L + g.pM / 2), zs = zA + (g.S - g.sh) / 2;   // ponta virtual além do corte: o corte em −L deixa o paralelo                                         // ponta de trás (virtual) e fim dos lábios
     return { k, L, outer: [[0, R(g.D + g.iM)], [zs, R(g.D - g.sh)], [zA, g.rm]], inner: [[0, R(g.d - g.iM)], [zs, R(g.d + g.sh)], [zA, g.rm]], notch: g.dM };
   }
   if (k === "A"){
@@ -2278,7 +2281,7 @@ function psh110DrawP(p){
 function psh110Profile(p){
   const g = psh110Geom(p), C = psh110Contours(p), L = g.L, o = C.outer, i = C.inner, rm = g.rm;
   if (C.k === "M"){
-    return [o[0], [0, rm + C.notch], [-C.notch, rm], [0, rm - C.notch], i[0], i[1], [-L, rm], o[1]];
+    return [o[0], [0, rm + C.notch], [-C.notch, rm], [0, rm - C.notch], i[0], i[1], ...(g.pM > 0 ? [[-L, rm - g.pM / 2], [-L, rm + g.pM / 2]] : [[-L, rm]]), o[1]];
   }
   if (C.k === "A") return [[0, rm + g.a], o[1], o[2], [-L, C.back[0]], [-L, C.back[1]], i[2], i[1], [0, rm - g.a]];
   return [o[0], o[1], [-L, C.back[0]], [-L, C.back[1]], i[1], i[0], [0, rm - C.notch], [-C.notch, rm], [0, rm + C.notch]];
@@ -2290,7 +2293,7 @@ GEN.psh110 = {
   main: [["peca","Peça do conjunto","M"],["dint","Ø haste (mm)",50],["dext","Ø alojamento (mm)",65],["h","Altura (mm)",35],["nm","Quantidade de intermediárias",5],
          ["matM","Material da intermediária","PU"],["matF","Material da base e da tampa","NYLON"],["rpt","Nº de repetições RPT (vazio = intermediária: quantidade − 1; base/tampa: 0)",""],
          ["bi","Bucha Ø interno (vazio = automática)",""],["bo","Bucha Ø externo (vazio = automática)",""]],
-  params: [["apR","Desbaste: quanto tirar por passada (no raio, mm)",3],["alR","Sobremetal deixado para o acabamento (no raio, mm)",1.5],["rn","Raio da ponta das ferramentas (mm)",0.4],["S","Rotação S (vazio = tabela pelo Ø ext.)",""]],
+  params: [["apR","Desbaste: quanto tirar por passada (no raio, mm)",3],["alR","Sobremetal deixado para o acabamento (no raio, mm)",1.5],["rn","Raio da ponta das ferramentas (mm)",0.4],["S","Rotação S (vazio = tabela pelo Ø ext.)",""],["pM","Paralelo atrás da intermediária (largura, vazio = 0,25 × secção; 0 = ponta viva)",""]],
   build(p){
     const g = psh110Geom(p), C = psh110Contours(p), k = C.k, L = g.L, f3 = v => fx(v, 3), r = Number(p.rn) > 0 ? Number(p.rn) : 0.4;
     const mat = psh110Mat(p), PU = mat === "PU", lab = psh110MatLabel(mat); p.mat = lab;
@@ -2334,7 +2337,7 @@ GEN.psh110 = {
     Lp.push(";( FINISH )", `G0 X${f3(2 * pin[0].p[1])} Z3.000`, `G1 X${f3(2 * pin[0].p[1])} Z${f3(pin[0].p[0])}`, ...tipLines(pin, r, "0.140"));
     const li = pin[pin.length - 1].p; Lp.push(`G0 X${f3(Math.max(0, xMin - 2))} Z${f3(li[0] + 0.2)}`, `G0 X${f3(Math.max(0, xMin - 2))} Z5.000`, "");
     // ---- corte: na altura da peça (como nos programas VPA01B) ----
-    const xc = bo + 0.2, xEnd = k === "M" ? 2 * g.rm - 2 : xMin - 0.1;
+    const xc = bo + 0.2, xEnd = k === "M" ? 2 * g.rm - g.pM - 1 : xMin - 0.1;   // intermediária: corta o paralelo inteiro
     Lp.push(...sec("CUTTING"), "G0 Z70", tools.cut, ";", ";", `G0 X${f3(xc)} Z3.000`, `G0 X${f3(xc)} Z${f3(-L)}`, `G1 X${f3(xEnd)} Z${f3(-L)} F${tools.fCut}`, `G0 X${f3(xc)} Z${f3(-L)}`, `G0 X${f3(xc)} Z15.000`, "", "");
     const g92 = 15 + progMaxZ(Lp) + 0.15;
     const rpt = (p.rpt === "" || p.rpt === undefined || isNaN(p.rpt)) ? (k === "M" ? String(g.n - 1) : "0") : gen15(p.rpt);
@@ -2345,7 +2348,7 @@ GEN.psh110 = {
     const g = psh110Geom(p), m = [];
     if (!(g.D > g.d)) m.push("Ø alojamento tem que ser maior que a haste");
     if (!(g.S >= 3)) m.push("secção muito pequena para chevron (mín. 3)");
-    { const zs = -g.L + (g.S - g.sh) / 2; if (zs > -0.3) m.push("anel do meio baixo demais para os lábios: diminua a quantidade de anéis"); }
+    { const zs = -(g.L + g.pM / 2) + (g.S - g.sh) / 2; if (zs > -0.3) m.push("anel do meio baixo demais para os lábios: diminua a quantidade de anéis"); }
     if (!(g.L > Math.max(g.dM, g.dF) + 0.5)) m.push(`altura ${fmtN(g.L, 2)} por peça é pequena para o V (${fmtN(Math.max(g.dM, g.dF), 2)}): diminua a quantidade de intermediárias`);
     return m.length ? "ATENÇÃO: " + m.join("; ") + "." : "";
   }
@@ -4000,6 +4003,7 @@ function drawingSVG(p){  if (p && p.tipoGen === "psh110") p = psh110DrawP(p);   
     const G = psh110Geom(p), C = psh110Contours(p);
     if (C.notch) g += call(DX(-C.notch), DY(G.rm), dzf - 40, (dyE + dyI) / 2, `V 45° · fundo ${fmtN(C.notch, 2)}`);
     if (C.nose) g += call(DX(0), DY(G.rm), dzf - 40, (dyE + dyI) / 2, `ponta V 45° · reta ${fmtN(2 * C.nose, 2)}`);
+    if (C.k === "M" && G.pM > 0) g += call(DX(-h), DY(G.rm), dzb + 22, (dyE + dyI) / 2 + 28, `paralelo ${fmtN(G.pM, 2)}`);   // v5.40.0: atrás sem canto vivo
   } else if (p.tipoGen === "psa109") {   // PSA 109: chanfros da frente (menores) e de trás + raio na face
     const G = psa109Geom(p), kI = 1 / TAN(60), aB = p.angIB > 0 ? p.angIB : 30;
     g += call(DX(-G.cEf / 2), DY(re - G.cEf / 2), dzf - 28, dyE - 6, `${fmtN(G.cEf, 2)} x 45°`);

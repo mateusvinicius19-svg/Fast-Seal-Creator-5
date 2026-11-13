@@ -6,6 +6,17 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.28.0 — Perfil novo PSH 124 (DHR): PSE 108 (DP) invertido
+- Novo gerador **PSH 124 (DHR)** (veio): anel de PTFE para HASTE, igual ao PSE 108 (DP) só que invertido — os chanfros
+  GRANDES ficam no INTERNO e o pequeno no EXTERNO (O-ring ativador por fora).
+- Chanfro interno da frente: chF x 45°. Chanfro interno de TRÁS: mesmo tamanho no raio (chT), mas a **30° com o eixo**
+  (a T4D4 faz no máximo 30° nas costas), por isso fica mais comprido em Z (chT ÷ tg30). Chanfro externo: chE em Z x 60°
+  (como o interno do DP). Padrão 50 x 57,5 x 4, chanfros 0,8 / 0,8 / 0,2.
+- Programa no mesmo formato do DP (T7D7 face + externo com G42, T4D4 interno com G41, T8D8 bedame, RPT).
+- Tolerâncias padrão (campo vazio): diâmetros 0/−0,1 (com a regra de 2/3: 0/−0,07), altura 0/−0,1, secção +0,1/−0,05.
+- Desenho (detalhe B com as chamadas dos chanfros e nota própria) e imagem do perfil em Veio. O bloco de alojamento do DP
+  não foi copiado.
+
 ## 5.27.0 — Perfil novo PSH 125 (PSH 117 + O-ring do PSH 107)
 - Novo gerador **PSH 125** (veio): perfil do PSH 117 (lábio interno recuado 0,12 × secção, folga do calcanhar interno
   0,134 × secção, lábio de estabilidade V atrás) com o canal do O-ring do PSH 107 (secção automática = a maior até
@@ -463,6 +474,6 @@ Junta as branches paralelas (5.12.0 servidor/celular, 5.7.x Cód. interno/cancel
 
 ## 5.0.0 — 09/11/2026
 - Primeira versão no GitHub (base do que já estava no W: em 09/11/2026).
-- Simulador CNC.html: gera Fagor .PIT + MCS 500 + desenho PDF para PSE/PSH 105/106/107, PSH 103, PSE 103, PSE 118, PSH 121, PSH 125, PSH 108, PSH 117, PSR 102/211,
+- Simulador CNC.html: gera Fagor .PIT + MCS 500 + desenho PDF para PSE/PSH 105/106/107, PSH 103, PSE 103, PSE 118, PSH 121, PSH 125, PSH 124 (DHR), PSH 108, PSH 117, PSR 102/211,
   DH PSH 129, PSO 109, arruelas (ISO, ciclo com/sem chanfro); Alterar programa (só desbaste); Ver programa.
 - Rotina noturna (`Claude contexto/Rotina/*.ps1`): gerar, revisar, controle, imprimir, regerar, índice de .PIT, pit2mcs.

@@ -6,6 +6,12 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.45.0 — Mudança só no perfil pedido: desbaste contínuo só no PSG 101; peças por ciclo só no PSE 108
+- Regra do usuário: **quando falamos de um perfil, a mudança vale só para aquele perfil**, a não ser que ele peça para mais.
+- Desbaste em Z num passe contínuo (5.44.0) agora vale **só no PSG 101**. PSA 108, PSA 109, PSG 103, PSG 104 e os ciclos
+  voltam a ser como na 5.42.0 (etapas de até 20 mm acima de 10 mm; campos "máximo por etapa" e "vai de uma vez" de volta).
+- Peças por ciclo (5.37.0) agora vale **só no PSE 108 (DP)** escolhido; a Arruela ISO volta a 1 peça (campo indica "só PSE 108").
+
 ## 5.44.0 — Arruelas / PSG: desbaste em Z sempre num passe contínuo
 - Pedido do usuário: "só tem que dividir o desbaste em alguns perfis quando a ferramenta for cavar no diâmetro; nos outros
   perfis é um passe contínuo linear". Nas arruelas e guias (PSA 108, PSA 109, PSG 101/103/104, ciclos) o desbaste **não é

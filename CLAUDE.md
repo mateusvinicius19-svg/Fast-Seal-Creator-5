@@ -13,6 +13,11 @@ Ao terminar qualquer alteração (mesmo pequena):
    Se a main andou enquanto você trabalhava: merge da main na sua branch, resolva conflitos, teste e só então o merge do PR.
 4. Confira que a `main` no GitHub ficou com o `VERSION` novo.
 
+## Regra: mudança só no perfil pedido (usuário, 13/11/2026)
+Quando o pedido fala de um perfil, mude **só aquele perfil** — mesmo que o código seja compartilhado com outros (ex.: GEN.iso =
+Arruela ISO + PSE 108; arrRough = todas as arruelas/guias). Isole a mudança (flag/condição pelo tipo) e confira que os outros
+perfis geram o mesmo programa de antes. Só mude mais perfis se o usuário pedir.
+
 ## Como o usuário usa
 - `Iniciar\Abrir Simulador.bat` (cópia na Área de Trabalho) só baixa e roda `Iniciar\atualizar.ps1` da main (mude a lógica
   lá, não no .bat). O atualizador baixa a `main` para `%LOCALAPPDATA%\FastSealCreator\app-<commit>` (uma pasta por versão: a

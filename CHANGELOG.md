@@ -6,6 +6,22 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.36.0 — Perfil novo PSH 110 (chevron, base VPA01B do Fast Seal)
+- Novo gerador **PSH 110**: conjunto chevron de 3 peças — **MACHO** (A, -1: ponta em V na frente), **FÊMEA** (B, -2: entalhe
+  em V na frente) e **ANÉIS DO MEIO** (-3: entalhe na frente, ponta atrás, lábios com aperto). Entradas: Ø haste, Ø alojamento,
+  altura do alojamento e **quantidade de anéis do meio**; campo "Peça do conjunto" escolhe qual programa sai.
+- Regras tiradas dos programas VPA01B do W: (S = secção): macho Ø D − 0,15·S / d + 0,15·S; fêmea D − 0,03·S / d + 0,03·S;
+  meio com aperto na frente 0,064·S + 0,07 e lábios até D − 0,5 / d + 0,5; V 45° com entalhe do meio 0,4923·S − 1,035 e da
+  fêmea 0,4349·S − 0,165 (rasgo no fundo com a T3D3, igual aos programas); bico do macho com reta de meia-largura 0,125·S;
+  chanfro de trás de macho/fêmea 0,0571·S + 0,232. Conferido com o 033704 (50x65x35): diâmetros 65,55 / 63,88 / 64,78,
+  secções 8,05 / 6,38 / 7,28, reta 1,88 e chanfro 0,66 iguais ao desenho do Fast Seal.
+- Alturas **iguais** nas 3 peças e o conjunto fecha **exato** a altura do alojamento (usuário): cada peça =
+  (H + (n + 1) × entalhe) / (n + 2). Ex.: 50x65x35 com 5 anéis → 7,28.
+- Materiais (usuário): meio **PU** (T3D3 face e V, T2D2, T2D12/T1D45, T5D5), macho e fêmea **PEAD** (T7D7, T3D3 no V da fêmea,
+  T4D4/T2D14, T8D8); campos para trocar. RPT do meio = quantidade − 1 (vazio).
+- Desenho da peça escolhida com as medidas reais dela; arquivo "PSH 110 dxDxH MEIO / A (MACHO) / B (FEMEA)". Só o VPA01B
+  (as variações VPA03A, VPA02A 30° e o meio SS11A-P ficam para depois).
+
 ## 5.35.0 — PSE 125 (DPR): mesma tabela padrão e tolerância do PSH 129
 - Pedido do usuário: as medidas padrão do PSH 129 valem também para o PSE 125 (DPR). Altura (A), secção do rebaixo
   frontal (C) e profundidade do rebaixo (D) vazias = tabela pela secção (B), proporcional fora da tabela; E = 10° (padrão).
@@ -580,6 +596,6 @@ Junta as branches paralelas (5.12.0 servidor/celular, 5.7.x Cód. interno/cancel
 
 ## 5.0.0 — 09/11/2026
 - Primeira versão no GitHub (base do que já estava no W: em 09/11/2026).
-- Simulador CNC.html: gera Fagor .PIT + MCS 500 + desenho PDF para PSE/PSH 105/106/107, PSH 103, PSE 103, PSE 118, PSH 121, PSH 125, PSH 124 (DHR), PSE 125 (DPR), PSG 103, PSG 104, PSA 109, PSH 108, PSH 117, PSR 102/211,
+- Simulador CNC.html: gera Fagor .PIT + MCS 500 + desenho PDF para PSE/PSH 105/106/107, PSH 103, PSE 103, PSE 118, PSH 121, PSH 125, PSH 124 (DHR), PSE 125 (DPR), PSH 110, PSG 103, PSG 104, PSA 109, PSH 108, PSH 117, PSR 102/211,
   DH PSH 129, PSO 109, arruelas (ISO, ciclo com/sem chanfro); Alterar programa (só desbaste); Ver programa.
 - Rotina noturna (`Claude contexto/Rotina/*.ps1`): gerar, revisar, controle, imprimir, regerar, índice de .PIT, pit2mcs.

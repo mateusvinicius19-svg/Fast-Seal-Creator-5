@@ -6,6 +6,11 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.42.0 — PSE 108 (DP): tolerância dos diâmetros maior, igual ao PSE 125
+- Pedido do usuário: tolerância padrão dos diâmetros do PSE 108 (campo vazio), cada Ø pelo seu tamanho, para mais:
+  até Ø50 → +0,2/0 · até Ø100 → +0,3/0 · até Ø200 → +0,4/0 · até Ø300 → +0,6/0 · acima → +0,8/0 (antes +0,07/0 em todos).
+  Altura continua 0/−0,1. Tolerância digitada = usa a digitada.
+
 ## 5.41.0 — PSH 110: limite de profundidade da T2D2/T2D12 e desbaste da parte de trás da intermediária
 - Pedido do usuário: na intermediária em PU, a **T2D2** (externo) e a **T2D12** (interno) vão no máximo **7 mm de profundidade no raio
   (14 no Ø)**, contados do lábio da frente. Acima disso o percurso para no limite (segue reto em Z) e aparece **ATENÇÃO** com a

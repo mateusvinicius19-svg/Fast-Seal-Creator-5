@@ -4038,11 +4038,26 @@ function drawingSVG(p){  if (p && p.tipoGen === "psh110") p = psh110DrawP(p);   
   }
 
   // ---- VISTA FRONTAL ----
-  const fx0 = PT ? 397 : 900, fy0 = PT ? 618 : 245, fs = (PT ? 120 : 140) / re;
+  const fx0 = PT ? 397 : 900, fy0 = PT ? 618 : (p.tipoGen === "psh110" ? 215 : 245), fs = (PT ? 120 : (p.tipoGen === "psh110" ? 100 : 140)) / re;   // PSH 110 deitada: vista menor, conjunto montado embaixo
   g += `<circle cx="${fx0}" cy="${fy0}" r="${re * fs}" class="pl" fill="#f3f3f3"/><circle cx="${fx0}" cy="${fy0}" r="${ri * fs}" fill="#fff" class="pl"/>`;
   g += `<line x1="${fx0 - re * fs - 16}" y1="${fy0}" x2="${fx0 + re * fs + 16}" y2="${fy0}" class="ax"/><line x1="${fx0}" y1="${fy0 - re * fs - 16}" x2="${fx0}" y2="${fy0 + re * fs + 16}" class="ax"/>`;
   g += `<text x="${fx0 - re * fs - 30}" y="${fy0 - 6}" class="t">A</text><text x="${fx0 + re * fs + 22}" y="${fy0 - 6}" class="t">A</text>`;
   g += `<text x="${fx0}" y="${fy0 + re * fs + 36}" class="vt" text-anchor="middle">VISTA FRONTAL</text>`;
+  if (p.tipoGen === "psh110"){   // PSH 110 (usuário 13/11/2026): conjunto montado — macho virado + n anéis do meio + fêmea, dentro do alojamento
+    const G = psh110Geom(p), n = G.n, Lp = G.L, st = Lp - G.dM;          // cada peça começa (L − entalhe) depois da anterior: fecha H exato
+    const bw = PT ? 210 : 320, bh = PT ? 190 : 62, bx = PT ? 565 : 740, by = PT ? 505 : 388;
+    // meia secção ampliada (faixa entre a haste e o alojamento), como nos desenhos do Fast Seal
+    const r0 = G.d / 2 - 1, sc = Math.min(bw / G.H, bh / (G.S + 2)), yB = by + (bh + (G.S + 2) * sc) / 2, X = x => bx + x * sc, Y = r => yB - (r - r0) * sc;
+    const pcs = [["A", 0, true], ...Array.from({ length: n }, (_, i) => ["M", (i + 1) * st, false]), ["B", (n + 1) * st, false]];
+    for (const [k, x0, mir] of pcs){
+      const prof = psh110Profile(Object.assign({}, p, { peca: k })), xs = z => mir ? x0 + Lp + z : x0 - z;   // macho virado: a ponta entra no 1º anel
+      g += `<path d="${prof.map(([z, r], i) => `${i ? "L" : "M"}${X(xs(z)).toFixed(2)},${Y(r).toFixed(2)}`).join("")}Z" class="p" style="stroke-width:1"/>`;
+    }
+    g += `<rect x="${X(0).toFixed(2)}" y="${Y(G.D / 2).toFixed(2)}" width="${(G.H * sc).toFixed(2)}" height="${(G.S * sc).toFixed(2)}" fill="none" stroke="#777" stroke-width="0.8" stroke-dasharray="4 3"/>`;
+    g += ext(X(0), Y(G.D / 2) - 3, X(0), Y(G.D / 2) - 16) + ext(X(G.H), Y(G.D / 2) - 3, X(G.H), Y(G.D / 2) - 16) + dimH(X(0), X(G.H), Y(G.D / 2) - 12, "H " + f2(G.H));
+    g += `<text x="${X(G.H / 2)}" y="${Y(G.d / 2) + 20}" class="vt" text-anchor="middle" style="font-size:12px">CONJUNTO MONTADO</text>` +
+         `<text x="${X(G.H / 2)}" y="${Y(G.d / 2) + 33}" class="n" text-anchor="middle">macho + ${n} anéis + fêmea · ${fmtN(Lp, 2)} cada</text>`;
+  }
   if (isPSG(p.tipoGen) && p.corte !== "N"){   // v5.21.1 (PSG 103 sem corte: sem a vista do corte): corte da guia (aberto em cima) + vista de fora com o ângulo
     const ang = psgAng(p), gp = 3, yTop = fy0 - re * fs, yBot = fy0 - ri * fs;
     g += `<rect x="${fx0 - gp}" y="${yTop - 1}" width="${2 * gp}" height="${yBot - yTop + 2}" fill="#fff"/><line x1="${fx0 - gp}" y1="${yTop}" x2="${fx0 - gp}" y2="${yBot}" class="pl"/><line x1="${fx0 + gp}" y1="${yTop}" x2="${fx0 + gp}" y2="${yBot}" class="pl"/>`;

@@ -6,6 +6,12 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.38.0 — PSH 110: desenho do conjunto montado
+- Pedido do usuário: toda folha do PSH 110 ganha a vista **CONJUNTO MONTADO** — meia secção ampliada com o macho (virado, ponta
+  para dentro), os n anéis do meio encaixados e a fêmea, dentro do contorno do alojamento (tracejado), com a cota H total e
+  "macho + n anéis + fêmea · altura de cada peça". Cada peça entra (altura − entalhe) depois da anterior, fechando H exato.
+- Folha em pé: à direita da vista frontal. Folha deitada: vista frontal um pouco menor e o conjunto embaixo dela.
+
 ## 5.37.0 — PSE 108 (DP): peças por ciclo
 - Pedido do usuário: o PSE 108 (DP) ganhou o campo **Peças por ciclo (1 a 10)**, como o PSA 108. Vale também para a
   Arruela ISO (mesmo gerador). Com 1 peça o programa sai igual ao de antes.

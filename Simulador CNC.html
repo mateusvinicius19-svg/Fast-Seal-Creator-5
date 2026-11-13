@@ -3677,7 +3677,9 @@ function drawingSVG(p){  const PT = state.orient === "portrait";
   const oW = !oAt ? 0 : ((alojMode(oAt) === "aloj" && state.alojAtiv && state.alojAtiv.kind === oAt && state.alojAtiv.W) || (oAt === "dp" ? DP_SERIE.find(x => p.dext <= x[0])[3] : DH_SERIE.find(x => p.dint <= x[0])[3]));
   const oL = oAt ? oringL(oW) : 0;
   const ds = Math.min((PT ? 160 : 200) / Math.max(h, 0.1), 260 / Math.max(sec + oL, 0.1), (W - 175 - (PT ? 430 : 470)) / Math.max(h, 0.1));   // cabe a cota da secção à direita
-  const dx0 = PT ? 430 : 470, dy0 = (PT ? 450 : 410) - (oAt === "dp" ? oL * ds : 0);
+  // usuário 12/11/2026: na folha em pé o detalhe B sobe para o canto de cima à direita (estava colado na vista frontal e o topo
+  // ficava vazio); peças de secção grande descem o necessário para a cota H não sair da folha (topo da peça ≥ 95)
+  const dx0 = PT ? 430 : 470, dy0 = (PT ? Math.min(450, Math.max(280, 95 + (sec + oL) * ds)) : 410) - (oAt === "dp" ? oL * ds : 0);
   const DX = z => dx0 + (-z) * ds, DY = r => dy0 - (r - ri) * ds;
   g += `<path d="${prof.map(([z, r], i) => `${i ? "L" : "M"}${DX(z).toFixed(2)},${DY(r).toFixed(2)}`).join("")}Z" class="p"/>`;
   const dzf = DX(0), dzb = DX(-h), dyE = DY(re), dyI = DY(ri);

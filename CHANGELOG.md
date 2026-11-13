@@ -6,6 +6,12 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.31.1 — Desenho: detalhe B sobe na folha em pé
+- Pedido do usuário: na folha A4 em pé, o **detalhe B** (secção ampliada) subiu para o canto de cima à direita — antes ficava
+  colado na vista frontal e o topo da folha ficava vazio. Vale para os desenhos do tipo arruela (PSA 108, PSG 101/103/104,
+  ISO/DP, DH, DHR, DPR, PSO). Peças de secção grande descem só o necessário para a cota H não sair da folha. Folha deitada sem
+  mudança.
+
 ## 5.31.0 — Perfil novo PSG 104 (guia com rebaixo externo)
 - Novo gerador **PSG 104** (guias): igual ao PSG 103, mas o rebaixo fica no **Ø externo** (campos "Ø do rebaixo externo" e
   "Altura do rebaixo"). Uma peça por vez, opção "Com corte" / "Sem corte", chanfros editáveis (vazio = sugestão limitada a 30 %

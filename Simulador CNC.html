@@ -1518,10 +1518,9 @@ function readParams(){
     if ((p.tiS === "" || p.tiS === undefined) && (p.tiI === "" || p.tiI === undefined)){ p.tiS = 0; p.tiI = -dTol(pk.idTol); }   // Ø int.: só para menos
     if ((p.thS === "" || p.thS === undefined) && (p.thI === "" || p.thI === undefined)){ p.thS = pk.wTol; p.thI = -pk.wTol; } // altura = secção: ±W
   }
-  // DH PSH 129: diâmetros para menos, 0/−0,2 quando o campo está vazio (usuário 09/11/2026)
-  if ($("genType").value === "lip"){
-    for (const pre of ["ti", "te", "th"]) if ((p[pre + "S"] === "" || p[pre + "S"] === undefined) && (p[pre + "I"] === "" || p[pre + "I"] === undefined)){ p[pre + "S"] = 0; p[pre + "I"] = pre === "th" ? -0.1 : -dTol(0.2); }   // altura 0/−0,1
-  }
+  // DH PSH 129: diâmetros para menos quando o campo está vazio. v5.34.0 (usuário 13/11/2026): pelo diâmetro, valor cheio
+  // (sem o × 2/3): até 50 → 0/−0,2 · até 100 → −0,3 · até 200 → −0,4 · até 300 → −0,6 · acima de 300 → −0,8. Altura 0/−0,1.
+  if ($("genType").value === "lip") lipTolFill(p);
   // PSE 125 (DPR): espelho do DH (0/−0,2) — diâmetros +0,2/0 (pistão: para mais) e altura 0/−0,1 quando o campo está vazio
   if ($("genType").value === "dpr"){
     for (const pre of ["ti", "te", "th"]) if ((p[pre + "S"] === "" || p[pre + "S"] === undefined) && (p[pre + "I"] === "" || p[pre + "I"] === undefined)){ if (pre === "th"){ p.thS = 0; p.thI = -0.1; } else { p[pre + "S"] = dTol(0.2); p[pre + "I"] = 0; } }
@@ -3454,7 +3453,7 @@ function fv3(v){ let s = fmtN(v, 3); if (s.indexOf(",") >= 0) { while (s.endsWit
 // PSH 129 (DH) — medidas padrão do usuário (13/11/2026): [B secção total, A altura, C secção do rebaixo frontal, D profundidade do rebaixo].
 // Ângulo da base (E) = 10°, já é o padrão. Campo vazio = tabela pela secção; secção fora da tabela = proporcional
 // (entre as duas linhas vizinhas; abaixo da 1ª / acima da última = proporcional à linha da ponta).
-const DH_PADRAO = [[1.1, 2, 0.7, 0.7], [1.9, 3, 1.2, 1], [2.65, 4, 1.65, 1.3], [3.5, 6, 2.25, 2], [5, 8, 3.5, 2.8]];
+const DH_PADRAO = [[1.1, 2, 0.7, 0.7], [1.9, 3, 1.2, 1], [2.65, 4, 1.65, 1.3], [3.5, 6, 2.25, 2], [5, 8, 3.5, 2.8], [6.5, 8, 4, 2.8]];   // 6,5: usuário 13/11/2026 (v5.34.0)
 function dhPadrao(sec){
   const T = DH_PADRAO, r = v => Math.round(v * 1000) / 1000;
   if (!(sec > 0)) return null;
@@ -3463,6 +3462,12 @@ function dhPadrao(sec){
   else if (sec >= T[T.length - 1][0]) k = T[T.length - 1].map(v => v * sec / T[T.length - 1][0]);
   else { const i = T.findIndex(t => t[0] >= sec), a = T[i - 1], b = T[i], f = (sec - a[0]) / (b[0] - a[0]); k = a.map((v, j) => v + (b[j] - v) * f); }
   return { h: r(k[1]), h2: r(k[2]), b: r(k[3]) };
+}
+function lipTolFill(p){   // usado pelo formulário e pelo gerar.ps1 (rotina em lote)
+  const dhTol = d => d <= 50 ? 0.2 : d <= 100 ? 0.3 : d <= 200 ? 0.4 : d <= 300 ? 0.6 : 0.8;
+  const dia = { ti: Number(p.dint) || 0, te: (Number(p.dint) || 0) + 2 * (Number(p.sec) || 0) };
+  for (const pre of ["ti", "te", "th"]) if ((p[pre + "S"] === "" || p[pre + "S"] === undefined) && (p[pre + "I"] === "" || p[pre + "I"] === undefined)){ p[pre + "S"] = 0; p[pre + "I"] = pre === "th" ? -0.1 : -dhTol(dia[pre]); }
+  return p;
 }
 function lipFill(p){
   const vazio = v => v === "" || v === undefined || v === null || (typeof v === "number" && isNaN(v));

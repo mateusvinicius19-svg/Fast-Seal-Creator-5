@@ -6,6 +6,13 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.30.1 — PSG 103: rebaixo na face oposta no desenho, exemplo com secção 5
+- Pedido do usuário: no desenho o rebaixo interno fica na **face oposta** (lado direito do detalhe B, como na imagem do
+  perfil). No torno ele continua sendo feito pela face de entrada (a T4D4 não faz degrau reto nas costas) — a peça é simétrica,
+  só muda o lado em que o rebaixo aparece. Comentário do programa: "USINADO PELA FACE DE ENTRADA".
+- Exemplo padrão com **secção 5**: Ø50 x Ø60 x 9,7, rebaixo Ø54 x 4. Sem o campo de peças por ciclo (uma de cada vez).
+- Chanfros externo e interno continuam editáveis (vazio = sugestão).
+
 ## 5.30.0 — Perfil novo PSG 103 (guia com rebaixo interno)
 - Novo gerador **PSG 103** (guias): mesmo padrão do PSG 101 (material, acréscimo de 0,9 no POM/Celeron, chanfros, corte em
   ângulo, tolerâncias, secção +0/−0,05) com **rebaixo interno** na face da frente: campos novos **Ø do rebaixo interno** e

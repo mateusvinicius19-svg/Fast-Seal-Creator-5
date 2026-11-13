@@ -1998,12 +1998,14 @@ function psg103ChSug(p){ const s = psaChSug(p.h), w = (Number(p.dext) - Number(p
 function psg103Profile(p){
   const pts = isoProfile(p), ri = p.dint / 2, rR = p.dReb / 2, hR = p.hReb, cI = p.chI * (1 / TAN(p.angI));
   // isoProfile: ..., [-(h - chI), ri], [-chI, ri], [0, ri + cI], [0, re - chF] → troca a frente do interno pelo rebaixo
-  return [...pts.slice(0, 6), [-hR, ri], [-hR, rR], [-p.chI, rR], [0, rR + cI], pts[8]];
+  // usuário 12/11/2026: no DESENHO o rebaixo fica na face oposta (espelhado: z' = −h − z); no torno ele é feito pela face de
+  // entrada (a peça é simétrica, só muda o lado em que o rebaixo aparece)
+  return [...pts.slice(0, 6), [-hR, ri], [-hR, rR], [-p.chI, rR], [0, rR + cI], pts[8]].map(([z, r]) => [-p.h - z, r]);
 }
 GEN.psg103 = {
   name: "PSG 103 (guia com rebaixo)",
-  main: (() => { const m = GEN.psg101.main.filter(f => f[0] !== "n");
-    m.splice(m.findIndex(f => f[0] === "h") + 1, 0, ["dReb", "Ø do rebaixo interno (mm)", 52], ["hReb", "Altura do rebaixo (mm)", 4]);
+  main: (() => { const m = GEN.psg101.main.filter(f => f[0] !== "n").map(f => f[0] === "dext" ? ["dext", f[1], 60] : f);   // exemplo com secção 5 (usuário 12/11/2026)
+    m.splice(m.findIndex(f => f[0] === "h") + 1, 0, ["dReb", "Ø do rebaixo interno (mm)", 54], ["hReb", "Altura do rebaixo (mm)", 4]);
     m.splice(m.findIndex(f => f[0] === "angC") + 1, 0, ["corte", "Corte da guia", "S"]);
     return m; })(),
   params: GEN.psg101.params,
@@ -2015,7 +2017,7 @@ GEN.psg103 = {
     const L = GEN.psa108.build(q), cI = q.chI;
     if (!p.nome) L[0] = `%PSG103 ${fx(p.dint, 3)}/${fx(p.dext, 3)}/${fx(p.h, 3)},MX,`;
     const iB = L.findIndex(l => /^;BUCHA /.test(l));
-    const extra = [`;PSG 103 (GUIA COM REBAIXO) - REBAIXO INTERNO D${fx(p.dReb, 3)} X ${fx(hR, 3)} NA FRENTE`,
+    const extra = [`;PSG 103 (GUIA COM REBAIXO) - REBAIXO INTERNO D${fx(p.dReb, 3)} X ${fx(hR, 3)} (USINADO PELA FACE DE ENTRADA)`,
       p.corte === "N" ? ";PECA SEM CORTE" : `;CORTE NO ACABAMENTO A ${fx(psgAng(p), 0)} GRAUS - ${a > 0 ? "SERRA " + fx(PSG_SERRA, 1) + " (POR ISSO +" + fx(a, 1) + " NOS DIAMETROS)" : "SEM PERDA"}`];
     if (a > 0) extra.unshift(`;${(ARR_MAT[p.matA] || [p.matA])[0].split(" ")[0].toUpperCase()}: USINADO ${fx(a, 2)} MAIOR NOS DIAMETROS (${fx(p.dint + a, 3)}/${fx(p.dext + a, 3)}/REBAIXO ${fx(dR, 3)}) - DESENHO ${fx(p.dint, 3)}/${fx(p.dext, 3)}/${fx(p.dReb, 3)}`);
     L.splice(iB + 1, 0, ...extra);
@@ -3672,8 +3674,9 @@ function drawingSVG(p){  const PT = state.orient === "portrait";
   g += `<text x="${(dzf + dzb) / 2}" y="${dyI + 44 + (oAt === "dp" ? oL * ds : 0)}" class="vt" text-anchor="middle">DETALHE B (ampliado)</text>`;
   if (p.tipoGen === "psg103" && p.dReb > 0 && p.hReb > 0){   // PSG 103: altura do rebaixo e Ø do rebaixo
     const yR = DY(p.dReb / 2), yh = dyI + 24;
-    g += ext(DX(-p.hReb), dyI + 4, DX(-p.hReb), yh + 6) + ext(dzf, yR + 4, dzf, yh + 6) + dimH(dzf, DX(-p.hReb), yh, fv3(p.hReb));
-    g += `<text x="${DX(-p.hReb) + 8}" y="${yh + 4}" class="tn">rebaixo Ø ${fmtN(p.dReb, 2)}</text>`;
+    const xR = DX(-(h - p.hReb));   // rebaixo desenhado na face de trás (lado direito do detalhe)
+    g += ext(xR, dyI + 4, xR, yh + 6) + ext(dzb, yR + 4, dzb, yh + 6) + dimH(xR, dzb, yh, fv3(p.hReb));
+    g += `<text x="${xR - 8}" y="${yh + 4}" class="tn" text-anchor="end">rebaixo Ø ${fmtN(p.dReb, 2)}</text>`;
   }
 
   // ---- VISTA FRONTAL ----

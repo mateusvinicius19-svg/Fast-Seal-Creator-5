@@ -6,6 +6,14 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.34.0 — PSH 129 (DH): linha da secção 6,5 e tolerância dos diâmetros pelo tamanho
+- Tabela padrão ganhou a linha **secção 6,5 → A 8 · C 4 · D 2,8** (pedido do usuário). Entre 5 e 6,5 fica proporcional
+  (ex.: 5,75 → C 3,75); acima de 6,5, proporcional à linha de 6,5 (ex.: 8 → A 9,846 · C 4,923 · D 3,446).
+- Tolerância padrão dos diâmetros (campo vazio), Ø interno e Ø externo cada um pelo seu tamanho, valor cheio:
+  até Ø50 → 0/−0,2 · até Ø100 → 0/−0,3 · até Ø200 → 0/−0,4 · até Ø300 → 0/−0,6 · acima de Ø300 → 0/−0,8
+  (antes 0/−0,13 em todos). Altura continua 0/−0,1. Tolerância digitada = usa a digitada.
+- Rotina em lote (`gerar.ps1`): o PSH 129 também usa a tabela padrão (altura/rebaixo vazios) e essa tolerância.
+
 ## 5.33.1 — PSH 129 (DH): secção 5 com C = 3,5
 - Pedido do usuário: na secção 5 a secção do rebaixo frontal (C) passa de 4 para **3,5** (A 8 · C 3,5 · D 2,8).
   Os valores proporcionais acompanham (ex.: secção 6,5 → C 4,55; secção 4 → C 2,75).

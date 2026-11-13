@@ -1559,7 +1559,7 @@ function readParams(){
   // DP: tolerância padrão quando o campo está vazio — diâmetros +0,1/0, altura 0/−0,1
   if ($("genType").value === "iso" && pieceKind(p) === "dp"){
     const empty = pre => (p[pre + "S"] === "" || p[pre + "S"] === undefined) && (p[pre + "I"] === "" || p[pre + "I"] === undefined);
-    for (const pre of ["ti", "te"]) if (empty(pre)){ p[pre + "S"] = dTol(0.1); p[pre + "I"] = 0; }
+    for (const pre of ["ti", "te"]) if (empty(pre)){ p[pre + "S"] = dhTolVal(pre === "ti" ? p.dint : p.dext); p[pre + "I"] = 0; }   // v5.42.0: igual ao PSE 125
     if (empty("th")){ p.thS = 0; p.thI = -0.1; }
   }
   return p;
@@ -3673,8 +3673,10 @@ function dhPadrao(sec){
   else { const i = T.findIndex(t => t[0] >= sec), a = T[i - 1], b = T[i], f = (sec - a[0]) / (b[0] - a[0]); k = a.map((v, j) => v + (b[j] - v) * f); }
   return { h: r(k[1]), h2: r(k[2]), b: r(k[3]) };
 }
+// tolerância dos diâmetros pelo tamanho (usuário 13/11/2026): PSH 129 (para menos), PSE 125 e PSE 108 (para mais)
+function dhTolVal(d){ d = Number(d) || 0; return d <= 50 ? 0.2 : d <= 100 ? 0.3 : d <= 200 ? 0.4 : d <= 300 ? 0.6 : 0.8; }
 function lipTolFill(p){   // PSH 129 (DH) e PSE 125 (DPR); usado pelo formulário e pelo gerar.ps1 (rotina em lote)
-  const dhTol = d => d <= 50 ? 0.2 : d <= 100 ? 0.3 : d <= 200 ? 0.4 : d <= 300 ? 0.6 : 0.8;
+  const dhTol = dhTolVal;
   const pist = (p.tipoGen || $("genType").value) === "dpr", s = Number(p.sec) || 0;   // DPR (pistão): input = Ø externo, tolerância para mais
   const dia = pist ? { ti: (Number(p.dext) || 0) - 2 * s, te: Number(p.dext) || 0 } : { ti: Number(p.dint) || 0, te: (Number(p.dint) || 0) + 2 * s };
   for (const pre of ["ti", "te", "th"]) if ((p[pre + "S"] === "" || p[pre + "S"] === undefined) && (p[pre + "I"] === "" || p[pre + "I"] === undefined)){

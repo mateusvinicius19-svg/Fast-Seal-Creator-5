@@ -6,6 +6,18 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.30.0 — Perfil novo PSG 103 (guia com rebaixo interno)
+- Novo gerador **PSG 103** (guias): mesmo padrão do PSG 101 (material, acréscimo de 0,9 no POM/Celeron, chanfros, corte em
+  ângulo, tolerâncias, secção +0/−0,05) com **rebaixo interno** na face da frente: campos novos **Ø do rebaixo interno** e
+  **Altura do rebaixo**. O rebaixo fica na frente porque a T4D4 não faz degrau reto nas costas.
+- Campo **Corte da guia**: "Com corte" (como o PSG 101) ou **"Sem corte"** — sem serra, sem o acréscimo nos Ø, sem a vista do
+  corte no desenho e nota "Sem corte".
+- Programa: o do PSG 101 com 1 peça por ciclo; o interno faz o chanfro no Ø do rebaixo, o rebaixo até a altura, o degrau reto
+  até o Ø interno e segue até o chanfro de trás (com desbaste do rebaixo quando sai 5 ou mais no Ø).
+- Chanfro sugerido = o da guia (10 % da altura), limitado a 30 % da parede da frente ((Ø ext. − Ø rebaixo) / 2); aviso se os
+  chanfros não couberem na parede.
+- Desenho com o rebaixo no detalhe B (cota da altura e Ø do rebaixo) e nota; imagem do perfil em Guias: "PSG 103 (GUIA)".
+
 ## 5.29.0 — Perfil novo PSE 125 (DPR): PSH 129 (DH) invertido para pistão
 - Novo gerador **PSE 125 (DPR)** (pistão): igual ao PSH 129 (DH), espelhado — lábio de PTFE no **Ø externo** (encosta no
   cilindro) com degrau na face da frente por fora, flanco 100° e base 10° (mesmos campos A, B, C, D do DH; entrada = Ø externo
@@ -491,6 +503,6 @@ Junta as branches paralelas (5.12.0 servidor/celular, 5.7.x Cód. interno/cancel
 
 ## 5.0.0 — 09/11/2026
 - Primeira versão no GitHub (base do que já estava no W: em 09/11/2026).
-- Simulador CNC.html: gera Fagor .PIT + MCS 500 + desenho PDF para PSE/PSH 105/106/107, PSH 103, PSE 103, PSE 118, PSH 121, PSH 125, PSH 124 (DHR), PSE 125 (DPR), PSH 108, PSH 117, PSR 102/211,
+- Simulador CNC.html: gera Fagor .PIT + MCS 500 + desenho PDF para PSE/PSH 105/106/107, PSH 103, PSE 103, PSE 118, PSH 121, PSH 125, PSH 124 (DHR), PSE 125 (DPR), PSG 103, PSH 108, PSH 117, PSR 102/211,
   DH PSH 129, PSO 109, arruelas (ISO, ciclo com/sem chanfro); Alterar programa (só desbaste); Ver programa.
 - Rotina noturna (`Claude contexto/Rotina/*.ps1`): gerar, revisar, controle, imprimir, regerar, índice de .PIT, pit2mcs.

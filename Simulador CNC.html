@@ -1564,7 +1564,7 @@ function readParams(){
   }
   return p;
 }
-const OPT_KEYS = new Set(["pM","pL","chEF","chIF","rF","pF","chR","angIT","rpt","S","rpm","ai","ae","fi","fe","chc","bi","bo","tInt","xLe","xHe","xLi","xHi","lLab","cLab","pCan","rCan","wCan","rec","vD","vL","oc","oID","tL","lipF","rampa","chE","hb"]);
+const OPT_KEYS = new Set(["pZ","pM","pL","chEF","chIF","rF","pF","chR","angIT","rpt","S","rpm","ai","ae","fi","fe","chc","bi","bo","tInt","xLe","xHe","xLi","xHi","lLab","cLab","pCan","rCan","wCan","rec","vD","vL","oc","oID","tL","lipF","rampa","chE","hb"]);
 let genTimer = 0;
 function saveForm(){
   try {
@@ -2256,7 +2256,13 @@ function psh110Contours(p){
   const g = psh110Geom(p), k = psh110Piece(p), L = g.L, R = x => x / 2, T30 = Math.tan(30 * Math.PI / 180);
   if (k === "M"){
     const zA = -(L + g.pM / 2), zs = zA + (g.S - g.sh) / 2;   // ponta virtual além do corte: o corte em −L deixa o paralelo                                         // ponta de trás (virtual) e fim dos lábios
-    return { k, L, outer: [[0, R(g.D + g.iM)], [zs, R(g.D - g.sh)], [zA, g.rm]], inner: [[0, R(g.d - g.iM)], [zs, R(g.d + g.sh)], [zA, g.rm]], notch: g.dM };
+    // v5.40.1 (usuário 13/11/2026): o V de trás vai até a face de trás (borda do paralelo) e segue RETO em Z mais pZ (0,6), no externo e
+    // no interno; o desbaste termina nesse mesmo Z
+    const pz = Number(String(p.pZ ?? "").replace(",", ".")), zE = -(L + (pz > 0 ? pz : (String(p.pZ ?? "") === "0" ? 0 : 0.6)));
+    const ro = g.rm + g.pM / 2, ri = g.rm - g.pM / 2;
+    return { k, L, notch: g.dM,
+      outer: [[0, R(g.D + g.iM)], [zs, R(g.D - g.sh)], [-L, ro], ...(zE < -L ? [[zE, ro]] : [])],
+      inner: [[0, R(g.d - g.iM)], [zs, R(g.d + g.sh)], [-L, ri], ...(zE < -L ? [[zE, ri]] : [])] };
   }
   if (k === "A"){
     const Do = g.D - 0.15 * g.S, di = g.d + 0.15 * g.S, zo = -((Do / 2 - g.rm) - g.a), zi = -((g.rm - di / 2) - g.a);
@@ -2293,7 +2299,7 @@ GEN.psh110 = {
   main: [["peca","Peça do conjunto","M"],["dint","Ø haste (mm)",50],["dext","Ø alojamento (mm)",65],["h","Altura (mm)",35],["nm","Quantidade de intermediárias",5],
          ["matM","Material da intermediária","PU"],["matF","Material da base e da tampa","NYLON"],["rpt","Nº de repetições RPT (vazio = intermediária: quantidade − 1; base/tampa: 0)",""],
          ["bi","Bucha Ø interno (vazio = automática)",""],["bo","Bucha Ø externo (vazio = automática)",""]],
-  params: [["apR","Desbaste: quanto tirar por passada (no raio, mm)",3],["alR","Sobremetal deixado para o acabamento (no raio, mm)",1.5],["rn","Raio da ponta das ferramentas (mm)",0.4],["S","Rotação S (vazio = tabela pelo Ø ext.)",""],["pM","Paralelo atrás da intermediária (largura, vazio = 0,25 × secção; 0 = ponta viva)",""]],
+  params: [["apR","Desbaste: quanto tirar por passada (no raio, mm)",3],["alR","Sobremetal deixado para o acabamento (no raio, mm)",1.5],["rn","Raio da ponta das ferramentas (mm)",0.4],["S","Rotação S (vazio = tabela pelo Ø ext.)",""],["pM","Paralelo atrás da intermediária (largura, vazio = 0,25 × secção; 0 = ponta viva)",""],["pZ","Intermediária: reta em Z no fim do externo/interno (vazio = 0,6)",""]],
   build(p){
     const g = psh110Geom(p), C = psh110Contours(p), k = C.k, L = g.L, f3 = v => fx(v, 3), r = Number(p.rn) > 0 ? Number(p.rn) : 0.4;
     const mat = psh110Mat(p), PU = mat === "PU", lab = psh110MatLabel(mat); p.mat = lab;

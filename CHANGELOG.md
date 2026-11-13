@@ -6,6 +6,12 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.40.1 — PSH 110: reta em Z no fim do externo e do interno da intermediária
+- Pedido do usuário: na intermediária, o V de trás vai até a face de trás (borda do paralelo) e segue **reto em Z mais 0,6**, no
+  externo e no interno; o desbaste termina nesse mesmo Z (como nos programas do Fast Seal). Ex.: 50x65x35 → externo X59,375 e
+  interno X55,625 até Z −8,278 (ponta da ferramenta).
+- Campo novo em Parâmetros fixos: "Intermediária: reta em Z no fim do externo/interno" (vazio = 0,6).
+
 ## 5.40.0 — PSH 110: paralelo atrás da intermediária
 - Pedido do usuário: a parte de trás da intermediária não tem mais canto vivo — a ponta em V vira um **paralelo** (face reta) de
   **0,25 × secção** (igual à reta do bico da base; 1,88 no 50x65). Os flancos de 45° continuam os mesmos, então o encaixe e a altura

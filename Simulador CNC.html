@@ -910,7 +910,8 @@ const GEN = {
     name: "Programa Arruela ISO",
     main: [["dint","Diâmetro interno (mm)",200],["dext","Diâmetro externo (mm)",250],["h","Altura (mm)",10],
            ["chF","Chanfro externo frente (mm)",0.8],["chT","Chanfro externo trás (mm)",0.8],["chI","Chanfro interno, compr. em Z (mm)",0.2],
-           ["angI","Ângulo do chanfro interno (°)",60],["rpt","Nº de repetições RPT (vazio = 0)",""]],
+           ["angI","Ângulo do chanfro interno (°)",60],["rpt","Nº de repetições RPT (vazio = 0)",""],
+           ["n","Peças por ciclo (1 a 10)",1],["bed","Espessura do bedame (mm) — espaço entre as peças",1]],
     params: [["prolF","Prolongamento frente (mm)",0.3],["prolT","Prolongamento trás (mm)",0.4],["parT","Paralelo trás (mm)",0.6],
              ["sobra","Faceamento: sobra em diâmetro (mm)",4],["fExt","Avanço externo F",0.15],["fInt","Avanço interno F",0.15],
              ["rpm","Rotação S (vazio = tabela pelo maior Ø)",""],["g92","Valor do G92 Z",1.05],["tExt","Ferramenta externo e face","T7D7"],
@@ -929,25 +930,45 @@ const GEN = {
         24: p.zAp, 26: p.zSeg, 27: p.fExt, 28: p.fInt, 29: 0, 30: -p.h - p.cDZ, 31: p.dint - p.cPass, 32: p.fBed,
         33: p.dext + p.cPos, 34: p.zEnt
       };
-      const c = n => fx(C[n], 3);
+      const c = n => fx(C[n], 3), X = v => fx(v, 3);
       const rpt = (p.rpt === "" || p.rpt === null || isNaN(p.rpt)) ? "0" : gen15(p.rpt);
+      // v5.37.0 (usuário 13/11/2026): PSE 108 (e Arruela ISO) com VÁRIAS PEÇAS POR CICLO. Peça i começa em Z −(i−1)·(altura + bedame);
+      // entre as peças o perfil desce pelo chanfro de trás até o meio do espaço do bedame e sobe pelo chanfro da frente da seguinte.
+      // O bedame corta cada peça na altura dela; o G92 fica no último corte (consumo = N × altura + (N−1) × bedame + G92).
+      const N = isoN(p), bed = Number(p.bed) > 0 ? Number(p.bed) : 1, P = p.h + bed, g2 = bed / 2;
+      const ext = [], int = [], cut = [];
+      for (let i = 0; i < N; i++){
+        const o = i * P;
+        if (i > 0) ext.push("G01 X" + c(4) + " Z" + X(-(o + p.chF)) + " ;(PECA " + (i + 1) + ")");
+        ext.push("G01 Z" + X(-(o + p.h - p.chT)));
+        if (i < N - 1){ ext.push("G01 X" + X(p.dext - 2*p.chT - 2*g2) + " Z" + X(-(o + p.h + g2))); if (Math.abs(p.chT - p.chF) > 1e-9) ext.push("G01 X" + X(p.dext - 2*p.chF - 2*g2)); }
+        else ext.push("G01 X" + X(C[7]) + " Z" + X(-(o + p.h + p.prolT)), "G01 Z" + X(-(o + p.h + p.prolT + p.parT)));
+        if (i > 0) int.push("G01 X" + c(17) + " Z" + X(-(o + p.chI)) + " ;(PECA " + (i + 1) + ")");
+        int.push("G01 Z" + X(-(o + p.h - p.chI)));
+        if (i < N - 1) int.push("G01 X" + X(p.dint + 2*(p.chI + g2)*k) + " Z" + X(-(o + p.h + g2)));
+        else int.push("G01 X" + X(C[20]) + " Z" + X(-(o + p.h + p.prolT)), "G01 Z" + X(-(o + p.h + p.prolT + p.parT)));
+        cut.push(...(N > 1 ? ["; (CORTE PECA " + (i + 1) + ")"] : []), "G00 Z" + X(-(o + p.h) - p.cDZ), "G01 X" + c(31) + " F" + c(32), "G00 X" + c(33));
+      }
       return [
+        ...(N > 1 ? [";" + N + " PECAS POR CICLO - BEDAME " + gen15(bed)] : []),
         "G90","G95","G54","G97 S" + gen15((p.rpm === "" || p.rpm === undefined || isNaN(p.rpm)) ? rpmLookup(p.dext, RPM_TABLE) : p.rpm) + " M3","N10","G0 Z100",
         p.tExt + " ;(EXTERNO FACE)",
         "G00 X"+c(10)+" Z"+c(24), "G01 Z"+c(29)+" F"+c(27), "G01 X"+c(11)+" F"+c(27), "G00 Z"+c(34), "G00 X"+c(2),
-        "G42 G01 Z"+c(3)+" F"+c(27), "G01 X"+c(4)+" Z"+c(5), "G01 Z"+c(6), "G01 X"+c(7)+" Z"+c(8), "G01 Z"+c(9),
+        "G42 G01 Z"+c(3)+" F"+c(27), "G01 X"+c(4)+" Z"+c(5), ...ext,
         "G01 X"+c(13), "G40 G00 Z"+c(34), "G00 Z"+c(26),
         p.tInt + " ;(INTERNO)",
-        "G00 X"+c(15)+" Z"+c(34), "G41 G01 Z"+c(16)+" F"+c(28), "G01 X"+c(17)+" Z"+c(18), "G01 Z"+c(19),
-        "G01 X"+c(20)+" Z"+c(21), "G01 Z"+c(22), "G01 X"+c(23), "G40 G00 Z"+c(24), "G00 Z"+c(26),
+        "G00 X"+c(15)+" Z"+c(34), "G41 G01 Z"+c(16)+" F"+c(28), "G01 X"+c(17)+" Z"+c(18), ...int,
+        "G01 X"+c(23), "G40 G00 Z"+c(24), "G00 Z"+c(26),
         p.tBed + " ;(BEDAME 1)",
-        "G00 X"+c(33)+" Z"+c(24), "G00 Z"+c(30), "G01 X"+c(31)+" F"+c(32), "G00 X"+c(33),
+        "G00 X"+c(33)+" Z"+c(24), ...cut,
         "G92 Z" + fx(p.g92, 2), "N20 G00 Z100",
         "(RPT N10,N20)N" + rpt + ";=(N IGUAL A NUMERO DE REPETIÇOES)",
         "G54", "G00 Z" + fx(p.zFim, 0), "M05", "M30"
       ];
     },
-    check(p){ return p.dext > p.dint ? "" : "ATENÇÃO: diâmetro externo tem que ser maior que o interno."; }
+    check(p){ const m = []; if (!(p.dext > p.dint)) m.push("diâmetro externo tem que ser maior que o interno");
+      if (Number(p.n) > 10) m.push("máximo de 10 peças por ciclo (usado 10)");
+      return m.length ? "ATENÇÃO: " + m.join("; ") + "." : ""; }
   },
 
   ciclo: {
@@ -1588,7 +1609,7 @@ function generate(fromInput){
   }
   const fname = (type === "iso" || type === "dhr" || type === "dpr" || type === "psh110" || type === "psa108" || type === "psa109" || type === "psg101" || type === "psg103" || type === "psg104" || type === "lip" || type === "pso" || type === "pse106" || type === "psh106" || type === "psh108" || type === "psh117" || type === "psh125" || type === "psh105" || type === "pse105" || type === "pse103" || type === "pse107" || type === "pse118" || type === "psh107" || type === "psh121" || type === "psh103" || type === "psr102" || type === "psr211") ? pieceFile(p) + (buchaIsException(p) || (state.alterNum && p.bi !== "" && p.bo !== "") ? ` ${gen15(p.bi)}X${gen15(p.bo)}` : "") : `PSA108 ${gen15(p.dint)}X${gen15(p.dext)}X${gen15(p.h)} - ${xround(p.n,0)} pcs`;
   load(lines.join("\n"), fname);
-  if (!g.check(p)) try { $("genMsg").textContent += costTxt(pieceCost(lines.join("\n"), ["ciclo", "semch"].includes(type) ? xround(p.n, 0) : isPSA(type) ? cicloPcs(p) : 1)); } catch(e){}
+  if (!g.check(p)) try { $("genMsg").textContent += costTxt(pieceCost(lines.join("\n"), ["ciclo", "semch"].includes(type) ? xround(p.n, 0) : (isPSA(type) || type === "iso") ? cicloPcs(p) : 1)); } catch(e){}
   // 🧰 T8D8 → T6D16 quando a secção passa de 14,8 (feito acima, antes de montar o programa)
   if (isPSG(type) && p.corte !== "N") $("genMsg").textContent += (psgAcr(p) > 0 ? ` · ${(ARR_MAT[p.matA] || [p.matA])[0].split(" ")[0]}: usinado ${fmtN(psgAcr(p), 2)} mm maior nos diâmetros (Ø${fmtN(p.dint + psgAcr(p), 3)} / Ø${fmtN(p.dext + psgAcr(p), 3)}) por causa da serra de ${fmtN(PSG_SERRA, 1)}; desenho com a medida nominal` : "") + ` · corte da guia a ${fmtN(psgAng(p), 0)}° no acabamento${psgAcr(p) > 0 ? "" : " (sem perda)"}.`;
   if (d16 && celD16 && secCorte <= 14.8 + 1e-9){ $("genMsg").textContent += ` · Celeron: corte com a T6D16 — bedame 2 nas peças, G92 +1 mm, desbaste e acabamento terminam no mesmo Z (sem passar para a peça seguinte).`; }
@@ -2624,7 +2645,7 @@ const HIST_COLS = ["Data", "Programa", "Perfil", "Nominais", "Comentario", "Peca
 function formSnapshot(){ const vals = {}; document.querySelectorAll("#genBox input[data-k], #genBox select[data-k]").forEach(el => vals[el.dataset.k] = el.value); return JSON.stringify({ type: $("genType").value, vals }); }
 function histRecord(p, type, text, pitName, mcsName, pdfMsg){
   const f3 = v => (v === "" || v === undefined || v === null || isNaN(v)) ? "" : Number(v).toFixed(3);
-  const c = (() => { try { return pieceCost(text, ["ciclo", "semch"].includes(type) ? xround(p.n, 0) : isPSA(type) ? cicloPcs(p) : 1); } catch(e){ return null; } })();
+  const c = (() => { try { return pieceCost(text, ["ciclo", "semch"].includes(type) ? xround(p.n, 0) : (isPSA(type) || type === "iso") ? cicloPcs(p) : 1); } catch(e){ return null; } })();
   const dext = type === "lip" ? p.dint + 2 * p.sec : p.dext;
   const perfil = ["ciclo", "semch"].includes(type) ? `PSA 108 (ciclo ${xround(p.n, 0)} pç${type === "semch" ? " sem chanfro" : ""})` : (() => { try { return pieceName(p); } catch(e){ return type; } })();
   const mat = ["ciclo", "semch"].includes(type) || p.matA ? ((ARR_MAT[p.matA] || ARR_MAT.PU)[0]) : (p.mat || "PU");
@@ -2632,7 +2653,7 @@ function histRecord(p, type, text, pitName, mcsName, pdfMsg){
   const pdf = (pdfMsg || "").match(/desenho: (.+?\.pdf)/);
   return { "Data": `${String(now.getDate()).padStart(2, "0")}-${M[now.getMonth()]}-${now.getFullYear()} ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`,
     "Programa": pitName.replace(/\.PIT$/i, ""), "Perfil": perfil, "Nominais": `${f3(p.dint)}/${f3(dext)}/${f3(p.h)}`, "Comentario": "",
-    "Pecas/ciclo": ["ciclo", "semch"].includes(type) ? String(xround(p.n, 0)) : isPSA(type) ? String(cicloPcs(p)) : "1",
+    "Pecas/ciclo": ["ciclo", "semch"].includes(type) ? String(xround(p.n, 0)) : (isPSA(type) || type === "iso") ? String(cicloPcs(p)) : "1",
     "Custo peca (R$)": c ? c.cost.toFixed(2).replace(".", ",") : "", "Material": mat,
     "Bucha I": c ? f3(c.a) : "", "Bucha E": c ? f3(c.b) : "", "Maquina": "FAGOR 1 / MCS 500",
     "Arquivo Fagor": pitName, "Arquivo MCS": mcsName, "Desenho": pdf ? pdf[1] : "", "Parametros": (() => { try { return formSnapshot(); } catch(e){ return ""; } })() };
@@ -2708,7 +2729,8 @@ async function openHistory(){
   $("histQ").oninput = e => { const q = e.target.value.toLowerCase(); $("histT").querySelector("tbody").innerHTML = data.filter(r => r.join(" ").toLowerCase().includes(q)).map(tr).join(""); };
 }
 // auto = "Alterar programa": salva sem perguntar o número (usa o do programa + sufixo da bucha) e sem imprimir o desenho
-function cicloPcs(p){ if (!isPSA(p.tipoGen)) return 0; return Math.max(1, Math.min(10, xround(p.n, 0), psaMaxN(p))); }
+function isoN(p){ const n = xround(Number(p.n) || 1, 0); return Math.max(1, Math.min(10, n)); }
+function cicloPcs(p){ if (p.tipoGen === "iso") return isoN(p); if (!isPSA(p.tipoGen)) return 0; return Math.max(1, Math.min(10, xround(p.n, 0), psaMaxN(p))); }
 async function saveProgram(auto){
   // pastas primeiro (ainda dentro do clique); se nenhuma janela abriu, ainda dá para pedir a DESENHOS
   let dir = null, dd = null;

@@ -6,6 +6,14 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.37.0 — PSE 108 (DP): peças por ciclo
+- Pedido do usuário: o PSE 108 (DP) ganhou o campo **Peças por ciclo (1 a 10)**, como o PSA 108. Vale também para a
+  Arruela ISO (mesmo gerador). Com 1 peça o programa sai igual ao de antes.
+- Peça i começa em Z −(i−1) × (altura + bedame). Entre as peças o externo e o interno descem pelo chanfro de trás até o
+  meio do espaço do bedame e sobem pelo chanfro da frente da peça seguinte (comentário ";(PECA n)"). O bedame corta cada
+  peça ("; (CORTE PECA n)") e o G92 fica no último corte. Campo **Espessura do bedame** (padrão 1; T6D16 = 2 automático).
+- 1ª linha ";N PECAS POR CICLO"; o nome do arquivo leva "CICLO N PÇ"; custo por peça e "Peças por ciclo" dividem por N.
+
 ## 5.36.0 — Perfil novo PSH 110 (chevron, base VPA01B do Fast Seal)
 - Novo gerador **PSH 110**: conjunto chevron de 3 peças — **MACHO** (A, -1: ponta em V na frente), **FÊMEA** (B, -2: entalhe
   em V na frente) e **ANÉIS DO MEIO** (-3: entalhe na frente, ponta atrás, lábios com aperto). Entradas: Ø haste, Ø alojamento,

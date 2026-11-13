@@ -6,6 +6,15 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.29.0 — Perfil novo PSE 125 (DPR): PSH 129 (DH) invertido para pistão
+- Novo gerador **PSE 125 (DPR)** (pistão): igual ao PSH 129 (DH), espelhado — lábio de PTFE no **Ø externo** (encosta no
+  cilindro) com degrau na face da frente por fora, flanco 100° e base 10° (mesmos campos A, B, C, D do DH; entrada = Ø externo
+  do bico), O-ring ativador por DENTRO. Interno liso com chanfro nos 2 cantos a **30° com o eixo** (limite da T4D4 nas costas,
+  mesmo critério do PSH 124).
+- Programa no formato do DH (face, desbaste externo, externo do lábio com G42, interno com G41, bedame, RPT; material e bucha
+  como no DH). Tolerâncias padrão: diâmetros +0,2/0 (com a regra de 2/3: +0,13/0), altura 0/−0,1, secção +0,1/−0,05.
+- Desenho com as cotas do degrau, ângulos e nota própria; imagem do perfil (enviada pelo usuário) em Pistão: "PSE 125 (DPR)".
+
 ## 5.28.2 — Nomes nos quadros: PSH 124 (DHR), PSH 129 (DH), PSG 101 (GUIA)
 - Na escolha pela imagem, esses três perfis aparecem com o nome pedido pelo usuário: **PSH 124 (DHR)**, **PSH 129 (DH)**
   (antes "DH PSH 129") e **PSG 101 (GUIA)**. Nome do programa, do arquivo e das pastas do W: sem mudança.
@@ -482,6 +491,6 @@ Junta as branches paralelas (5.12.0 servidor/celular, 5.7.x Cód. interno/cancel
 
 ## 5.0.0 — 09/11/2026
 - Primeira versão no GitHub (base do que já estava no W: em 09/11/2026).
-- Simulador CNC.html: gera Fagor .PIT + MCS 500 + desenho PDF para PSE/PSH 105/106/107, PSH 103, PSE 103, PSE 118, PSH 121, PSH 125, PSH 124 (DHR), PSH 108, PSH 117, PSR 102/211,
+- Simulador CNC.html: gera Fagor .PIT + MCS 500 + desenho PDF para PSE/PSH 105/106/107, PSH 103, PSE 103, PSE 118, PSH 121, PSH 125, PSH 124 (DHR), PSE 125 (DPR), PSH 108, PSH 117, PSR 102/211,
   DH PSH 129, PSO 109, arruelas (ISO, ciclo com/sem chanfro); Alterar programa (só desbaste); Ver programa.
 - Rotina noturna (`Claude contexto/Rotina/*.ps1`): gerar, revisar, controle, imprimir, regerar, índice de .PIT, pit2mcs.

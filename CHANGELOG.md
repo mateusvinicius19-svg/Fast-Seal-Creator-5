@@ -6,6 +6,10 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.45.2 — PSG 103 / PSG 104: chanfro do degrau do rebaixo mais fácil de achar (13/11/2026)
+- O campo chama "Chanfro 45° do degrau do rebaixo" e mostra a sugestão (ex.: 0,76). Digitar um valor muda o chanfro no
+  programa e no desenho; 0 = canto vivo.
+
 ## 5.45.1 — PSH 110: interno da intermediária só até Ø haste 21 (13/11/2026)
 - Intermediária em PU: interno com T2D12 a partir de Ø40 e com T1D45 de Ø40 até Ø21. Abaixo de Ø21 o V de 45° não dá
   para fazer: aparece o aviso "use outro perfil".

@@ -1523,6 +1523,7 @@ function readParams(){
   if (isPSA($("genType").value)){
     const sug = psaFill(p);
     for (const k of ["chE", "chI"]){ const e = document.querySelector(`#genBox [data-k="${k}"]`); if (e) e.placeholder = "sugestão: " + fmtN(sug, 2); }
+    { const e = document.querySelector(`#genBox [data-k="chR"]`); if (e) e.placeholder = "sugestão: " + fmtN(psgChR(Object.assign({}, p, { chR: "" })), 2); }   // v5.45.2: mostra o chanfro do degrau sugerido
   }
   if ($("genType").value === "iso" && "chF" in p){
     const kind = pieceKind(p);
@@ -2036,7 +2037,7 @@ function psg103Profile(p){
 GEN.psg103 = {
   name: "PSG 103 (guia com rebaixo)",
   main: (() => { const m = GEN.psg101.main.filter(f => f[0] !== "n").map(f => f[0] === "dext" ? ["dext", f[1], 60] : f);   // exemplo com secção 5 (usuário 12/11/2026)
-    m.splice(m.findIndex(f => f[0] === "h") + 1, 0, ["dReb", "Ø do rebaixo interno (mm)", 54], ["hReb", "Altura do rebaixo (mm)", 4], ["chR", "Chanfro 45° no canto do rebaixo (vazio = sugestão, 0 = sem)", ""]);
+    m.splice(m.findIndex(f => f[0] === "h") + 1, 0, ["dReb", "Ø do rebaixo interno (mm)", 54], ["hReb", "Altura do rebaixo (mm)", 4], ["chR", "Chanfro 45° do degrau do rebaixo (vazio = sugestão, 0 = sem)", ""]);
     m.splice(m.findIndex(f => f[0] === "angC") + 1, 0, ["corte", "Corte da guia", "S"]);
     return m; })(),
   params: [...GEN.psa108.params, ["psgAcr", "POM / Celeron: usinar maior nos diâmetros (mm)", 0.9]],   // com as etapas em Z (só o PSG 101 é contínuo)

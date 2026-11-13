@@ -6,6 +6,13 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.27.0 — Perfil novo PSH 125 (PSH 117 + O-ring do PSH 107)
+- Novo gerador **PSH 125** (veio): perfil do PSH 117 (lábio interno recuado 0,12 × secção, folga do calcanhar interno
+  0,134 × secção, lábio de estabilidade V atrás) com o canal do O-ring do PSH 107 (secção automática = a maior até
+  0,57 × secção, ou campo "O-ring: secção"; centro no Ø médio ou pelo "O-ring: Ø interno").
+- Programa: faceamento T3D3 igual ao 117 (face Z0, raio, rampa até o eixo do canal no Z do recuo) e ";( FRONT GROOVE )" com a
+  ferramenta de perfil do O-ring. Cabeçalho `%PSH125`. Desenho com V, recuo e O-ring; imagem do perfil em Veio.
+
 ## 5.26.0 — Perfil novo PSH 121 (PSE 118 com as regras de PSH)
 - Novo gerador **PSH 121** (veio): = PSH 107 (externo sem folga, folga do calcanhar interno pela tabela, O-ring no canal com
   a ferramenta de perfil), só o chanfro frontal 45° dos lábios = **1/4 do PSH 107** (espessura do lábio ÷ 12), como o PSE 118.
@@ -456,6 +463,6 @@ Junta as branches paralelas (5.12.0 servidor/celular, 5.7.x Cód. interno/cancel
 
 ## 5.0.0 — 09/11/2026
 - Primeira versão no GitHub (base do que já estava no W: em 09/11/2026).
-- Simulador CNC.html: gera Fagor .PIT + MCS 500 + desenho PDF para PSE/PSH 105/106/107, PSH 103, PSE 103, PSE 118, PSH 121, PSH 108, PSH 117, PSR 102/211,
+- Simulador CNC.html: gera Fagor .PIT + MCS 500 + desenho PDF para PSE/PSH 105/106/107, PSH 103, PSE 103, PSE 118, PSH 121, PSH 125, PSH 108, PSH 117, PSR 102/211,
   DH PSH 129, PSO 109, arruelas (ISO, ciclo com/sem chanfro); Alterar programa (só desbaste); Ver programa.
 - Rotina noturna (`Claude contexto/Rotina/*.ps1`): gerar, revisar, controle, imprimir, regerar, índice de .PIT, pit2mcs.

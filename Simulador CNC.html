@@ -911,7 +911,7 @@ const GEN = {
     main: [["dint","Diâmetro interno (mm)",200],["dext","Diâmetro externo (mm)",250],["h","Altura (mm)",10],
            ["chF","Chanfro externo frente (mm)",0.8],["chT","Chanfro externo trás (mm)",0.8],["chI","Chanfro interno, compr. em Z (mm)",0.2],
            ["angI","Ângulo do chanfro interno (°)",60],["rpt","Nº de repetições RPT (vazio = 0)",""],
-           ["n","Peças por ciclo (1 a 10)",1],["bed","Espessura do bedame (mm) — espaço entre as peças",1]],
+           ["n","Peças por ciclo — só PSE 108 (DP) (1 a 10)",1],["bed","Espessura do bedame (mm) — espaço entre as peças (só DP)",1]],
     params: [["prolF","Prolongamento frente (mm)",0.3],["prolT","Prolongamento trás (mm)",0.4],["parT","Paralelo trás (mm)",0.6],
              ["sobra","Faceamento: sobra em diâmetro (mm)",4],["fExt","Avanço externo F",0.15],["fInt","Avanço interno F",0.15],
              ["rpm","Rotação S (vazio = tabela pelo maior Ø)",""],["g92","Valor do G92 Z",1.05],["tExt","Ferramenta externo e face","T7D7"],
@@ -1666,12 +1666,14 @@ function arrRough(p, mode, zEnd, xBack, feed){
   // (nunca o comprimento todo de uma vez); cada etapa passa todos os Ø de fora para dentro antes de descer a próxima.
   // v5.9.1 (usuário 10/11): no PU essa regra NÃO vale (desbaste como antes, de uma vez)
   // v5.20.2 (usuário 11/11): peça curta (comprimento ≤ zMin, padrão 10 mm) vai numa etapa só — 2 etapas repetiam o mesmo passe
-  // v5.44.0 (usuário 13/11/2026): NÃO divide mais em etapas. "Só tem que dividir o desbaste em alguns perfis quando a ferramenta
-  // for cavar no diâmetro; nos outros perfis é um passe contínuo linear" — arruelas/guias: cada Ø vai de uma vez até o fim em Z.
+  const zMin = p.zMin > 0 ? p.zMin : 10;
+  // v5.45.0 (usuário 13/11/2026, PSG 101): "só tem que dividir o desbaste em alguns perfis quando a ferramenta for cavar no
+  // diâmetro; nos outros perfis é um passe contínuo linear" — SÓ NO PSG 101 (p.zCont): cada Ø vai de uma vez até o fim em Z.
+  // Mudança vale só para o perfil pedido; os outros (PSA 108/109, PSG 103/104, ciclos) continuam com as etapas.
   // v5.21.3 (usuário 11/11): Celeron corta com a T6D16 (bedame 2 mm) → desbaste 1 mm mais fundo em Z
   // (se a peça já usa bedame 2 por causa da secção > 14,8, o comprimento já conta os 2 mm)
   const cel = p.matA === "CELERON" && !p.bedD16; if (cel) zEnd -= 1;
-  const D = -zEnd, k = 1;
+  const D = -zEnd, k = !p.zCont && p.zSeg > 0 && !arrPU(p) && D > zMin + 1e-9 ? Math.max(2, Math.ceil(D / p.zSeg - 1e-9)) : 1;
   const L = ["G90", "; (DESBASTE " + (mode === "od" ? "EXTERNO" : "INTERNO") + " - MAX. 8 NO DIAMETRO, ACABAMENTO 2" + (k > 1 ? ", EM Z " + k + " ETAPAS DE " + fx(D / k, 3) : "") + (cel ? ", +1 EM Z: CORTE COM D16 2MM" : "") + ")"];
   let first = true;
   for (let s = 1; s <= k; s++){
@@ -1911,7 +1913,7 @@ GEN.psa108 = {
            ["fExt","Avanço externo F",0.15],["fInt","Avanço interno F",0.1],["fCor","Avanço corte F",0.1],["z0","Z inicial (G0 Z)",50],
            ["zExt","Z afastamento externo",70],["zInt","Z afastamento interno",50],["g92","Valor do G92 Z",1.1],["zN20","Z do bloco N20",100],
            ["zFim","Z final (G00)",250],["afX","Afastamento final em X (se N0 = 0)",50],["S","Rotação S (vazio = tabela pelo Ø ext.)",""],
-           ["zMax","Desbaste em Z: comprimento máximo (mm)",40]],
+           ["zMax","Desbaste em Z: comprimento máximo (mm)",40],["zSeg","Desbaste em Z: máximo por etapa (mm, ≥ 2 etapas acima do mínimo)",20],["zMin","Desbaste em Z: até este comprimento vai de uma vez (mm)",10]],
   build(p){
     psaFill(p); const fx3 = v => fx(v, 3);
     const prol = (p.bed - p.sobrep) / 2, cE = p.chE, cI = p.chI;
@@ -1995,9 +1997,9 @@ GEN.psg101 = {
   name: "PSG 101 (guia)",
   main: (() => { const m = GEN.psa108.main.map(f => f[0] === "dint" ? ["dint", f[1], 50] : f[0] === "dext" ? ["dext", f[1], 55] : f[0] === "h" ? ["h", f[1], 9.7] : f[0] === "matA" ? ["matA", f[1], "POM"] : f);
     m.splice(m.findIndex(f => f[0] === "nome"), 0, ["angC", "Ângulo do corte da guia (°)", 45]); return m; })(),
-  params: [...GEN.psa108.params, ["psgAcr", "POM / Celeron: usinar maior nos diâmetros (mm)", 0.9]],
+  params: [...GEN.psa108.params.filter(f => f[0] !== "zSeg" && f[0] !== "zMin"), ["psgAcr", "POM / Celeron: usinar maior nos diâmetros (mm)", 0.9]],   // PSG 101: desbaste em Z contínuo (sem etapas)
   build(p){
-    const a = psgAcr(p), q = Object.assign({}, p, { tipoGen: "psa108", dint: p.dint + a, dext: p.dext + a, angE: psgAngE(p) });
+    const a = psgAcr(p), q = Object.assign({}, p, { tipoGen: "psa108", dint: p.dint + a, dext: p.dext + a, angE: psgAngE(p), zCont: true });
     if (p.chE === "" || p.chE === undefined) q.chE = psaChSug(p.h);
     if (p.chI === "" || p.chI === undefined) q.chI = psaChSug(p.h);
     const L = GEN.psa108.build(q);
@@ -2037,7 +2039,7 @@ GEN.psg103 = {
     m.splice(m.findIndex(f => f[0] === "h") + 1, 0, ["dReb", "Ø do rebaixo interno (mm)", 54], ["hReb", "Altura do rebaixo (mm)", 4], ["chR", "Chanfro 45° no canto do rebaixo (vazio = sugestão, 0 = sem)", ""]);
     m.splice(m.findIndex(f => f[0] === "angC") + 1, 0, ["corte", "Corte da guia", "S"]);
     return m; })(),
-  params: GEN.psg101.params,
+  params: [...GEN.psa108.params, ["psgAcr", "POM / Celeron: usinar maior nos diâmetros (mm)", 0.9]],   // com as etapas em Z (só o PSG 101 é contínuo)
   build(p){
     const a = psgAcr(p), dR = p.dReb + a, hR = p.hReb;
     const q = Object.assign({}, p, { tipoGen: "psa108", n: 1, dint: p.dint + a, dext: p.dext + a, angE: psgAngE(p) });
@@ -2788,7 +2790,8 @@ async function openHistory(){
   $("histQ").oninput = e => { const q = e.target.value.toLowerCase(); $("histT").querySelector("tbody").innerHTML = data.filter(r => r.join(" ").toLowerCase().includes(q)).map(tr).join(""); };
 }
 // auto = "Alterar programa": salva sem perguntar o número (usa o do programa + sufixo da bucha) e sem imprimir o desenho
-function isoN(p){ const n = xround(Number(p.n) || 1, 0); return Math.max(1, Math.min(10, n)); }
+function isoN(p){ if (String(p.tipoP || "") !== "dp") return 1;   // v5.45.0 (usuário): peças por ciclo só no PSE 108 (DP), não na Arruela ISO
+  const n = xround(Number(p.n) || 1, 0); return Math.max(1, Math.min(10, n)); }
 function cicloPcs(p){ if (p.tipoGen === "iso") return isoN(p); if (!isPSA(p.tipoGen)) return 0; return Math.max(1, Math.min(10, xround(p.n, 0), psaMaxN(p))); }
 async function saveProgram(auto){
   // pastas primeiro (ainda dentro do clique); se nenhuma janela abriu, ainda dá para pedir a DESENHOS

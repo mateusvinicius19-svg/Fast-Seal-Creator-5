@@ -6,6 +6,12 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.32.1 — PSA 109: paralelo na face junto ao externo e ao interno
+- Pedido do usuário: a face do PSA 109 tem um **paralelo** (parte reta) de **10 % da secção** junto ao externo e outro junto ao
+  interno (medidos depois do chanfro da frente); o arco do raio fica entre os dois. Campo novo "Paralelo na face" (vazio = 10 %).
+- O raio continua 4/5 da secção e a **profundidade sai da conta** (ex.: 52 x 57,1 x 2,9 → R2,04, prof. 0,21). Se a profundidade
+  for digitada, o raio é que sai da conta. Programa (T3D3), desenho e nota atualizados.
+
 ## 5.32.0 — Perfil novo PSA 109 (arruela com raio na face)
 - Novo gerador **PSA 109** (arruelas): o PSA 108 com um **raio na face da frente** (canal raso em arco, centrado no Ø médio):
   raio = **4/5 da secção**, profundidade = **15 % da altura** (campos "Raio na face" e "Profundidade do canal" para testar

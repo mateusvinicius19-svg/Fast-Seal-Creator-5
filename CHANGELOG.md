@@ -6,6 +6,9 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.23.3 — PSH 108: imagem sem o texto
+- Imagem do PSH 108 na escolha pela imagem recortada sem o "PSH108" escrito (o código já aparece embaixo do quadro).
+
 ## 5.23.2 — Escolha pela imagem: só o código do perfil
 - Nos quadros de "Escolher pela imagem" aparece só o código (PSH 108, PSE 107, DH PSH 129…), sem a descrição entre
   parênteses; o nome completo continua ao passar o mouse e no botão do perfil. Ciclos, Arruela ISO e PSE 108 (DP) sem mudança.

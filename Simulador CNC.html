@@ -1079,8 +1079,8 @@ const GEN = {
 
   lip: {
     name: "DH PSH 129",
-    main: [["dint","E · Ø interno (bico) (mm)",560],["sec","B · Secção (mm)",6.5],["h","A · Altura (mm)",7.9],
-           ["h2","C · Altura do degrau (mm)",4.5],["b","D · Largura do degrau (mm)",3.247],["ch","Chanfro externo 45° (mm)",0.5],
+    main: [["dint","Ø interno (bico) (mm)",560],["sec","B · Secção total (mm)",6.5],["h","A · Altura (vazio = tabela padrão)",""],
+           ["h2","C · Secção do rebaixo frontal (vazio = tabela)",""],["b","D · Profundidade do rebaixo (vazio = tabela)",""],["ch","Chanfro externo 45° (mm)",0.5],
            ["rpt","Nº de repetições RPT (vazio = 0)",""],["desc","Descrição (desenho / arquivo)","DH PSH 129"],
            ["matA","Material","PU"],["bi","Bucha Ø interno (vazio = automática PU)",""],["bo","Bucha Ø externo (vazio = automática PU)",""]],
     params: [["af","Ângulo do flanco com o degrau (°)",100],["ab","Ângulo da base (°)",10],
@@ -1097,7 +1097,8 @@ const GEN = {
       const rpt = (p.rpt === "" || p.rpt === null || isNaN(p.rpt)) ? "0" : gen15(p.rpt);
       const bu = lipBucha(p, g), zR = -(p.h + p.prolT + p.parT);
       { const iI = document.querySelector("#genBox [data-k=bi]"), iO = document.querySelector("#genBox [data-k=bo]"), pu = (p.matA || "PU") === "PU", a = pu ? buchaPick(p.dint, g.Dext) : null, dg = "digite (" + (ARR_MAT[p.matA] || ARR_MAT.PU)[0] + ")";
-        if (iI) iI.placeholder = a ? "automática: " + a[0] : dg; if (iO) iO.placeholder = a ? "automática: " + a[1] : dg; }
+        if (iI) iI.placeholder = a ? "automática: " + a[0] : dg; if (iO) iO.placeholder = a ? "automática: " + a[1] : dg;
+        const d = dhPadrao(Number(p.sec)); for (const k of ["h", "h2", "b"]){ const el = document.querySelector("#genBox [data-k=" + k + "]"); if (el && d) el.placeholder = "tabela: " + fmtN(d[k], 3); } }
       return applyArrMat(this.buildRaw(p, g), p);   // material (usuário 09/11/2026): mesma lista e ferramentas das arruelas
     },
     buildRaw(p, g){
@@ -1554,7 +1555,7 @@ function saveForm(){
 function generate(fromInput){
   if (state.tolResetPending && fromInput){ state.tolResetPending = false; resetTolDefaults(); }   // mexeu na peça depois de salvar = item novo
   const type = $("genType").value, g = GEN[type], p = readParams();
-  p.tipoGen = type; if (isPSG(type)) p.angE = psgAngE(p); if (type === "lip") p.dext = p.dint + 2 * p.sec; if (type === "dpr") p.dint = p.dext - 2 * p.sec; if (type === "pso"){ p.dext = p.dint + 2 * p.sec; p.h = p.sec; }
+  p.tipoGen = type; if (isPSG(type)) p.angE = psgAngE(p); if (type === "lip"){ lipFill(p); p.dext = p.dint + 2 * p.sec; } if (type === "dpr") p.dint = p.dext - 2 * p.sec; if (type === "pso"){ p.dext = p.dint + 2 * p.sec; p.h = p.sec; }
   for (const [k] of g.main.concat(g.params)) if (!TEXT_KEYS.has(k) && !OPT_KEYS.has(k) && (p[k] === "" || isNaN(p[k]))) { $("genMsg").textContent = "Preencha: " + k; return; }
   const alojTxt = applyAloj(p);
   // v5.17.0 (usuário 11/11/2026): T8D8 (bedame 1 mm) corta secção de no máximo 14,8 → acima disso corta com a T6D16 (bedame 2 mm).
@@ -3450,7 +3451,28 @@ function pseFscBuild(p, gOver){
 }
 
 function fv3(v){ let s = fmtN(v, 3); if (s.indexOf(",") >= 0) { while (s.endsWith("0")) s = s.slice(0, -1); if (s.endsWith(",")) s = s.slice(0, -1); } return s; }
+// PSH 129 (DH) — medidas padrão do usuário (13/11/2026): [B secção total, A altura, C secção do rebaixo frontal, D profundidade do rebaixo].
+// Ângulo da base (E) = 10°, já é o padrão. Campo vazio = tabela pela secção; secção fora da tabela = proporcional
+// (entre as duas linhas vizinhas; abaixo da 1ª / acima da última = proporcional à linha da ponta).
+const DH_PADRAO = [[1.1, 2, 0.7, 0.7], [1.9, 3, 1.2, 1], [2.65, 4, 1.65, 1.3], [3.5, 6, 2.25, 2], [5, 8, 4, 2.8]];
+function dhPadrao(sec){
+  const T = DH_PADRAO, r = v => Math.round(v * 1000) / 1000;
+  if (!(sec > 0)) return null;
+  let k;
+  if (sec <= T[0][0]) k = T[0].map(v => v * sec / T[0][0]);
+  else if (sec >= T[T.length - 1][0]) k = T[T.length - 1].map(v => v * sec / T[T.length - 1][0]);
+  else { const i = T.findIndex(t => t[0] >= sec), a = T[i - 1], b = T[i], f = (sec - a[0]) / (b[0] - a[0]); k = a.map((v, j) => v + (b[j] - v) * f); }
+  return { h: r(k[1]), h2: r(k[2]), b: r(k[3]) };
+}
+function lipFill(p){
+  const vazio = v => v === "" || v === undefined || v === null || (typeof v === "number" && isNaN(v));
+  const d = dhPadrao(Number(p.sec));
+  if (!d) return p;
+  for (const k of ["h", "h2", "b"]) if (vazio(p[k])) p[k] = d[k];
+  return p;
+}
 function lipGeom(p){
+  lipFill(p);
   const Dext = p.dint + 2 * p.sec, Dstep = Dext - 2 * p.h2, drop = (Dstep - p.dint) / 2;
   const zLip = -(p.b + drop * TAN(p.af - 90));                 // bico do lábio (Z negativo a partir da face do degrau)
   const rise = (p.h + zLip) * TAN(p.ab);

@@ -30,6 +30,7 @@ metadata:
 - 09/11/2026 (usuário): desenho das gaxetas (PSE/PSH 105/106/107/117, PSR 211 corpo) — tolerância da ALTURA no máximo 0/−0,4 (antes = secção, até −0,5). Secção continua pela tabela.
 - 09/11/2026 (usuário): DH PSH 129 ganhou campo Material (matA, mesma lista/ferramentas das arruelas via applyArrMat; linha ;MATERIAL). Fora do PU a bucha tem que ser digitada (ATENÇÃO se vazia).
 - 09/11/2026 (usuário): desenho PSH (106/105/117/107): cota de secção à direita = lábio ext → lábio int (extAp − intAp)/2 ±tol, igual ao PSE (ex. 54,50→44,00 = 5,25 = soma das 3 cotas), não mais calcanhar até ponta do lábio.
+- 13/11/2026 (usuário): PSH 129 (DH) medidas padrão pela secção B (DH_PADRAO no HTML): B 1,1/1,9/2,65/3,5/5 → A altura 2/3/4/6/8, C secção do rebaixo frontal 0,7/1,2/1,65/2,25/4, D profundidade do rebaixo 0,7/1/1,3/2/2,8; E = ângulo da base 10° (padrão). Campos A/C/D vazios = tabela; fora da tabela = proporcional (interpola entre linhas; fora das pontas, proporcional à linha da ponta).
 - 09/11/2026 (usuário): PSH 129 (DH) tolerância padrão (campo vazio): Ø int e Ø ext 0/−0,2, altura 0/−0,1. PSE 108 e PSH 129: desenho SEM o O-ring ativador por enquanto (const DESENHO_ORING = false).
 - 09/11/2026 (usuário): PSA 108 tolerância padrão (campo vazio): Ø int e Ø ext ±0,2, altura 0/−0,1. Nome da pasta/PDF do desenho arredonda a 3 casas.
 - 10/11/2026 (usuário) — REGRAS PARA O CLAUDE AO FAZER PROGRAMAS DE PSA 108 (arruela). Seguir sempre, gerando pelo Simulador/gerar.ps1 (v5.9.1 já aplica):

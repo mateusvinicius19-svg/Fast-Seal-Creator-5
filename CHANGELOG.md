@@ -6,6 +6,14 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.44.0 — Arruelas / PSG: desbaste em Z sempre num passe contínuo
+- Pedido do usuário: "só tem que dividir o desbaste em alguns perfis quando a ferramenta for cavar no diâmetro; nos outros
+  perfis é um passe contínuo linear". Nas arruelas e guias (PSA 108, PSA 109, PSG 101/103/104, ciclos) o desbaste **não é
+  mais dividido em etapas em Z**, qualquer que seja o comprimento: cada passada no Ø vai de uma vez até o fim
+  (ex.: PSG 101 com 25 de altura → Z −26,55 direto; antes 2 etapas de 13,275). Substitui a 5.43.0.
+- Saíram os campos "Desbaste em Z: máximo por etapa" e "até este comprimento vai de uma vez". O limite de 40 mm (peças por
+  ciclo) continua.
+
 ## 5.43.0 — Arruelas / PSG: desbaste em Z sem ir "até o meio e de novo"
 - Pedido do usuário (PSG 101, já corrigido antes na 5.20.2 para peças até 10 mm): peça de 9,7 de altura dá 11,25 mm de
   desbaste em Z e saía em 2 etapas (até o meio da peça e depois de novo até o fim). Agora até **20 mm** (o máximo por etapa)

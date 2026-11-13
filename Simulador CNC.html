@@ -1996,7 +1996,9 @@ function profThumb(type){
 function profOptText(t){ if (t === "dp") return "PSE 108 (DP)"; const o = [...$("genType").options].find(o => o.value === t); return o ? o.textContent : (GEN[t] && GEN[t].name) || t; }
 // quadros da escolha pela imagem: só o código do perfil (ex.: "PSH 108"), sem a descrição entre parênteses (usuário 12/11/2026);
 // o nome completo fica no title (passar o mouse). Ciclos / Arruela ISO não têm código e ficam com o nome todo; DP continua "PSE 108 (DP)"
-function profCode(t){ const s = profOptText(t), m = t === "dp" ? null : s.match(/^((?:DH )?PS[A-Z] \d+)\s*\(/); return m ? m[1] : s; }
+// nomes fixos nos quadros (usuário 12/11/2026)
+const PROF_CARD_NAME = { dhr: "PSH 124 (DHR)", lip: "PSH 129 (DH)", psg101: "PSG 101 (GUIA)" };
+function profCode(t){ if (PROF_CARD_NAME[t]) return PROF_CARD_NAME[t]; const s = profOptText(t), m = t === "dp" ? null : s.match(/^((?:DH )?PS[A-Z] \d+)\s*\(/); return m ? m[1] : s; }
 // botão do perfil: miniatura + nome do perfil atual (a lista de seleção fica escondida)
 function updateProfBtn(){
   const b = $("btnProf"); if (!b) return;

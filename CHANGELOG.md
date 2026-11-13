@@ -6,6 +6,10 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.28.2 — Nomes nos quadros: PSH 124 (DHR), PSH 129 (DH), PSG 101 (GUIA)
+- Na escolha pela imagem, esses três perfis aparecem com o nome pedido pelo usuário: **PSH 124 (DHR)**, **PSH 129 (DH)**
+  (antes "DH PSH 129") e **PSG 101 (GUIA)**. Nome do programa, do arquivo e das pastas do W: sem mudança.
+
 ## 5.28.1 — PSH 124 (DHR): os dois chanfros internos a 30°
 - Pedido do usuário: chanfro interno da FRENTE também a **30° com o eixo** (antes 45°), igual ao de trás. Os dois campos
   são o tamanho no raio; em Z ficam ÷ tg30 (ex.: 0,8 no raio → 1,39 em Z). Programa (T4D4), desenho e nota atualizados.

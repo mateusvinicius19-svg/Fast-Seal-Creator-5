@@ -6,6 +6,14 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.39.0 — PSH 110: salvar meio / A / B, campo Altura e imagem nova
+- Salvar (pedido do usuário): os **anéis do meio** salvam com o número normal (030249.PIT / 30249.txt); o **macho** com o mesmo
+  número + **A** (030249A) e a **fêmea** + **B** (030249B). Ao salvar o macho ou a fêmea, o número sugerido é o do último meio
+  salvo. Os desenhos das 3 peças ficam na mesma pasta do conjunto: `PSH 110 (50 X 65 X 35) 30249…30249.pdf`, `…30249A.pdf`,
+  `…30249B.pdf`, como no W:.
+- Campo "Altura do alojamento" passa a se chamar só **Altura** (no PSH 110 são a mesma coisa).
+- Imagem nova do PSH 110 na escolha pela imagem (enviada pelo usuário).
+
 ## 5.38.0 — PSH 110: desenho do conjunto montado
 - Pedido do usuário: toda folha do PSH 110 ganha a vista **CONJUNTO MONTADO** — meia secção ampliada com o macho (virado, ponta
   para dentro), os n anéis do meio encaixados e a fêmea, dentro do contorno do alojamento (tracejado), com a cota H total e

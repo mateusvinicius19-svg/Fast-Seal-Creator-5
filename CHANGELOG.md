@@ -6,6 +6,15 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.47.7 — PSR 101: não trava ao editar; chanfros no formulário (14/11/2026)
+- **Travava ao mudar as medidas**: digitando um chanfro (ex.: 0,45) ele passava por "0", o canto ficava com dois pontos
+  iguais e o cálculo do percurso entrava em laço — a tela congelava. Agora pontos repetidos saem antes do cálculo
+  (chanfro 0 = canto vivo) e, com medidas impossíveis no meio da digitação (Ø alojamento menor que a haste, h1 ≥ h2,
+  lábio fora do degrau…), o PSR 101 não calcula: só mostra o aviso em vermelho até a medida fechar.
+- Os 4 chanfros (canto do degrau, quebra 45° do corpo, trás externo 60°, trás interno 30°) e o aperto da ponta foram para
+  o formulário principal, logo abaixo das alturas (antes ficavam em "Parâmetros fixos", que vem fechado).
+- Programas e desenhos de todos os perfis, inclusive o PSR 101 nas medidas normais, iguais a antes (conferido).
+
 ## 5.47.6 — PSR 101: furo reto (14/11/2026)
 - Pedido do usuário: o furo de trás (d + 1,0, ex.: Ø64 no 63x71) fica inteiro nessa medida, sem ângulo: a rampa de 19° da
   ponta vai direto até o furo e ele segue reto até o chanfro de trás (que continua igual). Antes ia até d + 0,45 e subia em

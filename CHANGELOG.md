@@ -6,6 +6,10 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.47.3 — PSR 101: chanfro de trás do interno a 30° (14/11/2026)
+- Pedido do usuário: o chanfro de trás do interno passa de 50° para 30° com o eixo (mesmo tamanho no raio: 0,35; secção
+  acima de 6: 0,5). Muda o programa e o desenho só do PSR 101; os outros perfis não mudam (conferido).
+
 ## 5.47.2 — PSR 101: desenho invertido (14/11/2026)
 - O desenho do PSR 101 (corte, detalhe e DXF) agora tem o corpo à esquerda e o lábio à direita, como no desenho do Fast
   Seal. O programa não muda; os outros perfis não mudam (conferido).

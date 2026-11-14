@@ -1400,7 +1400,7 @@ GEN.psr102 = { name: "PSR 102",
 //  · lábio por fora termina no degrau no Ø médio (d + S); aresta de fora na face em d + 0,45;
 //  · interno: chanfro da frente a 55° com o eixo até a ponta, rampa a 19° até d + 0,45 (C: d + 1,0) e furo até d + 1,0 atrás;
 //  · quebra de 45° do degrau para o corpo 0,3 (C: 0,6); chanfro de trás externo a 60° com a face 0,35 / 0,65 / 0,6,
-//    interno a 50° com o eixo 0,35 (C: 0,5). Conferido: degrau, quebra e corpo saem iguais aos PSR101-P.
+//    interno a 30° com o eixo 0,35 (C: 0,5) — usuário 14/11/2026 (o Fast Seal usa 50°). Conferido: degrau, quebra e corpo saem iguais aos PSR101-P.
 const PSR101_TAN = a => Math.tan(a * Math.PI / 180);
 function psr101Geom(p){
   const opt = v => (v === "" || v === null || v === undefined || isNaN(v)) ? null : Number(v);
@@ -1410,8 +1410,8 @@ function psr101Geom(p){
   const Le = d + (opt(p.r1LipE) ?? S), e0 = opt(p.r1E0) ?? 0.45, zT = opt(p.r1ZT) ?? 0.25, bR = opt(p.r1BR) ?? (cl === "C" ? 1.0 : 0.45), bB = opt(p.r1BB) ?? 1.0;
   const c45 = opt(p.r1C45) ?? (cl === "C" ? 0.6 : 0.3), cB = opt(p.r1CB) ?? { A: 0.35, B: 0.65, C: 0.6 }[cl], cI = opt(p.r1CI) ?? (cl === "C" ? 0.5 : 0.35);
   const aB = 55, aR = 19, Ds = D - st, Lz = H - h2, Fz = H - h1;
-  // interno (z de 0 na frente a −H): face → ponta a zT da face (chanfro de 55°) → rampa de 19° → furo → chanfro de trás (50°)
-  const zt = -zT, zr = zt - ((ap + bR) / 2) / PSR101_TAN(aR), kI = PSR101_TAN(50), eI = d - ap + 2 * zT * PSR101_TAN(aB);
+  // interno (z de 0 na frente a −H): face → ponta a zT da face (chanfro de 55°) → rampa de 19° → furo → chanfro de trás (30°, usuário)
+  const zt = -zT, zr = zt - ((ap + bR) / 2) / PSR101_TAN(aR), kI = PSR101_TAN(30), eI = d - ap + 2 * zT * PSR101_TAN(aB);
   const inner = [[0, R(eI)], [zt, R(d - ap)], [zr, R(d + bR)], [-H + cI / kI, R(d + bB)], [-H, R(d + bB) + cI], [-H - 0.6, R(d + bB) + cI + 0.6 * kI]];
   // externo: aresta na face → lábio até o degrau → degrau Ø D − st → quebra 45° → corpo Ø D → chanfro de trás (60° com a face)
   const k60 = PSR101_TAN(60);
@@ -1438,7 +1438,7 @@ GEN.psr101 = { name: "PSR 101",
            ["r1Ap","Aperto da ponta no Ø (vazio = 1,1 / 1,4 / 1,8 pela secção)",""],["r1ZT","Ponta do lábio: distância da face (vazio = 0,25)",""],["r1St","Degrau: quanto menor que o Ø alojamento (vazio = 2 / 3 / 4 pela secção)",""],
            ["r1LipE","Lábio no degrau: Ø − haste (vazio = secção, ou seja Ø médio)",""],["r1E0","Aresta de fora do lábio na face: Ø − haste (vazio = 0,45)",""],
            ["r1BR","Fim da rampa interna: Ø − haste (vazio = 0,45; secção acima de 6: 1,0)",""],["r1BB","Furo atrás: Ø − haste (vazio = 1,0)",""],
-           ["r1C45","Quebra 45° do degrau para o corpo (vazio = 0,3; secção acima de 6: 0,6)",""],["r1CB","Chanfro de trás externo, 60° (vazio = 0,35 / 0,65 / 0,6)",""],["r1CI","Chanfro de trás interno, 50° (vazio = 0,35; secção acima de 6: 0,5)",""]],
+           ["r1C45","Quebra 45° do degrau para o corpo (vazio = 0,3; secção acima de 6: 0,6)",""],["r1CB","Chanfro de trás externo, 60° (vazio = 0,35 / 0,65 / 0,6)",""],["r1CI","Chanfro de trás interno, 30° com o eixo (vazio = 0,35; secção acima de 6: 0,5)",""]],
   build(p){
     const g = psr101Geom(p), f3 = v => fx(v, 3), r = Number(p.rn) > 0 ? Number(p.rn) : 0.4, H = g.H;
     const tI = g.bi ?? 0, tO = g.bo ?? (g.D + 5);

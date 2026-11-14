@@ -6,6 +6,11 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.48.1 — Avisos pedem para avisar o responsável (14/11/2026)
+- Pedido do usuário: todo aviso de ATENÇÃO (ex.: profundidade acima do limite da T2D2/T2D12 no PSH 110) termina com
+  "AVISE O RESPONSÁVEL antes de usar este programa.", e a faixa vermelha de erro (programa ou desenho) também pede para
+  avisar o responsável. Só muda a mensagem na tela; os programas não mudam.
+
 ## 5.48.0 — Erros de programa e desenho aparecem na tela (todos os perfis) (14/11/2026)
 - Pedido do usuário: qualquer erro ao gerar um programa ou montar um desenho aparece na tela, numa faixa vermelha no topo
   (perfil + motivo + "tire um print e mande para o Claude"), com × para fechar. Antes falhava calado ou travava.

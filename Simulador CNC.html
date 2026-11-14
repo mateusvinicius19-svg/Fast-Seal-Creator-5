@@ -1754,7 +1754,7 @@ function errShow(onde, e){
     document.body.appendChild(b);
   }
   let perfil = ""; try { perfil = (GEN[$("genType").value] || {}).name || ""; } catch(_){}
-  b.querySelector("#errBannerTxt").textContent = `⚠ ${onde}${perfil ? " — " + perfil : ""}: ${msg}\nConfira as medidas. Se continuar, tire um print desta mensagem e mande para o Claude.`;
+  b.querySelector("#errBannerTxt").textContent = `⚠ ${onde}${perfil ? " — " + perfil : ""}: ${msg}\nAVISE O RESPONSÁVEL antes de usar este programa/desenho. Confira as medidas; se continuar, tire um print desta mensagem.`;
   try { const gm = $("genMsg"); if (gm && /programa/i.test(onde)){ gm.textContent = `ERRO: ${msg}`; gm.style.color = "#a2231d"; } } catch(_){}
 }
 function errHide(){ const b = document.getElementById("errBanner"); if (b) b.remove(); }
@@ -1787,7 +1787,7 @@ function generateCore(fromInput){
       return /^\s*G92\s*Z-?[\d.]+/i.test(l) ? l.replace(/(G92\s*Z)(-?[\d.]+)/i, (m, a, v) => a + (Number(v) + 1).toFixed((v.split(".")[1] || "").length || 1)) : l; });
     p.cutD16 = true;
   } else if (p.bedD16){ p.bed = p.bedOrig; delete p.bedD16; }
-  $("genMsg").textContent = (g.check(p) || `${g.name}: ${lines.length} linhas geradas.`) + (alojTxt ? " · " + alojTxt : "");
+  $("genMsg").textContent = (g.check(p) ? g.check(p) + " AVISE O RESPONSÁVEL antes de usar este programa." : `${g.name}: ${lines.length} linhas geradas.`) + (alojTxt ? " · " + alojTxt : "");   // v5.48.1 (usuário): avisos pedem para avisar o responsável
   $("genMsg").style.color = g.check(p) ? "#a2231d" : "";
   state.genType = type; state.genParams = p; saveForm();
   { // bloco do alojamento: DP (PSE 108, O-ring por dentro) e DH (PSH 129, O-ring por fora)
@@ -4333,7 +4333,7 @@ function drawingTools(p){
   return out;
 }
 function drawingSVG(p){   // v5.48.0: erro no desenho aparece na tela (e o PDF não é salvo)
-  try { return drawingSVGCore(p); } catch(e){ errShow("Erro ao montar o desenho", e); return `<svg xmlns="http://www.w3.org/2000/svg" data-erro="1" viewBox="0 0 794 300" width="794" height="300"><rect width="794" height="300" fill="#fff"/><text x="20" y="60" fill="#a2231d" font-family="Arial" font-size="18" font-weight="700">ERRO NO DESENHO: ${esc(e && e.message ? e.message : String(e))}</text><text x="20" y="95" fill="#333" font-family="Arial" font-size="14">Confira as medidas. Se continuar, tire um print e mande para o Claude.</text></svg>`; }
+  try { return drawingSVGCore(p); } catch(e){ errShow("Erro ao montar o desenho", e); return `<svg xmlns="http://www.w3.org/2000/svg" data-erro="1" viewBox="0 0 794 300" width="794" height="300"><rect width="794" height="300" fill="#fff"/><text x="20" y="60" fill="#a2231d" font-family="Arial" font-size="18" font-weight="700">ERRO NO DESENHO: ${esc(e && e.message ? e.message : String(e))}</text><text x="20" y="95" fill="#333" font-family="Arial" font-size="14">AVISE O RESPONSÁVEL. Confira as medidas; se continuar, tire um print.</text></svg>`; }
 }
 function drawingSVGCore(p){  if (p && p.tipoGen === "psh110") p = psh110DrawP(p); if (p && p.tipoGen === "psh110t") p = psh110tDrawP(p);   // PSH 110: desenho com as medidas da peça escolhida
   const PT = state.orient === "portrait";

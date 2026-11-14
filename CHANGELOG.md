@@ -6,6 +6,24 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.46.0 — PSH 110 30°: perfil novo (chevron a 30°) (14/11/2026)
+- Perfil novo **PSH 110 30°** no seletor e na escolha pela imagem (Veio). É um perfil próprio: as próximas mudanças pedidas
+  para ele valem só nele. O PSH 110 de 45° e todos os outros perfis geram o mesmo programa de antes (conferido).
+- Regras tiradas dos programas VPA02A30º do W: (S = secção):
+  - flancos do V a **30° com o eixo** (entalhe da frente, V de trás da intermediária e bico da base);
+  - entalhe com **fundo redondo R = 0,2·S − 0,4** feito com a T3D3 (G2/G3), passadas de 1 em 1 mm como no Fast Seal:
+    intermediária 0,666·S de fundo, tampa 0,5795·S − 0,174;
+  - paralelo atrás da intermediária = reta do bico da base = **0,4·S** (campo para mudar);
+  - lábios da intermediária com aperto +0,40 no Ø na frente, terminando em D / d;
+  - base Ø D − 0,2·S / d + 0,2·S; tampa D − 0,2 / d + 0,2; chanfro de trás 0,0571·S + 0,232 (tampa 0,06 menor),
+    externo a 45° e interno a 32°.
+- Do PSH 110: as três peças com a mesma altura e o conjunto fechando exato a altura do alojamento (encaixe flanco com
+  flanco), nomes intermediária / base (A) / tampa (B), salvar com número, número + A e número + B (número sugerido
+  separado do PSH 110 de 45°), reta de 0,6 em Z no fim do externo/interno, limite de 14 no Ø da T2D2/T2D12 e desbaste
+  escalonado do V de trás.
+- Interno da intermediária em PU: T2D12 a partir de Ø40, T1D45 de Ø20 até Ø40, T4D14 abaixo de Ø20 (como nos VPA02A30º).
+- Desenho com "V 30° · fundo · R", conjunto montado e nota próprios. Desenhos vão para a pasta `PSH 110 30°`.
+
 ## 5.45.2 — PSG 103 / PSG 104: chanfro do degrau do rebaixo mais fácil de achar (13/11/2026)
 - O campo chama "Chanfro 45° do degrau do rebaixo" e mostra a sugestão (ex.: 0,76). Digitar um valor muda o chanfro no
   programa e no desenho; 0 = canto vivo.

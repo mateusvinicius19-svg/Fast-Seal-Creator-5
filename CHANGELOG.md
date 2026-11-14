@@ -6,6 +6,10 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.46.2 — PSH 110 30°: imagem mais nítida (14/11/2026)
+- A imagem do card (79x52 px) foi ampliada 4x (316x208, bicúbica + realce de bordas): o card mostra a imagem reduzida em
+  vez de esticada, com menos borrão. Para ficar nítida de verdade, precisa de uma imagem original maior.
+
 ## 5.46.1 — PSH 110 30°: imagem na escolha pela imagem (14/11/2026)
 - O card do PSH 110 30° na escolha do perfil pela imagem usa a imagem enviada pelo usuário (antes era o desenho do perfil).
 - Confirmado pelo usuário: o conjunto do PSH 110 30° fecha EXATO a altura do alojamento (não como o FSC, que fazia 7–9% mais alto).

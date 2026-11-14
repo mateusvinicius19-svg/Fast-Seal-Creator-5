@@ -6,6 +6,11 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.48.2 — Aviso de ATENÇÃO aparece na faixa do topo (14/11/2026)
+- O usuário não via o aviso (ficava só no texto pequeno embaixo do formulário). Agora todo aviso de ATENÇÃO de qualquer
+  perfil abre a faixa no topo, em laranja (erros continuam em vermelho), com "AVISE O RESPONSÁVEL antes de usar este
+  programa." A faixa some sozinha quando as medidas voltam a não ter aviso. Programas não mudam.
+
 ## 5.48.1 — Avisos pedem para avisar o responsável (14/11/2026)
 - Pedido do usuário: todo aviso de ATENÇÃO (ex.: profundidade acima do limite da T2D2/T2D12 no PSH 110) termina com
   "AVISE O RESPONSÁVEL antes de usar este programa.", e a faixa vermelha de erro (programa ou desenho) também pede para

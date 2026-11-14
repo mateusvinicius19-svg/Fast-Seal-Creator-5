@@ -1758,12 +1758,20 @@ function errShow(onde, e){
   try { const gm = $("genMsg"); if (gm && /programa/i.test(onde)){ gm.textContent = `ERRO: ${msg}`; gm.style.color = "#a2231d"; } } catch(_){}
 }
 function errHide(){ const b = document.getElementById("errBanner"); if (b) b.remove(); }
+// v5.48.2 (usuário): aviso de ATENÇÃO do programa também aparece na faixa do topo (laranja), pedindo para avisar o responsável
+function warnShow(txt){
+  errShow("ATENÇÃO", String(txt || "").replace(/^ATENÇÃO:\s*/, ""));
+  const b = document.getElementById("errBanner"); if (!b) return;
+  b.style.background = "#b45309";
+  let perfil = ""; try { perfil = (GEN[$("genType").value] || {}).name || ""; } catch(_){}
+  b.querySelector("#errBannerTxt").textContent = `⚠ ATENÇÃO${perfil ? " — " + perfil : ""}: ${String(txt || "").replace(/^ATENÇÃO:\s*/, "")}\nAVISE O RESPONSÁVEL antes de usar este programa.`;
+}
 // laço de cálculo que não termina (medida inválida / NaN) vira erro em vez de travar a tela
 function loopGuard(n, onde){ if (n > 20000) throw new Error(`cálculo sem fim em ${onde} (alguma medida inválida)`); }
 window.addEventListener("error", ev => { if (ev && ev.error) errShow("Erro no Simulador", ev.error); });
 window.addEventListener("unhandledrejection", ev => errShow("Erro no Simulador", ev && ev.reason));
 function generate(fromInput){
-  try { const r = generateCore(fromInput); errHide(); return r; } catch(e){ errShow("Erro ao gerar o programa", e); }
+  try { state.lastWarn = ""; const r = generateCore(fromInput); if (state.lastWarn) warnShow(state.lastWarn); else errHide(); return r; } catch(e){ errShow("Erro ao gerar o programa", e); }
 }
 function generateCore(fromInput){
   if (state.tolResetPending && fromInput){ state.tolResetPending = false; resetTolDefaults(); }   // mexeu na peça depois de salvar = item novo
@@ -1788,7 +1796,7 @@ function generateCore(fromInput){
     p.cutD16 = true;
   } else if (p.bedD16){ p.bed = p.bedOrig; delete p.bedD16; }
   $("genMsg").textContent = (g.check(p) ? g.check(p) + " AVISE O RESPONSÁVEL antes de usar este programa." : `${g.name}: ${lines.length} linhas geradas.`) + (alojTxt ? " · " + alojTxt : "");   // v5.48.1 (usuário): avisos pedem para avisar o responsável
-  $("genMsg").style.color = g.check(p) ? "#a2231d" : "";
+  $("genMsg").style.color = g.check(p) ? "#a2231d" : ""; state.lastWarn = g.check(p) || "";   // v5.48.2: vai para a faixa do topo
   state.genType = type; state.genParams = p; saveForm();
   { // bloco do alojamento: DP (PSE 108, O-ring por dentro) e DH (PSH 129, O-ring por fora)
     const want = type === "iso" && String(p.tipoP || "") === "dp" ? "dp" : type === "lip" ? "dh" : null;   // DP: só PSE 108 escolhido (não o automático)

@@ -1462,7 +1462,7 @@ function psr101ViewsSVG(p, PT){
     // alturas em cima (medidas de trás, como nas pastas do W:): H, h2 (até o lábio), h1 (até o degrau)
     const r1 = yTop - 76, r2 = yTop - 52, r3 = yTop - 28;
     g += ln(xb, PY(rTop - G.cB) - 3, xb, r1 - 6, "e") + ln(xf, PY((G.d + G.e0) / 2) - 3, xf, r1 - 6, "e") + hdim(xb, xf, r1, (tolNum(p.thS) !== null || tolNum(p.thI) !== null) ? tolMk("H " + f(H), p.thS, p.thI) : tl("H " + f(H), 0.2));
-    g += ln(xL, PY(G.Ds / 2) - 3, xL, r2 - 6, "e") + hdim(xb, xL, r2, "h2 " + f(G.h2));
+    g += ln(xL, PY(G.Ds / 2) - 3, xL, r2 - 6, "e") + hdim(xb, xL, r2, tolMk("h2 " + f(G.h2), "0", "-0.2"))   /* v5.47.8: mesma tolerância do h1 */;
     g += ln(xS, PY(rTop) - 3, xS, r3 - 6, "e") + hdim(xb, xS, r3, tolMk("h1 " + f(G.h1), "0", "-0.2"));
     if (vi === 0){
       const yB = yBot + MB - 14;
@@ -1507,18 +1507,17 @@ function psr101Bad(p){
   return m;
 }
 GEN.psr101 = { name: "PSR 101",
-  // v5.47.7 (usuário): chanfros e aperto no formulário principal (antes só em Parâmetros fixos, que vem fechado)
+  // v5.47.8 (usuário): no formulário principal só o chanfro novo do canto do degrau; os outros ficam em Parâmetros fixos
   main: [["dint","Ø haste (mm)",63],["dext","Ø alojamento (mm)",71],["h1","Altura do corpo h1 (de trás até o degrau, mm)",4],["h2","Altura até o lábio h2 (de trás até o começo do lábio, mm)",5],["h","Altura total H (mm)",7],
-         ["r1CP","Chanfro 45° no canto do degrau, lado do lábio (vazio = 0,3 / 0,4 / 0,5 pela secção)",""],["r1C45","Quebra 45° do degrau para o corpo (vazio = 0,3; secção acima de 6: 0,6)",""],
-         ["r1CB","Chanfro de trás externo, 60° (vazio = 0,35 / 0,65 / 0,6)",""],["r1CI","Chanfro de trás interno, 30° com o eixo (vazio = 0,35; secção acima de 6: 0,5)",""],
-         ["r1Ap","Aperto da ponta no Ø (vazio = 1,1 / 1,4 / 1,8 pela secção)",""],
+         ["r1CP","Chanfro 45° no canto do degrau, lado do lábio (vazio = 0,3 / 0,4 / 0,5 pela secção)",""],
          ["rpt","Nº de repetições RPT (vazio = 0)",""],["mat","Material","PU"],["bi","Bucha Ø interno (vazio = automática)",""],["bo","Bucha Ø externo (vazio = automática)",""]],
   params: [["apR","Desbaste: quanto tirar por passada (no raio, mm)",3],["alR","Sobremetal deixado para o acabamento (no raio, mm)",1.5],["rn","Raio da ponta das ferramentas (mm)",0.4],
            ["tInt","Ferramenta interna (vazio = T1D45 até Ø40, senão T2D12)",""],["S","Rotação S (vazio = tabela pelo Ø ext.)",""],
            ["r1Ap","Aperto da ponta no Ø (vazio = 1,1 / 1,4 / 1,8 pela secção)",""],["r1ZT","Ponta do lábio: distância da face (vazio = 0,25)",""],["r1St","Degrau: quanto menor que o Ø alojamento (vazio = 2 / 3 / 4 pela secção)",""],
            ["r1LipE","Lábio no degrau: Ø − haste (vazio = secção, ou seja Ø médio)",""],["r1E0","Aresta de fora do lábio na face: Ø − haste (vazio = 0,45)",""],
            ["r1BR","Fim da rampa interna: Ø − haste (vazio = igual ao furo: furo reto)",""],["r1BB","Furo atrás: Ø − haste (vazio = 1,0)",""],
-           ],
+           ["r1C45","Quebra 45° do degrau para o corpo (vazio = 0,3; secção acima de 6: 0,6)",""],["r1CB","Chanfro de trás externo, 60° (vazio = 0,35 / 0,65 / 0,6)",""],
+           ["r1CI","Chanfro de trás interno, 30° com o eixo (vazio = 0,35; secção acima de 6: 0,5)",""]],
   build(p){
     const bad = psr101Bad(p);
     if (bad.length) return [`%PSR101 ${p.dint}/${p.dext}/${p.h1}/${p.h2}/${p.h},MX,`, ";PSR 101 - MEDIDAS INCOMPLETAS OU IMPOSSIVEIS - PROGRAMA NAO GERADO", ...bad.map(s => ";" + s), "M30"];
@@ -1789,6 +1788,7 @@ function autoBucha(p){
   try {
     if (["pse106","psh106","psh108","psh117","psh105","pse105","pse107","psh107","psh103","pse103","pse118","psh121","psh125"].includes(p.tipoGen)){ const g = pseFscGeom(q); return [g.bi, g.bo]; }
     if (p.tipoGen === "psr211"){ const g = psr211Geom(q); return [g.bi, g.bo]; }
+    if (p.tipoGen === "psr101"){ const g = psr101Geom(q); return [g.bi, g.bo]; }
     if (p.tipoGen === "psr102"){ const g = psr102Geom(q); return [g.bi, g.bo]; }
     if (p.tipoGen === "lip"){ const b = lipBucha(q, lipGeom(q)); return [b.bi, b.bo]; } if (p.tipoGen === "dpr"){ const g = dprGeom(q), b = lipBucha(Object.assign({}, q, { dint: g.Dint }), { Dext: q.dext }); return [b.bi, b.bo]; }
     if (p.tipoGen === "pso"){ const b = psoBucha(q); return [b.bi, b.bo]; }
@@ -4650,8 +4650,8 @@ function rerenderDrawing(){
 function setOrient(v){ state.orient = v; $("pvOrient").value = v; $("dwgOrient").value = v; rerenderDrawing(); }
 function renderBuchas(){
   const box = $("buchaBox"); if (!box) return;
-  const on = ["pse106","psh106","psh108","psh117","psh105","pse105","pse107","psh107","psh103","pse103","pse118","psh121","psh125","psr211","psr102"].includes($("genType").value); box.style.display = on ? "" : "none"; if (!on) return;
-  let cur = null; try { if (state.genParams && ["pse106","psh106","psh108","psh117","psh105","pse105","pse107","psh107","psh103","pse103","pse118","psh121","psh125","psr211","psr102"].includes(state.genParams.tipoGen)){ const g = state.genParams.tipoGen === "psr102" ? psr102Geom(state.genParams) : state.genParams.tipoGen === "psr211" ? psr211Geom(state.genParams) : pseFscGeom(state.genParams); cur = g.bi + "/" + g.bo; } } catch(e){}
+  const on = ["pse106","psh106","psh108","psh117","psh105","pse105","pse107","psh107","psh103","pse103","pse118","psh121","psh125","psr211","psr102","psr101"].includes($("genType").value); box.style.display = on ? "" : "none"; if (!on) return;
+  let cur = null; try { if (state.genParams && ["pse106","psh106","psh108","psh117","psh105","pse105","pse107","psh107","psh103","pse103","pse118","psh121","psh125","psr211","psr102","psr101"].includes(state.genParams.tipoGen)){ const g = state.genParams.tipoGen === "psr101" ? psr101Geom(state.genParams) : state.genParams.tipoGen === "psr102" ? psr102Geom(state.genParams) : state.genParams.tipoGen === "psr211" ? psr211Geom(state.genParams) : pseFscGeom(state.genParams); cur = g.bi + "/" + g.bo; } } catch(e){}
   const ex = new Set(buchasAll().extra.map(([a, b]) => a + "/" + b));
   if (cur){ const [ci, co] = cur.split("/"); const iI = document.querySelector("#genBox [data-k=bi]"), iO = document.querySelector("#genBox [data-k=bo]"); if (iI) iI.placeholder = "automática: " + ci; if (iO) iO.placeholder = "automática: " + co; }
   $("buchaList").innerHTML = buchasList().map(([a, b]) => { const k = a + "/" + b, nm = BUCHA_NOMINAL[k]; return `<span class="${ex.has(k) ? "x" : ""} ${k === cur ? "on" : ""}" title="${a ? "bucha" : "tarugo"}${nm ? " (compra " + nm + ")" : ""}${BUCHA_PRICE[k] ? " · R$ " + BUCHA_PRICE[k].price.toFixed(2).replace(".", ",") + " / " + BUCHA_PRICE[k].len + " mm (R$ " + BUCHA_PRICE[k].perMm.toFixed(2).replace(".", ",") + "/mm)" : " · sem preço"}">${a ? a + "/" + b : "T Ø" + b}${nm ? ` (${nm})` : ""}<a href="#" data-rm="${k}" title="remover">✕</a></span>`; }).join("")

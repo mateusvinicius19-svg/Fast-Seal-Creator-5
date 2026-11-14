@@ -6,6 +6,13 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.47.8 — PSR 101: tolerância do h2, só o chanfro novo no formulário, bucha automática (14/11/2026)
+- Desenho: o h2 tem a mesma tolerância do h1 (0 / −0,2).
+- Formulário principal: só o chanfro novo (canto do degrau). Quebra 45° do corpo e chanfros de trás voltaram para
+  Parâmetros fixos; o aperto da ponta estava duplicado (formulário e Parâmetros fixos) e ficou só em Parâmetros fixos.
+- Bucha: os campos mostram "automática: …" e o quadro de buchas aparece, como nos outros perfis (PSR 101 entrou na
+  lista da bucha automática). Os outros perfis não mudam (conferido).
+
 ## 5.47.7 — PSR 101: não trava ao editar; chanfros no formulário (14/11/2026)
 - **Travava ao mudar as medidas**: digitando um chanfro (ex.: 0,45) ele passava por "0", o canto ficava com dois pontos
   iguais e o cálculo do percurso entrava em laço — a tela congelava. Agora pontos repetidos saem antes do cálculo

@@ -1413,22 +1413,23 @@ function psr101Geom(p){
   // interno (z de 0 na frente a −H): face → ponta a zT da face (chanfro de 55°) → rampa de 19° → furo → chanfro de trás (30°, usuário)
   const zt = -zT, zr = zt - ((ap + bR) / 2) / PSR101_TAN(aR), kI = PSR101_TAN(30), eI = d - ap + 2 * zT * PSR101_TAN(aB);
   const inner = [[0, R(eI)], [zt, R(d - ap)], [zr, R(d + bR)], [-H + cI / kI, R(d + bB)], [-H, R(d + bB) + cI], [-H - 0.6, R(d + bB) + cI + 0.6 * kI]];
-  // externo: aresta na face → lábio até o degrau → degrau Ø D − st → quebra 45° → corpo Ø D → chanfro de trás (60° com a face)
-  const k60 = PSR101_TAN(60);
-  const outer = [[0, R(d + e0)], [-Lz, R(Le)], [-Lz, R(Ds)], [-Fz, R(Ds)], [-Fz, R(D) - c45], [-Fz - c45, R(D)], [-H + cB * k60, R(D)], [-H, R(D) - cB], [-H - 0.6, R(D) - cB - 0.6 / k60]];
+  // externo: aresta na face → lábio até o degrau → chanfro 45° no canto do degrau (cP, usuário 14/11/2026) → degrau Ø D − st →
+  // quebra 45° → corpo Ø D → chanfro de trás (60° com a face)
+  const k60 = PSR101_TAN(60), cP = Math.max(0, Math.min(opt(p.r1CP) ?? { A: 0.3, B: 0.4, C: 0.5 }[cl], (Ds - Le) / 2 - 0.05, Fz - Lz - 0.05));
+  const outer = [[0, R(d + e0)], [-Lz, R(Le)], [-Lz, R(Ds) - cP], [-Lz - cP, R(Ds)], [-Fz, R(Ds)], [-Fz, R(D) - c45], [-Fz - c45, R(D)], [-H + cB * k60, R(D)], [-H, R(D) - cB], [-H - 0.6, R(D) - cB - 0.6 / k60]];
   let bi = opt(p.bi), bo = opt(p.bo), sobMedida = false;
   if (bi === null || bo === null){
     const hit = teflonBucha(p, d - ap, D) || buchaPick(d - ap, D); if (!hit) sobMedida = true;
     if (bi === null) bi = hit ? hit[0] : Math.max(0, Math.floor(d - ap - 3));
     if (bo === null) bo = hit ? hit[1] : Math.ceil(D + 3);
   }
-  return { d, D, H, h1, h2, S, cl, st, ap, Le, e0, eI, zT, bR, bB, c45, cB, cI, Ds, Lz, Fz, zt, zr, inner, outer, bi, bo, sobMedida };
+  return { d, D, H, h1, h2, S, cl, st, ap, Le, e0, eI, zT, bR, bB, c45, cB, cI, cP, Ds, Lz, Fz, zt, zr, inner, outer, bi, bo, sobMedida };
 }
 // perfil para o desenho (z de 0 a −H), face da frente (lábio) à esquerda
 // v5.47.2 (usuário): desenho invertido — corpo à esquerda e lábio à direita, como no desenho do Fast Seal (z → −H − z)
 function psr101Profile(p){
   const g = psr101Geom(p), o = g.outer, i = g.inner;
-  return [...o.slice(0, 8), [-g.H, i[4][1]], i[3], i[2], i[1], i[0]].map(([z, r]) => [-g.H - z, r]);
+  return [...o.slice(0, 9), [-g.H, i[4][1]], i[3], i[2], i[1], i[0]].map(([z, r]) => [-g.H - z, r]);
 }
 GEN.psr101 = { name: "PSR 101",
   main: [["dint","Ø haste (mm)",63],["dext","Ø alojamento (mm)",71],["h1","Altura do corpo h1 (de trás até o degrau, mm)",4],["h2","Altura até o lábio h2 (de trás até o começo do lábio, mm)",5],["h","Altura total H (mm)",7],
@@ -1438,7 +1439,7 @@ GEN.psr101 = { name: "PSR 101",
            ["r1Ap","Aperto da ponta no Ø (vazio = 1,1 / 1,4 / 1,8 pela secção)",""],["r1ZT","Ponta do lábio: distância da face (vazio = 0,25)",""],["r1St","Degrau: quanto menor que o Ø alojamento (vazio = 2 / 3 / 4 pela secção)",""],
            ["r1LipE","Lábio no degrau: Ø − haste (vazio = secção, ou seja Ø médio)",""],["r1E0","Aresta de fora do lábio na face: Ø − haste (vazio = 0,45)",""],
            ["r1BR","Fim da rampa interna: Ø − haste (vazio = 0,45; secção acima de 6: 1,0)",""],["r1BB","Furo atrás: Ø − haste (vazio = 1,0)",""],
-           ["r1C45","Quebra 45° do degrau para o corpo (vazio = 0,3; secção acima de 6: 0,6)",""],["r1CB","Chanfro de trás externo, 60° (vazio = 0,35 / 0,65 / 0,6)",""],["r1CI","Chanfro de trás interno, 30° com o eixo (vazio = 0,35; secção acima de 6: 0,5)",""]],
+           ["r1CP","Chanfro 45° no canto do degrau, lado do lábio (vazio = 0,3 / 0,4 / 0,5 pela secção)",""],["r1C45","Quebra 45° do degrau para o corpo (vazio = 0,3; secção acima de 6: 0,6)",""],["r1CB","Chanfro de trás externo, 60° (vazio = 0,35 / 0,65 / 0,6)",""],["r1CI","Chanfro de trás interno, 30° com o eixo (vazio = 0,35; secção acima de 6: 0,5)",""]],
   build(p){
     const g = psr101Geom(p), f3 = v => fx(v, 3), r = Number(p.rn) > 0 ? Number(p.rn) : 0.4, H = g.H;
     const tI = g.bi ?? 0, tO = g.bo ?? (g.D + 5);
@@ -1453,7 +1454,7 @@ GEN.psr101 = { name: "PSR 101",
     L.push(...sec("FACING DOWNWARD"), "G0 Z100", "T3D3", `G0 X${f3(xf0)} Z0.690`, `G1 X${f3(xf0)} Z0.000`, ";( FINISH )", `G1 X${f3(xf0)} Z0.000`, `G1 X${f3(xf1)} Z0.000 F0.120`, `G0 X${f3(xf1)} Z0.690`, "");
     // ---- externo ----
     L.push(...sec("OUTSIDE"), "G0 Z70", TL.ext, ";", ";");
-    const pout = tipPath(extendStart(g.outer.filter((q, k) => k !== 7), 1.4), r, "right", [-r, -r]);   // sem o ponto do meio do chanfro de trás (alinhado)
+    const pout = tipPath(extendStart(g.outer.filter((q, k) => k !== 8), 1.4), r, "right", [-r, -r]);   // sem o ponto do meio do chanfro de trás (alinhado)
     L.push(...roughPasses(pout, tO, "od", "0.160", Number(p.apR), Number(p.alR), r, deepAbove(p, tO)));
     L.push(";( FINISH )", `G0 X${f3(2 * pout[0].p[1])} Z3.000`, `G1 X${f3(2 * pout[0].p[1])} Z${f3(pout[0].p[0])}`, ...tipLines(pout, r, "0.130"));
     const lo = pout[pout.length - 1].p; L.push(`G0 X${f3(tO + 1)} Z${f3(lo[0] + 0.2)}`, `G0 X${f3(tO + 1)} Z5.000`, "");
@@ -1657,7 +1658,7 @@ function readParams(){
   }
   return p;
 }
-const OPT_KEYS = new Set(["r1Ap","r1ZT","r1St","r1LipE","r1E0","r1BR","r1BB","r1C45","r1CB","r1CI","pZ","pM","pL","chEF","chIF","rF","pF","chR","angIT","rpt","S","rpm","ai","ae","fi","fe","chc","bi","bo","tInt","xLe","xHe","xLi","xHi","lLab","cLab","pCan","rCan","wCan","rec","vD","vL","oc","oID","tL","lipF","rampa","chE","hb"]);
+const OPT_KEYS = new Set(["r1CP","r1Ap","r1ZT","r1St","r1LipE","r1E0","r1BR","r1BB","r1C45","r1CB","r1CI","pZ","pM","pL","chEF","chIF","rF","pF","chR","angIT","rpt","S","rpm","ai","ae","fi","fe","chc","bi","bo","tInt","xLe","xHe","xLi","xHi","lLab","cLab","pCan","rCan","wCan","rec","vD","vL","oc","oID","tL","lipF","rampa","chE","hb"]);
 let genTimer = 0;
 function saveForm(){
   try {

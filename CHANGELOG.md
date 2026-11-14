@@ -6,6 +6,10 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.47.4 — PSR 101: chanfro no canto do degrau (14/11/2026)
+- Pedido do usuário: o paralelo do degrau (Ø D − 2/3/4) ganha um chanfro de 45° no canto do lado do lábio: 0,3 / 0,4 / 0,5
+  pela secção (até 4 / até 6 / acima de 6), com campo para mudar. Só o PSR 101 muda (conferido).
+
 ## 5.47.3 — PSR 101: chanfro de trás do interno a 30° (14/11/2026)
 - Pedido do usuário: o chanfro de trás do interno passa de 50° para 30° com o eixo (mesmo tamanho no raio: 0,35; secção
   acima de 6: 0,5). Muda o programa e o desenho só do PSR 101; os outros perfis não mudam (conferido).

@@ -1425,9 +1425,10 @@ function psr101Geom(p){
   return { d, D, H, h1, h2, S, cl, st, ap, Le, e0, eI, zT, bR, bB, c45, cB, cI, Ds, Lz, Fz, zt, zr, inner, outer, bi, bo, sobMedida };
 }
 // perfil para o desenho (z de 0 a −H), face da frente (lábio) à esquerda
+// v5.47.2 (usuário): desenho invertido — corpo à esquerda e lábio à direita, como no desenho do Fast Seal (z → −H − z)
 function psr101Profile(p){
   const g = psr101Geom(p), o = g.outer, i = g.inner;
-  return [...o.slice(0, 8), [-g.H, i[4][1]], i[3], i[2], i[1], i[0]];
+  return [...o.slice(0, 8), [-g.H, i[4][1]], i[3], i[2], i[1], i[0]].map(([z, r]) => [-g.H - z, r]);
 }
 GEN.psr101 = { name: "PSR 101",
   main: [["dint","Ø haste (mm)",63],["dext","Ø alojamento (mm)",71],["h1","Altura do corpo h1 (de trás até o degrau, mm)",4],["h2","Altura até o lábio h2 (de trás até o começo do lábio, mm)",5],["h","Altura total H (mm)",7],
@@ -4313,11 +4314,11 @@ function drawingSVG(p){  if (p && p.tipoGen === "psh110") p = psh110DrawP(p); if
     g += `<line x1="${M(G.zLip)}" y1="${dyI}" x2="${dzf}" y2="${dyI}" class="e" stroke-dasharray="3 3"/><text x="${dzf + 6}" y="${dyI - 4}" class="tn">${fmtN(p.ab, 0)}°</text>`;
     g += `<text x="${M(-p.b) - 6}" y="${yS + 14}" class="tn" text-anchor="end">${fmtN(p.af, 0)}°</text>`;
   } else if (p.tipoGen === "psr101") {   // PSR 101: ponta do lábio, degrau e alturas
-    const G = psr101Geom(p);
-    g += call(DX(G.zt), DY((G.d - G.ap) / 2), dzf - 40, dyI + 22, `ponta Ø${fmtN(G.d - G.ap, 2)} (aperto ${fmtN(G.ap, 2)})`);
-    g += call(DX(-G.Lz), DY(G.Le / 2), dzf - 40, dyE - 22, `lábio Ø${fmtN(G.Le, 2)} · degrau Ø${fmtN(G.Ds, 2)}`);
-    g += call(DX(-h + 0.5), DY((G.d + G.bB) / 2), dzb + 22, dyI + 22, `furo Ø${fmtN(G.d + G.bB, 2)}`);
-    g += call(DX(-G.Fz), DY(G.Ds / 2), dzb + 22, dyE - 22, `h1 ${fmtN(G.h1, 2)} · h2 ${fmtN(G.h2, 2)} (de trás)`);
+    const G = psr101Geom(p), M = z => DX(-h - z);   // desenho invertido: lábio à direita (lado dzb), corpo à esquerda (lado dzf)
+    g += call(M(G.zt), DY((G.d - G.ap) / 2), dzb + 22, dyI + 22, `ponta Ø${fmtN(G.d - G.ap, 2)} (aperto ${fmtN(G.ap, 2)})`);
+    g += call(M(-G.Lz), DY(G.Le / 2), dzb + 22, dyE - 22, `lábio Ø${fmtN(G.Le, 2)} · degrau Ø${fmtN(G.Ds, 2)}`);
+    g += call(M(-h + 0.5), DY((G.d + G.bB) / 2), dzf - 40, dyI + 22, `furo Ø${fmtN(G.d + G.bB, 2)}`);
+    g += call(M(-G.Fz), DY(G.Ds / 2), dzf - 40, dyE - 22, `h1 ${fmtN(G.h1, 2)} · h2 ${fmtN(G.h2, 2)} (de trás)`);
   } else if (p.tipoGen === "psh110t") {   // PSH 110 30°: peça escolhida do chevron — V de 30° com fundo redondo
     const G = psh110tGeom(p), C = psh110tContours(p);
     if (C.notch) g += call(DX(-C.notch), DY(G.rm), dzf - 40, (dyE + dyI) / 2, `V 30° · fundo ${fmtN(C.notch, 2)} · R${fmtN(C.R, 2)}`);

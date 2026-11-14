@@ -6,6 +6,10 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.47.2 — PSR 101: desenho invertido (14/11/2026)
+- O desenho do PSR 101 (corte, detalhe e DXF) agora tem o corpo à esquerda e o lábio à direita, como no desenho do Fast
+  Seal. O programa não muda; os outros perfis não mudam (conferido).
+
 ## 5.47.1 — PSR 101: gera ao editar (14/11/2026)
 - O PSR 101 não gerava pela tela: os campos opcionais novos (aperto, degrau, chanfros…) não estavam na lista de campos que
   podem ficar vazios e a tela parava em "Preencha: ap". Os campos do PSR 101 ganharam nomes próprios (r1…) e só eles

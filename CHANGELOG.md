@@ -6,6 +6,13 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.47.5 — PSR 101: desenho no padrão do PSR 102 (14/11/2026)
+- O desenho do PSR 101 agora usa o mesmo padrão do PSR 102: vistas DIÂMETROS e SECÇÃO, alturas H / h2 / h1 em cima
+  (medidas de trás), Ø em ordenadas (alojamento, furo, ponta, lábio e degrau), secções, altura do degrau, distância da
+  ponta à face e chamadas de todos os chanfros e ângulos. Função própria: o desenho do PSR 102 não muda (conferido).
+- Todos os chanfros do PSR 101 têm campo em Parâmetros fixos (quebra 45° do corpo, chanfro do canto do degrau, chanfro de
+  trás externo e interno).
+
 ## 5.47.4 — PSR 101: chanfro no canto do degrau (14/11/2026)
 - Pedido do usuário: o paralelo do degrau (Ø D − 2/3/4) ganha um chanfro de 45° no canto do lado do lábio: 0,3 / 0,4 / 0,5
   pela secção (até 4 / até 6 / acima de 6), com campo para mudar. Só o PSR 101 muda (conferido).

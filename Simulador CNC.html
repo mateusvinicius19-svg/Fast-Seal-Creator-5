@@ -1431,6 +1431,65 @@ function psr101Profile(p){
   const g = psr101Geom(p), o = g.outer, i = g.inner;
   return [...o.slice(0, 9), [-g.H, i[4][1]], i[3], i[2], i[1], i[0]].map(([z, r]) => [-g.H - z, r]);
 }
+// v5.47.5 (usuário 14/11/2026): desenho no MESMO padrão do PSR 102 — duas vistas (DIÂMETROS e SECÇÃO), Ø em ordenadas,
+// alturas em cima e chamadas dos chanfros. Função própria: o desenho do PSR 102 (psrViewsSVG) não muda.
+function psr101ViewsSVG(p, PT){
+  const G = psr101Geom(p), H = G.H, prof = psr101Profile(p), De = G.D, tip = G.d - G.ap, furo = G.d + G.bB, tolS = tgSecTol(G.S);
+  const T30 = PSR101_TAN(30), T60 = PSR101_TAN(60);
+  const f = v => fmtN(v, 2), tl = (base, t, sc) => (sc && secTolOv(p, base)) || (t ? tolMk(base, String(t), String(-t)) : esc(base)), tm = (base, t, sc) => (sc && secTolOv(p, base)) || (t ? tolMk(base, "0", String(-t)) : esc(base));
+  const rTop = De / 2, rBot = tip / 2;
+  const boxes = PT ? [[30, 28, 764, 452], [30, 458, 764, 814]] : [[30, 30, 555, 495], [568, 30, 1093, 495]];
+  const ML = 118, MR = 150, MT = 120, MB = 120, MBv = [MB, 62], ihv = boxes.map((b, i) => b[3] - b[1] - MT - MBv[i]);
+  const iw = boxes[0][2] - boxes[0][0] - ML - MR, ih = Math.min(...ihv), sc = Math.min(iw / H, ih / (rTop - rBot));
+  const ah = (x, y, dx, dy) => { const L = 9, w = 2.6; return `<path d="M${x},${y} L${x - dx * L - dy * w},${y - dy * L + dx * w} L${x - dx * L + dy * w},${y - dy * L - dx * w} Z" fill="#b2221f"/>`; };
+  const ln = (x1, y1, x2, y2, c = "d") => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="${c}"/>`;
+  const vdim = (x, y1, y2, txt, side = -1) => { const a = Math.min(y1, y2), b = Math.max(y1, y2); let s = ln(x, a, x, b);
+    s += b - a >= 22 ? ah(x, a, 0, -1) + ah(x, b, 0, 1) : ln(x, a - 12, x, a) + ln(x, b, x, b + 12) + ah(x, a, 0, 1) + ah(x, b, 0, -1);
+    const tx = x + (side < 0 ? -5 : 15), ty = (a + b) / 2; return s + `<text x="${tx}" y="${ty}" class="t" text-anchor="middle" transform="rotate(-90 ${tx} ${ty})">${txt}</text>`; };
+  const hdim = (x1, x2, y, txt) => { const a = Math.min(x1, x2), b = Math.max(x1, x2); let s = ln(a, y, b, y);
+    s += b - a >= 22 ? ah(a, y, -1, 0) + ah(b, y, 1, 0) : ln(a - 12, y, a, y) + ln(b, y, b + 12, y) + ah(a, y, 1, 0) + ah(b, y, -1, 0);
+    return s + `<text x="${(a + b) / 2}" y="${y - 5}" class="t" text-anchor="middle">${txt}</text>`; };
+  const ord = (x, yF, yB, xF, txt) => ln(xF, yF, x + (x > xF ? 5 : -5), yF, "e") + ln(x, yB, x, yF) + ah(x, yF, 0, -1) + `<text x="${x - 5}" y="${yB - 2}" class="t" transform="rotate(-90 ${x - 5} ${yB - 2})">${txt}</text>`;
+  const call = (x, y, tx, ty, txt, anchor) => ln(x, y, tx, ty, "e") + `<text x="${tx + (anchor === "end" ? -3 : 3)}" y="${ty + 4}" class="tn" text-anchor="${anchor}">${txt}</text>`;
+  let g = "";
+  boxes.forEach((bx, vi) => {
+    const x0 = bx[0] + ML + (iw - H * sc) / 2, yT = bx[1] + MT + (ihv[vi] - (rTop - rBot) * sc) / 2;
+    const PX = z => x0 + (H + z) * sc, PY = r => yT + (rTop - r) * sc;
+    const xb = PX(-H), xf = PX(0), yTop = PY(rTop), yBot = PY(rBot), xS = PX(-G.Fz), xL = PX(-G.Lz);
+    g += `<rect x="${bx[0]}" y="${bx[1]}" width="${bx[2] - bx[0]}" height="${bx[3] - bx[1]}" fill="none" stroke="#999" stroke-width=".8"/>`;
+    g += `<text x="${(bx[0] + bx[2]) / 2}" y="${bx[1] + 20}" class="vt" text-anchor="middle">${vi ? "SECÇÃO" : "DIÂMETROS"}</text>`;
+    g += `<path d="${prof.map(([z, r], i) => `${i ? "L" : "M"}${(x0 - z * sc).toFixed(2)},${PY(r).toFixed(2)}`).join("")}Z" class="p"/>`;
+    // alturas em cima (medidas de trás, como nas pastas do W:): H, h2 (até o lábio), h1 (até o degrau)
+    const r1 = yTop - 76, r2 = yTop - 52, r3 = yTop - 28;
+    g += ln(xb, PY(rTop - G.cB) - 3, xb, r1 - 6, "e") + ln(xf, PY((G.d + G.e0) / 2) - 3, xf, r1 - 6, "e") + hdim(xb, xf, r1, (tolNum(p.thS) !== null || tolNum(p.thI) !== null) ? tolMk("H " + f(H), p.thS, p.thI) : tl("H " + f(H), 0.2));
+    g += ln(xL, PY(G.Ds / 2) - 3, xL, r2 - 6, "e") + hdim(xb, xL, r2, "h2 " + f(G.h2));
+    g += ln(xS, PY(rTop) - 3, xS, r3 - 6, "e") + hdim(xb, xS, r3, tolMk("h1 " + f(G.h1), "0", "-0.2"));
+    if (vi === 0){
+      const yB = yBot + MB - 14;
+      g += ord(xb - 34, PY(furo / 2), yB, PX(-H + G.cI / T30), "Ø " + f(furo));
+      g += ord(xb - 68, PY(rTop), yB, PX(-H + G.cB * T60), tolMk("Ø " + f(De), p.teS, p.teI));
+      g += ord(xf + 28, PY(rBot), yB, PX(G.zt), "Ø " + f(tip));
+      g += ord(xf + 56, PY(G.Le / 2), yB, xL, "Ø " + f(G.Le));
+      g += ord(xf + 84, PY(G.Ds / 2), yB, xL - G.cP * sc, "Ø " + f(G.Ds));
+    } else {
+      const xs = xb - 44;
+      g += ln(PX(-H + G.cB * T60), PY(rTop), xs - 5, PY(rTop), "e") + ln(PX(-H + G.cI / T30), PY(furo / 2), xs - 5, PY(furo / 2), "e");
+      g += vdim(xs, PY(rTop), PY(furo / 2), tm(f((De - furo) / 2), tolS, 1));
+      const xc = xf + 34, xt = xf + 84;
+      g += ln(xS, PY(rTop), xt + 5, PY(rTop), "e") + ln(PX(G.zt), PY(rBot), xt + 5, PY(rBot), "e") + ln(xL, PY(G.Le / 2), xc + 5, PY(G.Le / 2), "e") + ln(xL - G.cP * sc, PY(G.Ds / 2), xc + 5, PY(G.Ds / 2), "e");
+      g += vdim(xc, PY(G.Ds / 2), PY(G.Le / 2), f((G.Ds - G.Le) / 2), 1) + vdim(xt, PY(rTop), PY(rBot), tl(f((De - tip) / 2), tolS, 1), 1);
+      const rb = yBot + 34;
+      g += ln(PX(G.zt), PY(rBot) + 3, PX(G.zt), rb + 6, "e") + ln(xf, PY(G.eI / 2) + 3, xf, rb + 6, "e") + hdim(PX(G.zt), xf, rb, f(G.zT));
+      g += call(PX(-G.Fz - G.c45 / 2), PY(rTop - G.c45 / 2), xS - 30, yTop - 14, `${f(G.c45)} x 45°`, "end");
+      if (G.cP > 0) g += call(PX(-G.Lz - G.cP / 2), PY(G.Ds / 2 - G.cP / 2), xL + 18, PY(G.Ds / 2) - 16, `${f(G.cP)} x 45°`, "start");
+      g += call(PX(-H + G.cB * T60 / 2), PY(rTop - G.cB / 2), xb - 12, yTop - 12, `${f(G.cB)} x 60°`, "end");
+      g += call(PX(-H + G.cI / T30 / 2), PY(furo / 2 + G.cI / 2), xb - 12, PY(furo / 2) + 24, `${f(G.cI)} x 30°`, "end");
+      g += call(PX(G.zt / 2), PY((G.eI + tip) / 4), xf + 14, yBot + 12, "55°", "start");
+      g += call(PX((G.zt + G.zr) / 2), PY((tip + G.d + G.bR) / 4), PX((G.zt + G.zr) / 2) - 18, yBot + 20, "19°", "end");
+    }
+  });
+  return g;
+}
 GEN.psr101 = { name: "PSR 101",
   main: [["dint","Ø haste (mm)",63],["dext","Ø alojamento (mm)",71],["h1","Altura do corpo h1 (de trás até o degrau, mm)",4],["h2","Altura até o lábio h2 (de trás até o começo do lábio, mm)",5],["h","Altura total H (mm)",7],
          ["rpt","Nº de repetições RPT (vazio = 0)",""],["mat","Material","PU"],["bi","Bucha Ø interno (vazio = automática)",""],["bo","Bucha Ø externo (vazio = automática)",""]],
@@ -4253,7 +4312,7 @@ function drawingSVG(p){  if (p && p.tipoGen === "psh110") p = psh110DrawP(p); if
   const ext = (x1, y1, x2, y2) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="e"/>`;
   let g = "";
 
-  if (p.tipoGen === "custom") g += p.customViews(p, PT); else if (p.tipoGen === "psr102") g += psrViewsSVG(p, PT); else if (["pse106","psh106","psh108","psh117","psh105","pse105","pse107","psh107","psh103","pse103","pse118","psh121","psh125","psr211"].includes(p.tipoGen)) g += pseViewsSVG(p, PT); else {
+  if (p.tipoGen === "custom") g += p.customViews(p, PT); else if (p.tipoGen === "psr102") g += psrViewsSVG(p, PT); else if (p.tipoGen === "psr101") g += psr101ViewsSVG(p, PT); else if (["pse106","psh106","psh108","psh117","psh105","pse105","pse107","psh107","psh103","pse103","pse118","psh121","psh125","psr211"].includes(p.tipoGen)) g += pseViewsSVG(p, PT); else {
   // ---- CORTE A-A ----
   const ox = PT ? 190 : 200, oy = PT ? 300 : 255, s = Math.min((PT ? 300 : 340) / p.dext, 130 / Math.max(h, 1));
   const X = z => ox + (-z) * s, Y = r => oy - r * s;

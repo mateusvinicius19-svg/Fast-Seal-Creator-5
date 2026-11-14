@@ -6,6 +6,16 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.48.0 — Erros de programa e desenho aparecem na tela (todos os perfis) (14/11/2026)
+- Pedido do usuário: qualquer erro ao gerar um programa ou montar um desenho aparece na tela, numa faixa vermelha no topo
+  (perfil + motivo + "tire um print e mande para o Claude"), com × para fechar. Antes falhava calado ou travava.
+- Programa: a mensagem embaixo do formulário vira "ERRO: …"; quando volta a gerar certo, a faixa some sozinha.
+- Desenho: a folha mostra "ERRO NO DESENHO" e o PDF com erro não é salvo.
+- Travamento: os laços do desbaste (roughPasses, desbaste da intermediária do PSH 110/110 30°, furo no tarugo) param
+  com erro em vez de congelar a tela quando chega uma medida inválida.
+- Erros inesperados em qualquer parte do Simulador também aparecem na faixa.
+- Nenhum programa ou desenho que já funcionava mudou (conferido nos 37 casos).
+
 ## 5.47.8 — PSR 101: tolerância do h2, só o chanfro novo no formulário, bucha automática (14/11/2026)
 - Desenho: o h2 tem a mesma tolerância do h1 (0 / −0,2).
 - Formulário principal: só o chanfro novo (canto do degrau). Quebra 45° do corpo e chanfros de trás voltaram para

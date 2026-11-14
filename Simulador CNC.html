@@ -1741,7 +1741,31 @@ function saveForm(){
     localStorage.setItem("ps_form", JSON.stringify({ type: $("genType").value, vals, dwg }));
   } catch(e){}
 }
+// ---- v5.48.0 (usuário 14/11/2026): qualquer erro em programa ou desenho aparece NA TELA (faixa vermelha no topo) ----
+function errShow(onde, e){
+  const msg = (e && e.message) ? e.message : String(e || "erro desconhecido");
+  try { console.error(onde, e); } catch(_){}
+  let b = document.getElementById("errBanner");
+  if (!b){
+    b = document.createElement("div"); b.id = "errBanner";
+    b.style.cssText = "position:fixed;left:12px;right:12px;top:10px;z-index:100000;background:#a2231d;color:#fff;border-radius:10px;padding:10px 44px 10px 14px;font:600 13px/1.4 'Segoe UI',Arial,sans-serif;box-shadow:0 6px 20px rgba(0,0,0,.25);white-space:pre-wrap";
+    b.innerHTML = '<span id="errBannerTxt"></span><button type="button" title="Fechar" style="position:absolute;right:8px;top:6px;border:0;background:transparent;color:#fff;font:700 18px Arial;cursor:pointer">×</button>';
+    b.querySelector("button").onclick = () => b.remove();
+    document.body.appendChild(b);
+  }
+  let perfil = ""; try { perfil = (GEN[$("genType").value] || {}).name || ""; } catch(_){}
+  b.querySelector("#errBannerTxt").textContent = `⚠ ${onde}${perfil ? " — " + perfil : ""}: ${msg}\nConfira as medidas. Se continuar, tire um print desta mensagem e mande para o Claude.`;
+  try { const gm = $("genMsg"); if (gm && /programa/i.test(onde)){ gm.textContent = `ERRO: ${msg}`; gm.style.color = "#a2231d"; } } catch(_){}
+}
+function errHide(){ const b = document.getElementById("errBanner"); if (b) b.remove(); }
+// laço de cálculo que não termina (medida inválida / NaN) vira erro em vez de travar a tela
+function loopGuard(n, onde){ if (n > 20000) throw new Error(`cálculo sem fim em ${onde} (alguma medida inválida)`); }
+window.addEventListener("error", ev => { if (ev && ev.error) errShow("Erro no Simulador", ev.error); });
+window.addEventListener("unhandledrejection", ev => errShow("Erro no Simulador", ev && ev.reason));
 function generate(fromInput){
+  try { const r = generateCore(fromInput); errHide(); return r; } catch(e){ errShow("Erro ao gerar o programa", e); }
+}
+function generateCore(fromInput){
   if (state.tolResetPending && fromInput){ state.tolResetPending = false; resetTolDefaults(); }   // mexeu na peça depois de salvar = item novo
   const type = $("genType").value, g = GEN[type], p = readParams();
   p.tipoGen = type; if (isPSG(type)) p.angE = psgAngE(p); if (type === "lip"){ lipFill(p); p.dext = p.dint + 2 * p.sec; } if (type === "dpr"){ lipFill(p); p.dint = p.dext - 2 * p.sec; } if (type === "pso"){ p.dext = p.dint + 2 * p.sec; p.h = p.sec; }
@@ -2492,7 +2516,7 @@ function psh110Rough(path, stock, mode, feed, ap, al, rn){
     L.push(...Lj);
     // próximo: começa do nível da última reta desta chamada (as retas não repetem)
     const step = 2 * ap, sft = 2 * sh; let k = 1, clip = stk;
-    for (;; k++){ const lvl = stk - sg * step * k; if (od ? lvl <= peak + sft : lvl >= peak - sft) break; clip = lvl; }
+    for (;; k++){ loopGuard(k, "desbaste da intermediária"); const lvl = stk - sg * step * k; if (od ? lvl <= peak + sft : lvl >= peak - sft) break; clip = lvl; }
     stk = clip;
   }
   return L;
@@ -2975,6 +2999,7 @@ async function drawingPdfBytes(p){
   const holder = document.createElement("div"); holder.style.cssText = "position:fixed;left:-20000px;top:0;width:800px"; holder.innerHTML = drawingSVG(p).replace(/\u2212/g, "-").replace(/[\u2009\u202f]/g, " "); document.body.appendChild(holder);   // fonte do PDF não tem o sinal de menos tipográfico
   try {
     const svg = holder.querySelector("svg");
+    if (svg && svg.getAttribute("data-erro")) throw new Error("o desenho deu erro — PDF não salvo (veja a mensagem em vermelho)");   // v5.48.0
     const doc = new window.jspdf.jsPDF({ unit: "pt", format: "a4", orientation: PT ? "portrait" : "landscape" });
     if (window.svg2pdf && window.svg2pdf.svg2pdf) await window.svg2pdf.svg2pdf(svg, doc, { x: 0, y: 0, width: W, height: H });
     else await doc.svg(svg, { x: 0, y: 0, width: W, height: H });
@@ -3827,7 +3852,7 @@ function roughPasses(path, stock, mode, feed, apRad, allowRad, rn, above){
   const zEnd = pts[pts.length - 1].z, zStart = pts[0].z;
   if (!(stock > 0) || (od ? stock <= peak : stock >= peak)) return L;
   let clip = stock, k = 1;
-  for (;; k++){
+  for (;; k++){ loopGuard(k, "desbaste");
     const lvl = stock - sg * step * k;
     if (od ? lvl <= peak + shift : lvl >= peak - shift) break;
     const zp = od && above && above.dz > 0 && lvl > above.x + 1e-6 ? zEnd - above.dz : zEnd;
@@ -3962,7 +3987,7 @@ function pseFscBuild(p, gOver){
   if (!(tI > 0)){
     const xmin = Math.min(...pin.map(q => 2 * q.p[1])), tgt = Math.round((xmin - 2) * 2) / 2, zc = Math.floor(pin[pin.length - 1].p[0] * 10) / 10;
     let x = Math.min(13, Math.floor((p.dint - 1.5) * 2) / 2), first = true;
-    if (x > 0 && tgt > 0) for (;;){
+    if (x > 0 && tgt > 0) for (let gq = 0;; gq++){ loopGuard(gq, "furo no tarugo");
       const xp = Math.min(x, tgt);
       L.push(`G0 X${gen15(xp)} Z3`, `G1 Z${gen15(zc)}` + (first ? " F0.140" : ""), `G1 X${gen15(xp - 0.5)}`, "G0 Z3"); first = false;
       if (xp >= tgt) break; x = xp + (tgt - xp) / Math.ceil((tgt - xp) / 8 - 1e-9);
@@ -4230,7 +4255,7 @@ function psr102Build(p){
     // cada um até o Z final do acabamento, recuo X −0,5 (usuário 07/11/2026: "já fizemos isso em outros modelos")
     const xmin = Math.min(...pin.map(q => 2 * q.p[1])), tgt = Math.round((xmin - 2) * 2) / 2, zc = Math.floor(pin[pin.length - 1].p[0] * 10) / 10;
     let x = Math.min(13, Math.floor((p.dint - 1.5) * 2) / 2), first = true;
-    if (x > 0 && tgt > 0) for (;;){
+    if (x > 0 && tgt > 0) for (let gq = 0;; gq++){ loopGuard(gq, "furo no tarugo");
       const xp = Math.min(x, tgt);
       L.push(`G0 X${gen15(xp)} Z3`, `G1 Z${gen15(zc)}` + (first ? " F0.150" : ""), `G1 X${gen15(xp - 0.5)}`, "G0 Z3"); first = false;
       if (xp >= tgt) break; x = xp + (tgt - xp) / Math.ceil((tgt - xp) / 8 - 1e-9);
@@ -4307,7 +4332,10 @@ function drawingTools(p){
   const out = []; String(txt).split(/\r?\n/).forEach(l => { const s = l.trim(); if (/^;\(/.test(s)) return; const m = s.match(/^;?\s*(T\d+D\d+)\b/i); if (m && !out.includes(m[1].toUpperCase())) out.push(m[1].toUpperCase()); });
   return out;
 }
-function drawingSVG(p){  if (p && p.tipoGen === "psh110") p = psh110DrawP(p); if (p && p.tipoGen === "psh110t") p = psh110tDrawP(p);   // PSH 110: desenho com as medidas da peça escolhida
+function drawingSVG(p){   // v5.48.0: erro no desenho aparece na tela (e o PDF não é salvo)
+  try { return drawingSVGCore(p); } catch(e){ errShow("Erro ao montar o desenho", e); return `<svg xmlns="http://www.w3.org/2000/svg" data-erro="1" viewBox="0 0 794 300" width="794" height="300"><rect width="794" height="300" fill="#fff"/><text x="20" y="60" fill="#a2231d" font-family="Arial" font-size="18" font-weight="700">ERRO NO DESENHO: ${esc(e && e.message ? e.message : String(e))}</text><text x="20" y="95" fill="#333" font-family="Arial" font-size="14">Confira as medidas. Se continuar, tire um print e mande para o Claude.</text></svg>`; }
+}
+function drawingSVGCore(p){  if (p && p.tipoGen === "psh110") p = psh110DrawP(p); if (p && p.tipoGen === "psh110t") p = psh110tDrawP(p);   // PSH 110: desenho com as medidas da peça escolhida
   const PT = state.orient === "portrait";
   const info = dwgInfo();
   const W = PT ? 794 : 1123, H = PT ? 1123 : 794;                     // A4 paisagem (96 dpi)

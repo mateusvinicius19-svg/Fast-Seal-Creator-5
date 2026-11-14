@@ -6,6 +6,19 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.47.0 — PSR 101: perfil novo (raspador com degrau) (14/11/2026)
+- Perfil novo **PSR 101** no seletor e em Raspadores na escolha pela imagem (imagem enviada pelo usuário). O PSR 102 e
+  todos os outros perfis geram o mesmo programa e o mesmo desenho de antes (conferido).
+- Medidas como nas pastas do W: **d x D x h1 x h2 x H**: h1 = de trás até a face do degrau, h2 = de trás até o começo do
+  lábio, H = total (ex.: 63 x 71 x 4 x 5 x 7).
+- Regras tiradas dos 68 programas PSR101-P do Fast Seal no W:, por secção S (até 4 / até 6 / acima de 6):
+  - degrau Ø D − 2 / 3 / 4; ponta do lábio d − 1,1 / 1,4 / 1,8, a 0,25 da face;
+  - lábio por fora até o degrau no Ø médio; quebra de 45° do degrau para o corpo 0,3 (acima de 6: 0,6);
+  - interno: chanfro da frente a 55°, rampa a 19° até d + 0,45 (acima de 6: d + 1,0), furo d + 1,0 atrás;
+  - chanfros de trás: externo a 60° com a face (0,35 / 0,65 / 0,6), interno a 50° (0,35; acima de 6: 0,5).
+- Conferido contra 034436 (63x71), 039816 (90x99) e 019031 (300x315): degrau, quebra, corpo, chanfro de trás e ponta
+  saem iguais ao Fast Seal; rampa e furo a menos de 0,1. Todas as regras têm campo para mudar.
+
 ## 5.46.2 — PSH 110 30°: imagem mais nítida (14/11/2026)
 - A imagem do card (79x52 px) foi ampliada 4x (316x208, bicúbica + realce de bordas): o card mostra a imagem reduzida em
   vez de esticada, com menos borrão. Para ficar nítida de verdade, precisa de uma imagem original maior.

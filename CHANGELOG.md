@@ -6,6 +6,11 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.47.6 — PSR 101: furo reto (14/11/2026)
+- Pedido do usuário: o furo de trás (d + 1,0, ex.: Ø64 no 63x71) fica inteiro nessa medida, sem ângulo: a rampa de 19° da
+  ponta vai direto até o furo e ele segue reto até o chanfro de trás (que continua igual). Antes ia até d + 0,45 e subia em
+  cone até d + 1,0, como o Fast Seal. O campo "Fim da rampa interna" vazio agora = igual ao furo. Só o PSR 101 muda.
+
 ## 5.47.5 — PSR 101: desenho no padrão do PSR 102 (14/11/2026)
 - O desenho do PSR 101 agora usa o mesmo padrão do PSR 102: vistas DIÂMETROS e SECÇÃO, alturas H / h2 / h1 em cima
   (medidas de trás), Ø em ordenadas (alojamento, furo, ponta, lábio e degrau), secções, altura do degrau, distância da

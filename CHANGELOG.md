@@ -6,6 +6,10 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.46.1 — PSH 110 30°: imagem na escolha pela imagem (14/11/2026)
+- O card do PSH 110 30° na escolha do perfil pela imagem usa a imagem enviada pelo usuário (antes era o desenho do perfil).
+- Confirmado pelo usuário: o conjunto do PSH 110 30° fecha EXATO a altura do alojamento (não como o FSC, que fazia 7–9% mais alto).
+
 ## 5.46.0 — PSH 110 30°: perfil novo (chevron a 30°) (14/11/2026)
 - Perfil novo **PSH 110 30°** no seletor e na escolha pela imagem (Veio). É um perfil próprio: as próximas mudanças pedidas
   para ele valem só nele. O PSH 110 de 45° e todos os outros perfis geram o mesmo programa de antes (conferido).

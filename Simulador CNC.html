@@ -1406,9 +1406,9 @@ function psr101Geom(p){
   const opt = v => (v === "" || v === null || v === undefined || isNaN(v)) ? null : Number(v);
   const d = Number(p.dint), D = Number(p.dext), H = Number(p.h), h1 = Number(p.h1), h2 = Number(p.h2), S = (D - d) / 2, R = x => x / 2;
   const cl = S < 4.25 ? "A" : S <= 6 ? "B" : "C";
-  const st = opt(p.st) ?? { A: 2, B: 3, C: 4 }[cl], ap = opt(p.ap) ?? { A: 1.1, B: 1.4, C: 1.8 }[cl];
-  const Le = d + (opt(p.lipE) ?? S), e0 = opt(p.e0) ?? 0.45, zT = opt(p.zT) ?? 0.25, bR = opt(p.bR) ?? (cl === "C" ? 1.0 : 0.45), bB = opt(p.bB) ?? 1.0;
-  const c45 = opt(p.c45) ?? (cl === "C" ? 0.6 : 0.3), cB = opt(p.cB) ?? { A: 0.35, B: 0.65, C: 0.6 }[cl], cI = opt(p.cI) ?? (cl === "C" ? 0.5 : 0.35);
+  const st = opt(p.r1St) ?? { A: 2, B: 3, C: 4 }[cl], ap = opt(p.r1Ap) ?? { A: 1.1, B: 1.4, C: 1.8 }[cl];
+  const Le = d + (opt(p.r1LipE) ?? S), e0 = opt(p.r1E0) ?? 0.45, zT = opt(p.r1ZT) ?? 0.25, bR = opt(p.r1BR) ?? (cl === "C" ? 1.0 : 0.45), bB = opt(p.r1BB) ?? 1.0;
+  const c45 = opt(p.r1C45) ?? (cl === "C" ? 0.6 : 0.3), cB = opt(p.r1CB) ?? { A: 0.35, B: 0.65, C: 0.6 }[cl], cI = opt(p.r1CI) ?? (cl === "C" ? 0.5 : 0.35);
   const aB = 55, aR = 19, Ds = D - st, Lz = H - h2, Fz = H - h1;
   // interno (z de 0 na frente a −H): face → ponta a zT da face (chanfro de 55°) → rampa de 19° → furo → chanfro de trás (50°)
   const zt = -zT, zr = zt - ((ap + bR) / 2) / PSR101_TAN(aR), kI = PSR101_TAN(50), eI = d - ap + 2 * zT * PSR101_TAN(aB);
@@ -1434,10 +1434,10 @@ GEN.psr101 = { name: "PSR 101",
          ["rpt","Nº de repetições RPT (vazio = 0)",""],["mat","Material","PU"],["bi","Bucha Ø interno (vazio = automática)",""],["bo","Bucha Ø externo (vazio = automática)",""]],
   params: [["apR","Desbaste: quanto tirar por passada (no raio, mm)",3],["alR","Sobremetal deixado para o acabamento (no raio, mm)",1.5],["rn","Raio da ponta das ferramentas (mm)",0.4],
            ["tInt","Ferramenta interna (vazio = T1D45 até Ø40, senão T2D12)",""],["S","Rotação S (vazio = tabela pelo Ø ext.)",""],
-           ["ap","Aperto da ponta no Ø (vazio = 1,1 / 1,4 / 1,8 pela secção)",""],["zT","Ponta do lábio: distância da face (vazio = 0,25)",""],["st","Degrau: quanto menor que o Ø alojamento (vazio = 2 / 3 / 4 pela secção)",""],
-           ["lipE","Lábio no degrau: Ø − haste (vazio = secção, ou seja Ø médio)",""],["e0","Aresta de fora do lábio na face: Ø − haste (vazio = 0,45)",""],
-           ["bR","Fim da rampa interna: Ø − haste (vazio = 0,45; secção acima de 6: 1,0)",""],["bB","Furo atrás: Ø − haste (vazio = 1,0)",""],
-           ["c45","Quebra 45° do degrau para o corpo (vazio = 0,3; secção acima de 6: 0,6)",""],["cB","Chanfro de trás externo, 60° (vazio = 0,35 / 0,65 / 0,6)",""],["cI","Chanfro de trás interno, 50° (vazio = 0,35; secção acima de 6: 0,5)",""]],
+           ["r1Ap","Aperto da ponta no Ø (vazio = 1,1 / 1,4 / 1,8 pela secção)",""],["r1ZT","Ponta do lábio: distância da face (vazio = 0,25)",""],["r1St","Degrau: quanto menor que o Ø alojamento (vazio = 2 / 3 / 4 pela secção)",""],
+           ["r1LipE","Lábio no degrau: Ø − haste (vazio = secção, ou seja Ø médio)",""],["r1E0","Aresta de fora do lábio na face: Ø − haste (vazio = 0,45)",""],
+           ["r1BR","Fim da rampa interna: Ø − haste (vazio = 0,45; secção acima de 6: 1,0)",""],["r1BB","Furo atrás: Ø − haste (vazio = 1,0)",""],
+           ["r1C45","Quebra 45° do degrau para o corpo (vazio = 0,3; secção acima de 6: 0,6)",""],["r1CB","Chanfro de trás externo, 60° (vazio = 0,35 / 0,65 / 0,6)",""],["r1CI","Chanfro de trás interno, 50° (vazio = 0,35; secção acima de 6: 0,5)",""]],
   build(p){
     const g = psr101Geom(p), f3 = v => fx(v, 3), r = Number(p.rn) > 0 ? Number(p.rn) : 0.4, H = g.H;
     const tI = g.bi ?? 0, tO = g.bo ?? (g.D + 5);
@@ -1656,7 +1656,7 @@ function readParams(){
   }
   return p;
 }
-const OPT_KEYS = new Set(["pZ","pM","pL","chEF","chIF","rF","pF","chR","angIT","rpt","S","rpm","ai","ae","fi","fe","chc","bi","bo","tInt","xLe","xHe","xLi","xHi","lLab","cLab","pCan","rCan","wCan","rec","vD","vL","oc","oID","tL","lipF","rampa","chE","hb"]);
+const OPT_KEYS = new Set(["r1Ap","r1ZT","r1St","r1LipE","r1E0","r1BR","r1BB","r1C45","r1CB","r1CI","pZ","pM","pL","chEF","chIF","rF","pF","chR","angIT","rpt","S","rpm","ai","ae","fi","fe","chc","bi","bo","tInt","xLe","xHe","xLi","xHi","lLab","cLab","pCan","rCan","wCan","rec","vD","vL","oc","oID","tL","lipF","rampa","chE","hb"]);
 let genTimer = 0;
 function saveForm(){
   try {

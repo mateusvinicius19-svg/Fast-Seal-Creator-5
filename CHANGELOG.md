@@ -6,6 +6,11 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.47.1 — PSR 101: gera ao editar (14/11/2026)
+- O PSR 101 não gerava pela tela: os campos opcionais novos (aperto, degrau, chanfros…) não estavam na lista de campos que
+  podem ficar vazios e a tela parava em "Preencha: ap". Os campos do PSR 101 ganharam nomes próprios (r1…) e só eles
+  entraram na lista; os outros perfis não mudam (conferido).
+
 ## 5.47.0 — PSR 101: perfil novo (raspador com degrau) (14/11/2026)
 - Perfil novo **PSR 101** no seletor e em Raspadores na escolha pela imagem (imagem enviada pelo usuário). O PSR 102 e
   todos os outros perfis geram o mesmo programa e o mesmo desenho de antes (conferido).

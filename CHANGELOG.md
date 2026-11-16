@@ -5,6 +5,10 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - CORREÇÃO (5.0.x): conserto de erro, ajuste de regra pequena.
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
+## 5.49.2 — PSR 212 aparece na escolha pela imagem (16/11/2026)
+- O PSR 212 não aparecia para o usuário: estava só no menu de lista (escondido) e faltava no grupo **Raspadores** da
+  janela "Escolha o perfil". Agora aparece ao lado do PSR 211. Programas não mudam.
+
 ## 5.49.1 — Mapa da pasta W: para o Claude (16/11/2026)
 - Novo `Claude contexto/mapa-pasta-W.md`: onde ficam no W: os programas (Fagor e MCS 500), os desenhos por perfil, os
   modelos de programa da PADRONIZAÇÃO, as ordens de serviço por perfil, as ferramentas (códigos de suportes e pastilhas),

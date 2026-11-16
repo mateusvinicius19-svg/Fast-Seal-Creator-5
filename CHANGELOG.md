@@ -6,6 +6,16 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.53.0 — Desenho a partir do 3D do Inventor (16/11/2026)
+- Pedido do usuário: botão novo **🧊 Desenho do 3D (Inventor)** (ou arrastar o arquivo para a tela). No Inventor:
+  **Arquivo → Exportar → Formato CAD → STL** (unidade mm, resolução Alta). O `.ipt` não abre fora do Inventor.
+- Para peça de revolução (anel, vedação, bucha, raspador): acha o eixo sozinho, tira a secção exata da peça (cantos
+  encaixados nos vértices do 3D) e abre a folha Parts Seals com **vista frontal, corte A-A e secção ampliada** com cotas
+  automáticas: largura total, Ø de cada degrau (diâmetros que não couberem vão na nota), larguras em cota corrida,
+  chanfros (agrupados), ângulo das rampas com o eixo e raios. O nome do arquivo vira a descrição; o resto do carimbo se
+  preenche no painel ao lado. "Imprimir / PDF" salva o PDF.
+- Novo `testes/testar-3d.js` (VEDADOR 272x291x19 em dois eixos). Programas não mudam (conferido nos 31 perfis).
+
 ## 5.52.2 — PSR 212: chanfro maior no desbaste da T2D2 (16/11/2026)
 - Pedido do usuário (só PSR 212): a T2D2 continua o 45° do chanfro da aresta do degrau até 0,2 mm (no raio) acima do Ø do
   degrau (Ø109,2 com o degrau padrão 108,8) e segue reto até o 45° de trás. Tira o material do degrau antes da T6D6.

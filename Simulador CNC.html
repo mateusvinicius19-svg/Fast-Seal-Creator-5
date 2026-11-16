@@ -235,6 +235,7 @@ body.printing #dwgModal .dwgf{display:none}
         <button class="btn primary" id="btnCopy" style="display:none">&#x29C9; Copiar</button>
         <button class="btn" id="btnSave" title="Salva o Fagor (.PIT) no Programas_CNC e a versão convertida (.txt) no MCS 500">&#x1F4BE; Salvar Fagor + MCS 500</button><button class="btn" id="btnPreview" style="display:none" title="Ver o desenho desta peça antes de salvar (não salva nada e não pede o código)">&#x1F441; Ver desenho</button><button class="btn" id="btnCopyMcs" style="display:none" title="Copia a versão convertida para o MCS 500">&#x29C9; Copiar MCS</button><button class="btn" id="btnDirRoot" style="display:none" title="Pasta única W:\Parts\PartsSeals\PROJETOS (tem Programas_CNC, MCS 500 e DESENHOS): escolha uma vez; nos outros dias é só clicar e Permitir">&#x1F513; PROJETOS</button><button class="btn" id="btnDirProg" style="display:none" title="Escolher a pasta W:\Parts\PartsSeals\PROJETOS\Programas_CNC">&#x1F4C1; Programas_CNC</button><button class="btn" id="btnDirMcs" style="display:none" title="Escolher a pasta W:\Parts\PartsSeals\PROJETOS\Programas_CNC\MCS 500">&#x1F4C1; MCS 500</button><button class="btn" id="btnAlt" title="Abrir um programa do Programas_CNC pelo número e refazer com outra bucha (salva como NNNNNN BIxBO — o original não muda)">&#x270F;&#xFE0F; Alterar programa</button><button class="btn" id="btnVer" title="Digitar o número e ver o programa e as variantes (NNNNNN BIxBO...)">&#x1F50E; Ver programa</button><button class="btn" id="btnHist" title="Programas salvos pelo Simulador (Programas_CNC\Historico Simulador CNC.csv)">&#x1F4CB; Histórico</button><button class="btn" id="btnDirDes" title="Escolher a pasta W:\Parts\PartsSeals\PROJETOS\DESENHOS">&#x1F4C1; DESENHOS</button>
         <button class="btn" id="btnDraw" style="display:none">&#x1F4D0; Desenho</button>
+        <button class="btn" id="btn3D" title="Desenho a partir do 3D do Inventor: no Inventor, Arquivo → Exportar → Formato CAD → STL (mm). Também dá para arrastar o .stl para a tela.">&#x1F9CA; Desenho do 3D (Inventor)</button><input type="file" id="file3D" accept=".stl" style="display:none">
         <span class="note" id="genMsg"></span>
       </div>
     </details>
@@ -4904,6 +4905,241 @@ function pvLayout(){
   pg.style.padding = (5 * k) + "px";                          // margem de 5 mm
   $("pvZoomTxt").textContent = Math.round(pvZoom * 100) + "%";
 }
+// ---- v5.53.0 (usuário 16/11/2026): DESENHO A PARTIR DO 3D DO INVENTOR ----
+// No Inventor: Arquivo → Exportar → Formato CAD → STL (unidade mm, resolução Alta). Aqui: botão "🧊 Desenho do 3D" ou arrastar o .stl.
+// A peça tem que ser de revolução (anel/vedação/bucha): acha o eixo, tira a secção exata (vértices do 3D) e monta a folha
+// Parts Seals com vista frontal, corte A-A e secção ampliada com cotas automáticas (Ø, larguras, chanfros, ângulos, raios).
+function stlParse(buf){
+  const dv = new DataView(buf), tris = [], n = buf.byteLength >= 84 ? dv.getUint32(80, true) : 0;
+  if (n > 0 && buf.byteLength === 84 + 50 * n){
+    for (let i = 0; i < n; i++){ const o = 84 + 50 * i + 12, t = [];
+      for (let k = 0; k < 3; k++) t.push([dv.getFloat32(o + 12 * k, true), dv.getFloat32(o + 12 * k + 4, true), dv.getFloat32(o + 12 * k + 8, true)]);
+      tris.push(t); }
+  } else {
+    const txt = new TextDecoder().decode(buf), re = /vertex\s+(\S+)\s+(\S+)\s+(\S+)/g; let m, cur = [];
+    while ((m = re.exec(txt))){ cur.push([+m[1], +m[2], +m[3]]); if (cur.length === 3){ tris.push(cur); cur = []; } }
+  }
+  if (!tris.length) throw new Error("arquivo STL vazio ou inválido (no Inventor: Exportar → Formato CAD → STL)");
+  return tris;
+}
+// secção da peça de revolução: [[a, r], ...] (a = posição no eixo a partir de uma face, r = raio), fechada, sentido qualquer
+function rev3DSection(tris){
+  const lo = [1e18, 1e18, 1e18], hi = [-1e18, -1e18, -1e18];
+  for (const t of tris) for (const v of t) for (let k = 0; k < 3; k++){ if (v[k] < lo[k]) lo[k] = v[k]; if (v[k] > hi[k]) hi[k] = v[k]; }
+  const ext = hi.map((h, k) => h - lo[k]);
+  // eixo: os dois lados perpendiculares iguais; entre os candidatos, o que deixa menos pares (posição, raio) distintos
+  let best = null;
+  for (let ax = 0; ax < 3; ax++){
+    const u = (ax + 1) % 3, w = (ax + 2) % 3, d = Math.abs(ext[u] - ext[w]) / Math.max(ext[u], ext[w], 1e-9);
+    if (d > 0.02) continue;
+    const cu = (lo[u] + hi[u]) / 2, cw = (lo[w] + hi[w]) / 2, pairs = new Map();
+    for (const t of tris) for (const v of t){ const a = v[ax] - lo[ax], r = Math.hypot(v[u] - cu, v[w] - cw), key = Math.round(a * 200) + "|" + Math.round(r * 200); if (!pairs.has(key)) pairs.set(key, [a, r]); }
+    if (!best || pairs.size < best.pairs.size) best = { ax, u, w, cu, cw, pairs, L: ext[ax] };
+  }
+  if (!best) throw new Error("a peça não parece ser de revolução (anel, vedação, bucha): os dois lados perpendiculares ao eixo não têm a mesma medida");
+  const { ax, u, w, cu, cw, L } = best, P = [...best.pairs.values()];
+  // plano que passa pelo eixo, no ângulo do vértice de maior raio (+ um pouco, para não cair em cima das arestas)
+  let vm = null, rm = -1;
+  for (const t of tris) for (const v of t){ const r = Math.hypot(v[u] - cu, v[w] - cw); if (r > rm){ rm = r; vm = v; } }
+  const th = Math.atan2(vm[w] - cw, vm[u] - cu) + 1e-4, cs = Math.cos(th), sn = Math.sin(th);
+  const S = v => [v[ax] - lo[ax], (v[u] - cu) * cs + (v[w] - cw) * sn, -(v[u] - cu) * sn + (v[w] - cw) * cs];   // [a, s, t]
+  const segs = [];
+  for (const t of tris){
+    const q = t.map(S), pts = [];
+    for (let i = 0; i < 3; i++){
+      let A = q[i], B = q[(i + 1) % 3];
+      if ((A[2] > 0) === (B[2] > 0)) continue;
+      if (A[0] > B[0] || (A[0] === B[0] && A[1] > B[1])) [A, B] = [B, A];   // mesma aresta = mesmo ponto nos dois triângulos
+      const k = A[2] / (A[2] - B[2]); pts.push([A[0] + (B[0] - A[0]) * k, A[1] + (B[1] - A[1]) * k]);
+    }
+    if (pts.length !== 2) continue;
+    let [p1, p2] = pts;
+    if (p1[1] <= 0 && p2[1] <= 0) continue;   // outro lado do eixo
+    if (p1[1] < 0 || p2[1] < 0){ if (p1[1] < 0) [p1, p2] = [p2, p1]; const k = p1[1] / (p1[1] - p2[1]); p2 = [p1[0] + (p2[0] - p1[0]) * k, 0]; }   // peça maciça: corta no eixo
+    segs.push([p1, p2]);
+  }
+  if (segs.length < 3) throw new Error("não consegui cortar a peça (o STL está fechado? exporte de novo do Inventor)");
+  // encadeia os segmentos em contornos fechados
+  const key = p => Math.round(p[0] * 1e4) + "|" + Math.round(p[1] * 1e4), adj = new Map();
+  segs.forEach((s, i) => { for (const e of [0, 1]){ const k = key(s[e]); if (!adj.has(k)) adj.set(k, []); adj.get(k).push(i); } });
+  const used = new Uint8Array(segs.length), loops = [];
+  for (let i0 = 0; i0 < segs.length; i0++){
+    if (used[i0]) continue;
+    used[i0] = 1; const loop = [segs[i0][0], segs[i0][1]]; let cur = segs[i0][1], guard = 0;
+    for (;;){ if (++guard > segs.length + 5) break;
+      const nx = (adj.get(key(cur)) || []).find(j => !used[j]); if (nx === undefined) break;
+      used[nx] = 1; const s = segs[nx]; cur = key(s[0]) === key(cur) ? s[1] : s[0];
+      if (key(cur) === key(loop[0])) break; loop.push(cur);
+    }
+    if (loop.length >= 3) loops.push(loop);
+  }
+  const area = l => { let A = 0; for (let i = 0; i < l.length; i++){ const p = l[i], q = l[(i + 1) % l.length]; A += p[0] * q[1] - q[0] * p[1]; } return A / 2; };
+  loops.sort((x, y) => Math.abs(area(y)) - Math.abs(area(x)));
+  if (!loops.length) throw new Error("não consegui fechar a secção da peça");
+  let poly = loops[0];
+  // encaixa cada canto no par (posição, raio) real do 3D mais perto (tira o erro das facetas do STL)
+  const size = Math.max(L, rm), tol = Math.max(0.05, size * 0.004);
+  poly = rev3DSimplify(poly, size * 2e-5);
+  poly = poly.map(p => { let b = null, bd = tol; for (const q of P){ const d = Math.hypot(q[0] - p[0], q[1] - p[1]); if (d < bd){ bd = d; b = q; } } return b ? [b[0], b[1]] : p; });
+  poly = poly.map(([a, r]) => [Math.round(a * 1000) / 1000, Math.round(r * 1000) / 1000]);
+  poly = rev3DSimplify(poly, 1e-4);
+  if (area(poly) < 0) poly.reverse();
+  return { poly, L: Math.round(L * 1000) / 1000, loops: loops.length };
+}
+function rev3DSimplify(poly, eps){   // tira pontos repetidos e pontos no meio de retas
+  let pts = poly.filter((p, i) => { const q = poly[(i + poly.length - 1) % poly.length]; return Math.hypot(p[0] - q[0], p[1] - q[1]) > eps; });
+  for (let changed = true; changed && pts.length > 3;){
+    changed = false;
+    for (let i = 0; i < pts.length && pts.length > 3; i++){
+      const a = pts[(i + pts.length - 1) % pts.length], b = pts[i], c = pts[(i + 1) % pts.length];
+      const dx = c[0] - a[0], dy = c[1] - a[1], len = Math.hypot(dx, dy) || 1, dist = Math.abs((b[0] - a[0]) * dy - (b[1] - a[1]) * dx) / len;
+      const dot = (b[0] - a[0]) * dx + (b[1] - a[1]) * dy;
+      if (dist < eps && dot > 0 && dot < len * len){ pts.splice(i, 1); changed = true; i--; }
+    }
+  }
+  return pts;
+}
+// classifica as arestas da secção: retas no eixo (Ø), radiais (larguras), chanfros, rampas e arcos (raio)
+function rev3DFeatures(poly){
+  const n = poly.length, E = [];
+  for (let i = 0; i < n; i++){ const p = poly[i], q = poly[(i + 1) % n], da = q[0] - p[0], dr = q[1] - p[1], len = Math.hypot(da, dr);
+    E.push({ i, p, q, da, dr, len, hor: Math.abs(dr) < 1e-6, ver: Math.abs(da) < 1e-6 }); }
+  // arcos: 3+ arestas inclinadas curtas seguidas com a mesma curvatura → um raio
+  const arcs = [], inArc = new Set();
+  for (let i = 0; i < n; i++){
+    if (inArc.has(i)) continue;
+    const ok = e => !e.hor && !e.ver && e.len < 3;
+    if (!ok(E[i])) continue;
+    let j = i, turn0 = null; const grp = [i];
+    for (;;){ const a = E[j % n], b = E[(j + 1) % n]; if (!ok(b) || grp.length >= n - 1) break;
+      const cr = a.da * b.dr - a.dr * b.da, ang = Math.asin(Math.max(-1, Math.min(1, cr / (a.len * b.len))));
+      if (Math.abs(ang) < 1e-3 || Math.abs(ang) > 0.6 || (turn0 !== null && (Math.sign(ang) !== Math.sign(turn0) || Math.abs(ang) > 1.6 * Math.abs(turn0) || Math.abs(ang) < Math.abs(turn0) / 1.6))) break;
+      if (b.len > 1.6 * a.len || b.len < a.len / 1.6) break;   // facetas do mesmo arco têm o mesmo tamanho
+      turn0 = ang; j++; grp.push(j % n); }
+    if (grp.length < 3) continue;
+    const A = E[grp[0]].p, M = E[grp[Math.floor(grp.length / 2)]].p, B = E[grp[grp.length - 1]].q;
+    const d = 2 * (A[0] * (M[1] - B[1]) + M[0] * (B[1] - A[1]) + B[0] * (A[1] - M[1])); if (Math.abs(d) < 1e-9) continue;
+    const ux = ((A[0] ** 2 + A[1] ** 2) * (M[1] - B[1]) + (M[0] ** 2 + M[1] ** 2) * (B[1] - A[1]) + (B[0] ** 2 + B[1] ** 2) * (A[1] - M[1])) / d;
+    const uy = ((A[0] ** 2 + A[1] ** 2) * (B[0] - M[0]) + (M[0] ** 2 + M[1] ** 2) * (A[0] - B[0]) + (B[0] ** 2 + B[1] ** 2) * (M[0] - A[0])) / d;
+    const R = Math.hypot(A[0] - ux, A[1] - uy);
+    grp.forEach(k => inArc.add(k)); arcs.push({ R, mid: M, c: [ux, uy] });
+  }
+  const cham = [], ramps = [];
+  E.forEach(e => { if (e.hor || e.ver || inArc.has(e.i)) return;
+    const a = Math.abs(e.da), r = Math.abs(e.dr), deg = Math.atan2(r, a) * 180 / Math.PI;
+    if ((Math.abs(deg - 45) < 3 && Math.max(a, r) <= 2.5) || Math.max(a, r) <= 0.6) cham.push({ e, a, r, deg }); else ramps.push({ e, deg }); });
+  return { E, arcs, cham, ramps };
+}
+function rev3DViews(M){
+  return function(p, PT){
+    const f = v => fv3(v), poly = M.poly, L = M.L, rmin = Math.min(...poly.map(q => q[1])), rmax = Math.max(...poly.map(q => q[1]));
+    const F = rev3DFeatures(poly), Hh = rmax - rmin;
+    let g = "";
+    const arr = (x1, y1, x2, y2) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="d" marker-start="url(#a)" marker-end="url(#a)"/>`;
+    const ext = (x1, y1, x2, y2) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="e"/>`;
+    const dimH = (x1, x2, y, txt, ty) => arr(x1, y, x2, y) + `<text x="${(x1 + x2) / 2}" y="${ty ?? y - 5}" class="t" text-anchor="middle">${txt}</text>`;
+    const dimV = (x, y1, y2, txt) => { const tx = x + 16, ty = (y1 + y2) / 2; return arr(x, y1, x, y2) + `<text x="${tx}" y="${ty}" class="t" text-anchor="middle" transform="rotate(-90 ${tx} ${ty})">${txt}</text>`; };
+    const call = (x, y, tx, ty, txt) => `<line x1="${x}" y1="${y}" x2="${tx}" y2="${ty}" class="e"/><text x="${tx + (tx < x ? -4 : 4)}" y="${ty + 4}" class="tn" text-anchor="${tx < x ? "end" : "start"}">${txt}</text>`;
+    // ---------- SECÇÃO (ampliada) ----------
+    const bx0 = PT ? 170 : 650, bx1 = PT ? 600 : 970, by0 = PT ? 530 : 150, by1 = PT ? 715 : 390;
+    const s = Math.min((bx1 - bx0) / Math.max(L, 1e-6), (by1 - by0) / Math.max(Hh, 1e-6), 60);
+    const ox = (bx0 + bx1) / 2 - L * s / 2, oy = (by0 + by1) / 2 + Hh * s / 2;
+    const X = a => ox + a * s, Y = r => oy - (r - rmin) * s, yT = Y(rmax), yB = Y(rmin);
+    g += `<path d="${poly.map(([a, r], i) => `${i ? "L" : "M"}${X(a).toFixed(2)},${Y(r).toFixed(2)}`).join("")}Z" class="p"/>`;
+    // largura total em cima
+    const aTopL = Math.min(...poly.filter(q => Math.abs(q[1] - rmax) < 1e-6).map(q => q[0]));
+    g += ext(X(0), Math.min(Y(poly.find(q => Math.abs(q[0]) < 1e-6)?.[1] ?? rmax), yT) - 4, X(0), yT - 46) + ext(X(L), yT - 4, X(L), yT - 46) + dimH(X(0), X(L), yT - 40, f(L));
+    // diâmetros: níveis das retas paralelas ao eixo (+ maior e menor), à esquerda ou à direita conforme o lado da reta
+    const lv = new Map();
+    F.E.filter(e => e.hor && e.len > 1e-3).forEach(e => { const r = e.p[1], k = r.toFixed(3), a = Math.min(e.p[0], e.q[0]), b = Math.max(e.p[0], e.q[0]);
+      const o = lv.get(k) || { r, len: 0, a, b }; o.len += e.len; o.a = Math.min(o.a, a); o.b = Math.max(o.b, b); lv.set(k, o); });
+    F.ramps.forEach(({ e }) => [e.p, e.q].forEach(q => { const k = q[1].toFixed(3); if (!lv.has(k)) lv.set(k, { r: q[1], len: 0, a: q[0], b: q[0] }); }));
+    for (const r of [rmin, rmax]) if (![...lv.values()].some(o => Math.abs(o.r - r) < 1e-6)){ const q = poly.filter(z => Math.abs(z[1] - r) < 1e-6).map(z => z[0]); lv.set(r.toFixed(3), { r, len: 0, a: Math.min(...q), b: Math.max(...q) }); }
+    const levels = [...lv.values()].sort((x, y) => (y.r === rmax || y.r === rmin) - (x.r === rmax || x.r === rmin) || y.len - x.len);
+    const placed = { L: [], R: [] }, skipped = [];
+    for (const o of levels){
+      const side = (o.a + o.b) / 2 <= L / 2 ? "L" : "R", y = Y(o.r);
+      if (placed[side].some(yy => Math.abs(yy - y) < 15)){ skipped.push(o.r); continue; }
+      placed[side].push(y);
+      const xEdge = side === "L" ? X(o.a) : X(o.b), xTxt = side === "L" ? (PT ? 40 : bx0 - 110) : (PT ? 760 : bx1 + 110);
+      g += `<line x1="${xEdge}" y1="${y}" x2="${xTxt}" y2="${y}" class="e" marker-start="url(#a)"/><text x="${xTxt}" y="${y - 4}" class="t" text-anchor="${side === "L" ? "start" : "end"}">Ø ${f(2 * o.r)}</text>`;
+    }
+    // posições no eixo: paredes radiais e pontas das rampas longas, em cota corrida embaixo (a partir da face da esquerda)
+    const az = new Set([0, L].map(v => v.toFixed(3)));
+    F.E.filter(e => e.ver && e.len > 1e-3).forEach(e => az.add(e.p[0].toFixed(3)));
+    F.ramps.forEach(({ e }) => { az.add(e.p[0].toFixed(3)); az.add(e.q[0].toFixed(3)); });
+    F.arcs.forEach(c => { if (c.R > 2.5){ az.add(c.c[0].toFixed(3)); } });
+    const zs = [...az].map(Number).sort((x, y) => x - y).filter((v, i, a) => !i || v - a[i - 1] > 1e-3);
+    if (zs.length > 2){
+      const yd = yB + 30;
+      zs.forEach(z => { const yFrom = Y(Math.min(...poly.filter(q => Math.abs(q[0] - z) < 1e-6).map(q => q[1]).concat(rmax))); g += ext(X(z), yFrom + 4, X(z), yd + 6); });
+      let row = 0;   // cotas curtas: o texto vai alternando em 3 alturas para não encavalar
+      for (let i = 1; i < zs.length; i++){ const x1 = X(zs[i - 1]), x2 = X(zs[i]), short = x2 - x1 < 30; row = short ? (row + 1) % 3 : 0; g += dimH(x1, x2, yd, f(zs[i] - zs[i - 1]), yd + [-5, 12, 25][row]); }
+    }
+    // alturas radiais das paredes que não aparecem nos Ø (à direita da peça, em cota corrida)
+    // chanfros (agrupados por tamanho), rampas (ângulo com o eixo) e raios
+    const chG = new Map();
+    F.cham.forEach(c => { const r2 = v => f(Math.round(v * 100) / 100), k = Math.abs(c.a - c.r) < 0.02 ? `${r2(c.a)} x 45°` : `${r2(c.a)} x ${r2(c.r)}`; if (!chG.has(k)) chG.set(k, []); chG.get(k).push(c); });
+    let ci = 0;
+    const cxS = X(L / 2), cyS = (yT + yB) / 2, used = [];
+    const spot = (mx, my, dx, dy) => { let tx = mx + dx, ty = my + dy; for (let k = 0; k < 12 && used.some(([ux, uy]) => Math.abs(ux - tx) < 90 && Math.abs(uy - ty) < 13); k++) ty += dy < 0 ? -13 : 13; used.push([tx, ty]); return [tx, ty]; };
+    chG.forEach((list, k) => { const c = list[0].e, mx = X((c.p[0] + c.q[0]) / 2), my = Y((c.p[1] + c.q[1]) / 2);
+      const [tx, ty] = spot(mx, my, mx >= cxS ? 34 : -34, my <= cyS ? -22 : 22);
+      g += call(mx, my, tx, ty, k + (list.length > 1 ? ` (${list.length}x)` : "")); ci++; });
+    F.ramps.forEach(({ e, deg }) => { const mx = X((e.p[0] + e.q[0]) / 2), my = Y((e.p[1] + e.q[1]) / 2), [tx, ty] = spot(mx, my, mx >= cxS ? 30 : -30, my <= cyS ? -18 : 18); g += call(mx, my, tx, ty, `${fmtN(deg, Math.abs(deg - Math.round(deg)) < 0.05 ? 0 : 1)}° com o eixo`); });
+    F.arcs.forEach(c => { const mx = X(c.mid[0]), my = Y(c.mid[1]), [tx, ty] = spot(mx, my, mx >= cxS ? 30 : -30, my <= cyS ? -18 : 18); g += call(mx, my, tx, ty, `R${f(Math.round(c.R * 100) / 100)}`); });
+    g += `<text x="${X(L / 2)}" y="${yB + 74}" class="vt" text-anchor="middle">SECÇÃO (ampliada)</text>`;
+    // ---------- VISTA FRONTAL + CORTE A-A (mesma escala) ----------
+    { const sc = (PT ? 300 : 250) / (2 * rmax), cx = PT ? 210 : 175, cy = PT ? 238 : 270, ox2 = PT ? 540 : 410;
+      const sc2 = Math.min(sc, (PT ? 180 : 140) / Math.max(L, 1e-6));
+      const Rr = r => r * sc;
+      const ring = r => `M${cx - r},${cy}A${r},${r} 0 1 0 ${cx + r},${cy}A${r},${r} 0 1 0 ${cx - r},${cy}Z`;
+      g += `<path d="${ring(Rr(rmax))}${rmin > 1e-6 ? ring(Rr(rmin)) : ""}" class="p" fill-rule="evenodd"/>`;
+      levels.filter(o => o.r !== rmax && o.r !== rmin).slice(0, 6).forEach(o => { g += `<circle cx="${cx}" cy="${cy}" r="${Rr(o.r)}" class="e" style="fill:none"/>`; });
+      g += `<line x1="${cx - Rr(rmax) - 12}" y1="${cy}" x2="${cx + Rr(rmax) + 12}" y2="${cy}" class="ax"/><line x1="${cx}" y1="${cy - Rr(rmax) - 12}" x2="${cx}" y2="${cy + Rr(rmax) + 12}" class="ax"/>`;
+      const yA = cy - Rr(rmax) - 22, yA2 = cy + Rr(rmax) + 22;
+      g += `<line x1="${cx}" y1="${yA}" x2="${cx}" y2="${yA + 10}" class="p"/><line x1="${cx}" y1="${yA2 - 10}" x2="${cx}" y2="${yA2}" class="p"/>`;
+      g += `<line x1="${cx}" y1="${yA}" x2="${cx + 16}" y2="${yA}" class="p" marker-end="url(#a)"/><line x1="${cx}" y1="${yA2}" x2="${cx + 16}" y2="${yA2}" class="p" marker-end="url(#a)"/>`;
+      g += `<text x="${cx + 22}" y="${yA + 4}" class="t">A</text><text x="${cx + 22}" y="${yA2 + 4}" class="t">A</text><text x="${cx}" y="${yA2 + 26}" class="vt" text-anchor="middle">VISTA FRONTAL</text>`;
+      const X2 = a => ox2 + (a - L / 2) * sc2, Y2 = r => cy - r * sc;
+      const half = sg => `<path d="${poly.map(([a, r], i) => `${i ? "L" : "M"}${X2(a).toFixed(2)},${Y2(sg * r).toFixed(2)}`).join("")}Z" class="p"/>`;
+      g += half(1) + (rmin > 1e-6 ? half(-1) : "") + `<line x1="${X2(-10 / sc2)}" y1="${cy}" x2="${X2(L + 10 / sc2)}" y2="${cy}" class="ax"/>`;
+      const xe = X2(L) + 60, xi = X2(L) + 30;
+      g += ext(X2(L), Y2(rmax), xe + 6, Y2(rmax)) + ext(X2(L), Y2(-rmax), xe + 6, Y2(-rmax)) + dimV(xe, Y2(rmax), Y2(-rmax), `Ø ${f(2 * rmax)}`);
+      if (rmin > 1e-6) g += ext(X2(L), Y2(rmin), xi + 6, Y2(rmin)) + ext(X2(L), Y2(-rmin), xi + 6, Y2(-rmin)) + dimV(xi, Y2(rmin), Y2(-rmin), `Ø ${f(2 * rmin)}`);
+      g += ext(X2(0), Y2(rmax) - 4, X2(0), Y2(rmax) - 26) + ext(X2(L), Y2(rmax) - 4, X2(L), Y2(rmax) - 26) + dimH(X2(0), X2(L), Y2(rmax) - 20, f(L));
+      g += `<text x="${ox2}" y="${yA2 + 26}" class="vt" text-anchor="middle">CORTE A-A</text>`; }
+    if (skipped.length) M.skipped = skipped;
+    return g;
+  };
+}
+function rev3DParams(name, poly, L){
+  const rmin = Math.min(...poly.map(q => q[1])), rmax = Math.max(...poly.map(q => q[1])), f = v => fv3(v);
+  const M = { poly, L };
+  const desc = String(name || "PEÇA").replace(/\.(stl|STL)$/, "").replace(/\s*\(.*$/, "").toUpperCase() || "PEÇA";
+  const dims = `Ø${f(2 * rmin)} x Ø${f(2 * rmax)} x ${f(L)}`;
+  const views = rev3DViews(M);
+  const p = { tipoGen: "custom", desc, mat: "", dint: 2 * rmin, dext: 2 * rmax, h: L, from3D: name,
+    customProfile: poly.map(([a, r]) => [-a, r]), customViews: views, customTools: [],
+    get customNotes(){ return `${desc} ${dims} · desenho gerado do 3D (${name})` + (M.skipped && M.skipped.length ? ` · Ø também: ${M.skipped.map(r => f(2 * r)).join(" / ")}` : "") + " · cotas em mm"; } };
+  return p;
+}
+function rev3DFlip(p){ const L = p.h, poly = p.customProfile.map(([z, r]) => [L + z, r]).reverse(); const q = rev3DParams(p.from3D, poly, L); q.desc = p.desc; q.mat = p.mat; return q; }
+async function rev3DOpen(file){
+  try {
+    const name = file.name || "peça.stl";
+    if (!/\.stl$/i.test(name)) throw new Error(`"${name}" não é STL. No Inventor: Arquivo → Exportar → Formato CAD → tipo STL (unidade mm, resolução Alta). O .ipt não abre fora do Inventor.`);
+    const { poly, L } = rev3DSection(stlParse(await file.arrayBuffer()));
+    state.genParams = rev3DParams(name, poly, L);
+    errHide(); openPreview();
+    $("genMsg").textContent = `Desenho do 3D: ${name} · ${state.genParams.customNotes}. Confira as cotas; "Imprimir / PDF" salva o PDF.`; $("genMsg").style.color = "";
+  } catch(e){ errShow("Erro ao ler o 3D", e); }
+}
+$("btn3D").onclick = () => $("file3D").click();
+$("file3D").onchange = e => { const f = e.target.files && e.target.files[0]; e.target.value = ""; if (f) rev3DOpen(f); };
+// arrastar o .stl para qualquer lugar da tela
+window.addEventListener("dragover", e => { if (e.dataTransfer && [...(e.dataTransfer.items || [])].some(i => i.kind === "file")) e.preventDefault(); });
+window.addEventListener("drop", e => { const f = e.dataTransfer && [...(e.dataTransfer.files || [])].find(x => /\.stl$/i.test(x.name)); if (f){ e.preventDefault(); rev3DOpen(f); } });
 function openPreview(){
   if (!state.genParams) return;
   $("pvPage").innerHTML = drawingSVG(state.genParams);

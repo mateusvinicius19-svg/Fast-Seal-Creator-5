@@ -6,6 +6,14 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.54.0 — Desenho do 3D salva no W: (16/11/2026)
+- Pedido do usuário (os desenhos do 3D são de itens fora de padrão): na prévia do desenho do 3D, botão **💾 Salvar no W:**.
+  Pergunta a **família** (pasta em DESENHOS, ex.: VEDADOR, PSE 124 E; vem o nome do arquivo), o **número do programa**
+  (se não estiver no painel; vazio = sem programa) e o **Cód. interno** (vazio = sem). Grava como os perfis padrão:
+  `DESENHOS\<família>\<família> (Ø int X Ø ext X largura) <programa>\….pdf` e, com Cód. interno, o pedido em
+  `_PEDIDOS ARGUS` (Anexo 1 no ARGUS).
+- Sem número de programa, o nome da pasta não fica mais com espaço sobrando no fim. Programas não mudam.
+
 ## 5.53.1 — PSA 108: desbaste sem duplicar nos outros materiais (16/11/2026)
 - Usuário: no PU o desbaste está certo; em Nylon, POM, NBR, Viton e Celeron saía duplicado (ex.: 100x120x22, bucha 50x70:
   116 linhas, cada Ø passava 2 vezes em 2 etapas em Z). Agora o PSA 108 desbasta em Z de uma vez em todos os materiais,

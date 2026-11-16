@@ -5,6 +5,11 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - CORREÇÃO (5.0.x): conserto de erro, ajuste de regra pequena.
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
+## 5.50.1 — PSR 212 gera o programa com o degrau vazio (16/11/2026)
+- O PSR 212 não gerava o programa: com o Ø e o comprimento do degrau vazios (que deveriam usar o padrão) aparecia
+  "Preencha: ds" e o código na tela continuava o do programa anterior. Os dois campos agora são opcionais, como diz o
+  texto. Só o PSR 212 muda (esses campos só existem nele).
+
 ## 5.50.0 — Ferramentas: área separada com cadastro e edição (16/11/2026)
 - Pedido do usuário: uma parte só de ferramentas, com tudo o que tem. O botão 🧰 Ferramentas agora abre uma área
   separada (tela cheia, ← Voltar ao Simulador) com duas abas:

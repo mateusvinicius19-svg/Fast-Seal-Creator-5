@@ -5752,9 +5752,31 @@ const BTN = "margin-top:14px;width:100%;padding:10px;border:0;border-radius:8px;
 async function loginShow(){
   let U;
   try { U = await usersRead(); } catch(e){ loginCard(`<b>Login</b><div style="margin-top:8px">${esc(e.message)}</div><button data-main style="${BTN}">Tentar de novo</button>`).querySelector("button").onclick = loginShow; return; }
-  if (!U.users.length){   // primeiro acesso: cria o administrador
+  // v5.62.0 (usuário 16/11/2026): os usuários são SÓ os do W: (os mesmos em qualquer computador). Sem W: não cria
+  // administrador local (antes dizia "os usuários ficam só neste computador"): pede para ligar o W: e tenta de novo.
+  if (!U.onW && !U.users.length){
+    const pick = !SRV && window.showDirectoryPicker;
+    const ov = loginCard(`<div style="font:700 17px 'Segoe UI',Arial;text-align:center">Entrar no Simulador</div>
+      <div style="color:#555;margin-top:6px;text-align:center">Os usuários ficam no W: (PADRONIZAÇÃO\\Arruela Padronizada\\${USERS_FILE}) e são os mesmos em qualquer computador.<br><br>
+      <b>Não encontrei o W: neste computador.</b><br>${SRV ? "Confira se o W: está conectado e clique em Tentar de novo." : pick ? "Clique abaixo e escolha a pasta W:\\Parts\\PartsSeals\\PROJETOS (ou Permitir, se ela já foi escolhida)." : "Abra o Simulador pelo atalho Abrir Simulador (Edge ou Chrome)."}</div>
+      ${pick ? `<button data-main id="lgPick" style="${BTN}">🔓 Ligar a pasta PROJETOS do W:</button>` : ""}
+      <button ${pick ? "" : "data-main"} id="lgRetry" style="${BTN};background:#555">Tentar de novo</button>`);
+    $("lgRetry").onclick = () => { ov.remove(); loginShow(); };
+    if (pick) $("lgPick").onclick = async () => {
+      try {
+        if (!(await kvGet("dirProjetos") && await rootDir(false))){
+          const h = await window.showDirectoryPicker({ id: "projetos", mode: "readwrite" });
+          if (!(await isProjetosDir(h))) return $("loginMsg").textContent = `"${h.name}" não é a pasta PROJETOS (não tem Programas_CNC e DESENHOS).`;
+          await kvSet("dirProjetos", h);
+        }
+      } catch(e){ return $("loginMsg").textContent = "Pasta não escolhida."; }
+      ov.remove(); loginShow();
+    };
+    return;
+  }
+  if (!U.users.length){   // primeiro acesso: cria o administrador (no W:)
     const ov = loginCard(`<div style="font:700 17px 'Segoe UI',Arial;text-align:center">Primeiro acesso</div>
-      <div style="color:#555;margin-top:6px;text-align:center">Crie o administrador (ele cadastra os outros usuários).${U.onW ? "" : "<br><b>Sem acesso ao W:</b> os usuários ficam só neste computador."}</div>
+      <div style="color:#555;margin-top:6px;text-align:center">Crie o administrador (ele cadastra os outros usuários).<br>Os usuários ficam no W: e valem em todos os computadores.</div>
       <label style="${LBL}">Nome<input id="lgName" value="MATEUS C." style="${INP}"></label>
       <label style="${LBL}">Senha<input id="lgPw" type="password" style="${INP}"></label>
       <label style="${LBL}">Repetir a senha<input id="lgPw2" type="password" style="${INP}"></label>
@@ -5793,7 +5815,7 @@ async function userMenu(){
     <button id="umOut" style="${BTN}">Sair (entrar com outro usuário)</button>
     <button id="umClose" style="${BTN};background:#eee;color:#333">Fechar</button>`);
   const ask = async (name, txt) => { const a = prompt(txt + (name ? " — " + name : "") + ":"); if (a === null) return null; if (a.length < 4){ alert("Senha com pelo menos 4 caracteres."); return null; } if (prompt("Repita a senha:") !== a){ alert("As duas senhas não são iguais."); return null; } return a; };
-  const save = async (users, ok) => { try { await usersWrite(users); alert(ok); } catch(e){ alert("Não consegui gravar: " + e.message); } };
+  const save = async (users, ok) => { try { if (!(await usersWrite(users))) return alert("Sem acesso ao W:: nada foi gravado. Os usuários ficam no W: (iguais em todos os computadores); ligue o W: e tente de novo."); alert(ok); } catch(e){ alert("Não consegui gravar: " + e.message); } };
   $("umClose").onclick = () => ov.remove();
   $("umOut").onclick = () => { ov.remove(); userSet(""); loginShow(); };
   $("umPw").onclick = async () => { const pw = await ask(state.user, "Senha nova"); if (pw === null) return; const u = U.users.find(x => x.nome === state.user); u.sal = newSalt(); u.hash = await pwHash(u.sal, pw); await save(U.users, "Senha trocada."); };

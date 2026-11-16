@@ -6,6 +6,13 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.62.0 — Login: usuários só no W:, iguais em todos os computadores (16/11/2026)
+- A tela "Primeiro acesso" dizia "Sem acesso ao W: os usuários ficam só neste computador", parecendo que cada PC tinha os
+  seus usuários. Agora os usuários ficam só no W: (`PADRONIZAÇÃO\Arruela Padronizada\usuarios.json`) e valem em qualquer
+  computador. Sem W:, o Simulador não cria mais administrador local: avisa que não encontrou o W:, oferece
+  "🔓 Ligar a pasta PROJETOS do W:" (fora do servidor) e "Tentar de novo". Cadastrar/trocar senha sem W: avisa que nada foi
+  gravado. Programas iguais (31 perfis).
+
 ## 5.61.2 — Desenho do programa: Programa Nº do programa aberto (16/11/2026)
 - 📐 Desenho do programa saía com o Programa Nº (e o Cód. interno) da peça anterior (ex.: programa 726 com "27077"). Agora o
   número vem do programa aberto (nome do arquivo) e o Cód. interno da peça anterior é apagado; a folha da tela e a da

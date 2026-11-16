@@ -6,6 +6,12 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.57.2 — PSR 211/212: rampa interna de trás menos inclinada com as alturas próximas (16/11/2026)
+- Com altura total perto da altura do corpo (raspador baixo), a rampa interna de trás ficava curta (1,24 × diferença) e
+  muito inclinada (41° a 84° com o eixo). Agora ela tem no mínimo o comprimento para 20° com o eixo (o ângulo dos padrões)
+  e avança para a frente, sem mexer nos Ø; limite de sempre (0,3 antes do lábio interno). Rampa digitada continua valendo.
+- Com raspador de 3 mm ou mais nada muda (padrões iguais; 31 perfis iguais no teste).
+
 ## 5.57.1 — PSE 108: peças por ciclo voltam a valer depois de reabrir (16/11/2026)
 - Ao reabrir o Simulador, o "Tipo da peça" não voltava (ficava "Automático"), então o PSE 108 gerava só 1 peça por ciclo
   mesmo com outro número no campo. Agora o tipo volta junto com as medidas (e o botão do perfil mostra PSE 108).

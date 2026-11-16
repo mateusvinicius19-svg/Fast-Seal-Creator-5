@@ -1583,7 +1583,11 @@ function psr211Geom(p){
   const g = pseFscGeom(Object.assign({}, p, { h: Hb, ae: opt(p.ae) ?? 1.0 }));   // aperto externo 1,0 como nos programas do Fast Seal
   const tth = opt(p.tL) ?? xround(0.3 * g.sec, 2), tipIn = g.intAp, tipOut = tipIn + 2 * tth;      // ponta do raspador: Ø int. = lábio int.; espessura 0,3 × secção
   const wAng = Number(p.wAng) > 0 ? Number(p.wAng) : 65, rootOut = xround(tipOut + 2 * prot * Math.tan((90 - wAng) * Math.PI / 180), 2);
-  const cT = opt(p.cT) ?? 0.5, rampL = opt(p.rampa) ?? xround(Math.min(1.24 * prot, Ht + g.zI - g.lipLen - 0.3), 2);
+  // v5.57.2 (usuário 16/11/2026): com as alturas próximas (raspador baixo) a rampa interna de trás ficava curta e muito inclinada
+  // (41° a 84° com o eixo). Agora ela tem no mínimo o comprimento para 20° com o eixo (o mesmo dos padrões, raspador 3 mm) —
+  // avança para a frente; os Ø não mudam. Limite de sempre: até 0,3 antes do lábio interno.
+  const cT = opt(p.cT) ?? 0.5, rampMin = cT + (g.intCalc - tipIn) / 2 / Math.tan(20 * Math.PI / 180);
+  const rampL = opt(p.rampa) ?? xround(Math.min(Math.max(1.24 * prot, rampMin), Ht + g.zI - g.lipLen - 0.3), 2);
   // PSR 212: degrau no externo, atrás do corpo — Ø do degrau dS de Z −(corpo − Ls) até a trás do corpo (chanfro chc nas duas arestas).
   // A T2D2 faz o externo igual ao PSR 211 (não corta parede virada para trás); o degrau é feito pela T6D6 (lâmina), junto com o raspador.
   const STEP = p.tipoGen === "psr212", dS = STEP ? (opt(p.ds) ?? xround(g.extCalc - 0.6 * g.sec, 1)) : null, Ls = STEP ? (opt(p.hs) ?? xround(0.3 * Hb, 1)) : 0, zS = -Hb + Ls;

@@ -3590,56 +3590,207 @@ function ferrRaster(code, src){ return new Promise(ok => { const im = new Image(
     else { const k = Math.min(W / im.naturalWidth, H / im.naturalHeight); x.drawImage(im, (W - im.naturalWidth * k) / 2, (H - im.naturalHeight * k) / 2, im.naturalWidth * k, im.naturalHeight * k); }
     FERR_PNG[code] = c.toDataURL("image/png"); } catch(e){} ok(); }; im.onerror = () => ok(); im.src = src; }); }
 async function ferrPrep(){ for (const f of FERR){ let src = null; try { src = await ferrFotoGet(f.c); } catch(e){} src = src || FERR_FOTO[f.c]; if (src){ await ferrRaster(f.c, src); if (f.alt) FERR_PNG[f.alt] = FERR_PNG[f.c]; } } try { rerenderDrawing(); } catch(e){} }
-setTimeout(() => { ferrPrep().catch(() => {}); }, 1200);
+setTimeout(() => { ferrLoad().then(ferrPrep).catch(() => {}); }, 1200);
 function ferrCard(f){
   const tD = f.c.match(/^T(\d+)D(\d+)$/), foto = FERR_FOTO[f.c];
-  return `<div class="ferrc" data-q="${esc((f.c + " " + (f.alt || "") + " " + f.nome + " " + f.uso + " " + f.mat + " " + (f.obs || "") + " " + (f.pastilha || "") + " " + FERR_TIPOS[f.tipo]).toLowerCase())}" data-t="${f.tipo}" style="border:1px solid #d5d9de;border-radius:10px;background:#fff;display:flex;gap:12px;padding:10px">
-    <div style="flex:none;width:120px;display:flex;flex-direction:column;gap:4px;align-items:center"><div class="ferrFoto" data-c="${f.c}" title="Clique e cole a foto (Ctrl+V) ou escolha um arquivo" style="width:120px;height:90px;border-radius:8px;background:#f2f3f5;display:flex;align-items:center;justify-content:center;overflow:hidden;color:#999;font-size:11px;text-align:center;cursor:pointer;border:2px dashed transparent">${foto ? `<img src="${foto}" style="max-width:100%;max-height:100%">` : "foto<br>pendente"}</div><button type="button" class="btn ferrPick" data-c="${f.c}" style="font-size:11px;padding:2px 8px">&#x1F4F7; Foto</button></div>
+  return `<div class="ferrc" data-q="${esc((f.c + " " + (f.alt || "") + " " + f.nome + " " + f.uso + " " + f.mat + " " + (f.obs || "") + " " + (f.pastilha || "") + " " + (f.sup || "") + " " + FERR_TIPOS[f.tipo]).toLowerCase())}" data-t="${f.tipo}" style="border:1px solid #d5d9de;border-radius:10px;background:#fff;display:flex;gap:12px;padding:10px">
+    <div style="flex:none;width:120px;display:flex;flex-direction:column;gap:4px;align-items:center"><div class="ferrFoto" data-c="${f.c}" title="Clique e cole a foto (Ctrl+V) ou escolha um arquivo" style="width:120px;height:90px;border-radius:8px;background:#f2f3f5;display:flex;align-items:center;justify-content:center;overflow:hidden;color:#999;font-size:11px;text-align:center;cursor:pointer;border:2px dashed transparent">${foto ? `<img src="${foto}" style="max-width:100%;max-height:100%">` : "foto<br>pendente"}</div><button type="button" class="btn ferrPick" data-c="${f.c}" style="font-size:11px;padding:2px 8px">&#x1F4F7; Foto</button><button type="button" class="btn ferrEd" data-c="${f.c}" style="font-size:11px;padding:2px 8px">&#x270F;&#xFE0F; Editar</button></div>
     <div style="flex:1;min-width:0;font:12.5px Segoe UI,Arial;color:#333">
-      <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap"><b style="font:700 17px Consolas,monospace;color:#b2221f">${f.c}</b>${f.alt ? `<b style="font:700 13px Consolas,monospace;color:#b2221f">/ ${f.alt}</b>` : ""}<b>${esc(f.nome)}</b><span class="kindtag">${FERR_TIPOS[f.tipo]}</span></div>
-      <div style="color:#666;margin:2px 0">Posição T${tD ? tD[1] : "?"}${f.alt ? " (ou T" + f.alt.match(/^T(\d+)/)[1] + ")" : ""} · corretor D${tD ? tD[2] : "?"}${f.pastilha ? ` · pastilha ${f.pastilha}` : ""}${f.raio ? ` · raio de ponta R${String(f.raio).replace(".", ",")}` : ""}${f.min ? ` · trabalha a partir de Ø${f.min}` : ""}${f.maxSec ? ` · corta secção até ${String(f.maxSec).replace(".", ",")}` : ""}</div>
+      <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap"><b style="font:700 17px Consolas,monospace;color:#b2221f">${f.c}</b>${f.alt ? `<b style="font:700 13px Consolas,monospace;color:#b2221f">/ ${f.alt}</b>` : ""}<b>${esc(f.nome)}</b><span class="kindtag">${FERR_TIPOS[f.tipo] || esc(f.tipo || "")}</span>${f._ed ? `<span class="kindtag" style="background:#fff4d6;color:#8a5a00">${f._ed === "nova" ? "cadastrada" : "editada"}</span>` : ""}</div>
+      <div style="color:#666;margin:2px 0">Posição T${tD ? tD[1] : "?"}${f.alt ? " (ou T" + f.alt.match(/^T(\d+)/)[1] + ")" : ""} · corretor D${tD ? tD[2] : "?"}${f.sup ? ` · suporte ${esc(f.sup)}` : ""}${f.pastilha ? ` · pastilha ${esc(f.pastilha)}` : ""}${f.raio ? ` · raio de ponta R${String(f.raio).replace(".", ",")}` : ""}${f.min ? ` · trabalha a partir de Ø${f.min}` : ""}${f.maxSec ? ` · corta secção até ${String(f.maxSec).replace(".", ",")}` : ""}</div>
       <div><b>Uso:</b> ${esc(f.uso)}</div><div><b>Materiais:</b> ${esc(f.mat)}</div>${f.obs ? `<div style="color:#555"><b>Obs.:</b> ${esc(f.obs)}</div>` : ""}</div></div>`;
 }
-function openFerr(sel){
+// v5.50.0 (usuário 16/11/2026): 🧰 Ferramentas virou uma área separada (tela cheia) com tudo de ferramenta: a torre CNC (T/D)
+// e os suportes, pastilhas e lâminas (códigos dos .txt do W:). Cadastrar e editar pela tela; fica salvo em
+// PROJETOS\FERRAMENTAS SIMULADOR\ferramentas.json (todos os PCs) ou, sem acesso à pasta, só neste PC (localStorage).
+// NÃO muda nenhum programa: os geradores têm as ferramentas no código; aqui muda só a biblioteca (e o nome no quadro do desenho).
+const FERR_BASE = FERR.map(f => ({ ...f }));
+const ITENS_TIPOS = { suporte: "Suporte", pastilha: "Pastilha / inserto", lamina: "Lâmina / bedame", outro: "Outro" };
+const ITENS_BASE = [
+  { id: "s-t7", cat: "suporte", cod: "SVJBL 2020 K16", desc: "Suporte externo", pos: "T7", pastilha: "VCGT 160404", fonte: "Suportes.txt · TABELA DE CODIGOS FERRAMENTAS.txt" },
+  { id: "s-t4", cat: "suporte", cod: "S10K-SDUCR 07", desc: "Barra interna 7 mm (também no torno convencional)", pos: "T4", pastilha: "DCGT 070204-AK", fonte: "Suportes.txt · TABELA DE CODIGOS FERRAMENTAS.txt" },
+  { id: "s-t6b2", cat: "suporte", cod: "MGEHL 2020-2", desc: "Suporte bedame 2 mm", pos: "T6", pastilha: "MGMN 200 G / MRM 200 M", fonte: "Suportes.txt · TABELA DE CODIGOS FERRAMENTAS.txt (MGEHL-2020-2T20)" },
+  { id: "s-t6b3", cat: "suporte", cod: "DGTL 20 B 3D40", desc: "Suporte bedame 3 mm", pos: "T6", pastilha: "DGL 31020", fonte: "Suportes.txt" },
+  { id: "s-t8", cat: "suporte", cod: "3000-20X125L", desc: "Suporte bedame 1 mm (WNT)", pos: "T8", pastilha: "3002.1,0.13.L", fonte: "Suportes.txt · TABELA DE CODIGOS FERRAMENTAS.txt" },
+  { id: "s-t2b2", cat: "suporte", cod: "MGIVL-2016-2", desc: "Suporte bedame interno 2 mm", pos: "T2", fonte: "Suportes.txt" },
+  { id: "s-t2b08", cat: "suporte", cod: "MB-E16-34-09R", desc: "Suporte bedame interno 0,8 mm", pos: "T2", pastilha: "MB-09R080-04-14L", fonte: "Suportes.txt" },
+  { id: "s-t1", cat: "suporte", cod: "S16 R SVUCL 11", desc: "Barra interna", pos: "T1", fonte: "TABELA DE CODIGOS FERRAMENTAS.txt" },
+  { id: "s-sm-faca", cat: "suporte", cod: "30HXXX0165", desc: "Suporte faca (Seal Maker)", marca: "Seal Maker", fonte: "ferramantas seal maker.txt" },
+  { id: "s-sm-ie", cat: "suporte", cod: "30HXXX0040", desc: "Suporte interno / externo (Seal Maker)", marca: "Seal Maker", fonte: "ferramantas seal maker.txt" },
+  { id: "s-sm-bdi", cat: "suporte", cod: "30HXXX0390", desc: "Suporte bedame interno (Seal Maker)", marca: "Seal Maker", pastilha: "30IXXX0287 / 30IXXX0350", fonte: "ferramantas seal maker.txt" },
+  { id: "s-sm-o", cat: "suporte", cod: "30HXXX0081", desc: "Suporte O (Seal Maker)", marca: "Seal Maker", pastilha: "30IXXX0165", fonte: "ferramantas seal maker.txt" },
+  { id: "p-vcgt16", cat: "pastilha", cod: "VCGT 160404 AK", desc: "Externa R0,4 (35°)", pos: "T7", pastilha: "SVJBL 2020 K16", fonte: "TABELA DE CODIGOS FERRAMENTAS.txt" },
+  { id: "p-vcgt-iscar", cat: "pastilha", cod: "VCGT 331 IC20", desc: "Externa R0,4", marca: "Iscar", pos: "T7", fonte: "Pastilhas Para usinagem.txt" },
+  { id: "p-vcgt-cer", cat: "pastilha", cod: "VCGT 160404FN 25P", desc: "Externa R0,4", marca: "Ceratizit", pos: "T7", fonte: "Pastilhas Para usinagem.txt" },
+  { id: "p-dcgt07", cat: "pastilha", cod: "DCGT 070204-AK", desc: "Interna 7 mm R0,4", pos: "T4 / T1D45", pastilha: "S10K-SDUCR 07", fonte: "TABELA DE CODIGOS FERRAMENTAS.txt" },
+  { id: "p-dvgt-kor", cat: "pastilha", cod: "DVGT 070204-AK", desc: "Interna 7 mm R0,4", marca: "Korloy", fonte: "Pastilhas Para usinagem.txt" },
+  { id: "p-dcgt-iscar", cat: "pastilha", cod: "DCGT 2-1-AS IC20", desc: "Interna 7 mm R0,4", marca: "Iscar", fonte: "Pastilhas Para usinagem.txt" },
+  { id: "p-vcgt11", cat: "pastilha", cod: "VCGT 110304-AK", desc: "Interna 11 mm R0,4 (H200 da T1D1)", marca: "China", fonte: "Pastilhas Para usinagem.txt" },
+  { id: "p-vbm", cat: "pastilha", cod: "VBM 160404 HMP", desc: "Externa para aço 35°", fonte: "Pastilhas Para usinagem.txt" },
+  { id: "p-tnmg", cat: "pastilha", cod: "TNMG 160404RN F50", desc: "Externa para aço, 3 pontas", fonte: "Pastilhas Para usinagem.txt" },
+  { id: "p-cxs", cat: "pastilha", cod: "CXS-06TE98-15-6230L 1025", desc: "Interno afiado", fonte: "TABELA DE CODIGOS FERRAMENTAS.txt" },
+  { id: "p-sm-bdi1", cat: "pastilha", cod: "30IXXX0287", desc: "Pastilha bedame interno (Seal Maker)", marca: "Seal Maker", pastilha: "30HXXX0390", fonte: "ferramantas seal maker.txt" },
+  { id: "p-sm-bdi2", cat: "pastilha", cod: "30IXXX0350", desc: "Pastilha bedame interno (Seal Maker)", marca: "Seal Maker", pastilha: "30HXXX0390", fonte: "ferramantas seal maker.txt" },
+  { id: "p-sm-o", cat: "pastilha", cod: "30IXXX0165", desc: "Pastilha O (Seal Maker)", marca: "Seal Maker", pastilha: "30HXXX0081", fonte: "ferramantas seal maker.txt" },
+  { id: "l-b3", cat: "lamina", cod: "DGL 31020 KLP", desc: "Bedame 3 mm", pos: "T6", pastilha: "DGTL 20 B 3D40", fonte: "Pastilhas Para usinagem.txt" },
+  { id: "l-b1", cat: "lamina", cod: "3002.1,0.13.L WPU7620", desc: "Bedame 1 mm", pos: "T8", pastilha: "3000-20X125L", fonte: "Pastilhas Para usinagem.txt" },
+  { id: "l-b2n", cat: "lamina", cod: "MGMN 200 G H01", desc: "Bedame 2 mm neutra", pos: "T6", pastilha: "MGEHL 2020-2", fonte: "Pastilhas Para usinagem.txt" },
+  { id: "l-b2r", cat: "lamina", cod: "MRM 200 M NC3120", desc: "Bedame 2 mm com raio", pos: "T6", pastilha: "MGEHL 2020-2", fonte: "Pastilhas Para usinagem.txt" },
+  { id: "l-bi08", cat: "lamina", cod: "MB-09R080-04-14L 1025", desc: "Bedame interno 0,8 mm", pos: "T2", pastilha: "MB-E16-34-09R", fonte: "Pastilhas Para usinagem.txt · TABELA DE CODIGOS FERRAMENTAS.txt" },
+  { id: "l-h1111", cat: "lamina", cod: "H1111", desc: "Lâmina de corte tipo faca (T5D5)", pos: "T5", fonte: "biblioteca do Simulador" },
+  { id: "l-h1002", cat: "lamina", cod: "H1002", desc: "Lâmina bedame 1 mm (T8D8) e 2 mm (T6D16)", pos: "T8 / T6", fonte: "biblioteca do Simulador" },
+  { id: "l-h1000", cat: "lamina", cod: "H1000", desc: "Lâmina 2 mm do canal martelo 65° (T6D6)", pos: "T6", fonte: "biblioteca do Simulador" }
+];
+const ITENS = [];
+let FERR_DATA = { torre: {}, itens: {} }, FERR_TAB = "torre";
+const FERR_JSON = "ferramentas.json";
+function ferrApply(){
+  const t = FERR_DATA.torre || {}, it = FERR_DATA.itens || {};
+  FERR.length = 0;
+  FERR_BASE.forEach(b => { const o = t[b.c]; if (o && o.apagada) return; FERR.push(o ? { ...b, ...o, c: b.c, _ed: "editada" } : { ...b }); });
+  Object.entries(t).forEach(([c, o]) => { if (o && !o.apagada && !FERR_BASE.some(b => b.c === c)) FERR.push({ tipo: "ext", nome: "", uso: "", mat: "", ...o, c, _ed: "nova" }); });
+  ITENS.length = 0;
+  ITENS_BASE.forEach(b => { const o = it[b.id]; if (o && o.apagada) return; ITENS.push(o ? { ...b, ...o, id: b.id, _ed: "editada" } : { ...b }); });
+  Object.entries(it).forEach(([id, o]) => { if (o && !o.apagada && !ITENS_BASE.some(b => b.id === id)) ITENS.push({ cat: "outro", cod: "", desc: "", ...o, id, _ed: "nova" }); });
+}
+async function ferrDataRead(){
+  const d = await ferrDir(false, true);
+  if (d) try { const f = await (await d.getFileHandle(FERR_JSON)).getFile(); return JSON.parse(await f.text()); } catch(e){}
+  try { const s = localStorage.getItem("ps_ferramentas"); if (s) return JSON.parse(s); } catch(e){}
+  return { torre: {}, itens: {} };
+}
+async function ferrDataSave(kind, key, rec){   // lê o arquivo mais novo antes de gravar (outro PC pode ter mudado outra ferramenta)
+  let cur = {}; try { cur = (await ferrDataRead()) || {}; } catch(e){}
+  cur.torre = cur.torre || {}; cur.itens = cur.itens || {};
+  if (rec === null) delete cur[kind][key]; else cur[kind][key] = rec;
+  cur.atualizado = new Date().toISOString();
+  const txt = JSON.stringify(cur, null, 1);
+  const d = await ferrDir(true, false); let onde;
+  if (d){ await writeFile(d, FERR_JSON, new TextEncoder().encode(txt)); onde = "W"; }
+  else { try { localStorage.setItem("ps_ferramentas", txt); } catch(e){ throw new Error("não consegui guardar neste computador"); } onde = "PC"; }
+  FERR_DATA = cur; ferrApply(); try { rerenderDrawing(); } catch(e){}
+  return onde;
+}
+async function ferrLoad(){ try { FERR_DATA = (await ferrDataRead()) || FERR_DATA; } catch(e){} ferrApply(); }
+function itemCard(it){
+  const q = [it.cod, it.desc, it.pos, it.marca, it.pastilha, it.obs, ITENS_TIPOS[it.cat]].filter(Boolean).join(" ").toLowerCase();
+  const info = [it.pos ? "posição " + esc(it.pos) : "", it.marca ? esc(it.marca) : "", it.pastilha ? (it.cat === "suporte" ? "pastilha/lâmina " : "suporte ") + esc(it.pastilha) : ""].filter(Boolean).join(" · ");
+  return `<div class="ferrc" data-q="${esc(q)}" data-t="${it.cat}" style="border:1px solid #d5d9de;border-radius:10px;background:#fff;display:flex;gap:12px;padding:10px;align-items:flex-start">
+    <div style="flex:1;min-width:0;font:12.5px Segoe UI,Arial;color:#333">
+      <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap"><b style="font:700 15px Consolas,monospace;color:#b2221f">${esc(it.cod)}</b><b>${esc(it.desc)}</b><span class="kindtag">${ITENS_TIPOS[it.cat] || esc(it.cat || "")}</span>${it._ed ? `<span class="kindtag" style="background:#fff4d6;color:#8a5a00">${it._ed === "nova" ? "cadastrada" : "editada"}</span>` : ""}</div>
+      ${info ? `<div style="color:#666;margin:2px 0">${info}</div>` : ""}${it.obs ? `<div style="color:#555"><b>Obs.:</b> ${esc(it.obs)}</div>` : ""}${it.fonte ? `<div style="color:#999;font-size:11px">Fonte: W: ${esc(it.fonte)}</div>` : ""}</div>
+    <button type="button" class="btn ferrEd" data-c="${esc(it.id)}" style="font-size:11px;padding:2px 8px;flex:none">&#x270F;&#xFE0F; Editar</button></div>`;
+}
+const TORRE_CAMPOS = [["c","Código (T = posição, D = corretor; ex.: T9D9)"],["alt","Código em outra posição (opcional, ex.: T2D42)"],["nome","Nome"],["tipo","Tipo","sel"],["sup","Suporte (código)"],["pastilha","Pastilha / lâmina (código)"],["raio","Raio da ponta (mm)","num"],["min","Ø mínimo de trabalho (interno)","num"],["mat","Materiais"],["uso","Uso (onde entra)","area"],["obs","Observações","area"]];
+const ITEM_CAMPOS = [["cod","Código"],["desc","Descrição"],["cat","Tipo","sel"],["pos","Posição na torre (ex.: T7)"],["marca","Marca / fornecedor"],["pastilha","Usa / encaixa em (suporte ou pastilha)"],["obs","Observações","area"]];
+function openFerr(sel, aba){
   let m = $("ferrModal"); if (m) m.remove();
-  m = document.createElement("div"); m.id = "ferrModal"; m.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:30px 12px";
-  m.innerHTML = `<div style="background:#f7f8fa;border-radius:12px;max-width:900px;width:100%;padding:16px 18px;box-shadow:0 10px 40px rgba(0,0,0,.35);color:#222">
-    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px"><b style="font:700 17px Segoe UI,Arial">🧰 Biblioteca de ferramentas</b><span style="color:#666;font-size:12px">${FERR.length} ferramentas · T = posição na torre · D = corretor</span><span style="flex:1"></span><button class="btn" type="button" id="ferrClose">Fechar</button></div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px"><input id="ferrQ" placeholder="buscar: T4D4, interno, PTFE, PSR 211…" style="flex:1;min-width:200px;padding:7px 9px;border:1px solid #ccd;border-radius:6px;font:14px Segoe UI,Arial">
-      <select id="ferrT" class="orient"><option value="">Todos os tipos</option>${Object.entries(FERR_TIPOS).map(([k, v]) => `<option value="${k}">${v}</option>`).join("")}</select></div>
-    <div id="ferrMsg" style="font:12.5px Segoe UI,Arial;color:#555;margin:-4px 0 8px">Para pôr a foto: clique no quadro da foto da ferramenta e cole (Ctrl+V), ou use 📷 Foto para escolher o arquivo.</div>
-    <div id="ferrList" style="display:grid;gap:8px">${FERR.map(ferrCard).join("")}</div></div>`;
+  FERR_TAB = aba || (sel ? "torre" : FERR_TAB || "torre");
+  m = document.createElement("div"); m.id = "ferrModal"; m.style.cssText = "position:fixed;inset:0;background:#f7f8fa;z-index:9999;overflow:auto;color:#222";
+  m.innerHTML = `<div style="position:sticky;top:0;z-index:2;background:#fff;border-bottom:1px solid #d5d9de;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:10px 16px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <b style="font:700 19px Segoe UI,Arial;margin-right:6px">🧰 Ferramentas</b>
+      <button class="btn ferrTab" type="button" data-a="torre">Torre CNC (T/D)</button><button class="btn ferrTab" type="button" data-a="itens">Suportes, pastilhas e lâminas</button>
+      <span style="flex:1"></span><button class="btn" type="button" id="ferrNova">&#x2795; Cadastrar</button><button class="btn" type="button" id="ferrClose">&#x2190; Voltar ao Simulador</button></div>
+    <div style="max-width:1000px;margin:0 auto;padding:12px 16px 40px">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px"><input id="ferrQ" placeholder="buscar: T4D4, interno, PTFE, VCGT, bedame…" style="flex:1;min-width:200px;padding:7px 9px;border:1px solid #ccd;border-radius:6px;font:14px Segoe UI,Arial"><select id="ferrT" class="orient"></select></div>
+      <div id="ferrMsg" style="font:12.5px Segoe UI,Arial;color:#555;margin:-4px 0 8px"></div>
+      <div id="ferrForm"></div><div id="ferrList" style="display:grid;gap:8px"></div></div>`;
   document.body.appendChild(m);
-  m.onclick = e => { if (e.target === m) m.remove(); };
-  $("ferrClose").onclick = () => m.remove();
+  const msg = t => { const e = $("ferrMsg"); if (e) e.textContent = t; };
+  const msgPad = () => msg(FERR_TAB === "torre" ? `${FERR.length} ferramentas · T = posição na torre · D = corretor. Foto: clique no quadro e cole (Ctrl+V) ou use 📷 Foto. Editar aqui não muda os programas.` : `${ITENS.length} itens (códigos tirados dos .txt de ferramentas do W:). ✏️ Editar para mudar, ➕ Cadastrar para incluir.`);
+  const close = () => { m.remove(); document.removeEventListener("paste", onPaste); document.removeEventListener("keydown", onKey); };
+  const onKey = e => { if (e.key === "Escape" && !$("ferrForm").innerHTML) close(); };
+  document.addEventListener("keydown", onKey);
+  $("ferrClose").onclick = close;
   const filt = () => { const q = $("ferrQ").value.trim().toLowerCase(), t = $("ferrT").value;
     m.querySelectorAll(".ferrc").forEach(el => el.style.display = (!t || el.dataset.t === t) && (!q || q.split(/\s+/).every(w => el.dataset.q.includes(w))) ? "flex" : "none"); };
   $("ferrQ").oninput = filt; $("ferrT").onchange = filt;
-  // fotos: carrega as do W: e liga o colar / escolher arquivo
   let fsel = null;
   const setImg = (code, url) => m.querySelectorAll(`.ferrFoto[data-c="${code}"]`).forEach(el => el.innerHTML = `<img src="${url}" style="max-width:100%;max-height:100%">`);
-  FERR.forEach(f => ferrFotoGet(f.c).then(u => { if (u) setImg(f.c, u); }).catch(() => {}));
-  const msg = t => { const e = $("ferrMsg"); if (e) e.textContent = t; };
   const mark = c => { fsel = c; m.querySelectorAll(".ferrFoto").forEach(el => el.style.borderColor = el.dataset.c === c ? "#b2221f" : "transparent"); msg(`${c}: cole a foto agora (Ctrl+V) ou clique em 📷 Foto para escolher o arquivo.`); };
-  const save = async (c, blob) => { msg(`Salvando a foto da ${c}…`);
+  const saveFoto = async (c, blob) => { msg(`Salvando a foto da ${c}…`);
     try { const onde = await ferrFotoSave(c, blob); setImg(c, FERR_URL[c]); ferrRaster(c, FERR_URL[c]).then(() => { const ff = ferrInfo(c); if (ff && ff.alt) FERR_PNG[ff.alt] = FERR_PNG[c]; });
       msg(onde === "W" ? `✔ Foto da ${c} salva em PROJETOS\\${FERR_DIR} — aparece em todos os computadores.` : `✔ Foto da ${c} guardada só neste computador (sem acesso à pasta PROJETOS — abra pelo Abrir Simulador para salvar no W:).`); }
     catch(e){ msg("Não salvei a foto: " + e.message); } };
-  m.querySelectorAll(".ferrFoto").forEach(el => el.onclick = () => mark(el.dataset.c));
-  m.querySelectorAll(".ferrPick").forEach(bt => bt.onclick = () => { mark(bt.dataset.c); const i = document.createElement("input"); i.type = "file"; i.accept = "image/*"; i.onchange = () => { if (i.files[0]) save(bt.dataset.c, i.files[0]); }; i.click(); });
   const onPaste = e => {
     if (!document.body.contains(m)){ document.removeEventListener("paste", onPaste); return; }
+    if (FERR_TAB !== "torre" || $("ferrForm").innerHTML) return;
     const it = [...(e.clipboardData ? e.clipboardData.items : [])].find(x => x.type && x.type.startsWith("image/"));
     if (!it) return;
     e.preventDefault();
     if (!fsel){ msg("Clique primeiro no quadro da foto da ferramenta e depois cole (Ctrl+V)."); return; }
-    save(fsel, it.getAsFile());
+    saveFoto(fsel, it.getAsFile());
   };
   document.addEventListener("paste", onPaste);
-  if (sel){ $("ferrQ").value = sel.toLowerCase(); filt(); }
+  const form = (key) => {   // key = código/id para editar; null = cadastrar
+    const torre = FERR_TAB === "torre", campos = torre ? TORRE_CAMPOS : ITEM_CAMPOS, tipos = torre ? FERR_TIPOS : ITENS_TIPOS;
+    const rec = key == null ? null : torre ? FERR.find(f => f.c === key) : ITENS.find(i => i.id === key);
+    const isBase = rec && (torre ? FERR_BASE.some(b => b.c === key) : ITENS_BASE.some(b => b.id === key));
+    const val = k => rec && rec[k] != null ? String(rec[k]) : "";
+    const inp = ([k, lab, kind]) => {
+      const st = "width:100%;box-sizing:border-box;padding:6px 8px;border:1px solid #ccd;border-radius:6px;font:13px Segoe UI,Arial";
+      const ro = torre && k === "c" && rec ? " readonly" : "";
+      const ctl = kind === "sel" ? `<select id="ff_${k}" style="${st}">${Object.entries(tipos).map(([v, t]) => `<option value="${v}"${val(k) === v ? " selected" : ""}>${t}</option>`).join("")}</select>`
+        : kind === "area" ? `<textarea id="ff_${k}" rows="2" style="${st};resize:vertical">${esc(val(k))}</textarea>`
+        : `<input id="ff_${k}" value="${esc(kind === "num" ? val(k).replace(".", ",") : val(k))}"${ro} style="${st}${ro ? ";background:#eef0f3" : ""}">`;
+      return `<label style="display:block;font:12px Segoe UI,Arial;color:#555;${kind === "area" ? "grid-column:1/-1" : ""}">${lab}${ctl}</label>`;
+    };
+    $("ferrForm").innerHTML = `<div style="border:2px solid #b2221f;border-radius:10px;background:#fff;padding:12px;margin-bottom:12px">
+      <b style="font:700 15px Segoe UI,Arial">${rec ? "Editar " + esc(torre ? rec.c : rec.cod) : torre ? "Cadastrar ferramenta na torre" : "Cadastrar suporte / pastilha / lâmina"}</b>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:8px;margin:10px 0">${campos.map(inp).join("")}</div>
+      <div id="ffMsg" style="color:#b2221f;font:12.5px Segoe UI,Arial;min-height:16px"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" type="button" id="ffSave">&#x1F4BE; Salvar</button><button class="btn" type="button" id="ffCancel">Cancelar</button><span style="flex:1"></span>
+        ${rec && isBase && rec._ed ? `<button class="btn" type="button" id="ffReset">&#x21A9; Voltar ao original</button>` : ""}
+        ${rec && (!isBase || !torre) ? `<button class="btn" type="button" id="ffDel" style="color:#b2221f">&#x1F5D1; Apagar</button>` : ""}</div></div>`;
+    $("ferrForm").scrollIntoView({ block: "start" });
+    const done = (onde, txt) => { $("ferrForm").innerHTML = ""; render(); msg(`✔ ${txt} ` + (onde === "W" ? `Salvo em PROJETOS\\${FERR_DIR}\\${FERR_JSON} — vale em todos os computadores.` : "Guardado só neste computador (sem acesso à pasta PROJETOS — abra pelo Abrir Simulador para salvar no W:).")); };
+    const fail = e => { $("ffMsg").textContent = "Não salvei: " + (e && e.message || e); };
+    $("ffCancel").onclick = () => { $("ferrForm").innerHTML = ""; msgPad(); };
+    if ($("ffReset")) $("ffReset").onclick = () => ferrDataSave(torre ? "torre" : "itens", key, null).then(o => done(o, "Voltou ao original.")).catch(fail);
+    if ($("ffDel")) $("ffDel").onclick = () => { if (!confirm("Apagar " + (torre ? rec.c : rec.cod) + " da lista?")) return;
+      ferrDataSave(torre ? "torre" : "itens", key, isBase ? { apagada: true } : null).then(o => done(o, "Apagado.")).catch(fail); };
+    $("ffSave").onclick = () => {
+      const o = {};
+      for (const [k, , kind] of campos){ let v = $("ff_" + k).value.trim();
+        if (kind === "num"){ if (v === ""){ o[k] = ""; continue; } const n = Number(v.replace(",", ".")); if (!isFinite(n) || n < 0) return fail("número inválido em \"" + campos.find(c => c[0] === k)[1] + "\""); o[k] = n; }
+        else o[k] = v; }
+      if (torre){
+        o.c = o.c.toUpperCase().replace(/\s+/g, ""); o.alt = o.alt.toUpperCase().replace(/\s+/g, "");
+        if (!/^T\d+D\d+$/.test(o.c)) return fail("o código tem que ser T e D, ex.: T9D9");
+        if (o.alt && !/^T\d+D\d+$/.test(o.alt)) return fail("o código em outra posição tem que ser T e D, ex.: T2D42");
+        if (!rec && FERR_BASE.concat(FERR).some(f => f.c === o.c && !(FERR_DATA.torre[o.c] || {}).apagada)) return fail(o.c + " já existe — use ✏️ Editar nela");
+        if (!o.nome) return fail("preencha o nome");
+        const k = o.c; delete o.c;
+        return ferrDataSave("torre", k, o).then(on => done(on, (rec ? "Alterada: " : "Cadastrada: ") + k + ".")).catch(fail);
+      }
+      if (!o.cod) return fail("preencha o código");
+      if (!o.desc) return fail("preencha a descrição");
+      const id = key || "n-" + Date.now().toString(36);
+      return ferrDataSave("itens", id, o).then(on => done(on, (rec ? "Alterado: " : "Cadastrado: ") + o.cod + ".")).catch(fail);
+    };
+    const f0 = $("ff_" + (rec ? campos[1][0] : campos[0][0])); if (f0) f0.focus();
+  };
+  const render = () => {
+    const torre = FERR_TAB === "torre", tipos = torre ? FERR_TIPOS : ITENS_TIPOS;
+    m.querySelectorAll(".ferrTab").forEach(b => { const on = b.dataset.a === FERR_TAB; b.style.background = on ? "#b2221f" : ""; b.style.color = on ? "#fff" : ""; b.style.borderColor = on ? "#b2221f" : ""; });
+    const tv = $("ferrT").value; $("ferrT").innerHTML = `<option value="">Todos os tipos</option>` + Object.entries(tipos).map(([k, v]) => `<option value="${k}">${v}</option>`).join(""); if (tipos[tv]) $("ferrT").value = tv;
+    $("ferrList").innerHTML = torre ? FERR.map(ferrCard).join("") : ITENS.map(itemCard).join("");
+    m.querySelectorAll(".ferrEd").forEach(b => b.onclick = () => form(b.dataset.c));
+    if (torre){
+      FERR.forEach(f => ferrFotoGet(f.c).then(u => { if (u) setImg(f.c, u); }).catch(() => {}));
+      m.querySelectorAll(".ferrFoto").forEach(el => el.onclick = () => mark(el.dataset.c));
+      m.querySelectorAll(".ferrPick").forEach(bt => bt.onclick = () => { mark(bt.dataset.c); const i = document.createElement("input"); i.type = "file"; i.accept = "image/*"; i.onchange = () => { if (i.files[0]) saveFoto(bt.dataset.c, i.files[0]); }; i.click(); });
+    }
+    filt(); msgPad();
+  };
+  m.querySelectorAll(".ferrTab").forEach(b => b.onclick = () => { FERR_TAB = b.dataset.a; fsel = null; $("ferrForm").innerHTML = ""; render(); });
+  $("ferrNova").onclick = () => form(null);
+  if (sel) $("ferrQ").value = sel.toLowerCase();
+  render();
+  ferrLoad().then(() => { if (document.body.contains(m) && !$("ferrForm").innerHTML) render(); }).catch(() => {});   // pega o que outro PC mudou
   $("ferrQ").focus();
 }
-{ const hb = $("btnHist"); if (hb){ const b = document.createElement("button"); b.className = "btn"; b.id = "btnFerr"; b.type = "button"; b.title = "Biblioteca de ferramentas (posição, corretor, uso, materiais)"; b.innerHTML = "&#x1F9F0; Ferramentas"; b.onclick = () => openFerr(); hb.after(b); } }
+{ const hb = $("btnHist"); if (hb){ const b = document.createElement("button"); b.className = "btn"; b.id = "btnFerr"; b.type = "button"; b.title = "Ferramentas: torre CNC, suportes, pastilhas e lâminas (cadastrar e editar)"; b.innerHTML = "&#x1F9F0; Ferramentas"; b.onclick = () => openFerr(); hb.after(b); } }
 document.addEventListener("DOMContentLoaded", () => {   // a seção do histórico fica depois deste script
   $("histRefresh").onclick = () => histLoadInline(true);
   $("histQi").oninput = () => histRenderInline(HIST_ROWS);

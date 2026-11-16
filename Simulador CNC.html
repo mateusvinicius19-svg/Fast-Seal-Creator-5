@@ -1711,7 +1711,17 @@ function resetTolDefaults(){
   document.querySelectorAll("#genBox [data-k]").forEach(el => { if (TOL_KEYS.includes(el.dataset.k)) el.value = el.tagName === "SELECT" ? (el.querySelector('option[value=""]') ? "" : el.options[0].value) : ""; });
   try { syncTolRows(); } catch(e){}
 }
+// v5.61.1 (usuário 16/11/2026, PSG 101 em PEAD saía "PTFE+BR"): o campo MATERIAL do cabeçalho do desenho vale mais que o material
+// do perfil e ficava guardado de uma peça para outra. Agora ele é apagado ao trocar o material do perfil ou o perfil — o desenho
+// volta a seguir o material escolhido; digitado depois disso, vale só para a peça.
+const MAT_KEYS = ["matA", "mat", "matM", "matF"];
+function dwgMatClear(){
+  const a = document.querySelector("#dwgFields [data-d=mat]"), b = document.querySelector("#pvSide [data-dd=mat]");
+  if (a) a.value = ""; if (b) b.value = "";
+  try { saveForm(); } catch(e){}
+}
 function buildForm(){
+  dwgMatClear();   // v5.61.1: perfil novo → material do desenho volta a seguir o perfil
   state.alterNum = "";   // trocou de perfil: sai do modo "Alterar programa"
   state.tolVals = null;  // v5.20.0 (usuário): item novo → tolerâncias do desenho voltam ao padrão
   const g = GEN[$("genType").value];
@@ -2969,6 +2979,7 @@ document.addEventListener("keydown", e => {
   el.dispatchEvent(new Event("change", { bubbles: true }));
   const nx = list[i + 1]; if (nx){ nx.focus(); if (nx.select && nx.tagName === "INPUT") nx.select(); }
 });
+$("genBox").addEventListener("input", e => { if (e.target.matches("[data-k]") && MAT_KEYS.includes(e.target.dataset.k)){ dwgMatClear(); setTimeout(() => { try { rerenderDrawing(); } catch(_){} }, 300); } });   // v5.61.1
 $("genBox").addEventListener("input", e => { if (e.target.matches("[data-k]")) { const tol = TOL_KEYS.includes(e.target.dataset.k); clearTimeout(genTimer); genTimer = setTimeout(() => generate(!tol), 250); } });
 
 /* ----------------------- copiar / salvar ------------------------ */
@@ -5413,7 +5424,7 @@ function progTolApply(q, it){
 }
 // material do desenho do programa (usuário 16/11/2026): pergunta junto com as tolerâncias; sugere o ;MATERIAL do programa
 function progMatGuess(){ try { const m = /;MATERIAL:\s*(?:USER DEFINED\s+)?(.+?)(?:\s+[\d.]+\/[\d.]+.*|\s+-\s+.*)?$/im.exec(currentText().split("\n").slice(0, 12).join("\n")); return m && m[1].trim() ? m[1].trim().toUpperCase() : ""; } catch(e){ return ""; } }
-function progMatSet(mat){ const a = document.querySelector("#dwgFields [data-d=mat]"); if (a) a.value = mat; const b = document.querySelector("#pvSide [data-dd=mat]"); if (b) b.value = mat; }
+function progMatSet(mat){ dwgMatClear(); }   // v5.61.1: o material vai no p.mat do desenho (não fica preso no cabeçalho para as próximas peças)
 function progTolAsk(q, rank, done, std){
   const old = $("ptModal"); if (old) old.remove();
   const m = document.createElement("div"); m.id = "ptModal";
@@ -5679,6 +5690,10 @@ sizeCanvas(); draw();
     if (k === "tipoP" && state.tolVals) state.tolVals.tipoP = v; }
   for (const [k, v] of Object.entries(s.dwg || {})){ const el = document.querySelector(`#dwgFields [data-d="${k}"]`); if (el) el.value = v; }
   syncTolRows(); generate(); try { updateProfBtn(); } catch(e){}
+})();
+(function matV5611(){   // v5.61.1: uma vez por computador — limpa o material que ficou preso no cabeçalho (ex.: "PTFE+BR" em todos os desenhos)
+  try { if (localStorage.getItem("ps_mat5611")) return; localStorage.setItem("ps_mat5611", "1"); } catch(e){ return; }
+  dwgMatClear(); try { rerenderDrawing(); } catch(e){}
 })();
 (function carimboV555(){   // uma vez por computador: o "MATEUS C." que era padrão do DESENHADO passa para o APROVADO
   try { if (localStorage.getItem("ps_carimbo555")) return; localStorage.setItem("ps_carimbo555", "1"); } catch(e){ return; }

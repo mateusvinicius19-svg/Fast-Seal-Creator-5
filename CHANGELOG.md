@@ -6,6 +6,11 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.60.1 — PSG 101: chanfro sugerido com 15 % da secção (16/11/2026)
+- Usuário achou grande o 0,8 do Ø100 x Ø108 x 9,7 e escolheu 0,6: a sugestão passa a ser o menor entre 10 % da altura e
+  **15 %** da secção (era 20 %), de 0,2 a no máximo 1 mm. Ex.: 100x108x9,7 → 0,6; 50x55x9,7 → 0,4; 60x70x15 → 0,8; 80x84x9,7 → 0,3.
+- Só o PSG 101 muda; os outros 30 perfis geram o mesmo programa.
+
 ## 5.60.0 — PSG 101: chanfro sugerido conforme a secção e a altura (16/11/2026)
 - Pedido do usuário: algumas guias saíam com chanfros grandes demais. A sugestão do PSG 101 (chanfro externo e interno, quando o
   campo fica vazio) agora é o MENOR entre 10 % da altura e 20 % da secção, de 0,2 a no máximo 1 mm, arredondada em 0,1.

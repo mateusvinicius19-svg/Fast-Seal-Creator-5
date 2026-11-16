@@ -6,6 +6,12 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.52.2 — PSR 212: chanfro maior no desbaste da T2D2 (16/11/2026)
+- Pedido do usuário (só PSR 212): a T2D2 continua o 45° do chanfro da aresta do degrau até 0,2 mm (no raio) acima do Ø do
+  degrau (Ø109,2 com o degrau padrão 108,8) e segue reto até o 45° de trás. Tira o material do degrau antes da T6D6.
+- Na peça o chanfro continua 0,5: a T6D6 corta a parede e o Ø do degrau depois. Desenho não muda.
+- Os outros perfis geram o mesmo programa de antes (conferido nos 31).
+
 ## 5.52.1 — Ferramentas: o D (corretor) é o código principal (16/11/2026)
 - Usuário: o D é fixo e identifica a ferramenta; o T muda conforme a máquina. Na aba Torre CNC (agora "corretores D") cada
   ferramenta aparece com o **D em destaque** (T2D13 menor ao lado), a linha diz "Corretor D13 (fixo) · posição T2 (muda

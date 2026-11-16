@@ -6,6 +6,11 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.57.1 — PSE 108: peças por ciclo voltam a valer depois de reabrir (16/11/2026)
+- Ao reabrir o Simulador, o "Tipo da peça" não voltava (ficava "Automático"), então o PSE 108 gerava só 1 peça por ciclo
+  mesmo com outro número no campo. Agora o tipo volta junto com as medidas (e o botão do perfil mostra PSE 108).
+  "Alterar programa → Abrir configurações" também atualiza o botão do perfil. Nenhum programa dos 31 perfis mudou.
+
 ## 5.57.0 — Alterar programa: abrir as configurações da peça salva (16/11/2026)
 - Pedido do usuário: no ✏️ Alterar programa, botão **📂 Abrir configurações da peça**. Digita o número e o Simulador põe de
   volta no formulário as medidas e opções com que o programa foi salvo (mesmo perfil, material, bucha, peças por ciclo,

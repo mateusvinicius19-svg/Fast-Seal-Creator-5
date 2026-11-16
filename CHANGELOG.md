@@ -6,6 +6,15 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.49.0 — PSR 212: perfil novo (PSR 211 com degrau no externo) (16/11/2026)
+- Novo perfil **PSR 212** no menu e na escolha pela imagem (Raspadores), com a foto do catálogo enviada pelo usuário.
+- Geometria = PSR 211 (frente do PSH 105 + raspador a 65°) com um **degrau no externo, atrás do corpo**: Ø maior na frente (lado do canal), Ø do degrau menor atrás, junto do raspador.
+- Campos novos: **Ø do degrau** (vazio = Ø ext. − 0,6 × secção) e **comprimento do degrau** em Z a partir da trás do corpo (vazio = 0,3 × corpo). Chanfro do calcanhar nas duas arestas do degrau.
+- Programa: o externo da T2D2 fica igual ao do PSR 211 (ela não corta parede virada para trás). O degrau (chanfro da aresta, parede, Ø do degrau e chanfro de trás) é feito pela **T6D6** antes do raspador a 65°.
+- Desenho: cota do Ø do degrau (DIÂMETROS), comprimento e profundidade do degrau e chanfro da aresta (SECÇÃO), degrau na nota do raspador.
+- Os outros perfis geram o mesmo programa de antes (conferido em todos).
+- Valores padrão do degrau são estimados pela foto: conferir com um programa/desenho real de PSR 212.
+
 ## 5.48.2 — Aviso de ATENÇÃO aparece na faixa do topo (14/11/2026)
 - O usuário não via o aviso (ficava só no texto pequeno embaixo do formulário). Agora todo aviso de ATENÇÃO de qualquer
   perfil abre a faixa no topo, em laranja (erros continuam em vermelho), com "AVISE O RESPONSÁVEL antes de usar este

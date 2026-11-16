@@ -6,6 +6,18 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.61.0 — 📐 Desenho do programa (testado pelo usuário na cópia de teste) (16/11/2026)
+- Botão "📐 Desenho do programa": digita o número → procura no Programas_CNC (como o ✏️ Alterar programa) → abre no
+  simulador → folha de desenho com cotas. Em branco = programa aberto na tela. Para peças sem perfil padrão.
+- Peça = material que sobra da 1ª volta do programa (externa tira de fora, interna de dentro, de face pela frente, bedame
+  solta a peça). Desenho virado como na usinagem (frente à direita).
+- Janela "Desenho do programa": pede o MATERIAL (sugere o ;MATERIAL do programa) e as TOLERÂNCIAS do perfil padrão mais
+  parecido (compara o formato; dá para trocar ou "sem tolerância"). Se for PSH 129, oferece o desenho padrão do PSH 129 com as
+  medidas tiradas do programa (mostra a diferença, ex.: chanfro a mais).
+- Cotas: Ø ext./int. só no corte A-A com tolerância; cota da secção com tolerância; detalhes do lado de fora cotados em cima e
+  os de dentro embaixo; canal cotado pela profundidade.
+- Não muda nada dos perfis padrão nem do desenho do 3D (31 programas iguais; teste do 3D ok).
+
 ## 5.60.1 — PSG 101: chanfro sugerido com 15 % da secção (16/11/2026)
 - Usuário achou grande o 0,8 do Ø100 x Ø108 x 9,7 e escolheu 0,6: a sugestão passa a ser o menor entre 10 % da altura e
   **15 %** da secção (era 20 %), de 0,2 a no máximo 1 mm. Ex.: 100x108x9,7 → 0,6; 50x55x9,7 → 0,4; 60x70x15 → 0,8; 80x84x9,7 → 0,3.

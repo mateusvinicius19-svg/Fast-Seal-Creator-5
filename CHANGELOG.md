@@ -6,6 +6,11 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.61.2 — Desenho do programa: Programa Nº do programa aberto (16/11/2026)
+- 📐 Desenho do programa saía com o Programa Nº (e o Cód. interno) da peça anterior (ex.: programa 726 com "27077"). Agora o
+  número vem do programa aberto (nome do arquivo) e o Cód. interno da peça anterior é apagado; a folha da tela e a da
+  impressão são atualizadas juntas. Programas iguais (31 perfis).
+
 ## 5.61.1 — Material do desenho segue o perfil (PSG 101 em PEAD saía PTFE+BR) (16/11/2026)
 - O campo MATERIAL do cabeçalho do desenho vale mais que o material do perfil e ficava guardado de uma peça para outra (até
   depois de fechar o Simulador): um "PTFE+BR" digitado uma vez ia em todos os desenhos. Agora é apagado ao trocar o material do

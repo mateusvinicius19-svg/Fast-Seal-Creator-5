@@ -5494,7 +5494,11 @@ function progDrawing(){
     const rank = progTolRank(pm, L); let std = null;
     if (rank[0] && rank[0].t === "lip"){ const fit = progFitLip(poly, L, nome);
       if (fit && fit.dev <= 0.3) std = { t: "lip", name: rank[0].name, p: fit.p, dev: fit.dev, txt: `Ø${fv3(fit.p.dint)} · secção ${fv3(fit.p.sec)} · altura ${fv3(fit.p.h)} · rebaixo ${fv3(fit.p.h2)} x ${fv3(fit.p.b)} · flanco ${fmtN(fit.p.af - 90, 1)}° · base ${fmtN(fit.p.ab, 1)}° · chanfro ${fv3(fit.p.ch)}` }; }
-    progTolAsk(p, rank, sp => { if (sp) state.genParams = sp; openPreview(); }, std);
+    progTolAsk(p, rank, sp => { if (sp) state.genParams = sp;
+      // v5.61.2 (usuário 16/11/2026): Programa Nº = o do programa aberto (ficava o da peça anterior); Cód. interno da peça anterior sai
+      const nm = String(state.fileName || "").match(/^0*(\d+[A-Z]?)/i), set = (k, v) => { const a = document.querySelector(`#dwgFields [data-d="${k}"]`), b = document.querySelector(`#pvSide [data-dd="${k}"]`); if (a) a.value = v; if (b) b.value = v; };
+      set("prog", nm ? nm[1].toUpperCase() : ""); set("cod", ""); try { saveForm(); } catch(e){}
+      openPreview(); try { rerenderDrawing(); } catch(e){} }, std);
     $("genMsg").textContent = `Desenho do programa: ${nome}${pecas > 1 ? ` · ${pecas} peças no ciclo (desenho da 1ª)` : ""}. Programa sem G41/G42 muda a medida pelo raio da ponta — confira as cotas.`; $("genMsg").style.color = "";
   } catch(e){ errShow("Desenho do programa", e); }
 }

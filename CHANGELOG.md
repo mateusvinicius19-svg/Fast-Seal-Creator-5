@@ -6,6 +6,9 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.57.3 — PSE 125 (DPR): imagem certa na janela "Escolha o perfil" (16/11/2026)
+- Troca a miniatura do PSE 125 (DPR) pela imagem enviada pelo usuário (lábio por fora, O-ring por dentro). Programas iguais.
+
 ## 5.57.2 — PSR 211/212: rampa interna de trás menos inclinada com as alturas próximas (16/11/2026)
 - Com altura total perto da altura do corpo (raspador baixo), a rampa interna de trás ficava curta (1,24 × diferença) e
   muito inclinada (41° a 84° com o eixo). Agora ela tem no mínimo o comprimento para 20° com o eixo (o ângulo dos padrões)

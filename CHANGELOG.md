@@ -6,6 +6,13 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.59.0 — Celeron: corte com metade da rotação (16/11/2026)
+- Pedido do usuário: no Celeron o corte gira na metade da rotação.
+- Logo depois de chamar a ferramenta de corte (T6D16) entra `G97 S<metade> M3 ;(CELERON: METADE DA ROTACAO NO CORTE)`;
+  antes do `G92` volta a rotação do início (`;(ROTACAO NORMAL)`), porque o RPT volta para o N10, que fica depois do G97 do começo.
+- Vale para todo programa em Celeron (arruelas, PSA 108/109, PSG 101/103/104, PSH 110 base/tampa). Os outros materiais não mudam
+  (31 perfis com os valores padrão: programas iguais aos da 5.58.1).
+
 ## 5.58.1 — Desenho do programa sai do Simulador até o teste (16/11/2026)
 - O usuário quer testar antes: o botão "📐 Desenho do programa" (5.58.0) foi retirado da versão normal. O teste é numa cópia
   separada ("Simulador CNC - TESTE desenho do programa.html"). O Simulador fica igual ao 5.57.3.

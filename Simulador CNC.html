@@ -1847,6 +1847,20 @@ function generateCore(fromInput){
       return /^\s*G92\s*Z-?[\d.]+/i.test(l) ? l.replace(/(G92\s*Z)(-?[\d.]+)/i, (m, a, v) => a + (Number(v) + 1).toFixed((v.split(".")[1] || "").length || 1)) : l; });
     p.cutD16 = true;
   } else if (p.bedD16){ p.bed = p.bedOrig; delete p.bedD16; }
+  // v5.59.0 (usuário 16/11/2026): Celeron corta com METADE da rotação → G97 S/2 logo depois de chamar a ferramenta de corte e
+  // volta à rotação do início antes do G92 (o RPT volta para o N10, que fica depois do G97 do começo).
+  let celRpm = null;
+  if (p.matA === "CELERON" || /CELERON/i.test(String(p.mat || ""))){
+    const iS = lines.findIndex(l => /^\s*G97\s*S\s*\d/i.test(String(l))), iT = lines.findIndex(l => /^\s*T(6D16|8D8|5D5)\b/.test(String(l)));
+    const S = iS >= 0 ? Number(String(lines[iS]).match(/S\s*([\d.]+)/i)[1]) : 0;
+    if (S > 0 && iT > iS){
+      const half = Math.round(S / 2), sHalf = String(lines[iS]).replace(/S\s*[\d.]+/i, m => m.replace(/[\d.]+/, String(half)));
+      const iE = lines.findIndex((l, i) => i > iT && /^\s*G92\s*Z/i.test(String(l)));
+      if (iE > 0) lines.splice(iE, 0, String(lines[iS]).trim() + " ;(ROTACAO NORMAL)");
+      lines.splice(iT + 1, 0, sHalf.trim() + " ;(CELERON: METADE DA ROTACAO NO CORTE)");
+      celRpm = [S, half];
+    }
+  }
   $("genMsg").textContent = (g.check(p) ? g.check(p) + " AVISE O RESPONSÁVEL antes de usar este programa." : `${g.name}: ${lines.length} linhas geradas.`) + (alojTxt ? " · " + alojTxt : "");   // v5.48.1 (usuário): avisos pedem para avisar o responsável
   $("genMsg").style.color = g.check(p) ? "#a2231d" : ""; state.lastWarn = g.check(p) || "";   // v5.48.2: vai para a faixa do topo
   state.genType = type; state.genParams = p; saveForm();
@@ -1864,7 +1878,8 @@ function generateCore(fromInput){
   // 🧰 T8D8 → T6D16 quando a secção passa de 14,8 (feito acima, antes de montar o programa)
   if (isPSG(type) && p.corte !== "N") $("genMsg").textContent += (psgAcr(p) > 0 ? ` · ${(ARR_MAT[p.matA] || [p.matA])[0].split(" ")[0]}: usinado ${fmtN(psgAcr(p), 2)} mm maior nos diâmetros (Ø${fmtN(p.dint + psgAcr(p), 3)} / Ø${fmtN(p.dext + psgAcr(p), 3)}) por causa da serra de ${fmtN(PSG_SERRA, 1)}; desenho com a medida nominal` : "") + ` · corte da guia a ${fmtN(psgAng(p), 0)}° no acabamento${psgAcr(p) > 0 ? "" : " (sem perda)"}.`;
   if (d16 && celD16 && secCorte <= 14.8 + 1e-9){ $("genMsg").textContent += ` · Celeron: corte com a T6D16 — bedame 2 nas peças, G92 +1 mm, desbaste e acabamento terminam no mesmo Z (sem passar para a peça seguinte).`; }
-  else if (d16){ $("genMsg").textContent += ` · Secção ${fmtN(secCorte, 2)} > 14,8: corte com a T6D16 (bedame 2 mm) no lugar da T8D8 — G92 +1 mm${p.bedD16 ? ", bedame 2 nas peças" : ""}.`; }
+  if (celRpm) $("genMsg").textContent += ` · Celeron: corte com metade da rotação (S${celRpm[1]}; o resto em S${celRpm[0]}).`;
+  if (d16 && !(celD16 && secCorte <= 14.8 + 1e-9)){ $("genMsg").textContent += ` · Secção ${fmtN(secCorte, 2)} > 14,8: corte com a T6D16 (bedame 2 mm) no lugar da T8D8 — G92 +1 mm${p.bedD16 ? ", bedame 2 nas peças" : ""}.`; }
 }
 // bucha digitada à mão só vira exceção ("NNNNNN BIxBO") quando é diferente da que o Simulador escolheria sozinho
 function autoBucha(p){

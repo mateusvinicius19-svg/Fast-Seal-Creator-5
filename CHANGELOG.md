@@ -5,6 +5,15 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - CORREÇÃO (5.0.x): conserto de erro, ajuste de regra pequena.
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
+## 5.50.2 — Campo "vazio = …" nunca mais trava o programa + teste de todos os perfis (16/11/2026)
+- Pedido do usuário: era o 2º perfil novo que não gerava por pedir "Preencha" num campo opcional. Agora todo campo cujo
+  texto diz "vazio = …" é opcional automaticamente (não depende mais de uma lista à parte que dava para esquecer).
+- Faltando um campo obrigatório, a faixa laranja do topo diz o nome do campo e que o programa NÃO foi gerado (antes
+  aparecia só "Preencha: ds" em letra pequena e o código do programa anterior continuava na tela).
+- Novo `testes/testar-perfis.js` (para o Claude rodar antes de todo merge): gera programa e desenho de todos os perfis e
+  confere que todo perfil aparece na janela "Escolha o perfil". Teria pegado os dois erros do PSR 212.
+- Programas não mudam (conferido nos 31 perfis).
+
 ## 5.50.1 — PSR 212 gera o programa com o degrau vazio (16/11/2026)
 - O PSR 212 não gerava o programa: com o Ø e o comprimento do degrau vazios (que deveriam usar o padrão) aparecia
   "Preencha: ds" e o código na tela continuava o do programa anterior. Os dois campos agora são opcionais, como diz o

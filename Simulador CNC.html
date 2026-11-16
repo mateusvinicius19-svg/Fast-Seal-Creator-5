@@ -1750,7 +1750,7 @@ function readParams(){
   }
   return p;
 }
-const OPT_KEYS = new Set(["r1CP","r1Ap","r1ZT","r1St","r1LipE","r1E0","r1BR","r1BB","r1C45","r1CB","r1CI","pZ","pM","pL","chEF","chIF","rF","pF","chR","angIT","rpt","S","rpm","ai","ae","fi","fe","chc","bi","bo","tInt","xLe","xHe","xLi","xHi","lLab","cLab","pCan","rCan","wCan","rec","vD","vL","oc","oID","tL","lipF","rampa","chE","hb","ds","hs"]);
+const OPT_KEYS = new Set(["r1CP","r1Ap","r1ZT","r1St","r1LipE","r1E0","r1BR","r1BB","r1C45","r1CB","r1CI","pZ","pM","pL","chEF","chIF","rF","pF","chR","angIT","rpt","S","rpm","ai","ae","fi","fe","chc","bi","bo","tInt","xLe","xHe","xLi","xHi","lLab","cLab","pCan","rCan","wCan","rec","vD","vL","oc","oID","tL","lipF","rampa","chE","hb"]);
 let genTimer = 0;
 function saveForm(){
   try {
@@ -1796,7 +1796,11 @@ function generateCore(fromInput){
   if (state.tolResetPending && fromInput){ state.tolResetPending = false; resetTolDefaults(); }   // mexeu na peça depois de salvar = item novo
   const type = $("genType").value, g = GEN[type], p = readParams();
   p.tipoGen = type; if (isPSG(type)) p.angE = psgAngE(p); if (type === "lip"){ lipFill(p); p.dext = p.dint + 2 * p.sec; } if (type === "dpr"){ lipFill(p); p.dint = p.dext - 2 * p.sec; } if (type === "pso"){ p.dext = p.dint + 2 * p.sec; p.h = p.sec; }
-  for (const [k] of g.main.concat(g.params)) if (!TEXT_KEYS.has(k) && !OPT_KEYS.has(k) && (p[k] === "" || isNaN(p[k]))) { $("genMsg").textContent = "Preencha: " + k; return; }
+  // v5.50.2 (usuário 16/11/2026, 2º perfil com "Preencha" num campo opcional): campo cujo texto diz "vazio = …" é opcional sozinho
+  // (não depende de lembrar do OPT_KEYS). Faltando um obrigatório, a faixa do topo diz qual campo e que o programa NÃO foi gerado.
+  for (const [k, lbl] of g.main.concat(g.params)) if (!TEXT_KEYS.has(k) && !OPT_KEYS.has(k) && !/vazio/i.test(lbl || "") && (p[k] === "" || isNaN(p[k]))) {
+    const nome = String(lbl || k).replace(/\s*\(.*$/, "");
+    $("genMsg").textContent = `Falta preencher: ${nome}`; state.lastWarn = `Falta preencher "${nome}". O programa NÃO foi gerado (o código na tela é o anterior).`; return; }
   const alojTxt = applyAloj(p);
   // v5.17.0 (usuário 11/11/2026): T8D8 (bedame 1 mm) corta secção de no máximo 14,8 → acima disso corta com a T6D16 (bedame 2 mm).
   // A lâmina é 1 mm mais grossa: nas arruelas o "bed" vira 2 (intervalo entre as peças acompanha) e o G92 sobe 1 mm.

@@ -18,6 +18,15 @@ Quando o pedido fala de um perfil, mude **só aquele perfil** — mesmo que o c�
 Arruela ISO + PSE 108; arrRough = todas as arruelas/guias). Isole a mudança (flag/condição pelo tipo) e confira que os outros
 perfis geram o mesmo programa de antes. Só mude mais perfis se o usuário pedir.
 
+## Regra: testar TODOS os perfis antes do merge (usuário, 16/11/2026)
+O PSR 212 chegou ao usuário sem aparecer na janela "Escolha o perfil" e depois sem gerar ("Preencha: ds"). Antes de todo
+merge na main que mexa no `Simulador CNC.html`:
+1. Na main antiga: `node testes/testar-perfis.js --salvar <scratchpad>/base.json`.
+2. Depois da mudança: `node testes/testar-perfis.js --comparar <scratchpad>/base.json` — tem que dar "Todos os N perfis
+   geraram programa" e só podem mudar os perfis pedidos.
+- Perfil novo: entra no `<select id="genType">` **e** no `PROF_GROUPS` (a janela por imagem; o select fica escondido).
+- Campo opcional: escreva "vazio = …" no texto do campo (vira opcional sozinho) e trate o vazio no gerador com `opt()`.
+
 ## Como o usuário usa
 - `Iniciar\Abrir Simulador.bat` (cópia na Área de Trabalho) só baixa e roda `Iniciar\atualizar.ps1` da main (mude a lógica
   lá, não no .bat). O atualizador baixa a `main` para `%LOCALAPPDATA%\FastSealCreator\app-<commit>` (uma pasta por versão: a

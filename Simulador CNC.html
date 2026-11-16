@@ -198,6 +198,7 @@ body.printing #dwgModal .dwgf{display:none}
     <div class="sub" id="progName">Abra um .PIT / .txt ou cole o programa da planilha</div>
   </div>
   <div class="spacer"></div>
+  <button class="btn" id="btnUser" title="Usuário (vai no DESENHADO do carimbo) · trocar senha · cadastrar usuários">&#x1F464; Entrar</button>
   <label class="btn primary" title="Abrir arquivo do programa">
     <input type="file" id="file" accept=".pit,.PIT,.txt,.nc,.cnc,.mpf,.tap" hidden>
     Abrir arquivo
@@ -5322,6 +5323,116 @@ sizeCanvas(); draw();
   if (a && !a.value.trim()) a.value = "MATEUS C.";
   try { saveForm(); } catch(e){}
 })();
+// ---- v5.56.0 (usuário 16/11/2026): LOGIN com senha — quem entra vai sozinho no DESENHADO do carimbo ----
+// Usuários em W:\...\PROGRAMAÇÃO\PADRONIZAÇÃO\Arruela Padronizada\usuarios.json (o mesmo para todos os computadores, pelo
+// servidor); sem W: fica só neste computador. Senha guardada como hash SHA-256 com sal (não dá para ler a senha no arquivo).
+// É identificação de quem desenhou, não cofre: quem tem o arquivo do Simulador consegue abrir sem login.
+const USERS_PATH = ["PROGRAMAÇÃO", "PADRONIZAÇÃO", "Arruela Padronizada"], USERS_FILE = "usuarios.json";
+async function usersDir(){ try { let d = await rootDir(true); if (!d) return null; for (const n of USERS_PATH) d = await d.getDirectoryHandle(n); return d; } catch(e){ return null; } }
+async function usersRead(){
+  const d = await usersDir();
+  if (d) try { const f = await (await d.getFileHandle(USERS_FILE)).getFile(), j = JSON.parse(await f.text()); if (Array.isArray(j.users)) { try { localStorage.setItem("ps_users", JSON.stringify(j)); } catch(e){} return { users: j.users, onW: true }; } }
+    catch(e){ if (!/NotFound/i.test(String(e && (e.name || e.message)))) throw new Error("não consegui ler " + USERS_FILE + " no W:: " + e.message); return { users: [], onW: true }; }
+  try { const j = JSON.parse(localStorage.getItem("ps_users") || "null"); if (j && Array.isArray(j.users)) return { users: j.users, onW: false }; } catch(e){}
+  return { users: [], onW: false };
+}
+async function usersWrite(users){
+  const j = { users, alterado: new Date().toISOString() }, txt = JSON.stringify(j, null, 2);
+  try { localStorage.setItem("ps_users", txt); } catch(e){}
+  const d = await usersDir(); if (!d) return false;
+  await writeFile(d, USERS_FILE, new TextEncoder().encode(txt)); return true;
+}
+async function pwHash(salt, pw){
+  const data = new TextEncoder().encode(salt + ":" + pw);
+  if (window.crypto && crypto.subtle) return [...new Uint8Array(await crypto.subtle.digest("SHA-256", data))].map(b => b.toString(16).padStart(2, "0")).join("");
+  let h = 2166136261; for (const b of data){ h ^= b; h = Math.imul(h, 16777619) >>> 0; } return "f" + h.toString(16);   // navegador sem crypto.subtle
+}
+function newSalt(){ const a = new Uint8Array(12); (window.crypto || {}).getRandomValues ? crypto.getRandomValues(a) : a.forEach((_, i) => a[i] = Math.random() * 256); return [...a].map(b => b.toString(16).padStart(2, "0")).join(""); }
+const nomeUser = s => String(s || "").trim().toUpperCase().replace(/\s+/g, " ");
+function userSet(name){
+  state.user = name || "";
+  try { if (name) sessionStorage.setItem("ps_user", name); else sessionStorage.removeItem("ps_user"); } catch(e){}
+  const d = document.querySelector("#dwgFields [data-d=des]"); if (d && name){ d.value = name; const pv = document.querySelector("#pvSide [data-dd=des]"); if (pv) pv.value = name; try { saveForm(); } catch(e){} try { rerenderDrawing(); } catch(e){} }
+  const b = $("btnUser"); if (b) b.textContent = name ? "👤 " + name : "👤 Entrar";
+}
+function loginCard(html){
+  let ov = $("loginOv");
+  if (!ov){ ov = document.createElement("div"); ov.id = "loginOv"; ov.style.cssText = "position:fixed;inset:0;z-index:99999;background:rgba(20,20,24,.72);display:flex;align-items:center;justify-content:center;padding:16px"; document.body.appendChild(ov); }
+  ov.innerHTML = `<div style="background:#fff;border-radius:14px;padding:22px 24px;width:min(380px,100%);font:14px 'Segoe UI',Arial,sans-serif;box-shadow:0 12px 40px rgba(0,0,0,.35)">
+    <img src="${LOGO}" alt="Parts Seals" style="width:200px;display:block;margin:0 auto 12px">${html}<div id="loginMsg" style="color:#a2231d;font-weight:600;min-height:18px;margin-top:8px"></div></div>`;
+  const inp = ov.querySelectorAll("input,select"); if (inp.length) setTimeout(() => (ov.querySelector("input[type=password]") || inp[0]).focus(), 30);
+  ov.querySelectorAll("input").forEach(i => i.addEventListener("keydown", e => { if (e.key === "Enter"){ const b = ov.querySelector("button[data-main]"); if (b) b.click(); } }));
+  return ov;
+}
+const LBL = "display:block;margin:10px 0 4px;font-weight:600;color:#333", INP = "width:100%;box-sizing:border-box;padding:9px 10px;border:1px solid #bbb;border-radius:8px;font:15px 'Segoe UI',Arial";
+const BTN = "margin-top:14px;width:100%;padding:10px;border:0;border-radius:8px;background:#b2221f;color:#fff;font:700 15px 'Segoe UI',Arial;cursor:pointer";
+async function loginShow(){
+  let U;
+  try { U = await usersRead(); } catch(e){ loginCard(`<b>Login</b><div style="margin-top:8px">${esc(e.message)}</div><button data-main style="${BTN}">Tentar de novo</button>`).querySelector("button").onclick = loginShow; return; }
+  if (!U.users.length){   // primeiro acesso: cria o administrador
+    const ov = loginCard(`<div style="font:700 17px 'Segoe UI',Arial;text-align:center">Primeiro acesso</div>
+      <div style="color:#555;margin-top:6px;text-align:center">Crie o administrador (ele cadastra os outros usuários).${U.onW ? "" : "<br><b>Sem acesso ao W:</b> os usuários ficam só neste computador."}</div>
+      <label style="${LBL}">Nome<input id="lgName" value="MATEUS C." style="${INP}"></label>
+      <label style="${LBL}">Senha<input id="lgPw" type="password" style="${INP}"></label>
+      <label style="${LBL}">Repetir a senha<input id="lgPw2" type="password" style="${INP}"></label>
+      <button data-main style="${BTN}">Criar e entrar</button>`);
+    ov.querySelector("button[data-main]").onclick = async () => {
+      const name = nomeUser($("lgName").value), pw = $("lgPw").value;
+      if (!name) return $("loginMsg").textContent = "Escreva o nome.";
+      if (pw.length < 4) return $("loginMsg").textContent = "Senha com pelo menos 4 caracteres.";
+      if (pw !== $("lgPw2").value) return $("loginMsg").textContent = "As duas senhas não são iguais.";
+      const salt = newSalt();
+      try { await usersWrite([{ nome: name, sal: salt, hash: await pwHash(salt, pw), admin: true }]); } catch(e){ return $("loginMsg").textContent = "Não consegui gravar: " + e.message; }
+      ov.remove(); userSet(name);
+    };
+    return;
+  }
+  let last = ""; try { last = localStorage.getItem("ps_lastUser") || ""; } catch(e){}
+  const ov = loginCard(`<div style="font:700 17px 'Segoe UI',Arial;text-align:center">Entrar no Simulador</div>
+    <label style="${LBL}">Usuário<select id="lgName" style="${INP}">${U.users.map(u => `<option ${u.nome === last ? "selected" : ""}>${esc(u.nome)}</option>`).join("")}</select></label>
+    <label style="${LBL}">Senha<input id="lgPw" type="password" style="${INP}"></label>
+    <button data-main style="${BTN}">Entrar</button>
+    <div style="color:#777;font-size:12px;margin-top:10px;text-align:center">Esqueceu a senha? Peça ao administrador para trocar.</div>`);
+  ov.querySelector("button[data-main]").onclick = async () => {
+    const name = $("lgName").value, u = U.users.find(x => x.nome === name), pw = $("lgPw").value;
+    if (!u || (await pwHash(u.sal, pw)) !== u.hash){ $("loginMsg").textContent = "Senha errada."; $("lgPw").value = ""; $("lgPw").focus(); return; }
+    try { localStorage.setItem("ps_lastUser", name); } catch(e){}
+    ov.remove(); userSet(name);
+  };
+}
+async function userMenu(){
+  if (!state.user) return loginShow();
+  let U; try { U = await usersRead(); } catch(e){ alert(e.message); return; }
+  const me = U.users.find(u => u.nome === state.user) || {}, adm = !!me.admin;
+  const ov = loginCard(`<div style="font:700 17px 'Segoe UI',Arial;text-align:center">👤 ${esc(state.user)}${adm ? " (administrador)" : ""}</div>
+    <button id="umPw" style="${BTN};background:#555">Trocar minha senha</button>
+    ${adm ? `<button id="umAdd" style="${BTN};background:#555">Cadastrar usuário</button><button id="umReset" style="${BTN};background:#555">Trocar senha / remover usuário</button>` : ""}
+    <button id="umOut" style="${BTN}">Sair (entrar com outro usuário)</button>
+    <button id="umClose" style="${BTN};background:#eee;color:#333">Fechar</button>`);
+  const ask = async (name, txt) => { const a = prompt(txt + (name ? " — " + name : "") + ":"); if (a === null) return null; if (a.length < 4){ alert("Senha com pelo menos 4 caracteres."); return null; } if (prompt("Repita a senha:") !== a){ alert("As duas senhas não são iguais."); return null; } return a; };
+  const save = async (users, ok) => { try { await usersWrite(users); alert(ok); } catch(e){ alert("Não consegui gravar: " + e.message); } };
+  $("umClose").onclick = () => ov.remove();
+  $("umOut").onclick = () => { ov.remove(); userSet(""); loginShow(); };
+  $("umPw").onclick = async () => { const pw = await ask(state.user, "Senha nova"); if (pw === null) return; const u = U.users.find(x => x.nome === state.user); u.sal = newSalt(); u.hash = await pwHash(u.sal, pw); await save(U.users, "Senha trocada."); };
+  if (adm){
+    $("umAdd").onclick = async () => { const n = nomeUser(prompt("Nome do usuário (como vai no carimbo, ex.: JOÃO S.):") || ""); if (!n) return;
+      if (U.users.some(u => u.nome === n)) return alert(n + " já está cadastrado.");
+      const pw = await ask(n, "Senha"); if (pw === null) return; const salt = newSalt();
+      U.users.push({ nome: n, sal: salt, hash: await pwHash(salt, pw), admin: false }); await save(U.users, n + " cadastrado."); };
+    $("umReset").onclick = async () => { const lista = U.users.map((u, i) => `${i + 1} - ${u.nome}${u.admin ? " (adm)" : ""}`).join("\n");
+      const i = Number(prompt("Qual usuário? (número)\n" + lista)) - 1, u = U.users[i]; if (!u) return;
+      const op = prompt(`${u.nome}: digite 1 para trocar a senha ou 2 para remover`);
+      if (op === "1"){ const pw = await ask(u.nome, "Senha nova"); if (pw === null) return; u.sal = newSalt(); u.hash = await pwHash(u.sal, pw); await save(U.users, "Senha de " + u.nome + " trocada."); }
+      else if (op === "2"){ if (u.nome === state.user) return alert("Você não pode remover o seu próprio usuário."); if (!confirm("Remover " + u.nome + "?")) return; U.users.splice(i, 1); await save(U.users, u.nome + " removido."); } };
+  }
+}
+$("btnUser").onclick = userMenu;
+(function loginStart(){
+  if (navigator.webdriver && !/[?&]login=1/.test(location.search)) return;   // rotina/testes automáticos (Edge headless, Playwright): sem tela de login
+  let u = ""; try { u = sessionStorage.getItem("ps_user") || ""; } catch(e){}
+  if (u) userSet(u); else loginShow();
+})();
+
 document.addEventListener("input", e => { if (e.target.closest && e.target.closest("#dwgFields")) saveForm(); if (e.target.matches && e.target.matches("#dwgFields [data-d=cod], #pvSide [data-dd=cod]") && state.genParams) try { state.codKey = pieceFile(state.genParams); } catch(_){} });
 document.addEventListener("input", e => { const a = e.target.dataset && e.target.dataset.ak; if (a && alojMode(a) === "aloj"){ clearTimeout(window.__alojT); window.__alojT = setTimeout(() => alojApply(a), 250); } });
 document.addEventListener("change", e => { const d = e.target.dataset || {}; if (d.amode && d.ak2) alojSetMode(d.ak2, d.amode); });

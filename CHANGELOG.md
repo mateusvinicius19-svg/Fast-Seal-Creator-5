@@ -6,6 +6,16 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.56.0 — Login com senha: quem entra vai no DESENHADO (16/11/2026)
+- Pedido do usuário: ao abrir o Simulador aparece **Entrar** (usuário + senha). O nome de quem entrou vai sozinho no
+  **DESENHADO** do carimbo (APROVADO continua MATEUS C.). Fica logado até fechar o navegador; botão **👤 nome** no topo:
+  trocar a senha, sair / entrar com outro usuário.
+- **Primeiro acesso**: cria o administrador (MATEUS C. + senha). O administrador cadastra usuários, troca a senha ou remove.
+- Usuários em `W:\...\PROGRAMAÇÃO\PADRONIZAÇÃO\Arruela Padronizada\usuarios.json` (o mesmo em todos os computadores,
+  pelo servidor); a senha fica só como hash SHA-256 com sal. Sem W: os usuários ficam só no computador.
+- É identificação de quem desenhou, não um cofre (quem tem o arquivo abre sem login). A rotina em lote e os testes
+  automáticos não mostram a tela de login. Programas não mudam (conferido nos 31 perfis).
+
 ## 5.55.0 — Marca d'água Parts Seals + carimbo (aprovado / desenhado) (16/11/2026)
 - Pedido do usuário: **marca d'água** em todos os desenhos (perfis padrão e Desenho do 3D): o logo Parts Seals repetido,
   reto, em fileiras alternadas, a 15% (testado na impressão: 7% quase não aparecia), atrás das vistas e cotas, dentro da

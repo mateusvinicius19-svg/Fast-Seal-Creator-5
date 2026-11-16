@@ -6,6 +6,13 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.60.0 — PSG 101: chanfro sugerido conforme a secção e a altura (16/11/2026)
+- Pedido do usuário: algumas guias saíam com chanfros grandes demais. A sugestão do PSG 101 (chanfro externo e interno, quando o
+  campo fica vazio) agora é o MENOR entre 10 % da altura e 20 % da secção, de 0,2 a no máximo 1 mm, arredondada em 0,1.
+  Ex.: Ø50 x Ø55 x 9,7 (secção 2,5) passa de 0,97 para 0,5; Ø100 x Ø108 x 9,7 → 0,8; Ø60 x Ø70 x 15 → 1.
+- Chanfro digitado no campo continua valendo. Só o PSG 101 muda (PSA 108/109, PSG 103/104 iguais; os outros 30 perfis geram o
+  mesmo programa de antes).
+
 ## 5.59.0 — Celeron: corte com metade da rotação (16/11/2026)
 - Pedido do usuário: no Celeron o corte gira na metade da rotação.
 - Logo depois de chamar a ferramenta de corte (T6D16) entra `G97 S<metade> M3 ;(CELERON: METADE DA ROTACAO NO CORTE)`;

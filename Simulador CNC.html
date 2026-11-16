@@ -2163,8 +2163,12 @@ function psaTolFill(p){
 // peças que cabem no limite de Z do desbaste: N × (altura + bedame − sobreposição) + paralelo ≤ zMax (usuário 10/11: 40 mm)
 function psaMaxN(p){ if (arrPU(p)) return 10; const B6 = p.h + (p.bed - p.sobrep), z = p.zMax > 0 ? p.zMax : 40; return Math.max(1, Math.floor((z - p.par) / B6 + 1e-9)); }
 function psaChSug(h){ return xround(Math.min(1, Math.max(0.2, 0.10 * (Number(h) || 0))), 2); }
+// v5.60.0 (usuário 16/11/2026): PSG 101 — chanfros sugeridos estavam grandes nas guias de secção fina. Sugestão = o menor entre
+// 10 % da altura e 20 % da secção, de 0,2 a no máximo 1 mm, arredondado em 0,1 (só o PSG 101; digitado no campo continua valendo).
+function psg101ChSug(p){ const sec = (Number(p.dext) - Number(p.dint)) / 2, h = Number(p.h) || 0, v = Math.min(0.10 * h, sec > 0 ? 0.20 * sec : 1, 1);
+  return xround(Math.max(0.2, Math.round(v * 10 + 1e-9) / 10), 2); }
 function psaFill(p){
-  const s = (p.tipoGen || (document.getElementById("genType") || {}).value) === "psg103" ? psg103ChSug(p) : (p.tipoGen || (document.getElementById("genType") || {}).value) === "psg104" ? psg104ChSug(p) : psaChSug(p.h), e = v => v === "" || v === undefined || v === null || isNaN(v);
+  const s = (p.tipoGen || (document.getElementById("genType") || {}).value) === "psg101" ? psg101ChSug(p) : (p.tipoGen || (document.getElementById("genType") || {}).value) === "psg103" ? psg103ChSug(p) : (p.tipoGen || (document.getElementById("genType") || {}).value) === "psg104" ? psg104ChSug(p) : psaChSug(p.h), e = v => v === "" || v === undefined || v === null || isNaN(v);
   if (e(p.chE)) p.chE = s; if (e(p.chI)) p.chI = s;
   p.chF = p.chT = p.chE; p.angI = 60; p.angE = isPSG(p.tipoGen) ? psgAngE(p) : (p.angE > 0 ? p.angE : 45); p.angLbl = 30; p.tipoP = "arruela";
   { const a = Number(p.angIT); p.angIB = p.angIT !== "" && p.angIT !== undefined && a > 0 && a < 90 ? a : 30; }   // v5.21.22: ângulo do chanfro interno de trás (com o eixo)   // perfil/desenho usam o mesmo meio perfil da arruela (chI em Z, 30° com o eixo)
@@ -2270,8 +2274,8 @@ GEN.psg101 = {
   params: [...GEN.psa108.params.filter(f => f[0] !== "zSeg" && f[0] !== "zMin"), ["psgAcr", "POM / Celeron: usinar maior nos diâmetros (mm)", 0.9]],   // PSG 101: desbaste em Z contínuo (sem etapas)
   build(p){
     const a = psgAcr(p), q = Object.assign({}, p, { tipoGen: "psa108", dint: p.dint + a, dext: p.dext + a, angE: psgAngE(p), zCont: true });
-    if (p.chE === "" || p.chE === undefined) q.chE = psaChSug(p.h);
-    if (p.chI === "" || p.chI === undefined) q.chI = psaChSug(p.h);
+    if (p.chE === "" || p.chE === undefined) q.chE = psg101ChSug(p);
+    if (p.chI === "" || p.chI === undefined) q.chI = psg101ChSug(p);
     const L = GEN.psa108.build(q);
     if (!p.nome) L[0] = `%PSG101 ${fx(p.dint, 3)}/${fx(p.dext, 3)}/${fx(p.h, 3)},MX,`;
     const iB = L.findIndex(l => /^;BUCHA /.test(l));

@@ -5,6 +5,18 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - CORREÇÃO (5.0.x): conserto de erro, ajuste de regra pequena.
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
+## 5.50.0 — Ferramentas: área separada com cadastro e edição (16/11/2026)
+- Pedido do usuário: uma parte só de ferramentas, com tudo o que tem. O botão 🧰 Ferramentas agora abre uma área
+  separada (tela cheia, ← Voltar ao Simulador) com duas abas:
+  - **Torre CNC (T/D)**: as ferramentas dos programas (posição, corretor, uso, materiais, foto) + campo **suporte**;
+  - **Suportes, pastilhas e lâminas**: 33 itens com os códigos dos .txt de ferramentas do W: (Suportes.txt, Pastilhas
+    Para usinagem.txt, TABELA DE CODIGOS FERRAMENTAS.txt, ferramentas Seal Maker) e as lâminas H1111 / H1002 / H1000.
+- **➕ Cadastrar** e **✏️ Editar** em todas; **Voltar ao original** nas que vieram prontas; **Apagar** nas cadastradas e
+  nos itens. Fica salvo em PROJETOS\FERRAMENTAS SIMULADOR\ferramentas.json (vale em todos os PCs; sem acesso à pasta,
+  só neste PC). Antes de gravar, lê o arquivo mais novo (não apaga o que outro PC mudou).
+- Os programas não mudam: os geradores continuam com as ferramentas deles. Só o nome da ferramenta no quadro
+  FERRAMENTAS do desenho acompanha a edição. Conferido: os 31 perfis geram o mesmo programa e o mesmo desenho de antes.
+
 ## 5.49.2 — PSR 212 aparece na escolha pela imagem (16/11/2026)
 - O PSR 212 não aparecia para o usuário: estava só no menu de lista (escondido) e faltava no grupo **Raspadores** da
   janela "Escolha o perfil". Agora aparece ao lado do PSR 211. Programas não mudam.

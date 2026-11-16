@@ -6,6 +6,10 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.56.1 — 16/11/2026
+- PSA 109: no DESENHO o canal (raio na face) passou para o outro lado (perfil espelhado no Detalhe B; chamadas dos
+  chanfros e do R acompanham). O programa CNC não mudou (31 perfis iguais).
+
 ## 5.56.0 — Login com senha: quem entra vai no DESENHADO (16/11/2026)
 - Pedido do usuário: ao abrir o Simulador aparece **Entrar** (usuário + senha). O nome de quem entrou vai sozinho no
   **DESENHADO** do carimbo (APROVADO continua MATEUS C.). Fica logado até fechar o navegador; botão **👤 nome** no topo:

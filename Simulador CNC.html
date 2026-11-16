@@ -236,7 +236,7 @@ body.printing #dwgModal .dwgf{display:none}
         <button class="btn primary" id="btnCopy" style="display:none">&#x29C9; Copiar</button>
         <button class="btn" id="btnSave" title="Salva o Fagor (.PIT) no Programas_CNC e a versão convertida (.txt) no MCS 500">&#x1F4BE; Salvar Fagor + MCS 500</button><button class="btn" id="btnPreview" style="display:none" title="Ver o desenho desta peça antes de salvar (não salva nada e não pede o código)">&#x1F441; Ver desenho</button><button class="btn" id="btnCopyMcs" style="display:none" title="Copia a versão convertida para o MCS 500">&#x29C9; Copiar MCS</button><button class="btn" id="btnDirRoot" style="display:none" title="Pasta única W:\Parts\PartsSeals\PROJETOS (tem Programas_CNC, MCS 500 e DESENHOS): escolha uma vez; nos outros dias é só clicar e Permitir">&#x1F513; PROJETOS</button><button class="btn" id="btnDirProg" style="display:none" title="Escolher a pasta W:\Parts\PartsSeals\PROJETOS\Programas_CNC">&#x1F4C1; Programas_CNC</button><button class="btn" id="btnDirMcs" style="display:none" title="Escolher a pasta W:\Parts\PartsSeals\PROJETOS\Programas_CNC\MCS 500">&#x1F4C1; MCS 500</button><button class="btn" id="btnAlt" title="Abrir um programa do Programas_CNC pelo número e refazer com outra bucha (salva como NNNNNN BIxBO — o original não muda)">&#x270F;&#xFE0F; Alterar programa</button><button class="btn" id="btnVer" title="Digitar o número e ver o programa e as variantes (NNNNNN BIxBO...)">&#x1F50E; Ver programa</button><button class="btn" id="btnHist" title="Programas salvos pelo Simulador (Programas_CNC\Historico Simulador CNC.csv)">&#x1F4CB; Histórico</button><button class="btn" id="btnDirDes" title="Escolher a pasta W:\Parts\PartsSeals\PROJETOS\DESENHOS">&#x1F4C1; DESENHOS</button>
         <button class="btn" id="btnDraw" style="display:none">&#x1F4D0; Desenho</button>
-        <button class="btn" id="btn3D" title="Desenho a partir do 3D do Inventor: no Inventor, Arquivo → Exportar → Formato CAD → STL (mm). Também dá para arrastar o .stl para a tela.">&#x1F9CA; Desenho do 3D (Inventor)</button><input type="file" id="file3D" accept=".stl" style="display:none">
+        <button class="btn" id="btnProgDes" title="Desenho a partir do programa aberto/gerado: simula a usinagem e cota a peça que sobra (como o desenho do 3D).">&#x1F4D0; Desenho do programa</button><button class="btn" id="btn3D" title="Desenho a partir do 3D do Inventor: no Inventor, Arquivo → Exportar → Formato CAD → STL (mm). Também dá para arrastar o .stl para a tela.">&#x1F9CA; Desenho do 3D (Inventor)</button><input type="file" id="file3D" accept=".stl" style="display:none">
         <span class="note" id="genMsg"></span>
       </div>
     </details>
@@ -5126,6 +5126,9 @@ function rev3DFeatures(poly){
 function rev3DViews(M){
   return function(p, PT){
     const f = v => fv3(v), poly = M.poly, L = M.L, rmin = Math.min(...poly.map(q => q[1])), rmax = Math.max(...poly.map(q => q[1]));
+    const tD = r => (p.tolD && p.tolD[r.toFixed(3)]) ? tolMk(`Ø ${f(2 * r)}`, p.tolD[r.toFixed(3)][0], p.tolD[r.toFixed(3)][1]) : !p.tolFrom ? `Ø ${f(2 * r)}` : Math.abs(r - rmax) < 1e-6 ? tolMk(`Ø ${f(2 * r)}`, p.teS, p.teI) : Math.abs(r - rmin) < 1e-6 ? tolMk(`Ø ${f(2 * r)}`, p.tiS, p.tiI) : `Ø ${f(2 * r)}`;   // desenho do programa: tolerâncias do perfil escolhido
+    const tL = () => p.tolFrom ? tolMk(f(L), p.thS, p.thI) : f(L);
+    const tS = () => tolMk("Secção " + f(rmax - rmin), p.tolSec ? p.tolSec[0] : "", p.tolSec ? p.tolSec[1] : "");
     const F = rev3DFeatures(poly), Hh = rmax - rmin;
     let g = "";
     const arr = (x1, y1, x2, y2) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="d" marker-start="url(#a)" marker-end="url(#a)"/>`;
@@ -5141,7 +5144,7 @@ function rev3DViews(M){
     g += `<path d="${poly.map(([a, r], i) => `${i ? "L" : "M"}${X(a).toFixed(2)},${Y(r).toFixed(2)}`).join("")}Z" class="p"/>`;
     // largura total em cima
     const aTopL = Math.min(...poly.filter(q => Math.abs(q[1] - rmax) < 1e-6).map(q => q[0]));
-    g += ext(X(0), Math.min(Y(poly.find(q => Math.abs(q[0]) < 1e-6)?.[1] ?? rmax), yT) - 4, X(0), yT - 46) + ext(X(L), yT - 4, X(L), yT - 46) + dimH(X(0), X(L), yT - 40, f(L));
+    g += ext(X(0), Math.min(Y(poly.find(q => Math.abs(q[0]) < 1e-6)?.[1] ?? rmax), yT) - 4, X(0), yT - (p.tolFrom !== undefined ? 52 : 46)) + ext(X(L), yT - 4, X(L), yT - (p.tolFrom !== undefined ? 52 : 46)) + dimH(X(0), X(L), yT - (p.tolFrom !== undefined ? 46 : 40), tL());   // desenho do programa: mais alta (cota corrida do externo embaixo dela)
     // diâmetros: níveis das retas paralelas ao eixo (+ maior e menor), à esquerda ou à direita conforme o lado da reta
     const lv = new Map();
     F.E.filter(e => e.hor && e.len > 1e-3).forEach(e => { const r = e.p[1], k = r.toFixed(3), a = Math.min(e.p[0], e.q[0]), b = Math.max(e.p[0], e.q[0]);
@@ -5149,19 +5152,44 @@ function rev3DViews(M){
     F.ramps.forEach(({ e }) => [e.p, e.q].forEach(q => { const k = q[1].toFixed(3); if (!lv.has(k)) lv.set(k, { r: q[1], len: 0, a: q[0], b: q[0] }); }));
     for (const r of [rmin, rmax]) if (![...lv.values()].some(o => Math.abs(o.r - r) < 1e-6)){ const q = poly.filter(z => Math.abs(z[1] - r) < 1e-6).map(z => z[0]); lv.set(r.toFixed(3), { r, len: 0, a: Math.min(...q), b: Math.max(...q) }); }
     const levels = [...lv.values()].sort((x, y) => (y.r === rmax || y.r === rmin) - (x.r === rmax || x.r === rmin) || y.len - x.len);
+    // desenho do programa (usuário 16/11/2026): CANAL (fundo reto entre duas paredes que vão até o Ø externo — ou interno) é cotado
+    // pela PROFUNDIDADE (do Ø externo/interno até o fundo), não pelo Ø do fundo
+    const grooves = [];
+    if (p.tolFrom !== undefined){ const n = F.E.length;
+      F.E.forEach((e, i) => { if (!e.hor || e.len < 1e-3) return; const a = F.E[(i + n - 1) % n], b = F.E[(i + 1) % n];
+        if (!a.ver || !b.ver) return; const r = e.p[1], ra = Math.max(a.p[1], a.q[1]), rb = Math.max(b.p[1], b.q[1]), sa = Math.min(a.p[1], a.q[1]), sb = Math.min(b.p[1], b.q[1]);
+        const ch = Math.max(0.6, 0.05 * (rmax - rmin));
+        if (Math.abs(sa - r) < 1e-6 && Math.abs(sb - r) < 1e-6 && ra >= rmax - ch && rb >= rmax - ch && r < rmax - 1e-3) grooves.push({ r, ref: rmax, a0: Math.min(e.p[0], e.q[0]), a1: Math.max(e.p[0], e.q[0]) });
+        else if (Math.abs(ra - r) < 1e-6 && Math.abs(rb - r) < 1e-6 && sa <= rmin + ch && sb <= rmin + ch && r > rmin + 1e-3) grooves.push({ r, ref: rmin, a0: Math.min(e.p[0], e.q[0]), a1: Math.max(e.p[0], e.q[0]) }); }); }
     const placed = { L: [], R: [] }, skipped = [];
     for (const o of levels){
+      if (p.tolFrom !== undefined && (Math.abs(o.r - rmax) < 1e-6 || Math.abs(o.r - rmin) < 1e-6)) continue;
+      if (grooves.some(gv => Math.abs(gv.r - o.r) < 1e-6)) continue;   // fundo do canal: vai a profundidade
+      if ((p.corteD || []).some(r => Math.abs(r - o.r) < 1e-6)) continue;   // este Ø vai no corte A-A   // desenho do programa: Ø ext. e int. só no corte A-A (com tolerância)
       const side = (o.a + o.b) / 2 <= L / 2 ? "L" : "R", y = Y(o.r);
       if (placed[side].some(yy => Math.abs(yy - y) < 15)){ skipped.push(o.r); continue; }
       placed[side].push(y);
       const xEdge = side === "L" ? X(o.a) : X(o.b), xTxt = side === "L" ? (PT ? 40 : bx0 - 110) : (PT ? 760 : bx1 + 110);
-      g += `<line x1="${xEdge}" y1="${y}" x2="${xTxt}" y2="${y}" class="e" marker-start="url(#a)"/><text x="${xTxt}" y="${y - 4}" class="t" text-anchor="${side === "L" ? "start" : "end"}">Ø ${f(2 * o.r)}</text>`;
+      g += `<line x1="${xEdge}" y1="${y}" x2="${xTxt}" y2="${y}" class="e" marker-start="url(#a)"/><text x="${xTxt}" y="${y - 4}" class="t" text-anchor="${side === "L" ? "start" : "end"}">${tD(o.r)}</text>`;
     }
+    if (p.tolFrom !== undefined){ const xs = X(L) + 34;   // desenho do programa: cota da secção (Ø ext − Ø int)/2, como nos perfis padrão
+      g += ext(X(Math.max(...poly.filter(q => Math.abs(q[1] - rmax) < 1e-6).map(q => q[0]))) + 4, yT, xs + 6, yT) + ext(X(Math.max(...poly.filter(q => Math.abs(q[1] - rmin) < 1e-6).map(q => q[0]))) + 4, yB, xs + 6, yB) + dimV(xs, yT, yB, tS()); }
+    grooves.forEach(gv => { const xa = X(gv.a0), xb = X(gv.a1), xm = xb - Math.min(5, (xb - xa) / 4), y1 = Y(gv.ref), y2 = Y(gv.r), d = Math.abs(gv.ref - gv.r);
+      g += `<line x1="${xa - 4}" y1="${y1}" x2="${xb + 4}" y2="${y1}" class="e"/>` + arr(xm, y1, xm, y2);
+      const tx = (xa + xm) / 2 + 4, ty = (y1 + y2) / 2; g += `<text x="${tx}" y="${ty}" class="t" text-anchor="middle" transform="rotate(-90 ${tx} ${ty})">${f(d)}</text>`; });
     // posições no eixo: paredes radiais e pontas das rampas longas, em cota corrida embaixo (a partir da face da esquerda)
-    const az = new Set([0, L].map(v => v.toFixed(3)));
-    F.E.filter(e => e.ver && e.len > 1e-3).forEach(e => az.add(e.p[0].toFixed(3)));
-    F.ramps.forEach(({ e }) => { az.add(e.p[0].toFixed(3)); az.add(e.q[0].toFixed(3)); });
-    F.arcs.forEach(c => { if (c.R > 2.5){ az.add(c.c[0].toFixed(3)); } });
+    const az = new Set([0, L].map(v => v.toFixed(3))), azT = new Set([0, L].map(v => v.toFixed(3)));
+    // desenho do programa (usuário 16/11/2026): detalhe da metade de FORA da secção (canal no externo…) cotado EM CIMA, a partir
+    // do Ø externo; da metade de dentro (rebaixo…) embaixo. Desenho do 3D: tudo embaixo, como antes.
+    const top = rr => p.tolFrom !== undefined && rr >= (rmin + rmax) / 2, put = (a, rr) => (top(rr) ? azT : az).add(a.toFixed(3));
+    F.E.filter(e => e.ver && e.len > 1e-3).forEach(e => put(e.p[0], (e.p[1] + e.q[1]) / 2));
+    F.ramps.forEach(({ e }) => { const rr = (e.p[1] + e.q[1]) / 2; put(e.p[0], rr); put(e.q[0], rr); });
+    F.arcs.forEach(c => { if (c.R > 2.5){ put(c.c[0], c.c[1]); } });
+    const topTxt = [];   // textos da cota de cima: as chamadas desviam deles
+    { const zt = [...azT].map(Number).sort((x, y) => x - y).filter((v, i, a) => !i || v - a[i - 1] > 1e-3);
+      if (zt.length > 2){ const yd = yT - 20;
+        zt.forEach(z => { const yFrom = Y(Math.max(...poly.filter(q => Math.abs(q[0] - z) < 1e-6).map(q => q[1]).concat(rmin))); g += ext(X(z), yFrom - 4, X(z), yd - 6); });
+        let row = 0; for (let i = 1; i < zt.length; i++){ const x1 = X(zt[i - 1]), x2 = X(zt[i]), short = x2 - x1 < 30; row = short ? (row + 1) % 2 : 0; g += dimH(x1, x2, yd, f(zt[i] - zt[i - 1]), yd - [5, 14][row]); topTxt.push([(x1 + x2) / 2, yd - [5, 14][row] - 4]); } } }
     const zs = [...az].map(Number).sort((x, y) => x - y).filter((v, i, a) => !i || v - a[i - 1] > 1e-3);
     if (zs.length > 2){
       const yd = yB + 30;
@@ -5175,6 +5203,8 @@ function rev3DViews(M){
     F.cham.forEach(c => { const r2 = v => f(Math.round(v * 100) / 100), k = Math.abs(c.a - c.r) < 0.02 ? `${r2(c.a)} x 45°` : `${r2(c.a)} x ${r2(c.r)}`; if (!chG.has(k)) chG.set(k, []); chG.get(k).push(c); });
     let ci = 0;
     const cxS = X(L / 2), cyS = (yT + yB) / 2, used = [];
+    if (p.tolFrom !== undefined) for (let y = yT - 6; y <= yB + 6; y += 6) used.push([X(L) + 34, y]);   // chamadas desviam da cota da secção
+    topTxt.forEach(t => used.push(t));
     const spot = (mx, my, dx, dy) => { let tx = mx + dx, ty = my + dy; for (let k = 0; k < 12 && used.some(([ux, uy]) => Math.abs(ux - tx) < 90 && Math.abs(uy - ty) < 13); k++) ty += dy < 0 ? -13 : 13; used.push([tx, ty]); return [tx, ty]; };
     chG.forEach((list, k) => { const c = list[0].e, mx = X((c.p[0] + c.q[0]) / 2), my = Y((c.p[1] + c.q[1]) / 2);
       const [tx, ty] = spot(mx, my, mx >= cxS ? 34 : -34, my <= cyS ? -22 : 22);
@@ -5197,16 +5227,16 @@ function rev3DViews(M){
       const X2 = a => ox2 + (a - L / 2) * sc2, Y2 = r => cy - r * sc;
       const half = sg => `<path d="${poly.map(([a, r], i) => `${i ? "L" : "M"}${X2(a).toFixed(2)},${Y2(sg * r).toFixed(2)}`).join("")}Z" class="p"/>`;
       g += half(1) + (rmin > 1e-6 ? half(-1) : "") + `<line x1="${X2(-10 / sc2)}" y1="${cy}" x2="${X2(L + 10 / sc2)}" y2="${cy}" class="ax"/>`;
-      const xe = X2(L) + 60, xi = X2(L) + 30;
-      g += ext(X2(L), Y2(rmax), xe + 6, Y2(rmax)) + ext(X2(L), Y2(-rmax), xe + 6, Y2(-rmax)) + dimV(xe, Y2(rmax), Y2(-rmax), `Ø ${f(2 * rmax)}`);
-      if (rmin > 1e-6) g += ext(X2(L), Y2(rmin), xi + 6, Y2(rmin)) + ext(X2(L), Y2(-rmin), xi + 6, Y2(-rmin)) + dimV(xi, Y2(rmin), Y2(-rmin), `Ø ${f(2 * rmin)}`);
-      g += ext(X2(0), Y2(rmax) - 4, X2(0), Y2(rmax) - 26) + ext(X2(L), Y2(rmax) - 4, X2(L), Y2(rmax) - 26) + dimH(X2(0), X2(L), Y2(rmax) - 20, f(L));
+      // Ø no corte: interno, os pedidos em p.corteD (desenho do programa) e externo, do menor para o maior (sem p.corteD = igual a antes)
+      const dl = [...(rmin > 1e-6 ? [rmin] : []), ...(p.corteD || []).filter(r => r > rmin + 1e-6 && r < rmax - 1e-6).sort((a, b) => a - b), rmax];
+      dl.forEach((r, k) => { const xx = X2(L) + 30 * (rmin > 1e-6 ? k + 1 : k + 2); g += ext(X2(L), Y2(r), xx + 6, Y2(r)) + ext(X2(L), Y2(-r), xx + 6, Y2(-r)) + dimV(xx, Y2(r), Y2(-r), tD(r)); });
+      g += ext(X2(0), Y2(rmax) - 4, X2(0), Y2(rmax) - 26) + ext(X2(L), Y2(rmax) - 4, X2(L), Y2(rmax) - 26) + dimH(X2(0), X2(L), Y2(rmax) - 20, tL());
       g += `<text x="${ox2}" y="${yA2 + 26}" class="vt" text-anchor="middle">CORTE A-A</text>`; }
     if (skipped.length) M.skipped = skipped;
     return g;
   };
 }
-function rev3DParams(name, poly, L){
+function rev3DParams(name, poly, L, fonte){
   const rmin = Math.min(...poly.map(q => q[1])), rmax = Math.max(...poly.map(q => q[1])), f = v => fv3(v);
   const M = { poly, L };
   const desc = String(name || "PEÇA").replace(/\.(stl|STL)$/, "").replace(/\s*\(.*$/, "").toUpperCase() || "PEÇA";
@@ -5214,7 +5244,7 @@ function rev3DParams(name, poly, L){
   const views = rev3DViews(M);
   const p = { tipoGen: "custom", desc, mat: "", dint: 2 * rmin, dext: 2 * rmax, h: L, from3D: name,
     customProfile: poly.map(([a, r]) => [-a, r]), customViews: views, customTools: [],
-    get customNotes(){ return `${desc} ${dims} · desenho gerado do 3D (${name})` + (M.skipped && M.skipped.length ? ` · Ø também: ${M.skipped.map(r => f(2 * r)).join(" / ")}` : "") + " · cotas em mm"; } };
+    get customNotes(){ return `${desc} ${dims} · desenho gerado ${fonte || `do 3D (${name})`}` + (M.skipped && M.skipped.length ? ` · Ø também: ${M.skipped.map(r => f(2 * r)).join(" / ")}` : "") + " · cotas em mm"; } };
   return p;
 }
 function rev3DFlip(p){ const L = p.h, poly = p.customProfile.map(([z, r]) => [L + z, r]).reverse(); const q = rev3DParams(p.from3D, poly, L); q.desc = p.desc; q.mat = p.mat; return q; }
@@ -5228,6 +5258,270 @@ async function rev3DOpen(file){
     $("genMsg").textContent = `Desenho do 3D: ${name} · ${state.genParams.customNotes}. Confira as cotas; "Imprimir / PDF" salva o PDF.`; $("genMsg").style.color = "";
   } catch(e){ errShow("Erro ao ler o 3D", e); }
 }
+// ---- v5.61.0 (usuário 16/11/2026, testado na cópia "TESTE desenho do programa"): DESENHO A PARTIR DO PROGRAMA — simula a usinagem numa grade (Z × raio): os trajetos de
+// corte (G1/G2/G3) tiram material do lado de onde a ferramenta vem (externa/interna/face/bedame); a peça é o material que
+// sobra (a da frente, se tiver várias no ciclo). Não muda nada dos perfis padrão (só lê o programa aberto/gerado). Contorno → pontos do programa → mesmo desenho com cotas do 3D (rev3DParams).
+// Programa com G41/G42 = trajeto no contorno da peça (cotas certas); sem compensação a ponta da ferramenta muda a medida.
+function progSection(moves, tube){
+  // só a 1ª volta do programa: o RPT repete o ciclo depois do G92 e a peça anterior já caiu (a entrada da peça seguinte passa
+  // por onde ela estava) — para no primeiro movimento que volta para uma linha anterior
+  let iEnd = moves.length; for (let i = 1; i < moves.length; i++) if (moves[i].line < moves[i - 1].line){ iEnd = i; break; }
+  const cuts = moves.slice(0, iEnd).filter(m => m.type !== 0 && m.len > 1e-9);
+  if (!cuts.length) throw new Error("o programa não tem movimentos de corte (G1/G2/G3)");
+  let z0 = 1e9, z1 = -1e9, r0 = 1e9, r1 = -1e9; const P = [];
+  for (const m of cuts) for (const q of m.pts){ if (q.z < z0) z0 = q.z; if (q.z > z1) z1 = q.z; if (q.r < r0) r0 = q.r; if (q.r > r1) r1 = q.r; P.push([q.z, q.r]); }
+  const mg = Math.max(0.5, 0.03 * Math.max(z1 - z0, r1 - r0));
+  const R0 = tube && tube.i > 0 && tube.i / 2 < r0 ? tube.i / 2 : Math.max(0, r0 - mg), R1 = tube && tube.o / 2 > r1 ? tube.o / 2 : r1 + mg;
+  const Z0 = z0 - mg, Z1 = z1 + mg;
+  let h = Math.max(0.005, Math.sqrt((Z1 - Z0) * (R1 - R0) / 3e6)); h = Math.min(h, 0.05);
+  const W = Math.ceil((Z1 - Z0) / h) + 1, H = Math.ceil((R1 - R0) / h) + 1;
+  const ix = z => Math.round((z - Z0) / h), iy = r => Math.round((r - R0) / h);
+  // cada ferramenta (bloco de cortes seguidos) tira material de um lado: EXTERNA tira de fora (raio ≥ trajeto), INTERNA de dentro
+  // (raio ≤ trajeto), de FACE (canal na frente, O-ring na face) pela frente (Z ≥ trajeto); bedame (corte radial) = externa
+  const blocks = []; let cb = null;
+  for (const m of cuts){ if (!cb || cb.tool !== m.tool){ cb = { tool: m.tool, ms: [], z0: 1e9, z1: -1e9, r0: 1e9, r1: -1e9, rs: 0, ls: 0 }; blocks.push(cb); }
+    cb.ms.push(m); for (const q of m.pts){ cb.z0 = Math.min(cb.z0, q.z); cb.z1 = Math.max(cb.z1, q.z); cb.r0 = Math.min(cb.r0, q.r); cb.r1 = Math.max(cb.r1, q.r); }
+    for (let k = 1; k < m.pts.length; k++){ const l = Math.hypot(m.pts[k].z - m.pts[k - 1].z, m.pts[k].r - m.pts[k - 1].r); cb.rs += l * (m.pts[k].r + m.pts[k - 1].r) / 2; cb.ls += l; } }
+  const zLong = Math.max(...blocks.map(c => c.z1 - c.z0)), zFront = Math.max(...blocks.map(c => c.z1));
+  for (const c of blocks){ c.rm = c.ls > 0 ? c.rs / c.ls : (c.r0 + c.r1) / 2;
+    const radial = c.ms.every(m => Math.abs(m.pts[m.pts.length - 1].z - m.pts[0].z) < 0.02 && m.pts.every(q => Math.abs(q.z - m.pts[0].z) < 0.02));   // só cortes radiais: bedame / faceamento
+    c.cutAll = radial;   // bedame / faceamento: a peça se solta nessa coluna (o interno já foi mais fundo)
+    c.kind = radial || c.z1 - c.z0 < 0.05 ? "od" : c.r1 - c.r0 < 0.05 ? "face" : ((c.z1 - c.z0) < 0.65 * zLong && zFront - c.z1 < 0.35 * zLong) ? "face" : null; }
+  const lat = blocks.filter(c => !c.kind), rMid = lat.length ? lat.reduce((s, c) => s + c.rm, 0) / lat.length : (r0 + r1) / 2;
+  for (const c of lat) c.kind = c.rm >= rMid ? "od" : "id";
+  { const ids = blocks.filter(c => c.kind === "id"), rId = ids.length ? Math.max(...ids.map(c => c.r1)) : null;   // corte da peça: desce até onde a interna usinou
+    for (const c of blocks) if (c.cutAll) c.cutAll = rId === null ? c === blocks[blocks.length - 1] : c.r0 <= rId + 1e-6; }
+  const G = new Uint8Array(W * H);   // 1 = material tirado
+  for (const c of blocks){
+    const lim = new Float64Array(c.kind === "face" ? H : W).fill(c.kind === "id" ? -1 : 1e9);
+    for (const m of c.ms) for (let k = 1; k < m.pts.length; k++){
+      const a = m.pts[k - 1], b = m.pts[k], n = Math.max(1, Math.ceil(Math.hypot(b.z - a.z, b.r - a.r) / (h / 3)));
+      for (let s = 0; s <= n; s++){ const x = ix(a.z + (b.z - a.z) * s / n), y = iy(a.r + (b.r - a.r) * s / n);
+        if (c.kind === "face"){ if (y >= 0 && y < H && x < lim[y]) lim[y] = x; }
+        else if (x >= 0 && x < W){ if (c.kind === "od" ? y < lim[x] : y > lim[x]) lim[x] = y; } } }
+    if (c.kind === "face"){ for (let y = 0; y < H; y++) if (lim[y] < 1e9) for (let x = Math.max(0, lim[y]); x < W; x++) G[y * W + x] = 1; }
+    else for (let x = 0; x < W; x++){ if (c.kind === "od" ? lim[x] < 1e9 : lim[x] >= 0){ if (c.kind === "od") for (let y = c.cutAll ? 0 : Math.max(0, lim[x]); y < H; y++) G[y * W + x] = 1; else for (let y = 0; y <= Math.min(H - 1, lim[x]); y++) G[y * W + x] = 1; } }
+  }
+  // regiões livres (4-vizinhos)
+  const lab = new Int32Array(W * H), comps = []; const st = new Int32Array(W * H);
+  for (let i = 0; i < W * H; i++){ if (G[i] || lab[i]) continue;
+    const id = comps.length + 1; let sp = 0, n = 0, sz = 0, edge = false; st[sp++] = i; lab[i] = id;
+    while (sp){ const c = st[--sp], x = c % W, y = (c - x) / W; n++; sz += x;
+      if (x === 0 || x === W - 1) edge = true;   // material de trás (barra) ou da frente: não é a peça
+      if (x > 0 && !G[c - 1] && !lab[c - 1]){ lab[c - 1] = id; st[sp++] = c - 1; }
+      if (x < W - 1 && !G[c + 1] && !lab[c + 1]){ lab[c + 1] = id; st[sp++] = c + 1; }
+      if (y > 0 && !G[c - W] && !lab[c - W]){ lab[c - W] = id; st[sp++] = c - W; }
+      if (y < H - 1 && !G[c + W] && !lab[c + W]){ lab[c + W] = id; st[sp++] = c + W; } }
+    comps.push({ id, n, zc: Z0 + h * sz / n, edge }); }
+  let cand = comps.filter(c => !c.edge && c.n * h * h > 0.02);
+  if (!cand.length) throw new Error("não achei uma região de material fechada pelos trajetos (o programa faz o perfil completo e o corte da peça?)");
+  const big = Math.max(...cand.map(c => c.n)); cand = cand.filter(c => c.n >= 0.5 * big);
+  const pc = cand.sort((a, b) => b.zc - a.zc)[0];   // várias peças por ciclo: a da frente
+  const inC = (x, y) => x >= 0 && y >= 0 && x < W && y < H && lab[y * W + x] === pc.id;
+  // contorno: arestas das células da peça
+  const edges = new Map(), key = (x, y) => x + "," + y;
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++){ if (!inC(x, y)) continue;
+    if (!inC(x, y - 1)) edges.set(key(x, y), [x + 1, y]); if (!inC(x + 1, y)) edges.set(key(x + 1, y), [x + 1, y + 1]);
+    if (!inC(x, y + 1)) edges.set(key(x + 1, y + 1), [x, y + 1]); if (!inC(x - 1, y)) edges.set(key(x, y + 1), [x, y]); }
+  let best = []; const seen = new Set();
+  for (const k0 of edges.keys()){ if (seen.has(k0)) continue; const loop = []; let k = k0, g = 0;
+    while (!seen.has(k) && edges.has(k) && g++ < 1e7){ seen.add(k); const [x, y] = k.split(",").map(Number); loop.push([x, y]); const nx = edges.get(k); k = key(nx[0], nx[1]); }
+    if (loop.length > best.length) best = loop; }
+  let poly = best.map(([x, y]) => [Z0 + (x - 0.5) * h, R0 + (y - 0.5) * h]);   // canto da célula → coordenada
+  const dp = (pts, eps) => { if (pts.length < 3) return pts; const [a, b] = [pts[0], pts[pts.length - 1]]; let iM = 0, dM = 0;
+    for (let i = 1; i < pts.length - 1; i++){ const L = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1e-9, d = Math.abs((b[0] - a[0]) * (a[1] - pts[i][1]) - (a[0] - pts[i][0]) * (b[1] - a[1])) / L; if (d > dM){ dM = d; iM = i; } }
+    return dM > eps ? [...dp(pts.slice(0, iM + 1), eps).slice(0, -1), ...dp(pts.slice(iM), eps)] : [a, b]; };
+  { let i0 = 0; for (let i = 1; i < poly.length; i++) if (poly[i][0] + poly[i][1] < poly[i0][0] + poly[i0][1]) i0 = i;   // começa num canto
+    poly = [...poly.slice(i0), ...poly.slice(0, i0)];
+    let iF = 0, dF = 0; poly.forEach((q, i) => { const d = Math.hypot(q[0] - poly[0][0], q[1] - poly[0][1]); if (d > dF){ dF = d; iF = i; } });   // fechado: divide no ponto mais longe
+    poly = [...dp(poly.slice(0, iF + 1), 1.6 * h).slice(0, -1), ...dp([...poly.slice(iF), poly[0]], 1.6 * h).slice(0, -1)]; }
+  const tol = 3 * h;   // encaixa nos pontos do programa (medida exata); senão Z e raio separados nos valores do programa (cantos entre retas)
+  const near = (vs, v) => { let b = v, bd = tol; for (const w of vs){ const d = Math.abs(w - v); if (d < bd){ bd = d; b = w; } } return b; };
+  const Zs = [...new Set(P.map(q => Math.round(q[0] * 1e4) / 1e4))], Rs = [...new Set(P.map(q => Math.round(q[1] * 1e4) / 1e4))];
+  poly = poly.map(p => { let b = null, bd = tol; for (const q of P){ const d = Math.hypot(q[0] - p[0], q[1] - p[1]); if (d < bd){ bd = d; b = q; } } return b ? [b[0], b[1]] : [near(Zs, p[0]), near(Rs, p[1])]; });
+  // trechos menores que minS (sobra da grade nos cantos) → um canto só, no encontro das retas vizinhas
+  const minS = Math.max(4 * h, Math.min(0.12, 0.01 * Math.max(z1 - z0, r1 - r0)));
+  for (let it = 0, ch = true; ch && it < 500 && poly.length > 4; it++){ ch = false;
+    for (let i = 0; i < poly.length && poly.length > 4; i++){
+      const n = poly.length, a = poly[(i + n - 1) % n], b = poly[i], c = poly[(i + 1) % n], d = poly[(i + 2) % n];
+      if (Math.hypot(c[0] - b[0], c[1] - b[1]) >= minS) continue;
+      const u = [b[0] - a[0], b[1] - a[1]], v = [d[0] - c[0], d[1] - c[1]], den = u[0] * v[1] - u[1] * v[0];
+      let X = [(b[0] + c[0]) / 2, (b[1] + c[1]) / 2];
+      if (Math.abs(den) > 1e-9){ const t = ((c[0] - a[0]) * v[1] - (c[1] - a[1]) * v[0]) / den, Y = [a[0] + u[0] * t, a[1] + u[1] * t];
+        if (Math.hypot(Y[0] - b[0], Y[1] - b[1]) < 3 * minS && Math.hypot(Y[0] - c[0], Y[1] - c[1]) < 3 * minS) X = Y; }
+      X = [near(Zs, X[0]), near(Rs, X[1])];
+      if ((i + 1) % n === 0){ poly.splice(0, 1); poly[poly.length - 1] = X; } else poly.splice(i, 2, X);
+      ch = true; } }
+  poly = rev3DSimplify(poly, Math.max(2 * h, 0.01));
+  const zF = Math.max(...poly.map(q => q[0])), zB = Math.min(...poly.map(q => q[0]));
+  poly = poly.map(([z, r]) => [Math.round((zF - z) * 1000) / 1000, Math.round(r * 1000) / 1000]);
+  poly = rev3DSimplify(poly, 1e-4);
+  const ar = poly.reduce((s, p, i) => { const q = poly[(i + 1) % poly.length]; return s + p[0] * q[1] - q[0] * p[1]; }, 0);
+  if (ar < 0) poly.reverse();
+  return { poly, L: Math.round((zF - zB) * 1000) / 1000, pecas: cand.length };
+}
+// ---- desenho do programa: TOLERÂNCIAS do perfil padrão mais parecido (usuário 16/11/2026) ----
+// Monta cada perfil padrão com as mesmas medidas (Ø int., Ø ext., altura), compara o formato da secção com a do programa
+// (sobreposição numa grade normalizada, nos dois sentidos) e pergunta de qual perfil usar as tolerâncias. Só lê os perfis:
+// não muda nada neles.
+const PROG_TOL_TYPES = ["psa108","psa109","psg101","psg103","psg104","dp","dhr","lip","dpr","pso","pse106","psh106","psh108","psh117","psh105","pse105","pse107","psh107","psh103","pse103","pse118","psh121","psh125","psr211","psr212"];
+function progTolProfile(t, di, de, L){
+  const type = t === "dp" ? "iso" : t, p = profDefaults(type), d0 = { h: p.h, hb: p.hb };
+  p.tipoGen = type; if (t === "dp") p.tipoP = "dp";
+  const sec = (de - di) / 2;
+  if (type === "lip"){ p.dint = di; p.sec = sec; p.dext = de; }
+  else if (type === "dpr"){ p.dext = de; p.sec = sec; p.dint = di; }
+  else if (type === "pso"){ p.dint = di; p.sec = sec; p.dext = de; }
+  else { p.dint = di; p.dext = de; }
+  p.h = type === "pso" ? sec : L;
+  if (["psr211","psr212"].includes(type) && d0.hb > 0) p.hb = xround(L * d0.hb / d0.h, 2);
+  if (isPSA(type)) psaFill(p);
+  if ((type === "lip" || type === "dpr") && typeof lipFill === "function") try { lipFill(p); } catch(e){}
+  return p;
+}
+function progTolsOf(t, p){
+  const T = {}, set = (k, S, I) => T[k] = [S, I], has = k => p[k + "S"] !== undefined && p[k + "S"] !== "";
+  if (isPSA(p.tipoGen)){ psaTolFill(p); ["ti","te","th"].forEach(k => set(k, p[k + "S"], p[k + "I"])); if (isPSG(p.tipoGen)) set("ts", 0, -0.05); else set("ts", 0.1, -0.1); }   // secção como no desenho padrão: PSG 0/−0,05 · PSA ±0,1
+  else if (t === "lip" || t === "dpr"){ lipTolFill(p); ["ti","te","th"].forEach(k => set(k, p[k + "S"], p[k + "I"])); set("ts", 0.1, -0.05); }   // DH / DPR / DHR / DP: secção +0,1/−0,05
+  else if (t === "dhr"){ set("ti", 0, -dTol(0.1)); set("te", 0, -dTol(0.1)); set("th", 0, -0.1); set("ts", 0.1, -0.05); }
+  else if (t === "dp"){ set("ti", dhTolVal(p.dint), 0); set("te", dhTolVal(p.dext), 0); set("th", 0, -0.1); set("ts", 0.1, -0.05); }
+  else if (t === "pso"){ const pk = parkerTol(Number(p.dint) || 0, Number(p.sec) || 0); set("ti", 0, -dTol(pk.idTol)); set("th", pk.wTol, -pk.wTol); set("ts", pk.wTol, -pk.wTol); }
+  else { const G = ["psr211","psr212"].includes(t) ? psr211Geom(p) : pseFscGeom(p);
+    set("ti", G.tol.A, -G.tol.A); set("te", G.tol.D, -G.tol.D); set("th", 0, -Math.min(G.tol.sec, 0.4)); set("ts", G.tol.sec, -G.tol.sec); }
+  return T;
+}
+function progTolRank(poly, L){
+  const rmin = Math.min(...poly.map(q => q[1])), rmax = Math.max(...poly.map(q => q[1]));
+  const NX = 48, NY = 32, inPoly = (P, x, y) => { let c = false; for (let i = 0, j = P.length - 1; i < P.length; j = i++){ const [xi, yi] = P[i], [xj, yj] = P[j]; if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) c = !c; } return c; };
+  const grid = P => { const a = Math.min(...P.map(q => q[0])), b = Math.max(...P.map(q => q[0])), c = Math.min(...P.map(q => q[1])), d = Math.max(...P.map(q => q[1]));
+    const N = P.map(([z, r]) => [(z - a) / ((b - a) || 1), (r - c) / ((d - c) || 1)]), g = new Uint8Array(NX * NY);
+    for (let y = 0; y < NY; y++) for (let x = 0; x < NX; x++) g[y * NX + x] = inPoly(N, (x + 0.5) / NX, (y + 0.5) / NY) ? 1 : 0; return g; };
+  const iou = (A, B, flip) => { let i = 0, u = 0; for (let y = 0; y < NY; y++) for (let x = 0; x < NX; x++){ const a = A[y * NX + x], b = B[y * NX + (flip ? NX - 1 - x : x)]; i += a && b; u += a || b; } return u ? i / u : 0; };
+  const G0 = grid(poly), out = [];
+  for (const t of PROG_TOL_TYPES){ try {
+    const p = progTolProfile(t, 2 * rmin, 2 * rmax, L), pr = profileOf(p);
+    if (!pr || pr.length < 3 || pr.some(q => !isFinite(q[0]) || !isFinite(q[1]))) continue;
+    const g = grid(pr), sc = Math.max(iou(G0, g, false), iou(G0, g, true));
+    out.push({ t, name: t === "dp" ? "PSE 108 (DP)" : profCode(t), sc, p }); } catch(e){} }
+  return out.sort((a, b) => b.sc - a.sc);
+}
+function progTolApply(q, it){
+  for (const k of ["ti","te","th","ts"]){ q[k + "S"] = ""; q[k + "I"] = ""; }
+  q.tolFrom = ""; q.tolSec = null;
+  if (it){ const T = progTolsOf(it.t, it.p); for (const k of ["ti","te","th"]) if (T[k]){ q[k + "S"] = T[k][0]; q[k + "I"] = T[k][1]; }
+    q.tolFrom = it.name; q.tolSec = T.ts || null; }
+}
+// material do desenho do programa (usuário 16/11/2026): pergunta junto com as tolerâncias; sugere o ;MATERIAL do programa
+function progMatGuess(){ try { const m = /;MATERIAL:\s*(?:USER DEFINED\s+)?(.+?)(?:\s+[\d.]+\/[\d.]+.*|\s+-\s+.*)?$/im.exec(currentText().split("\n").slice(0, 12).join("\n")); return m && m[1].trim() ? m[1].trim().toUpperCase() : ""; } catch(e){ return ""; } }
+function progMatSet(mat){ const a = document.querySelector("#dwgFields [data-d=mat]"); if (a) a.value = mat; const b = document.querySelector("#pvSide [data-dd=mat]"); if (b) b.value = mat; }
+function progTolAsk(q, rank, done, std){
+  const old = $("ptModal"); if (old) old.remove();
+  const m = document.createElement("div"); m.id = "ptModal";
+  m.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;display:flex;align-items:flex-start;justify-content:center;padding:60px 12px";
+  const top = rank.slice(0, 8), pc = v => Math.round(v * 100) + " %";
+  const tt = it => { const T = progTolsOf(it.t, it.p), s = k => T[k] ? (Math.abs(T[k][0] + T[k][1]) < 1e-9 && T[k][0] ? "±" + fmtN(T[k][0], 2) : `${tolStr(T[k][0])}/${tolStr(T[k][1])}`) : "—"; return `Ø int. ${s("ti")} · Ø ext. ${s("te")} · altura ${s("th")}${T.ts ? " · secção " + s("ts") : ""}`; };
+  m.innerHTML = `<form id="ptForm" style="background:#fff;border-radius:12px;padding:18px 20px;width:min(520px,100%);display:flex;flex-direction:column;gap:10px;font:14px Segoe UI,Arial;color:#222">
+    <b style="font-size:17px">Desenho do programa</b>
+    <label style="display:flex;flex-direction:column;gap:4px;font-weight:600">Material da peça (vai no desenho)
+      <input id="ptMat" list="ptMatL" value="${esc(progMatGuess())}" placeholder="ex.: PU, NBR, PTFE…" style="padding:8px 10px;border:1px solid #bbb;border-radius:8px;font:15px Segoe UI,Arial;font-weight:400">
+      <datalist id="ptMatL">${["PU","PU 95 SHORE A","NBR","VITON","PTFE","PTFE + BRONZE","PTFE + FIBRA DE VIDRO","PTFE + GRAFITE","POM","NYLON","PEAD","UHMW","CELERON"].map(m => `<option value="${m}">`).join("")}</datalist></label>
+    <b style="font-size:15px;margin-top:4px">Tolerâncias</b>
+    <span>Perfil mais parecido com o programa: <b>${esc(top[0] ? top[0].name : "—")}</b>${top[0] ? ` (${pc(top[0].sc)} igual no formato)` : ""}. Usar as tolerâncias de:</span>
+    <select id="ptSel" style="padding:8px;border:1px solid #bbb;border-radius:8px;font:15px Segoe UI,Arial">${top.map((it, i) => `<option value="${i}">${esc(it.name)} — ${pc(it.sc)}</option>`).join("")}<option value="-1">Sem tolerância</option></select>
+    <span id="ptTxt" style="color:#555;font-size:13px"></span>
+    ${std ? `<label style="display:flex;gap:8px;align-items:flex-start;background:#f5f7fa;border-radius:8px;padding:8px"><input type="checkbox" id="ptStd" checked style="margin-top:3px"><span><b>Usar o desenho padrão do ${esc(std.name)}</b> com as medidas do programa (${esc(std.txt)}). ${std.dev <= 0.01 ? "O formato bate com o programa." : `<b style="color:#b2221f">Diferença do programa: até ${fmtN(std.dev, 2)} mm</b> (detalhe que o desenho padrão não tem, ex.: chanfro a mais).`}</span></label>` : ""}
+    <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn primary" type="submit">OK</button></div></form>`;
+  document.body.appendChild(m);
+  const upd = () => { const i = Number($("ptSel").value); $("ptTxt").textContent = i >= 0 ? tt(top[i]) : "Cotas sem tolerância (só a tolerância geral)."; };
+  $("ptSel").onchange = upd; upd();
+  if (std) $("ptSel").addEventListener("change", () => { const c = $("ptStd"); if (c) c.disabled = top[Number($("ptSel").value)]?.t !== std.t; });
+  setTimeout(() => { const mi = $("ptMat"); if (mi){ mi.focus(); mi.select(); } }, 30);
+  $("ptForm").onsubmit = e => { e.preventDefault(); const i = Number($("ptSel").value);
+    const mat = $("ptMat").value.trim().toUpperCase(); if (!mat){ $("ptMat").focus(); $("ptMat").style.borderColor = "#b2221f"; $("ptMat").placeholder = "escreva o material da peça"; return; }
+    progMatSet(mat); q.mat = mat; if (std) std.p.mat = mat;
+    if (std && $("ptStd") && $("ptStd").checked && !$("ptStd").disabled){ m.remove(); return done(std.p); }
+    progTolApply(q, i >= 0 ? top[i] : null); m.remove(); done(); };
+}
+// desenho do programa → DESENHO PADRÃO do PSH 129 (usuário 16/11/2026): tira do programa as medidas do perfil (Ø int., secção,
+// altura, rebaixo C × D, flanco do lábio, base, chanfro), monta o PSH 129 e confere o formato (oferece até 0,3 mm de diferença,
+// ex.: chanfro na entrada do rebaixo que o padrão não tem — a janela mostra a diferença).
+// poly: (a, r) com a = distância da face da frente (a do rebaixo).
+function progFitLip(poly, L, nome){
+  const rmin = Math.min(...poly.map(q => q[1])), rmax = Math.max(...poly.map(q => q[1])), n = poly.length, E = [];
+  for (let i = 0; i < n; i++){ const p = poly[i], q = poly[(i + 1) % n]; E.push({ p, q, hor: Math.abs(p[1] - q[1]) < 1e-4, ver: Math.abs(p[0] - q[0]) < 1e-4, len: Math.hypot(q[0] - p[0], q[1] - p[1]) }); }
+  // rebaixo: reta no eixo por dentro (entre o lábio e o externo), começando perto da face da frente
+  const st = E.filter(e => e.hor && e.p[1] > rmin + 1e-3 && e.p[1] < rmax - 1e-3 && Math.min(e.p[0], e.q[0]) < 0.6 * L).sort((a, b) => b.len - a.len)[0];
+  if (!st) return null;
+  const rS = st.p[1], b = Math.max(st.p[0], st.q[0]);
+  const tips = poly.filter(q => Math.abs(q[1] - rmin) < 1e-4).map(q => q[0]), aTip = Math.min(...tips);
+  const back = poly.filter(q => Math.abs(q[0] - L) < 1e-4).map(q => q[1]), rBack = Math.min(...back);
+  const front = poly.filter(q => Math.abs(q[0]) < 1e-4).map(q => q[1]), ch = xround(rmax - Math.max(...front), 3);
+  if (!(aTip > b) || !(rS > rmin) || !(rBack >= rmin)) return null;
+  const sec = xround(rmax - rmin, 3), p = progTolProfile("lip", 2 * rmin, 2 * rmax, L);
+  Object.assign(p, { dint: xround(2 * rmin, 3), sec, dext: xround(2 * rmax, 3), h: xround(L, 3), h2: xround(rmax - rS, 3), b: xround(b, 3),
+    af: xround(90 + Math.atan2(aTip - b, rS - rmin) * 180 / Math.PI, 2), ab: xround(Math.atan2(rBack - rmin, L - aTip) * 180 / Math.PI, 2), ch: ch > 0 ? xround(ch, 2) : 0,
+    desc: nome, mat: "", matA: "", from3D: nome });   // material: NÃO vem do padrão do perfil (era PU) — campo Material do cabeçalho ou ;MATERIAL do programa
+  for (const k of ["ti","te","th","ts"]){ p[k + "S"] = ""; p[k + "I"] = ""; }
+  lipTolFill(p);
+  // confere: perfil do PSH 129 com essas medidas × programa (a mesma orientação: a = −H − z' … z' = −H − z → a = −z)
+  let dev = 0; try { const pr = lipProfile(p).map(([z, r]) => [-p.h - z, r]).map(([z, r]) => [-z, r]);
+    const dist = (P, Q) => Math.max(...P.map(a => Math.min(...Q.map((b, i) => { const c = Q[(i + 1) % Q.length], dx = c[0] - b[0], dy = c[1] - b[1], l2 = dx * dx + dy * dy || 1e-12, t = Math.max(0, Math.min(1, ((a[0] - b[0]) * dx + (a[1] - b[1]) * dy) / l2)); return Math.hypot(a[0] - b[0] - t * dx, a[1] - b[1] - t * dy); }))));
+    dev = Math.max(dist(poly, pr), dist(pr, poly)); } catch(e){ return null; }
+  return { p, dev };
+}
+function progDrawing(){
+  try {
+    if (!state.moves || !state.moves.length) throw new Error("abra ou gere um programa primeiro");
+    const nome = String(state.header || state.fileName || "PROGRAMA").replace(/^%/, "").replace(/,.*$/, "").replace(/\s*\([^)]*$/, "").trim() || "PROGRAMA";   // "%PSH 129 4-22 NOVO (D,MX---," → "PSH 129 4-22 NOVO"
+    const { poly, L, pecas } = progSection(state.moves, state.tube);
+    // igual à usinagem (usuário 16/11/2026): face da frente (Z0) à DIREITA, como no simulador → espelha (a' = L − a)
+    const pm = poly.map(([a, r]) => [Math.round((L - a) * 1000) / 1000, r]).reverse();
+    const p = rev3DParams(nome, pm, L, `do programa (${state.fileName || nome})`);
+    { const base = Object.getOwnPropertyDescriptor(p, "customNotes").get;
+      Object.defineProperty(p, "customNotes", { get(){ const t = this.tolSec; return base.call(this).replace(/ · cotas em mm$/, "") + (this.tolFrom ? ` · tolerâncias como ${this.tolFrom}` : "") + " · cotas em mm"; }, configurable: true }); }
+    state.genParams = p; errHide();
+    const rank = progTolRank(pm, L); let std = null;
+    if (rank[0] && rank[0].t === "lip"){ const fit = progFitLip(poly, L, nome);
+      if (fit && fit.dev <= 0.3) std = { t: "lip", name: rank[0].name, p: fit.p, dev: fit.dev, txt: `Ø${fv3(fit.p.dint)} · secção ${fv3(fit.p.sec)} · altura ${fv3(fit.p.h)} · rebaixo ${fv3(fit.p.h2)} x ${fv3(fit.p.b)} · flanco ${fmtN(fit.p.af - 90, 1)}° · base ${fmtN(fit.p.ab, 1)}° · chanfro ${fv3(fit.p.ch)}` }; }
+    progTolAsk(p, rank, sp => { if (sp) state.genParams = sp; openPreview(); }, std);
+    $("genMsg").textContent = `Desenho do programa: ${nome}${pecas > 1 ? ` · ${pecas} peças no ciclo (desenho da 1ª)` : ""}. Programa sem G41/G42 muda a medida pelo raio da ponta — confira as cotas.`; $("genMsg").style.color = "";
+  } catch(e){ errShow("Desenho do programa", e); }
+}
+// número digitado → procura no Programas_CNC (como o ✏️ Alterar programa) → abre no simulador → desenho
+async function progDrawingNum(num){
+  const msg = t => { $("genMsg").textContent = t; $("genMsg").style.color = ""; };
+  try {
+    let dir = await progDir(false, true); if (!dir) dir = await progDir(false, false);
+    if (!dir) throw new Error("sem acesso à pasta Programas_CNC");
+    msg(`Procurando ${num} no Programas_CNC…`);
+    const f = await altFind(dir, num, msg);
+    if (!f) throw new Error(`não achei o programa ${num} (*.PIT) no Programas_CNC`);
+    load(await (await f.fh.getFile()).text(), f.name);
+    progDrawing();
+  } catch(e){ errShow("Desenho do programa", e); }
+}
+$("btnProgDes").onclick = () => {
+  const old = $("pdModal"); if (old) old.remove();
+  const m = document.createElement("div"); m.id = "pdModal";
+  m.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;display:flex;align-items:flex-start;justify-content:center;padding:60px 12px";
+  const inp = "width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid #bbb;border-radius:8px;font:15px Segoe UI,Arial";
+  m.innerHTML = `<form id="pdForm" style="background:#fff;border-radius:12px;padding:18px 20px;width:min(420px,100%);display:flex;flex-direction:column;gap:10px;font:14px Segoe UI,Arial;color:#222">
+    <b style="font-size:17px">📐 Desenho do programa</b>
+    <label>Número do programa (Programas_CNC)<input id="pdNum" style="${inp}" inputmode="numeric" placeholder="ex.: 046158"></label>
+    <span style="color:#666;font-size:12px">Procura o programa no Programas_CNC, abre no simulador e faz a folha de desenho com as cotas. Em branco = o programa que já está aberto na tela.</span>
+    <span id="pdErr" style="color:#b2221f"></span>
+    <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn" type="button" id="pdCancel">Cancelar</button><button class="btn primary" type="submit">Fazer desenho</button></div></form>`;
+  document.body.appendChild(m);
+  m.onclick = e => { if (e.target === m) m.remove(); };
+  $("pdCancel").onclick = () => m.remove(); $("pdNum").focus();
+  $("pdForm").onsubmit = e => { e.preventDefault();
+    let num = $("pdNum").value.trim().replace(/\.pit$/i, "");
+    if (!num){ if (!state.moves || !state.moves.length) return $("pdErr").textContent = "Digite o número (não tem programa aberto na tela)."; m.remove(); return progDrawing(); }
+    if (/^\d{1,6}$/.test(num)) num = num.padStart(6, "0");
+    if (!/^\d{6}/.test(num)) return $("pdErr").textContent = "Digite o número do programa (ex.: 046158).";
+    m.remove(); progDrawingNum(num.slice(0, 6));   // ainda dentro do clique: pode pedir a pasta Programas_CNC
+  };
+};
 $("btn3D").onclick = () => $("file3D").click();
 $("file3D").onchange = e => { const f = e.target.files && e.target.files[0]; e.target.value = ""; if (f) rev3DOpen(f); };
 // arrastar o .stl para qualquer lugar da tela

@@ -5,6 +5,7 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - CORREÇÃO (5.0.x): conserto de erro, ajuste de regra pequena.
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
+
 ## 5.52.1 — Ferramentas: o D (corretor) é o código principal (16/11/2026)
 - Usuário: o D é fixo e identifica a ferramenta; o T muda conforme a máquina. Na aba Torre CNC (agora "corretores D") cada
   ferramenta aparece com o **D em destaque** (T2D13 menor ao lado), a linha diz "Corretor D13 (fixo) · posição T2 (muda

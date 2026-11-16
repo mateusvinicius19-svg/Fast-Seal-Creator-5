@@ -345,6 +345,7 @@ body.printing #dwgModal .dwgf{display:none}
     <button class="btn icon" id="pvZoomIn" title="Aumentar">+</button>
     <button class="btn" id="pvFit">Página inteira</button>
     <button class="btn" id="pvClose">Voltar</button>
+    <button class="btn" id="pvSave3D" style="display:none" title="Salva o PDF em W:\Parts\PartsSeals\PROJETOS\DESENHOS\<família>\<peça> <programa>\ (como os perfis padrão)">&#x1F4BE; Salvar no W:</button>
     <button class="btn primary" id="pvPrint">&#x1F5A8; Imprimir / PDF</button>
   </div>
   <div class="pvbody"><div class="pvstage" id="pvStage"><div class="pvpage" id="pvPage"></div></div><aside class="pvside" id="pvSide"></aside></div>
@@ -3069,7 +3070,7 @@ function desenhoFolderName(p, num){
   const a = key => (p.alojDone && p.alojK === key && p.alojH0 > 0) ? p.alojH0 : p[key];
   // n arredonda (DH: 47,62 + 2 × 3,24 dava 54.099999999999994 — usuário 09/11)
   const n = v => String(+Number(v).toFixed(3)), dims = p.tipoGen === "pso" ? [p.sec, p.dint] : p.tipoGen === "psr101" ? [p.dint, p.dext, p.h1, p.h2, p.h] : p.tipoGen === "psr102" ? [p.dint, p.dext, a("hh"), p.h] : ["psr211","psr212"].includes(p.tipoGen) ? [p.dint, p.dext, a("hb"), p.h] : [p.dint, p.dext, a("h")];
-  return `${desBase(p)} (${dims.map(n).join(" X ")}) ${String(num).replace(/^0+(?=\d)/, "")}`;
+  return `${desBase(p)} (${dims.map(n).join(" X ")}) ${String(num).replace(/^0+(?=\d)/, "")}`.replace(/\s+$/, "");
 }
 function desDir(forceNew, silent){ return pickDir("dirDesenhos", "desenhos", forceNew, silent, "DESENHOS"); }
 async function isDesenhosDir(dd){ for (const n of ["PSA 108", "PSE 106", "PSH 106"]) { try { await dd.getDirectoryHandle(n); return true; } catch(e){} } return false; }
@@ -5143,10 +5144,33 @@ $("file3D").onchange = e => { const f = e.target.files && e.target.files[0]; e.t
 // arrastar o .stl para qualquer lugar da tela
 window.addEventListener("dragover", e => { if (e.dataTransfer && [...(e.dataTransfer.items || [])].some(i => i.kind === "file")) e.preventDefault(); });
 window.addEventListener("drop", e => { const f = e.dataTransfer && [...(e.dataTransfer.files || [])].find(x => /\.stl$/i.test(x.name)); if (f){ e.preventDefault(); rev3DOpen(f); } });
+// v5.54.0 (usuário 16/11/2026): desenho do 3D (itens fora de padrão) salva no W: como os perfis padrão:
+// DESENHOS\<família = descrição>\<descrição (Ø int X Ø ext X largura) programa>\….pdf + pedido ARGUS se tiver Cód. interno
+$("pvSave3D").onclick = async () => {
+  const p = state.genParams; if (!p || !p.from3D) return;
+  const fam = prompt("Família / pasta em DESENHOS (ex.: VEDADOR, PSE 124 E, PSO 11 E R):", p.desc || "");
+  if (fam === null) return;
+  const famT = fam.trim().toUpperCase().replace(/[\\/:*?"<>|]/g, "-"); if (!famT){ alert("Escreva a família (nome da pasta)."); return; }
+  if (famT !== p.desc){ p.desc = famT; rerenderDrawing(); }
+  const progEl = document.querySelector("#dwgFields input[data-d=prog]"), pvProg = document.querySelector("#pvSide [data-dd=prog]");
+  let num = String((progEl && progEl.value) || (pvProg && pvProg.value) || "").trim();
+  if (!num){ const v = prompt("Número do programa (vazio = desenho sem programa):", ""); if (v === null) return; num = v.trim(); }
+  if (num && !/^\d+$/.test(num)){ alert(`"${num}" não é número de programa.`); return; }
+  const codEl = document.querySelector("#dwgFields [data-d=cod]");
+  if (codEl && !codEl.value.trim()){ const v = prompt("Cód. interno do item (vai no desenho e no Anexo 1 do ARGUS; vazio = sem):", ""); if (v === null) return; codEl.value = v.trim(); const pc = document.querySelector("#pvSide [data-dd=cod]"); if (pc) pc.value = codEl.value; }
+  rerenderDrawing();
+  try {
+    let dd = await desDir(false, true); if (!dd) dd = await desDir(false, false);
+    const m = await saveDrawingPdf(p, num, dd);
+    $("genMsg").textContent = "Desenho do 3D" + m + "."; $("genMsg").style.color = /NÃO|não salvo/.test(m) ? "#b2221f" : "";
+    alert(("Desenho do 3D" + m).replace(/ · /g, "\n"));
+  } catch(e){ errShow("Erro ao salvar o desenho do 3D", e); }
+};
 function openPreview(){
   if (!state.genParams) return;
   $("pvPage").innerHTML = drawingSVG(state.genParams);
   pvZoom = 1; $("pvModal").classList.add("show"); buildPvSide(); pvLayout();
+  $("pvSave3D").style.display = state.genParams.from3D ? "" : "none";   // v5.54.0: desenho do 3D salva no W:
 }
 $("pvClose").onclick = () => $("pvModal").classList.remove("show");
 $("pvZoomIn").onclick = () => { pvZoom = Math.min(4, pvZoom * 1.25); pvLayout(); };

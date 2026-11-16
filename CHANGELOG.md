@@ -6,14 +6,9 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
-## 5.58.0 — 📐 Desenho do programa (16/11/2026)
-- Botão novo "📐 Desenho do programa": lê o programa aberto (Abrir arquivo) ou gerado e faz a folha de desenho com cotas
-  automáticas (o mesmo desenho do 3D/Inventor, com "Salvar no W:"). Para peças sem perfil padrão no Simulador.
-- Como: simula a usinagem numa grade — cada ferramenta tira material do lado de onde vem (externa por fora, interna por
-  dentro, de face pela frente, bedame radial); a peça é o material que sobra (a da frente, se o ciclo tem várias). O contorno
-  encaixa nas medidas do programa. Programa com G41/G42 = medida da peça; sem compensação, a ponta da ferramenta muda a medida.
-- Conferido com os 31 perfis padrão (Ø int., Ø ext. e altura iguais aos do programa). NÃO muda nada dos perfis padrão
-  (31 programas iguais; teste do 3D ok).
+## 5.58.1 — Desenho do programa sai do Simulador até o teste (16/11/2026)
+- O usuário quer testar antes: o botão "📐 Desenho do programa" (5.58.0) foi retirado da versão normal. O teste é numa cópia
+  separada ("Simulador CNC - TESTE desenho do programa.html"). O Simulador fica igual ao 5.57.3.
 
 ## 5.57.3 — PSE 125 (DPR): imagem certa na janela "Escolha o perfil" (16/11/2026)
 - Troca a miniatura do PSE 125 (DPR) pela imagem enviada pelo usuário (lábio por fora, O-ring por dentro). Programas iguais.

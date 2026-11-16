@@ -236,7 +236,7 @@ body.printing #dwgModal .dwgf{display:none}
         <button class="btn primary" id="btnCopy" style="display:none">&#x29C9; Copiar</button>
         <button class="btn" id="btnSave" title="Salva o Fagor (.PIT) no Programas_CNC e a versão convertida (.txt) no MCS 500">&#x1F4BE; Salvar Fagor + MCS 500</button><button class="btn" id="btnPreview" style="display:none" title="Ver o desenho desta peça antes de salvar (não salva nada e não pede o código)">&#x1F441; Ver desenho</button><button class="btn" id="btnCopyMcs" style="display:none" title="Copia a versão convertida para o MCS 500">&#x29C9; Copiar MCS</button><button class="btn" id="btnDirRoot" style="display:none" title="Pasta única W:\Parts\PartsSeals\PROJETOS (tem Programas_CNC, MCS 500 e DESENHOS): escolha uma vez; nos outros dias é só clicar e Permitir">&#x1F513; PROJETOS</button><button class="btn" id="btnDirProg" style="display:none" title="Escolher a pasta W:\Parts\PartsSeals\PROJETOS\Programas_CNC">&#x1F4C1; Programas_CNC</button><button class="btn" id="btnDirMcs" style="display:none" title="Escolher a pasta W:\Parts\PartsSeals\PROJETOS\Programas_CNC\MCS 500">&#x1F4C1; MCS 500</button><button class="btn" id="btnAlt" title="Abrir um programa do Programas_CNC pelo número e refazer com outra bucha (salva como NNNNNN BIxBO — o original não muda)">&#x270F;&#xFE0F; Alterar programa</button><button class="btn" id="btnVer" title="Digitar o número e ver o programa e as variantes (NNNNNN BIxBO...)">&#x1F50E; Ver programa</button><button class="btn" id="btnHist" title="Programas salvos pelo Simulador (Programas_CNC\Historico Simulador CNC.csv)">&#x1F4CB; Histórico</button><button class="btn" id="btnDirDes" title="Escolher a pasta W:\Parts\PartsSeals\PROJETOS\DESENHOS">&#x1F4C1; DESENHOS</button>
         <button class="btn" id="btnDraw" style="display:none">&#x1F4D0; Desenho</button>
-        <button class="btn" id="btnProgDes" title="Desenho a partir do programa aberto/gerado: simula a usinagem e cota a peça que sobra (como o desenho do 3D).">&#x1F4D0; Desenho do programa</button><button class="btn" id="btn3D" title="Desenho a partir do 3D do Inventor: no Inventor, Arquivo → Exportar → Formato CAD → STL (mm). Também dá para arrastar o .stl para a tela.">&#x1F9CA; Desenho do 3D (Inventor)</button><input type="file" id="file3D" accept=".stl" style="display:none">
+        <button class="btn" id="btn3D" title="Desenho a partir do 3D do Inventor: no Inventor, Arquivo → Exportar → Formato CAD → STL (mm). Também dá para arrastar o .stl para a tela.">&#x1F9CA; Desenho do 3D (Inventor)</button><input type="file" id="file3D" accept=".stl" style="display:none">
         <span class="note" id="genMsg"></span>
       </div>
     </details>
@@ -5187,7 +5187,7 @@ function rev3DViews(M){
     return g;
   };
 }
-function rev3DParams(name, poly, L, fonte){
+function rev3DParams(name, poly, L){
   const rmin = Math.min(...poly.map(q => q[1])), rmax = Math.max(...poly.map(q => q[1])), f = v => fv3(v);
   const M = { poly, L };
   const desc = String(name || "PEÇA").replace(/\.(stl|STL)$/, "").replace(/\s*\(.*$/, "").toUpperCase() || "PEÇA";
@@ -5195,7 +5195,7 @@ function rev3DParams(name, poly, L, fonte){
   const views = rev3DViews(M);
   const p = { tipoGen: "custom", desc, mat: "", dint: 2 * rmin, dext: 2 * rmax, h: L, from3D: name,
     customProfile: poly.map(([a, r]) => [-a, r]), customViews: views, customTools: [],
-    get customNotes(){ return `${desc} ${dims} · desenho gerado ${fonte || `do 3D (${name})`}` + (M.skipped && M.skipped.length ? ` · Ø também: ${M.skipped.map(r => f(2 * r)).join(" / ")}` : "") + " · cotas em mm"; } };
+    get customNotes(){ return `${desc} ${dims} · desenho gerado do 3D (${name})` + (M.skipped && M.skipped.length ? ` · Ø também: ${M.skipped.map(r => f(2 * r)).join(" / ")}` : "") + " · cotas em mm"; } };
   return p;
 }
 function rev3DFlip(p){ const L = p.h, poly = p.customProfile.map(([z, r]) => [L + z, r]).reverse(); const q = rev3DParams(p.from3D, poly, L); q.desc = p.desc; q.mat = p.mat; return q; }
@@ -5209,113 +5209,6 @@ async function rev3DOpen(file){
     $("genMsg").textContent = `Desenho do 3D: ${name} · ${state.genParams.customNotes}. Confira as cotas; "Imprimir / PDF" salva o PDF.`; $("genMsg").style.color = "";
   } catch(e){ errShow("Erro ao ler o 3D", e); }
 }
-// ---- v5.58.0 (usuário 16/11/2026): DESENHO A PARTIR DO PROGRAMA — simula a usinagem numa grade (Z × raio): os trajetos de
-// corte (G1/G2/G3) tiram material do lado de onde a ferramenta vem (externa/interna/face/bedame); a peça é o material que
-// sobra (a da frente, se tiver várias no ciclo). Não muda nada dos perfis padrão (só lê o programa aberto/gerado). Contorno → pontos do programa → mesmo desenho com cotas do 3D (rev3DParams).
-// Programa com G41/G42 = trajeto no contorno da peça (cotas certas); sem compensação a ponta da ferramenta muda a medida.
-function progSection(moves, tube){
-  const cuts = moves.filter(m => m.type !== 0 && m.len > 1e-9);
-  if (!cuts.length) throw new Error("o programa não tem movimentos de corte (G1/G2/G3)");
-  let z0 = 1e9, z1 = -1e9, r0 = 1e9, r1 = -1e9; const P = [];
-  for (const m of cuts) for (const q of m.pts){ if (q.z < z0) z0 = q.z; if (q.z > z1) z1 = q.z; if (q.r < r0) r0 = q.r; if (q.r > r1) r1 = q.r; P.push([q.z, q.r]); }
-  const mg = Math.max(0.5, 0.03 * Math.max(z1 - z0, r1 - r0));
-  const R0 = tube && tube.i > 0 && tube.i / 2 < r0 ? tube.i / 2 : Math.max(0, r0 - mg), R1 = tube && tube.o / 2 > r1 ? tube.o / 2 : r1 + mg;
-  const Z0 = z0 - mg, Z1 = z1 + mg;
-  let h = Math.max(0.005, Math.sqrt((Z1 - Z0) * (R1 - R0) / 3e6)); h = Math.min(h, 0.05);
-  const W = Math.ceil((Z1 - Z0) / h) + 1, H = Math.ceil((R1 - R0) / h) + 1;
-  const ix = z => Math.round((z - Z0) / h), iy = r => Math.round((r - R0) / h);
-  // cada ferramenta (bloco de cortes seguidos) tira material de um lado: EXTERNA tira de fora (raio ≥ trajeto), INTERNA de dentro
-  // (raio ≤ trajeto), de FACE (canal na frente, O-ring na face) pela frente (Z ≥ trajeto); bedame (corte radial) = externa
-  const blocks = []; let cb = null;
-  for (const m of cuts){ if (!cb || cb.tool !== m.tool){ cb = { tool: m.tool, ms: [], z0: 1e9, z1: -1e9, r0: 1e9, r1: -1e9, rs: 0, ls: 0 }; blocks.push(cb); }
-    cb.ms.push(m); for (const q of m.pts){ cb.z0 = Math.min(cb.z0, q.z); cb.z1 = Math.max(cb.z1, q.z); cb.r0 = Math.min(cb.r0, q.r); cb.r1 = Math.max(cb.r1, q.r); }
-    for (let k = 1; k < m.pts.length; k++){ const l = Math.hypot(m.pts[k].z - m.pts[k - 1].z, m.pts[k].r - m.pts[k - 1].r); cb.rs += l * (m.pts[k].r + m.pts[k - 1].r) / 2; cb.ls += l; } }
-  const zLong = Math.max(...blocks.map(c => c.z1 - c.z0)), zFront = Math.max(...blocks.map(c => c.z1));
-  for (const c of blocks){ c.rm = c.ls > 0 ? c.rs / c.ls : (c.r0 + c.r1) / 2;
-    const radial = c.ms.every(m => Math.abs(m.pts[m.pts.length - 1].z - m.pts[0].z) < 0.02 && m.pts.every(q => Math.abs(q.z - m.pts[0].z) < 0.02));   // só cortes radiais: bedame / faceamento
-    c.kind = radial || c.z1 - c.z0 < 0.05 ? "od" : c.r1 - c.r0 < 0.05 ? "face" : ((c.z1 - c.z0) < 0.65 * zLong && zFront - c.z1 < 0.35 * zLong) ? "face" : null; }
-  const lat = blocks.filter(c => !c.kind), rMid = lat.length ? lat.reduce((s, c) => s + c.rm, 0) / lat.length : (r0 + r1) / 2;
-  for (const c of lat) c.kind = c.rm >= rMid ? "od" : "id";
-  const G = new Uint8Array(W * H);   // 1 = material tirado
-  for (const c of blocks){
-    const lim = new Float64Array(c.kind === "face" ? H : W).fill(c.kind === "id" ? -1 : 1e9);
-    for (const m of c.ms) for (let k = 1; k < m.pts.length; k++){
-      const a = m.pts[k - 1], b = m.pts[k], n = Math.max(1, Math.ceil(Math.hypot(b.z - a.z, b.r - a.r) / (h / 3)));
-      for (let s = 0; s <= n; s++){ const x = ix(a.z + (b.z - a.z) * s / n), y = iy(a.r + (b.r - a.r) * s / n);
-        if (c.kind === "face"){ if (y >= 0 && y < H && x < lim[y]) lim[y] = x; }
-        else if (x >= 0 && x < W){ if (c.kind === "od" ? y < lim[x] : y > lim[x]) lim[x] = y; } } }
-    if (c.kind === "face"){ for (let y = 0; y < H; y++) if (lim[y] < 1e9) for (let x = Math.max(0, lim[y]); x < W; x++) G[y * W + x] = 1; }
-    else for (let x = 0; x < W; x++){ if (c.kind === "od" ? lim[x] < 1e9 : lim[x] >= 0){ if (c.kind === "od") for (let y = Math.max(0, lim[x]); y < H; y++) G[y * W + x] = 1; else for (let y = 0; y <= Math.min(H - 1, lim[x]); y++) G[y * W + x] = 1; } }
-  }
-  // regiões livres (4-vizinhos)
-  const lab = new Int32Array(W * H), comps = []; const st = new Int32Array(W * H);
-  for (let i = 0; i < W * H; i++){ if (G[i] || lab[i]) continue;
-    const id = comps.length + 1; let sp = 0, n = 0, sz = 0, edge = false; st[sp++] = i; lab[i] = id;
-    while (sp){ const c = st[--sp], x = c % W, y = (c - x) / W; n++; sz += x;
-      if (x === 0 || x === W - 1) edge = true;   // material de trás (barra) ou da frente: não é a peça
-      if (x > 0 && !G[c - 1] && !lab[c - 1]){ lab[c - 1] = id; st[sp++] = c - 1; }
-      if (x < W - 1 && !G[c + 1] && !lab[c + 1]){ lab[c + 1] = id; st[sp++] = c + 1; }
-      if (y > 0 && !G[c - W] && !lab[c - W]){ lab[c - W] = id; st[sp++] = c - W; }
-      if (y < H - 1 && !G[c + W] && !lab[c + W]){ lab[c + W] = id; st[sp++] = c + W; } }
-    comps.push({ id, n, zc: Z0 + h * sz / n, edge }); }
-  let cand = comps.filter(c => !c.edge && c.n * h * h > 0.02);
-  if (!cand.length) throw new Error("não achei uma região de material fechada pelos trajetos (o programa faz o perfil completo e o corte da peça?)");
-  const big = Math.max(...cand.map(c => c.n)); cand = cand.filter(c => c.n >= 0.5 * big);
-  const pc = cand.sort((a, b) => b.zc - a.zc)[0];   // várias peças por ciclo: a da frente
-  const inC = (x, y) => x >= 0 && y >= 0 && x < W && y < H && lab[y * W + x] === pc.id;
-  // contorno: arestas das células da peça
-  const edges = new Map(), key = (x, y) => x + "," + y;
-  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++){ if (!inC(x, y)) continue;
-    if (!inC(x, y - 1)) edges.set(key(x, y), [x + 1, y]); if (!inC(x + 1, y)) edges.set(key(x + 1, y), [x + 1, y + 1]);
-    if (!inC(x, y + 1)) edges.set(key(x + 1, y + 1), [x, y + 1]); if (!inC(x - 1, y)) edges.set(key(x, y + 1), [x, y]); }
-  let best = []; const seen = new Set();
-  for (const k0 of edges.keys()){ if (seen.has(k0)) continue; const loop = []; let k = k0, g = 0;
-    while (!seen.has(k) && edges.has(k) && g++ < 1e7){ seen.add(k); const [x, y] = k.split(",").map(Number); loop.push([x, y]); const nx = edges.get(k); k = key(nx[0], nx[1]); }
-    if (loop.length > best.length) best = loop; }
-  let poly = best.map(([x, y]) => [Z0 + (x - 0.5) * h, R0 + (y - 0.5) * h]);   // canto da célula → coordenada
-  const dp = (pts, eps) => { if (pts.length < 3) return pts; const [a, b] = [pts[0], pts[pts.length - 1]]; let iM = 0, dM = 0;
-    for (let i = 1; i < pts.length - 1; i++){ const L = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1e-9, d = Math.abs((b[0] - a[0]) * (a[1] - pts[i][1]) - (a[0] - pts[i][0]) * (b[1] - a[1])) / L; if (d > dM){ dM = d; iM = i; } }
-    return dM > eps ? [...dp(pts.slice(0, iM + 1), eps).slice(0, -1), ...dp(pts.slice(iM), eps)] : [a, b]; };
-  { let i0 = 0; for (let i = 1; i < poly.length; i++) if (poly[i][0] + poly[i][1] < poly[i0][0] + poly[i0][1]) i0 = i;   // começa num canto
-    poly = [...poly.slice(i0), ...poly.slice(0, i0)];
-    let iF = 0, dF = 0; poly.forEach((q, i) => { const d = Math.hypot(q[0] - poly[0][0], q[1] - poly[0][1]); if (d > dF){ dF = d; iF = i; } });   // fechado: divide no ponto mais longe
-    poly = [...dp(poly.slice(0, iF + 1), 1.6 * h).slice(0, -1), ...dp([...poly.slice(iF), poly[0]], 1.6 * h).slice(0, -1)]; }
-  const tol = 3 * h;   // encaixa nos pontos do programa (medida exata); senão Z e raio separados nos valores do programa (cantos entre retas)
-  const near = (vs, v) => { let b = v, bd = tol; for (const w of vs){ const d = Math.abs(w - v); if (d < bd){ bd = d; b = w; } } return b; };
-  const Zs = [...new Set(P.map(q => Math.round(q[0] * 1e4) / 1e4))], Rs = [...new Set(P.map(q => Math.round(q[1] * 1e4) / 1e4))];
-  poly = poly.map(p => { let b = null, bd = tol; for (const q of P){ const d = Math.hypot(q[0] - p[0], q[1] - p[1]); if (d < bd){ bd = d; b = q; } } return b ? [b[0], b[1]] : [near(Zs, p[0]), near(Rs, p[1])]; });
-  // trechos menores que minS (sobra da grade nos cantos) → um canto só, no encontro das retas vizinhas
-  const minS = Math.max(4 * h, Math.min(0.12, 0.01 * Math.max(z1 - z0, r1 - r0)));
-  for (let it = 0, ch = true; ch && it < 500 && poly.length > 4; it++){ ch = false;
-    for (let i = 0; i < poly.length && poly.length > 4; i++){
-      const n = poly.length, a = poly[(i + n - 1) % n], b = poly[i], c = poly[(i + 1) % n], d = poly[(i + 2) % n];
-      if (Math.hypot(c[0] - b[0], c[1] - b[1]) >= minS) continue;
-      const u = [b[0] - a[0], b[1] - a[1]], v = [d[0] - c[0], d[1] - c[1]], den = u[0] * v[1] - u[1] * v[0];
-      let X = [(b[0] + c[0]) / 2, (b[1] + c[1]) / 2];
-      if (Math.abs(den) > 1e-9){ const t = ((c[0] - a[0]) * v[1] - (c[1] - a[1]) * v[0]) / den, Y = [a[0] + u[0] * t, a[1] + u[1] * t];
-        if (Math.hypot(Y[0] - b[0], Y[1] - b[1]) < 3 * minS && Math.hypot(Y[0] - c[0], Y[1] - c[1]) < 3 * minS) X = Y; }
-      X = [near(Zs, X[0]), near(Rs, X[1])];
-      if ((i + 1) % n === 0){ poly.splice(0, 1); poly[poly.length - 1] = X; } else poly.splice(i, 2, X);
-      ch = true; } }
-  poly = rev3DSimplify(poly, Math.max(2 * h, 0.01));
-  const zF = Math.max(...poly.map(q => q[0])), zB = Math.min(...poly.map(q => q[0]));
-  poly = poly.map(([z, r]) => [Math.round((zF - z) * 1000) / 1000, Math.round(r * 1000) / 1000]);
-  poly = rev3DSimplify(poly, 1e-4);
-  const ar = poly.reduce((s, p, i) => { const q = poly[(i + 1) % poly.length]; return s + p[0] * q[1] - q[0] * p[1]; }, 0);
-  if (ar < 0) poly.reverse();
-  return { poly, L: Math.round((zF - zB) * 1000) / 1000, pecas: cand.length };
-}
-function progDrawing(){
-  try {
-    if (!state.moves || !state.moves.length) throw new Error("abra ou gere um programa primeiro");
-    const nome = String(state.header || state.fileName || "PROGRAMA").replace(/^%/, "").replace(/,.*$/, "").trim() || "PROGRAMA";
-    const { poly, L, pecas } = progSection(state.moves, state.tube);
-    const p = rev3DParams(nome, poly, L, `do programa (${state.fileName || nome})`);
-    state.genParams = p; errHide(); openPreview();
-    $("genMsg").textContent = `Desenho do programa: ${nome}${pecas > 1 ? ` · ${pecas} peças no ciclo (desenho da 1ª)` : ""}. Programa sem G41/G42 muda a medida pelo raio da ponta — confira as cotas.`; $("genMsg").style.color = "";
-  } catch(e){ errShow("Desenho do programa", e); }
-}
-$("btnProgDes").onclick = progDrawing;
 $("btn3D").onclick = () => $("file3D").click();
 $("file3D").onchange = e => { const f = e.target.files && e.target.files[0]; e.target.value = ""; if (f) rev3DOpen(f); };
 // arrastar o .stl para qualquer lugar da tela

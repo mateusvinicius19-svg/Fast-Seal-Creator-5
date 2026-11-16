@@ -5,6 +5,13 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - CORREÇÃO (5.0.x): conserto de erro, ajuste de regra pequena.
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
+## 5.52.1 — Ferramentas: o D (corretor) é o código principal (16/11/2026)
+- Usuário: o D é fixo e identifica a ferramenta; o T muda conforme a máquina. Na aba Torre CNC (agora "corretores D") cada
+  ferramenta aparece com o **D em destaque** (T2D13 menor ao lado), a linha diz "Corretor D13 (fixo) · posição T2 (muda
+  conforme a máquina)", a lista vem em ordem de D e a busca acha por "d13".
+- Aviso quando o mesmo D está em duas ferramentas (hoje: D14, D24 e D51) e ao cadastrar um D que já existe.
+- Ferramenta pedida com um T diferente é achada pelo D. Programas e desenhos dos 31 perfis iguais a antes (conferido).
+
 
 ## 5.52.0 — PSR 212: chanfro do degrau pela T2D2 + passes na parte de trás (16/11/2026)
 - Pedido do usuário (só PSR 212): o **chanfro da aresta do degrau** agora é feito pela **T2D2** (ferramenta do externo), no

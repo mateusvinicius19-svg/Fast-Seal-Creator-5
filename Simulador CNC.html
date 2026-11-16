@@ -3536,7 +3536,7 @@ function formRestore(snap){
   const put = () => { let n = 0; for (const [k, v] of Object.entries(s.vals || {})){ const el = document.querySelector(`#genBox [data-k="${k}"]`); if (el && !el.readOnly){ el.value = v; n++; } } return n; };
   put(); try { syncTolRows(); } catch(e){} const n = put();   // 2ª vez: linhas de tolerância que só aparecem depois de escolher o tipo
   state.tolResetPending = false;
-  generate();
+  generate(); try { updateProfBtn(); } catch(e){}
   return n;
 }
 async function altOpenConfig(num){
@@ -5355,10 +5355,13 @@ sizeCanvas(); draw();
   if (s && s.type && GEN[s.type]) $("genType").value = s.type;
   buildForm();
   if (!s || s.type !== $("genType").value) return;
-  for (const [k, v] of Object.entries(s.vals || {})){ if (TOL_KEYS.includes(k)) continue;   // tolerâncias não voltam: começam no padrão
-    const el = document.querySelector(`#genBox [data-k="${k}"]`); if (el) el.value = k === "mat" ? matFromText(v) : v; }
+  for (const [k, v] of Object.entries(s.vals || {})){ if (TOL_KEYS.includes(k) && k !== "tipoP") continue;   // tolerâncias não voltam: começam no padrão
+    // v5.57.1 (usuário 16/11/2026): o TIPO DA PEÇA volta (PSE 108 = "dp"); sem ele, ao reabrir, o PSE 108 virava "Automático"
+    // e as peças por ciclo eram ignoradas (isoN só vale com o PSE 108 escolhido) → gerava 1 peça
+    const el = document.querySelector(`#genBox [data-k="${k}"]`); if (el) el.value = k === "mat" ? matFromText(v) : v;
+    if (k === "tipoP" && state.tolVals) state.tolVals.tipoP = v; }
   for (const [k, v] of Object.entries(s.dwg || {})){ const el = document.querySelector(`#dwgFields [data-d="${k}"]`); if (el) el.value = v; }
-  syncTolRows(); generate();
+  syncTolRows(); generate(); try { updateProfBtn(); } catch(e){}
 })();
 (function carimboV555(){   // uma vez por computador: o "MATEUS C." que era padrão do DESENHADO passa para o APROVADO
   try { if (localStorage.getItem("ps_carimbo555")) return; localStorage.setItem("ps_carimbo555", "1"); } catch(e){ return; }

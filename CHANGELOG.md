@@ -6,6 +6,17 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.63.0 — Perfil novo: PSE 102 R (U de pistão com degrau para o anel de apoio) (16/11/2026)
+- Gerador "PSE 102 R" (base Fast Seal PS05P) no grupo Pistão: entradas Ø int., Ø ext. e altura; opcionais largura do anel
+  (comprimento do degrau) e Ø do degrau. Regras tiradas de 195 programas PS05P do Programas_CNC e dos desenhos do Fast Seal
+  (DESENHOS\PSE 102 R): apertos 1,5 / 1,5 no Ø; folga externa 0,25 + 0,06 × secção; lábio externo recuado 0,11 × secção com
+  chanfro a 52° com o eixo; lábios com secção/2; canal assimétrico com fundo no Ø médio, prof. secção/2, R 0,08 × secção
+  (mín. 0,5); degrau do anel Ø int. + 1,1 × secção, largura 1,5 / 2 / 2,5 / 3 pela secção, feito pela T6D6
+  (";( OUTSIDE HAMMER GROOVE )" como no Fast Seal); chanfro interno de trás 45° 0,5 (secção ≥ 7,5: 0,8).
+- Conferido com o 045639 (121,2 × 133,8 × 9): externo, interno e canal a menos de 0,1 mm do programa do Fast Seal.
+  Desenho no padrão PSE (Diâmetros + Secção) com o anel de apoio desenhado no degrau, como no Fast Seal.
+- Os outros 31 perfis geram os mesmos programas e desenhos de antes.
+
 ## 5.62.0 — Login: usuários só no W:, iguais em todos os computadores (16/11/2026)
 - A tela "Primeiro acesso" dizia "Sem acesso ao W: os usuários ficam só neste computador", parecendo que cada PC tinha os
   seus usuários. Agora os usuários ficam só no W: (`PADRONIZAÇÃO\Arruela Padronizada\usuarios.json`) e valem em qualquer

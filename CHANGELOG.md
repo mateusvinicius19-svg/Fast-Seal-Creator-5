@@ -6,6 +6,15 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.52.0 — PSR 212: chanfro do degrau pela T2D2 + passes na parte de trás (16/11/2026)
+- Pedido do usuário (só PSR 212): o **chanfro da aresta do degrau** agora é feito pela **T2D2** (ferramenta do externo), no
+  acabamento: desce o chanfro e segue no Ø de baixo dele até o 45° de trás. A T6D6 não faz mais esse chanfro; entra direto
+  na parede do degrau.
+- Campo novo **"Passes da T6D6 na parte de trás — degrau + raspador"** (vazio = 1, até 10). Com mais de um passe, cada passe
+  repete o caminho do degrau e do raspador mais raso (cada ponto desce 1/n da sua profundidade, sem passar do acabamento);
+  o último é o acabamento. Cada passe vem marcado `;( PASSE k/n )` no programa.
+- Os outros perfis geram o mesmo programa de antes (conferido nos 31 com `testes/testar-perfis.js`).
+
 ## 5.51.0 — Ferramentas: lista de corretores da fábrica (16/11/2026)
 - Lista enviada pelo usuário (DESENHOS\CORRETORES FERRAMENTA\CORRETORES FERRAMENTA.txt) entrou na aba Torre CNC: de 23 para
   60 ferramentas. Cada uma mostra o nome que tem na lista (ex.: T2D13; (BDM INT 2mm)), com o ponto de zero quando a lista diz.

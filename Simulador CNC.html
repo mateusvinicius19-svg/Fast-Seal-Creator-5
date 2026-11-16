@@ -1248,7 +1248,7 @@ GEN.psr211 = Object.assign({}, GEN.psh105, { name: "PSR 211",
   build(p){ return pseFscBuild(p, psr211Geom(p)); } });
 // PSR 212 (usuário 16/11/2026): PSR 211 com degrau no externo, atrás do corpo (foto do catálogo)
 GEN.psr212 = Object.assign({}, GEN.psr211, { name: "PSR 212",
-  main: [...GEN.psr211.main.slice(0, 4), ["ds","Ø do degrau externo (vazio = Ø ext. − 0,6 × secção)",""],["hs","Comprimento do degrau em Z, a partir da trás do corpo (vazio = 0,3 × corpo)",""], ...GEN.psr211.main.slice(4)],
+  main: [...GEN.psr211.main.slice(0, 4), ["ds","Ø do degrau externo (vazio = Ø ext. − 0,6 × secção)",""],["hs","Comprimento do degrau em Z, a partir da trás do corpo (vazio = 0,3 × corpo)",""],["pt","Passes da T6D6 na parte de trás — degrau + raspador (vazio = 1)",""], ...GEN.psr211.main.slice(4)],
   params: GEN.psr211.params.map(f => [f[0], f[1].replace("PSR 211", "PSR 212"), f[2]]),
   check(p){
     const base = GEN.psr211.check(p), g = psr211Geom(p), m = [];
@@ -1586,10 +1586,27 @@ function psr211Geom(p){
   const STEP = p.tipoGen === "psr212", dS = STEP ? (opt(p.ds) ?? xround(g.extCalc - 0.6 * g.sec, 1)) : null, Ls = STEP ? (opt(p.hs) ?? xround(0.3 * Hb, 1)) : 0, zS = -Hb + Ls;
   const xoB = g.xoBack, k45 = Math.max(0.2, Math.min(prot + 0.5, R(xoB) - R(rootOut) - 0.3));
   const xoStep = STEP ? dS - (2 * g.chc + 1) * g.chc / (g.chc + 0.5) : xoB;   // Ø na trás do corpo depois do chanfro da aresta do degrau
-  const outer = [...g.outer.slice(0, 4), [-Hb, R(xoB)], [-Hb - k45, R(xoB) - k45], [-Ht - 0.5, R(xoB) - k45]];   // o resto fica para a T6D6
+  // v5.50.3 (usuário 16/11/2026): no PSR 212 a T2D2 faz o chanfro da aresta do degrau e segue no Ø de baixo do chanfro até o 45° de trás
+  const outer = [...g.outer.slice(0, 3), ...(STEP ? [[zS + g.chc, R(g.extCalc)], [zS, R(g.extCalc) - g.chc]] : [g.outer[3]]), [-Hb, R(xoB)], [-Hb - k45, R(xoB) - k45], [-Ht - 0.5, R(xoB) - k45]];   // o resto fica para a T6D6
   const inner = [...g.inner.slice(0, 3), [-Ht + rampL, R(g.intCalc)], [-Ht + cT, R(tipIn)], [-Ht, R(tipIn) + cT], [-Ht - 0.5, R(tipIn) + cT + 0.5]];
   const outerRough = [...outer.slice(0, -1), [-Ht - (Number(p.bed) > 0 ? Number(p.bed) : 2) + (Number(p.rn) || 0.4), outer[outer.length - 1][1]]];   // + raio da ponta: a ferramenta para em Z −(altura + 2)   // desbaste e acabamento externos: altura + bedame de 2 mm
   return Object.assign({}, g, { H: Ht, Hb, prot, tth, tipIn, tipOut, rootOut, wAng, cT, rampL, outer: outerRough, outerRough, inner, wiper: true, hHead: Hb, step: STEP, dS, Ls, zS, xoBack: xoStep, xoBody: xoB });
+}
+// PSR 212 (v5.50.3, usuário 16/11/2026): T6D6 na parte de trás — o chanfro da aresta já foi feito pela T2D2 (fica no Ø xa);
+// a lâmina (canto da frente) desce a parede, faz o Ø do degrau, o chanfro de trás e o raspador a 65°. "pt" passes: cada passe
+// segue o mesmo caminho mais raso (cada ponto desce 1/n da sua profundidade), o último é o acabamento.
+function psr212Back(g, H, tO, pt, f3){
+  const xa = g.extCalc - 2 * g.chc, n = Math.max(1, Math.min(10, Math.round(Number(pt)) || 1)), L = [];
+  const pts = [[g.dS, g.zS], [g.dS, -g.Hb + g.chc], [g.xoBack, -g.Hb], [g.rootOut, -g.Hb], [g.tipOut, -H]];
+  for (let k = 1; k <= n; k++){
+    const xs = pts.map(([x, z]) => [Math.min(xa, xa - (xa - x) * k / n), z]);   // cada ponto desce k/n da sua profundidade: nunca passa do acabamento
+    if (k > 1) L.push(`G0 X${f3(tO + 4)}`);
+    if (n > 1) L.push(`;( PASSE ${k}/${n} )`);
+    L.push(`G0 Z${f3(g.zS)}`, `G1 X${f3(xa + 1)}`, `G1 X${f3(xs[0][0])}`);
+    for (let i = 1; i < xs.length; i++) L.push(`G1 X${f3(xs[i][0])} Z${f3(xs[i][1])}`);
+  }
+  L.push(`G0 X${f3(tO + 4)}`);
+  return L;
 }
 function psr211Profile(p){
   const g = psr211Geom(p), H = g.H, R = x => x / 2, c = g.Rg, cz = g.Cg[0];
@@ -4218,8 +4235,8 @@ function pseFscBuild(p, gOver){
   L.push(`G0 X${f3(tO + 1)} Z${f3(lastOut[0] + 0.2)}`, `G0 X${f3(tO + 1)} Z5.000`, "");
   if (g.wiper) L.push(";( *********************** )", ";( OUTSIDE ANGLE HAMMER GROOVE   )", ";( *********************** )", "G0 Z70", "T6D6", ";", ";",
     `G0 X${f3(tO + 4)} Z3`, ...(g.step   // PSR 212: a lâmina (canto da frente) faz o chanfro da aresta, a parede e o Ø do degrau, o chanfro de trás e segue para o raspador
-      ? [`G0 Z${f3(g.zS + g.chc)}`, `G1 X${f3(g.extCalc + 1)}`, `G1 X${f3(g.extCalc)}`, `G1 X${f3(g.extCalc - 2 * g.chc)} Z${f3(g.zS)}`, `G1 X${f3(g.dS)}`, `G1 Z${f3(-g.Hb + g.chc)}`, `G1 X${f3(g.xoBack)} Z${f3(-g.Hb)}`]
-      : [`G0 Z${f3(-g.Hb)}`]), `G1 X${f3(g.rootOut)}`, `G1 X${f3(g.tipOut)} Z${f3(-H)}`, `G0 X${f3(tO + 4)}`, "G0 Z3");   // raspador a 65° com a T6D6
+      ? psr212Back(g, H, tO, p.pt, f3)
+      : [`G0 Z${f3(-g.Hb)}`, `G1 X${f3(g.rootOut)}`, `G1 X${f3(g.tipOut)} Z${f3(-H)}`, `G0 X${f3(tO + 4)}`]), "G0 Z3");   // raspador a 65° com a T6D6
   // ---- corte (T5D5; Teflon T8D8) ----
   const xc = tO + 0.2;
   L.push(...sec("CUTTING"), "G0 Z70", TL.cut, ";", ";", `G0 X${f3(xc)} Z3.000`, `G0 X${f3(xc)} Z${f3(-H)}`, `G1 X${f3(g.wiper ? g.tipIn - 0.1 : p.dint - 0.1)} Z${f3(-H)} F${TL.fCut}`,

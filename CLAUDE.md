@@ -24,6 +24,7 @@ merge na main que mexa no `Simulador CNC.html`:
 1. Na main antiga: `node testes/testar-perfis.js --salvar <scratchpad>/base.json`.
 2. Depois da mudança: `node testes/testar-perfis.js --comparar <scratchpad>/base.json` — tem que dar "Todos os N perfis
    geraram programa" e só podem mudar os perfis pedidos.
+3. Mexeu no desenho do 3D (`rev3D*`)? `node testes/testar-3d.js` tem que dar ok.
 - Perfil novo: entra no `<select id="genType">` **e** no `PROF_GROUPS` (a janela por imagem; o select fica escondido).
 - Campo opcional: escreva "vazio = …" no texto do campo (vira opcional sozinho) e trate o vazio no gerador com `opt()`.
 

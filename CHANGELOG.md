@@ -6,6 +6,15 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.57.0 — Alterar programa: abrir as configurações da peça salva (16/11/2026)
+- Pedido do usuário: no ✏️ Alterar programa, botão **📂 Abrir configurações da peça**. Digita o número e o Simulador põe de
+  volta no formulário as medidas e opções com que o programa foi salvo (mesmo perfil, material, bucha, peças por ciclo,
+  RPT, tolerâncias do desenho, parâmetros fixos). Aí é só mudar (ex.: peças por ciclo, tolerâncias atualizadas) e
+  💾 Salvar, que sugere o mesmo número (pergunta antes de substituir um arquivo que já existe).
+- Vem do histórico (Programas_CNC\Historico Simulador CNC.csv, coluna Parametros). Pega a gravação mais nova daquele
+  número; programas salvos antes dessa coluna, pelo lote ou pelo "só trocar a bucha" avisam que não têm as configurações.
+- A troca de bucha continua igual, logo abaixo ("Ou: só trocar a bucha"). Programas e desenhos não mudam (31 perfis conferidos).
+
 ## 5.56.1 — 16/11/2026
 - PSA 109: no DESENHO o canal (raio na face) passou para o outro lado (perfil espelhado no Detalhe B; chamadas dos
   chanfros e do R acompanham). O programa CNC não mudou (31 perfis iguais).

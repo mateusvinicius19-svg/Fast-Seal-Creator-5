@@ -3526,13 +3526,47 @@ $("btnVer").onclick = () => {   // janela abre na hora; a pasta é pedida no Bus
     } catch(err){ out.innerHTML = `<span style="color:#b2221f">Erro: ${esc(err.message || String(err))}</span>`; }
   };
 };
+// v5.57.0 (usuário 16/11/2026): ✏️ Alterar programa → 📂 Abrir configurações da peça: lê no histórico (coluna Parametros, gravada
+// a cada 💾 Salvar) as medidas e opções com que o programa foi salvo e põe de volta no formulário, no mesmo perfil, para mudar
+// peças por ciclo, tolerâncias do desenho etc. e salvar de novo (o Salvar sugere o mesmo número).
+function formRestore(snap){
+  const s = typeof snap === "string" ? JSON.parse(snap) : snap;
+  if (!s || !s.type || !GEN[s.type]) throw new Error("perfil " + (s && s.type || "?") + " não existe mais no Simulador");
+  $("genType").value = s.type; buildForm();
+  const put = () => { let n = 0; for (const [k, v] of Object.entries(s.vals || {})){ const el = document.querySelector(`#genBox [data-k="${k}"]`); if (el && !el.readOnly){ el.value = v; n++; } } return n; };
+  put(); try { syncTolRows(); } catch(e){} const n = put();   // 2ª vez: linhas de tolerância que só aparecem depois de escolher o tipo
+  state.tolResetPending = false;
+  generate();
+  return n;
+}
+async function altOpenConfig(num){
+  const dir = await progDir(false, true) || await progDir(false, false);
+  if (!dir) return "Sem acesso à pasta Programas_CNC (onde fica o histórico).";
+  const rows = await histRead(dir), head = rows[0] || [], iP = head.indexOf("Programa"), iJ = head.indexOf("Parametros"), iD = head.indexOf("Data");
+  if (iP < 0) return "O histórico está vazio.";
+  const all = rows.slice(1).filter(r => (String(r[iP] || "").match(/^(\d+)/) || [])[1] === num);
+  if (!all.length) return `O ${num} não está no histórico do Simulador (foi feito fora dele ou antes do histórico).`;
+  const ok = all.filter(r => iJ >= 0 && /^\{/.test(String(r[iJ] || "").trim()));
+  if (!ok.length) return `O ${num} está no histórico, mas foi salvo sem as configurações (versão antiga ou pelo ✏️ só bucha). Abra pelo perfil e digite as medidas.`;
+  const r = ok[ok.length - 1], n = formRestore(r[iJ]);
+  state.alterNum = num;   // 💾 Salvar sugere o mesmo número (se o nome for igual, pergunta antes de substituir)
+  const outros = [...new Set(ok.map(x => x[iP]))].filter(x => x !== r[iP]);
+  $("genMsg").textContent = `📂 Configurações do ${r[iP]} (salvo em ${r[iD] || "?"}) abertas no formulário: ${n} campos. Mude o que precisar e clique em 💾 Salvar.` + (outros.length ? ` Também há: ${outros.join(", ")}.` : "");
+  $("genMsg").style.color = "";
+  window.scrollTo({ top: 0, behavior: "smooth" });
+  return true;
+}
 $("btnAlt").onclick = () => {
   let m = $("altModal"); if (m) m.remove();
   m = document.createElement("div"); m.id = "altModal"; m.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;display:flex;align-items:flex-start;justify-content:center;padding:60px 12px";
   const inp = "padding:7px 9px;border:1px solid #ccd;border-radius:6px;font:14px Segoe UI,Arial;width:100%;box-sizing:border-box";
   m.innerHTML = `<form id="altForm" style="background:#fff;border-radius:12px;max-width:420px;width:100%;padding:16px 18px;box-shadow:0 10px 40px rgba(0,0,0,.35);color:#222;font:13px Segoe UI,Arial;display:grid;gap:10px">
-    <b style="font:700 16px Segoe UI,Arial">✏️ Alterar programa — bucha nova</b>
+    <b style="font:700 16px Segoe UI,Arial">✏️ Alterar programa</b>
     <label>Número do programa<input id="altNum" style="${inp}" placeholder="ex.: 046048" autocomplete="off"></label>
+    <div style="border:1px solid #d5d9de;border-radius:8px;padding:10px;display:grid;gap:6px;background:#f7f8fa">
+      <button class="btn" type="button" id="altCfg" style="justify-self:start">&#x1F4C2; Abrir configurações da peça</button>
+      <span style="color:#666;font-size:12px">Abre no formulário as medidas e opções com que a peça foi salva (mesmo perfil), para mudar <b>peças por ciclo, tolerâncias do desenho</b> etc. e salvar de novo (💾 Salvar sugere o mesmo número).</span></div>
+    <b style="font:700 13px Segoe UI,Arial;margin-top:2px">Ou: só trocar a bucha</b>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
       <label>Bucha Ø interno<input id="altBi" style="${inp}" inputmode="decimal" placeholder="0 = tarugo"></label>
       <label>Bucha Ø externo<input id="altBo" style="${inp}" inputmode="decimal"></label></div>
@@ -3543,6 +3577,14 @@ $("btnAlt").onclick = () => {
   m.onclick = e => { if (e.target === m) m.remove(); };
   $("altCancel").onclick = () => m.remove();
   $("altNum").focus();
+  $("altCfg").onclick = () => {
+    let num = $("altNum").value.trim().replace(/\.pit$/i, "");
+    if (/^\d{1,6}$/.test(num)) num = num.padStart(6, "0");
+    if (!/^\d{6}/.test(num)) return $("altErr").textContent = "Digite o número do programa (ex.: 046048).";
+    $("altErr").style.color = "#555"; $("altErr").textContent = "Procurando no histórico…";
+    altOpenConfig(num.slice(0, 6)).then(r => { if (r === true) m.remove(); else { $("altErr").style.color = "#b2221f"; $("altErr").textContent = r; } })
+      .catch(e => { $("altErr").style.color = "#b2221f"; $("altErr").textContent = "Erro: " + (e && e.message || e); });
+  };
   $("altForm").onsubmit = e => {
     e.preventDefault();
     let num = $("altNum").value.trim().replace(/\.pit$/i, "");

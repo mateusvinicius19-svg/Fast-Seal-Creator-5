@@ -2418,7 +2418,8 @@ function psa109Profile(p){
   const zArc = r => Math.abs(r - g.rc) < g.a ? g.zc - Math.sqrt(g.R * g.R - (r - g.rc) * (r - g.rc)) : 0;
   const front = []; const N = 80;
   for (let k = 0; k <= N; k++){ const r = re - (re - ri) * k / N; front.push([Math.min(zFace(r), zArc(r)), r]); }
-  return [...front, [-(h - g.cI), ri], [-h, ri + cIbR], [-h, re - g.cE * eT], [-(h - g.cE), re]];
+  // v5.56.1 (usuário 16/11/2026): no DESENHO o canal (raio na face) fica do outro lado — espelhado z' = −h − z (o programa não muda)
+  return [...front, [-(h - g.cI), ri], [-h, ri + cIbR], [-h, re - g.cE * eT], [-(h - g.cE), re]].map(([z, r]) => [-h - z, r]);
 }
 GEN.psa109 = {
   name: "PSA 109 (arruela com raio na face)",
@@ -4688,11 +4689,12 @@ function drawingSVGCore(p){  if (p && p.tipoGen === "psh110") p = psh110DrawP(p)
     if (C.k === "M" && G.pM > 0) g += call(DX(-h), DY(G.rm), dzb + 22, (dyE + dyI) / 2 + 28, `paralelo ${fmtN(G.pM, 2)}`);   // v5.40.0: atrás sem canto vivo
   } else if (p.tipoGen === "psa109") {   // PSA 109: chanfros da frente (menores) e de trás + raio na face
     const G = psa109Geom(p), kI = 1 / TAN(60), aB = p.angIB > 0 ? p.angIB : 30;
-    g += call(DX(-G.cEf / 2), DY(re - G.cEf / 2), dzf - 28, dyE - 6, `${fmtN(G.cEf, 2)} x 45°`);
-    g += call(DX(-(h - G.cE / 2)), DY(re - G.cE / 2), dzb + 16, dyE + 20, `${fmtN(G.cE, 2)} x 45°`);
-    g += call(DX(-G.cIf / 2), DY(ri + G.cIf * kI / 2), dzf - 28, dyI + 18, `${fmtN(G.cIf, 2)} x 30°`);
-    g += call(DX(-(h - G.cI / 2)), DY(ri + G.cI * TAN(aB) / 2), dzb + 16, dyI + 18, `${fmtN(G.cI, 2)} x ${fmtN(aB, 0)}°`);
-    if (G.a > 0) g += call(DX(-G.d), DY(G.rc), dzf - 40, (dyE + dyI) / 2, `R${fmtN(G.R, 2)} · prof. ${fmtN(G.d, 2)}`);
+    // v5.56.1: perfil espelhado no desenho (canal do lado de trás) → chamadas trocam de lado
+    g += call(DX(-(h - G.cEf / 2)), DY(re - G.cEf / 2), dzb + 16, dyE + 20, `${fmtN(G.cEf, 2)} x 45°`);
+    g += call(DX(-G.cE / 2), DY(re - G.cE / 2), dzf - 28, dyE - 6, `${fmtN(G.cE, 2)} x 45°`);
+    g += call(DX(-(h - G.cIf / 2)), DY(ri + G.cIf * kI / 2), dzb + 16, dyI + 18, `${fmtN(G.cIf, 2)} x 30°`);
+    g += call(DX(-G.cI / 2), DY(ri + G.cI * TAN(aB) / 2), dzf - 28, dyI + 18, `${fmtN(G.cI, 2)} x ${fmtN(aB, 0)}°`);
+    if (G.a > 0) g += call(DX(-(h - G.d)), DY(G.rc), dzb + 30, dyE - 34, `R${fmtN(G.R, 2)} · prof. ${fmtN(G.d, 2)}`);
   } else if (p.tipoGen === "semch") {   // v5.21.17: sem chanfro — cantos vivos, sem chamadas
   } else if (p.tipoGen === "dpr") {   // PSE 125 (DPR): espelho do DH — degrau e lábio por fora, chanfros internos a 30° com o eixo
     const G = dprGeom(p), M = z => DX(-h - z), yS = DY(G.Dstep / 2), c = p.ch;

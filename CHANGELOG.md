@@ -6,6 +6,12 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.61.1 — Material do desenho segue o perfil (PSG 101 em PEAD saía PTFE+BR) (16/11/2026)
+- O campo MATERIAL do cabeçalho do desenho vale mais que o material do perfil e ficava guardado de uma peça para outra (até
+  depois de fechar o Simulador): um "PTFE+BR" digitado uma vez ia em todos os desenhos. Agora é apagado ao trocar o material do
+  perfil ou o perfil; digitado depois, vale só para aquela peça. Na 1ª abertura desta versão ele é limpo uma vez.
+- Programas iguais (31 perfis); só o material do desenho.
+
 ## 5.61.0 — 📐 Desenho do programa (testado pelo usuário na cópia de teste) (16/11/2026)
 - Botão "📐 Desenho do programa": digita o número → procura no Programas_CNC (como o ✏️ Alterar programa) → abre no
   simulador → folha de desenho com cotas. Em branco = programa aberto na tela. Para peças sem perfil padrão.

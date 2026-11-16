@@ -6,6 +6,15 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.55.0 — Marca d'água Parts Seals + carimbo (aprovado / desenhado) (16/11/2026)
+- Pedido do usuário: **marca d'água** em todos os desenhos (perfis padrão e Desenho do 3D): o logo Parts Seals repetido,
+  reto, em fileiras alternadas, a 15% (testado na impressão: 7% quase não aparecia), atrás das vistas e cotas, dentro da
+  moldura e acima do carimbo.
+- Carimbo: **APROVADO = MATEUS C.** por padrão. **DESENHADO = quem desenhou**: começa vazio e, ao imprimir/salvar o desenho
+  (💾 Salvar, Imprimir / PDF, 💾 Salvar no W:), pergunta uma vez "Quem desenhou?" e fica guardado no computador. Nos
+  computadores que já tinham "MATEUS C." guardado no desenhado, ele passa para o aprovado (uma vez só).
+- Programas não mudam (conferido nos 31 perfis).
+
 ## 5.54.0 — Desenho do 3D salva no W: (16/11/2026)
 - Pedido do usuário (os desenhos do 3D são de itens fora de padrão): na prévia do desenho do 3D, botão **💾 Salvar no W:**.
   Pergunta a **família** (pasta em DESENHOS, ex.: VEDADOR, PSE 124 E; vem o nome do arquivo), o **número do programa**

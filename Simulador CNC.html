@@ -317,8 +317,8 @@ body.printing #dwgModal .dwgf{display:none}
     <div class="fields dwgf" id="dwgFields">
       <label>Programa nº<input data-d="prog" value=""></label>
       <label>Material<input data-d="mat" value=""></label>
-      <label>Desenhado (nome)<input data-d="des" value="MATEUS C."></label>
-      <label>Aprovado (nome)<input data-d="apr" value=""></label>
+      <label>Desenhado (nome)<input data-d="des" value="" placeholder="quem desenhou"></label>
+      <label>Aprovado (nome)<input data-d="apr" value="MATEUS C."></label>
       <label>Quantidade<input data-d="qtd" value="1"></label>
       <label>Observação<input data-d="obs" value=""></label>
       <label title="Ao salvar/imprimir o desenho, vai para a fila do ARGUS: Anexo 1 = PDF e Código do programa no cadastro do item">Cód. interno (item) → Anexo 1 ARGUS<input data-d="cod" value="" inputmode="numeric" placeholder="ex.: 45996"></label>
@@ -3230,6 +3230,7 @@ async function saveProgram(auto){
   const num = auto ? sug : prompt("Número do programa" + (state.alterNum ? " (alterando " + sug + ")" : sug ? " (próximo livre: " + sug + ")" : " (ex.: 046004)") + (suf ? ` — bucha especial: vai salvar como "número ${suf[1]}"` : "") + ":", sug);
   if (num === null) return;
   if (!auto && !askCod()) return;
+  if (!auto && state.genParams && DESENHO_TYPES.includes(state.genParams.tipoGen) && !askDes()) return;
   let base = num.trim().replace(/\.(pit|txt|nc)$/i, "");
   if (!base) return;
   if (/^\d{1,6}[A-Z]?$/i.test(base)) base = base.replace(/^(\d+)/, d => d.padStart(6, "0"));
@@ -4863,9 +4864,19 @@ function drawingSVGCore(p){  if (p && p.tipoGen === "psh110") p = psh110DrawP(p)
 .tv{font-size:12px;fill:#111;font-weight:700}.tv.big{font-size:13px}.tv.sm{font-size:10.5px}.tv.huge{font-size:20px}</style>
 </defs>
 <rect x="10" y="10" width="${W - 20}" height="${H - 20}" fill="#fff" stroke="#111" stroke-width="1.5"/>
+${dwgWatermark(W, T0)}
 ${g}
 ${t}
 </svg>`;
+}
+// v5.55.0 (usuário 16/11/2026): marca d'água — logo Parts Seals repetido (reto, fileiras alternadas), 15% de opacidade,
+// atrás das vistas e cotas, dentro da moldura e acima do carimbo (testado na impressão: 7% quase não aparecia)
+function dwgWatermark(W, yTop){
+  const w = 220, h = w * 144 / 640, cols = Math.floor((W - 40) / (w + 30)), gap = (W - 20 - cols * w) / cols;
+  let wm = "";
+  for (let r = 0, y = 40; y + h < yTop - 10; r++, y += 130){ const off = r % 2 ? gap / 2 + w / 2 : 0;
+    for (let c = 0; c < cols + 1; c++) wm += `<image href="${LOGO}" x="${(10 + gap / 2 + c * (w + gap) - off).toFixed(1)}" y="${y}" width="${w}" height="${h.toFixed(1)}" opacity="0.15"/>`; }
+  return `<clipPath id="wmClip"><rect x="11" y="11" width="${W - 22}" height="${yTop - 11}"/></clipPath><g clip-path="url(#wmClip)">${wm}</g>`;
 }
 function dxfOf(p){
   // secção completa + círculos da vista frontal, em mm (Z na horizontal, raio na vertical)
@@ -4882,6 +4893,16 @@ function dxfOf(p){
 // v5.7.0 (usuário 10/11/2026): cada item tem um código interno diferente — pergunta o Cód. interno ANTES de mostrar o desenho
 // (botão do desenho e Salvar programa). Uma vez por peça: na mesma peça não pergunta de novo; peça nova começa em branco.
 // v5.7.1: force = pergunta sempre (antes da janela de impressão), já preenchido com o código desta peça (Enter confirma)
+// v5.55.0 (usuário 16/11/2026): carimbo — APROVADO = MATEUS C. (padrão); DESENHADO = quem desenhou: pergunta uma vez
+// ao imprimir/salvar o desenho e fica guardado neste computador
+function askDes(){
+  const el = document.querySelector("#dwgFields [data-d=des]"); if (!el || el.value.trim()) return true;
+  const v = prompt("Quem desenhou? (nome no carimbo, em DESENHADO — fica guardado neste computador)", "");
+  if (v === null) return false;
+  el.value = v.trim().toUpperCase(); const pv = document.querySelector("#pvSide [data-dd=des]"); if (pv) pv.value = el.value;
+  try { saveForm(); } catch(e){} try { rerenderDrawing(); } catch(e){}
+  return true;
+}
 function askCod(force){
   const p = state.genParams, el = document.querySelector("#dwgFields [data-d=cod]");
   if (!p || !el || !DESENHO_TYPES.includes(p.tipoGen)) return true;
@@ -5158,6 +5179,7 @@ $("pvSave3D").onclick = async () => {
   if (num && !/^\d+$/.test(num)){ alert(`"${num}" não é número de programa.`); return; }
   const codEl = document.querySelector("#dwgFields [data-d=cod]");
   if (codEl && !codEl.value.trim()){ const v = prompt("Cód. interno do item (vai no desenho e no Anexo 1 do ARGUS; vazio = sem):", ""); if (v === null) return; codEl.value = v.trim(); const pc = document.querySelector("#pvSide [data-dd=cod]"); if (pc) pc.value = codEl.value; }
+  if (!askDes()) return;
   rerenderDrawing();
   try {
     let dd = await desDir(false, true); if (!dd) dd = await desDir(false, false);
@@ -5271,6 +5293,7 @@ $("pvPrint").onclick = async () => { if (!state.genParams) return;
   // v5.7.1 (usuário 10/11/2026): Cód. interno ANTES da janela de impressão (não precisa fechar a prévia para editar)
   const codEl = document.querySelector("#dwgFields [data-d=cod]"), codOld = codEl ? codEl.value.trim() : "";
   if (!askCod(true)) return;
+  if (!askDes()) return;
   const pvCod = document.querySelector("#pvSide [data-dd=cod]"); if (pvCod && codEl) pvCod.value = codEl.value;
   rerenderDrawing();
   const ld = state.lastDrawing && pieceFile(state.lastDrawing.p) === pieceFile(state.genParams) ? state.lastDrawing : null;   // só o desenho salvo DESTA peça
@@ -5291,6 +5314,13 @@ sizeCanvas(); draw();
     const el = document.querySelector(`#genBox [data-k="${k}"]`); if (el) el.value = k === "mat" ? matFromText(v) : v; }
   for (const [k, v] of Object.entries(s.dwg || {})){ const el = document.querySelector(`#dwgFields [data-d="${k}"]`); if (el) el.value = v; }
   syncTolRows(); generate();
+})();
+(function carimboV555(){   // uma vez por computador: o "MATEUS C." que era padrão do DESENHADO passa para o APROVADO
+  try { if (localStorage.getItem("ps_carimbo555")) return; localStorage.setItem("ps_carimbo555", "1"); } catch(e){ return; }
+  const d = document.querySelector("#dwgFields [data-d=des]"), a = document.querySelector("#dwgFields [data-d=apr]");
+  if (d && d.value.trim().toUpperCase() === "MATEUS C.") d.value = "";
+  if (a && !a.value.trim()) a.value = "MATEUS C.";
+  try { saveForm(); } catch(e){}
 })();
 document.addEventListener("input", e => { if (e.target.closest && e.target.closest("#dwgFields")) saveForm(); if (e.target.matches && e.target.matches("#dwgFields [data-d=cod], #pvSide [data-dd=cod]") && state.genParams) try { state.codKey = pieceFile(state.genParams); } catch(_){} });
 document.addEventListener("input", e => { const a = e.target.dataset && e.target.dataset.ak; if (a && alojMode(a) === "aloj"){ clearTimeout(window.__alojT); window.__alojT = setTimeout(() => alojApply(a), 250); } });

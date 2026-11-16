@@ -2161,6 +2161,9 @@ GEN.psa108 = {
            ["zFim","Z final (G00)",250],["afX","Afastamento final em X (se N0 = 0)",50],["S","Rotação S (vazio = tabela pelo Ø ext.)",""],
            ["zMax","Desbaste em Z: comprimento máximo (mm)",40],["zSeg","Desbaste em Z: máximo por etapa (mm, ≥ 2 etapas acima do mínimo)",20],["zMin","Desbaste em Z: até este comprimento vai de uma vez (mm)",10]],
   build(p){
+    // v5.53.1 (usuário 16/11/2026): PSA 108 em Nylon/POM/NBR/Celeron desbasta em Z de uma vez, como no PU (as etapas passavam
+    // cada Ø duas vezes). Só o PSA 108: PSA 109 e PSG 103/104 (que usam este build) mandam zCont: false e continuam iguais.
+    if (p.zCont == null) p.zCont = true;
     psaFill(p); const fx3 = v => fx(v, 3);
     const prol = (p.bed - p.sobrep) / 2, cE = p.chE, cI = p.chI;
     // v5.21.14 (usuário 11/11): com bedame 2 (Celeron / secção > 14,8) desbaste e acabamento terminam no MESMO Z, dentro da faixa
@@ -2257,7 +2260,7 @@ GEN.psg101 = {
     return L;
   },
   check(p){
-    const a = psgAcr(p), q = Object.assign({}, p, { tipoGen: "psa108", dint: p.dint + a, dext: p.dext + a });
+    const a = psgAcr(p), q = Object.assign({}, p, { tipoGen: "psa108", zCont: false, dint: p.dint + a, dext: p.dext + a });
     return GEN.psa108.check(q) || "";
   }
 };
@@ -2288,7 +2291,7 @@ GEN.psg103 = {
   params: [...GEN.psa108.params, ["psgAcr", "POM / Celeron: usinar maior nos diâmetros (mm)", 0.9]],   // com as etapas em Z (só o PSG 101 é contínuo)
   build(p){
     const a = psgAcr(p), dR = p.dReb + a, hR = p.hReb;
-    const q = Object.assign({}, p, { tipoGen: "psa108", n: 1, dint: p.dint + a, dext: p.dext + a, angE: psgAngE(p) });
+    const q = Object.assign({}, p, { tipoGen: "psa108", zCont: false, n: 1, dint: p.dint + a, dext: p.dext + a, angE: psgAngE(p) });
     if (p.chE === "" || p.chE === undefined) q.chE = psg103ChSug(p);
     if (p.chI === "" || p.chI === undefined) q.chI = psg103ChSug(p);
     const L = GEN.psa108.build(q), cI = q.chI;
@@ -2312,7 +2315,7 @@ GEN.psg103 = {
     return L;
   },
   check(p){
-    const a = psgAcr(p), q = Object.assign({}, p, { tipoGen: "psa108", n: 1, dint: p.dint + a, dext: p.dext + a }), m = [];
+    const a = psgAcr(p), q = Object.assign({}, p, { tipoGen: "psa108", zCont: false, n: 1, dint: p.dint + a, dext: p.dext + a }), m = [];
     const base = GEN.psa108.check(q) || "";
     const cI = (p.chI === "" || p.chI === undefined) ? psg103ChSug(p) : Number(p.chI), cE = (p.chE === "" || p.chE === undefined) ? psg103ChSug(p) : Number(p.chE);
     if ((p.dext - p.dReb) / 2 - cE * TAN(psgAngE(p)) - cI / TAN(60) < 0.2) m.push("chanfros grandes para a parede da frente (Ø ext. − Ø rebaixo): diminua os chanfros");
@@ -2340,7 +2343,7 @@ GEN.psg104 = {
   params: GEN.psg103.params,
   build(p){
     const a = psgAcr(p), dR = p.dReb + a, hR = p.hReb, dE = p.dext + a;
-    const q = Object.assign({}, p, { tipoGen: "psa108", n: 1, dint: p.dint + a, dext: dE, angE: psgAngE(p) });
+    const q = Object.assign({}, p, { tipoGen: "psa108", zCont: false, n: 1, dint: p.dint + a, dext: dE, angE: psgAngE(p) });
     if (p.chE === "" || p.chE === undefined) q.chE = psg104ChSug(p);
     if (p.chI === "" || p.chI === undefined) q.chI = psg104ChSug(p);
     const L = GEN.psa108.build(q), cE = q.chE;
@@ -2370,7 +2373,7 @@ GEN.psg104 = {
     return L;
   },
   check(p){
-    const a = psgAcr(p), q = Object.assign({}, p, { tipoGen: "psa108", n: 1, dint: p.dint + a, dext: p.dext + a }), m = [];
+    const a = psgAcr(p), q = Object.assign({}, p, { tipoGen: "psa108", zCont: false, n: 1, dint: p.dint + a, dext: p.dext + a }), m = [];
     const base = GEN.psa108.check(q) || "";
     const cI = (p.chI === "" || p.chI === undefined) ? psg104ChSug(p) : Number(p.chI), cE = (p.chE === "" || p.chE === undefined) ? psg104ChSug(p) : Number(p.chE);
     if (!(p.dReb > p.dint && p.dReb < p.dext)) m.push("Ø do rebaixo tem que ficar entre o Ø interno e o externo");
@@ -2424,7 +2427,7 @@ GEN.psa109 = {
     return m; })(),
   params: GEN.psa108.params,
   build(p){
-    const g = psa109Geom(p), q = Object.assign({}, p, { tipoGen: "psa108", n: 1, chE: g.cE, chI: g.cI });
+    const g = psa109Geom(p), q = Object.assign({}, p, { tipoGen: "psa108", zCont: false, n: 1, chE: g.cE, chI: g.cI });
     const L = GEN.psa108.build(q), c = g3, comp = (ARR_MAT[p.matA] || ARR_MAT.PU)[4];
     if (!p.nome) L[0] = `%PSA109 ${fx(p.dint, 3)}/${fx(p.dext, 3)}/${fx(p.h, 3)},MX,`;
     const prol = (q.bed - q.sobrep) / 2, aE = q.angE > 0 && q.angE < 90 ? q.angE : 45;
@@ -2466,7 +2469,7 @@ GEN.psa109 = {
     return L;
   },
   check(p){
-    const g = psa109Geom(p), q = Object.assign({}, p, { tipoGen: "psa108", n: 1, chE: g.cE, chI: g.cI }), m = [];
+    const g = psa109Geom(p), q = Object.assign({}, p, { tipoGen: "psa108", zCont: false, n: 1, chE: g.cE, chI: g.cI }), m = [];
     const base = GEN.psa108.check(q) || "";
     if (!(g.d > 0 && g.d < p.h / 2)) m.push("profundidade do canal tem que ficar entre 0 e a metade da altura");
     if (!(g.R > g.d)) m.push("raio da face tem que ser maior que a profundidade");

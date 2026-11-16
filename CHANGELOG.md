@@ -6,6 +6,13 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.53.1 — PSA 108: desbaste sem duplicar nos outros materiais (16/11/2026)
+- Usuário: no PU o desbaste está certo; em Nylon, POM, NBR, Viton e Celeron saía duplicado (ex.: 100x120x22, bucha 50x70:
+  116 linhas, cada Ø passava 2 vezes em 2 etapas em Z). Agora o PSA 108 desbasta em Z de uma vez em todos os materiais,
+  como no PU (90 linhas; o programa em Nylon fica igual ao do PU, menos a linha do material).
+- Só o PSA 108 mudou: PSA 109, PSG 101/103/104 e os ciclos de arruela continuam iguais (conferido em todos os materiais).
+
+
 ## 5.53.0 — Desenho a partir do 3D do Inventor (16/11/2026)
 - Pedido do usuário: botão novo **🧊 Desenho do 3D (Inventor)** (ou arrastar o arquivo para a tela). No Inventor:
   **Arquivo → Exportar → Formato CAD → STL** (unidade mm, resolução Alta). O `.ipt` não abre fora do Inventor.

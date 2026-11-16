@@ -3597,17 +3597,45 @@ async function ferrPrep(){ for (const f of FERR){ let src = null; try { src = aw
 setTimeout(() => { ferrLoad().then(ferrPrep).catch(() => {}); }, 1200);
 function ferrCard(f){
   const tD = f.c.match(/^T(\d+)D(\d+)$/), foto = FERR_FOTO[f.c];
-  return `<div class="ferrc" data-q="${esc((f.c + " " + (f.alt || "") + " " + f.nome + " " + f.uso + " " + f.mat + " " + (f.obs || "") + " " + (f.pastilha || "") + " " + (f.sup || "") + " " + FERR_TIPOS[f.tipo]).toLowerCase())}" data-t="${f.tipo}" style="border:1px solid #d5d9de;border-radius:10px;background:#fff;display:flex;gap:12px;padding:10px">
+  return `<div class="ferrc" data-q="${esc((f.c + " " + (f.alt || "") + " " + f.nome + " " + f.uso + " " + f.mat + " " + (f.obs || "") + " " + (f.pastilha || "") + " " + (f.sup || "") + " " + (f.corr || "") + " " + FERR_TIPOS[f.tipo]).toLowerCase())}" data-t="${f.tipo}" style="border:1px solid #d5d9de;border-radius:10px;background:#fff;display:flex;gap:12px;padding:10px">
     <div style="flex:none;width:120px;display:flex;flex-direction:column;gap:4px;align-items:center"><div class="ferrFoto" data-c="${f.c}" title="Clique e cole a foto (Ctrl+V) ou escolha um arquivo" style="width:120px;height:90px;border-radius:8px;background:#f2f3f5;display:flex;align-items:center;justify-content:center;overflow:hidden;color:#999;font-size:11px;text-align:center;cursor:pointer;border:2px dashed transparent">${foto ? `<img src="${foto}" style="max-width:100%;max-height:100%">` : "foto<br>pendente"}</div><button type="button" class="btn ferrPick" data-c="${f.c}" style="font-size:11px;padding:2px 8px">&#x1F4F7; Foto</button><button type="button" class="btn ferrEd" data-c="${f.c}" style="font-size:11px;padding:2px 8px">&#x270F;&#xFE0F; Editar</button></div>
     <div style="flex:1;min-width:0;font:12.5px Segoe UI,Arial;color:#333">
       <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap"><b style="font:700 17px Consolas,monospace;color:#b2221f">${f.c}</b>${f.alt ? `<b style="font:700 13px Consolas,monospace;color:#b2221f">/ ${f.alt}</b>` : ""}<b>${esc(f.nome)}</b><span class="kindtag">${FERR_TIPOS[f.tipo] || esc(f.tipo || "")}</span>${f._ed ? `<span class="kindtag" style="background:#fff4d6;color:#8a5a00">${f._ed === "nova" ? "cadastrada" : "editada"}</span>` : ""}</div>
       <div style="color:#666;margin:2px 0">Posição T${tD ? tD[1] : "?"}${f.alt ? " (ou T" + f.alt.match(/^T(\d+)/)[1] + ")" : ""} · corretor D${tD ? tD[2] : "?"}${f.sup ? ` · suporte ${esc(f.sup)}` : ""}${f.pastilha ? ` · pastilha ${esc(f.pastilha)}` : ""}${f.raio ? ` · raio de ponta R${String(f.raio).replace(".", ",")}` : ""}${f.min ? ` · trabalha a partir de Ø${f.min}` : ""}${f.maxSec ? ` · corta secção até ${String(f.maxSec).replace(".", ",")}` : ""}</div>
-      <div><b>Uso:</b> ${esc(f.uso)}</div><div><b>Materiais:</b> ${esc(f.mat)}</div>${f.obs ? `<div style="color:#555"><b>Obs.:</b> ${esc(f.obs)}</div>` : ""}</div></div>`;
+      ${f.corr ? `<div><b>Lista de corretores:</b> <span style="font-family:Consolas,monospace">${esc(f.c)}; (${esc(f.corr)})</span></div>` : ""}<div><b>Uso:</b> ${esc(f.uso)}</div><div><b>Materiais:</b> ${esc(f.mat)}</div>${f.obs ? `<div style="color:#555"><b>Obs.:</b> ${esc(f.obs)}</div>` : ""}</div></div>`;
 }
 // v5.50.0 (usuário 16/11/2026): 🧰 Ferramentas virou uma área separada (tela cheia) com tudo de ferramenta: a torre CNC (T/D)
 // e os suportes, pastilhas e lâminas (códigos dos .txt do W:). Cadastrar e editar pela tela; fica salvo em
 // PROJETOS\FERRAMENTAS SIMULADOR\ferramentas.json (todos os PCs) ou, sem acesso à pasta, só neste PC (localStorage).
 // NÃO muda nenhum programa: os geradores têm as ferramentas no código; aqui muda só a biblioteca (e o nome no quadro do desenho).
+// v5.51.0 (usuário 16/11/2026): lista oficial de corretores da fábrica — DESENHOS\CORRETORES FERRAMENTA\CORRETORES FERRAMENTA.txt.
+// Cada ferramenta da biblioteca mostra o nome que tem na lista; as que faltavam entram na torre (só biblioteca: nenhum gerador usa).
+FERR_TIPOS.bdmint = "Bedame interno"; FERR_TIPOS.outro = "Broca / rosca / outro";
+const FERR_CORR_NOME = { T1D1: "INTERNO 45 GRAUS", T1D11: "INTERNO ORING", T1D51: "INTERNO ORING MENOR 28", T2D2: "EXTERNO PU", T2D12: "INTERNO PU",
+  T2D42: "FRONTAL 1.78", T2D52: "FRONTAL 2.62", T2D62: "FRONTAL 3.53", T2D72: "FRONTAL 5.33", T2D82: "FRONTAL 6.99",
+  T2D54: "EXTERNA 2 LADOS DIAM >23", T2D64: "INTERNA 2 LADOS DIAM >23", T3D3: "FRONTAL 35 GRAUS", T4D4: "INTERNO 30 GRAUS", T4D14: "INTERNO AFIADO",
+  T5D5: "FACA", T6D6: "BDM AFIADO 1.5", T6D16: "BDM 2mm", T7D7: "EXTERNO", T7D17: "EXTERNO ORING", T8D8: "BDM 1mm" };
+FERR.forEach(f => { const n = FERR_CORR_NOME[f.c] || FERR_CORR_NOME[f.alt]; if (n) f.corr = n; });
+[ ["T1D21","corte","Faca fita","FACA FITA"], ["T1D31","outro","Broca","BROCA"], ["T1D41","int","Interno O-ring (inserto da T4D4)","INTERNO ORING INSERTO T4D4"],
+  ["T2D61","ext","Externo pastilha 16 mm","EXTERNO PASTILHA 16MM"], ["T2D71","int","Interno pastilha 16 mm","INTERNO PASTILHA 16MM"],
+  ["T1D91","ranhura","Externo canal 1,3","EXTERNO CANAL 1.3","Zero: ponta e canto direito."], ["T1D38","ranhura","Bedame para mola do retentor","BDM PARA MOLA RETENTOR"],
+  ["T2D13","bdmint","Bedame interno 2 mm","BDM INT 2mm"], ["T2D22","bdmint","Bedame interno 2 mm com raio","BDM INT 2mm RAIO"],
+  ["T2D24","bdmint","Bedame interno afiado 1,4","BDM INT AFIADO 1.4"], ["T2D32","bdmint","Bedame interno 0,4 com raio","BDM INT 0.4 RAIO","Zero: centro da pastilha."],
+  ["T2D40","canal","Bedame frontal 1,5","BDM 1.5 FRONTAL"], ["T2D51","int","Interno aço (inserto 16)","INTERNO AÇO INSERTO 16","Também na posição T3 (T3D51).","T3D51"],
+  ["T2D92","bdmint","Bedame interno 0,4 invertido","BDM INT 0.4 INVERTIDO","Zero: centro."], ["T2D34","corte","Corte espiral","CORTE ASPIRAL"],
+  ["T4D10","outro","Interna 5,5 mm de rosca","INTERNA 5.5MM ROSCA"], ["T4D18","corte","Bedame 1","BDM 1"],
+  ["T4D20","int","Interno inserto triângulo Ø6 (amarela)","INT INSERTO TRIÂNGULO DIAM 6MM - AMARELA"], ["T4D24","bdmint","Bedame interno afiado 1,8","BDM INTERNO AFIADO 1.8"],
+  ["T4D44","int","Interno aço haste 16 (desbaste)","INTERNO AÇO HASTE 16 - DESBASTE"], ["T4D81","int","Interno 6° (sem chanfro atrás)","INTERNO 6 GRAUS - SEM CHANFRO ATRAS"],
+  ["T4D74","bdmint","Bedame 0,8 (ponta e canto direito)","PONTA E CANTO DIREITO BEDAME DE 0.8","Zero: ponta e canto direito."],
+  ["T4D84","bdmint","Bedame 0,8 invertido (ponta e canto direito)","PONTA E CANTO DIREITO BEDAME DE 0.8 INVERTIDO","Zero: ponta e canto direito."],
+  ["T4D94","canal","Bedame frontal 2,4","BDM 2.4 FRONTAL"], ["T5D15","corte","Faca arruela espiral","FACA ARRUELA EXPIRAL"],
+  ["T6D26","corte","Bedame 2 mm com raio","BDM 2mm RAIO"], ["T6D36","corte","Bedame 3 mm","BDM 3"], ["T6D46","corte","Bedame afiado 2,2","BDM 2.2 AFIADO"],
+  ["T6D56","ext","Externo O-ring 3,53","EXTERNO ORING 3.53"], ["T6D66","bdmint","Bedame afiado 1,5 montado para interno","BDM AFIADO 1.5 MONTADO PARA FAZER INTERNO"],
+  ["T6D76","corte","Lâmina 3,2","LAMINA 3.2"], ["T6D86","canal","Bedame frontal 3 mm","BDM FRONTAL 3MM","Zero: cima e face. Na lista está só \"D86\" (no grupo da T6)."],
+  ["T7D27","canal","Bedame frontal 1,8","BDM FRONTAL 1.8"], ["T7D37","ext","Externo aço (TNMG)","EXTERNO AÇO TNMG"], ["T7D47","ext","Externo aço (WNMG)","EXTERNO AÇO WNMG"],
+  ["T8D28","ranhura","Bedame T para retentor","BDM T PARA RETENTOR","Zero: canto superior direito."], ["T8D98","outro","Suporte de rosca externa","SUPORTE ROSCA EXTERNA CNC"]
+].forEach(([c, tipo, nome, corr, obs, alt]) => { if (!FERR.some(f => f.c === c || f.alt === c)) FERR.push({ c, ...(alt ? { alt } : {}), tipo, nome, corr, uso: "Ainda não usada pelos geradores do Simulador", mat: "—", obs: obs || "" }); });
+const ferrOrd = f => { const m = f.c.match(/^T(\d+)D(\d+)$/); return m ? Number(m[1]) * 1000 + Number(m[2]) : 1e9; };
 const FERR_BASE = FERR.map(f => ({ ...f }));
 const ITENS_TIPOS = { suporte: "Suporte", pastilha: "Pastilha / inserto", lamina: "Lâmina / bedame", outro: "Outro" };
 const ITENS_BASE = [
@@ -3685,7 +3713,7 @@ function itemCard(it){
       ${info ? `<div style="color:#666;margin:2px 0">${info}</div>` : ""}${it.obs ? `<div style="color:#555"><b>Obs.:</b> ${esc(it.obs)}</div>` : ""}${it.fonte ? `<div style="color:#999;font-size:11px">Fonte: W: ${esc(it.fonte)}</div>` : ""}</div>
     <button type="button" class="btn ferrEd" data-c="${esc(it.id)}" style="font-size:11px;padding:2px 8px;flex:none">&#x270F;&#xFE0F; Editar</button></div>`;
 }
-const TORRE_CAMPOS = [["c","Código (T = posição, D = corretor; ex.: T9D9)"],["alt","Código em outra posição (opcional, ex.: T2D42)"],["nome","Nome"],["tipo","Tipo","sel"],["sup","Suporte (código)"],["pastilha","Pastilha / lâmina (código)"],["raio","Raio da ponta (mm)","num"],["min","Ø mínimo de trabalho (interno)","num"],["mat","Materiais"],["uso","Uso (onde entra)","area"],["obs","Observações","area"]];
+const TORRE_CAMPOS = [["c","Código (T = posição, D = corretor; ex.: T9D9)"],["alt","Código em outra posição (opcional, ex.: T2D42)"],["nome","Nome"],["corr","Nome na lista de corretores (CORRETORES FERRAMENTA.txt)"],["tipo","Tipo","sel"],["sup","Suporte (código)"],["pastilha","Pastilha / lâmina (código)"],["raio","Raio da ponta (mm)","num"],["min","Ø mínimo de trabalho (interno)","num"],["mat","Materiais"],["uso","Uso (onde entra)","area"],["obs","Observações","area"]];
 const ITEM_CAMPOS = [["cod","Código"],["desc","Descrição"],["cat","Tipo","sel"],["pos","Posição na torre (ex.: T7)"],["marca","Marca / fornecedor"],["pastilha","Usa / encaixa em (suporte ou pastilha)"],["obs","Observações","area"]];
 function openFerr(sel, aba){
   let m = $("ferrModal"); if (m) m.remove();
@@ -3778,7 +3806,7 @@ function openFerr(sel, aba){
     const torre = FERR_TAB === "torre", tipos = torre ? FERR_TIPOS : ITENS_TIPOS;
     m.querySelectorAll(".ferrTab").forEach(b => { const on = b.dataset.a === FERR_TAB; b.style.background = on ? "#b2221f" : ""; b.style.color = on ? "#fff" : ""; b.style.borderColor = on ? "#b2221f" : ""; });
     const tv = $("ferrT").value; $("ferrT").innerHTML = `<option value="">Todos os tipos</option>` + Object.entries(tipos).map(([k, v]) => `<option value="${k}">${v}</option>`).join(""); if (tipos[tv]) $("ferrT").value = tv;
-    $("ferrList").innerHTML = torre ? FERR.map(ferrCard).join("") : ITENS.map(itemCard).join("");
+    $("ferrList").innerHTML = torre ? [...FERR].sort((a, b) => ferrOrd(a) - ferrOrd(b)).map(ferrCard).join("") : ITENS.map(itemCard).join("");
     m.querySelectorAll(".ferrEd").forEach(b => b.onclick = () => form(b.dataset.c));
     if (torre){
       FERR.forEach(f => ferrFotoGet(f.c).then(u => { if (u) setImg(f.c, u); }).catch(() => {}));

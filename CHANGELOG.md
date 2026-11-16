@@ -5,6 +5,14 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - CORREÇÃO (5.0.x): conserto de erro, ajuste de regra pequena.
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
+
+## 5.51.0 — Ferramentas: lista de corretores da fábrica (16/11/2026)
+- Lista enviada pelo usuário (DESENHOS\CORRETORES FERRAMENTA\CORRETORES FERRAMENTA.txt) entrou na aba Torre CNC: de 23 para
+  60 ferramentas. Cada uma mostra o nome que tem na lista (ex.: T2D13; (BDM INT 2mm)), com o ponto de zero quando a lista diz.
+- As 37 novas (bedames internos, frontais, ferramentas de aço, broca, rosca, facas…) são só da biblioteca: nenhum gerador as
+  usa. Tipos novos no filtro: Bedame interno e Broca / rosca / outro. A torre aparece em ordem de T e D.
+- Campo novo para editar: nome na lista de corretores. Programas e desenhos dos 31 perfis iguais a antes (conferido).
+
 ## 5.50.2 — Campo "vazio = …" nunca mais trava o programa + teste de todos os perfis (16/11/2026)
 - Pedido do usuário: era o 2º perfil novo que não gerava por pedir "Preencha" num campo opcional. Agora todo campo cujo
   texto diz "vazio = …" é opcional automaticamente (não depende mais de uma lista à parte que dava para esquecer).

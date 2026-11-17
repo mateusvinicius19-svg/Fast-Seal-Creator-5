@@ -6,6 +6,10 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.64.2 — Arruela ISO: tolerância da altura para menos (16/11/2026)
+- Arruela ISO: com o campo de tolerância da altura vazio, o desenho sai com H 0/−0,1 (para menos, como PSA 108 e DP).
+  Digitado no campo continua valendo. Só a Arruela ISO muda (o PSE 108 / DP continua 0/−0,1 como antes); programas iguais (32 perfis).
+
 ## 5.64.1 — PSE 102 R: externo da gaxeta vai até 2 além da altura (16/11/2026)
 - Gaxeta (U) do PSE 102 R: o desbaste e o acabamento do externo (T2D2) agora descem até a altura + 2 (antes + 1), porque o
   bedame do corte, que faz o canal atrás da peça, tem 2 de largura. Ex.: altura 9 → externo até Z-11,4 (antes Z-10,4).

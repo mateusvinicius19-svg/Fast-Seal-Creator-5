@@ -6,6 +6,11 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.65.1 — PSE 120: peça principal se chama "ANEL GT" (16/11/2026)
+- No campo "Peça do conjunto" do PSE 120 a peça principal aparece como "ANEL GT" (antes "GAXETA (U)"). O anel de apoio
+  continua "ANEL DE APOIO (A)". Só o nome mudou: programas, desenhos e o número ao salvar iguais (33 perfis).
+  O PSE 102 R continua com "GAXETA (U)".
+
 ## 5.65.0 — Perfil novo: PSE 120 (16/11/2026)
 - Gerador "PSE 120" (base Fast Seal PS16P; nome só "PSE 120" na escolha do perfil) no grupo Pistão, com "Peça do conjunto": GAXETA (U) ou ANEL DE APOIO (A).
 - Regras tiradas do acabamento REAL dos programas PS16P (a passada manual com G42 que os operadores põem depois do contorno do

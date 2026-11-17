@@ -6,6 +6,11 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.67.2 — PSR 211: Ø da ponta é a 1ª cota de trás (17/11/2026)
+- Desenho do PSR 211 (vista DIÂMETROS): a cota do Ø da ponta do raspador (lábio int., com tolerância) passa a ser a primeira
+  do lado de trás, encostada na peça; as outras (calcanhar int., ponta ext., raiz, Ø ext.) andam uma casa para fora.
+- PSR 212 e programas sem mudança (33 perfis geraram, nenhum programa mudou).
+
 ## 5.67.1 — PSR 211: chanfro de trás a 30° e desenho sem cotas de chanfro (17/11/2026)
 - Pedido do usuário (19,05x25,4x4,4x7): o chanfro da ponta do raspador (atrás, interno) é cortado pelas costas da T1D45 —
   agora a **30° com o eixo** (antes 45°), tamanho no raio **0,1 × secção, entre 0,2 e 0,4** (antes 0,5). Chanfro só de estética:

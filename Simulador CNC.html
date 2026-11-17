@@ -4823,11 +4823,13 @@ function pseViewsSVG(p, PT){
     if (vi === 0) {
       const yB = yBot + MB - 14;
       if (G.P117) g += ord(xb - 34, PY(G.Vd / 2), yB, PX(-H + G.aVb), "Ø " + f(G.Vd));
-      if (G.wiper) g += ord(xb - 54, PY(G.tipOut / 2), yB, xb, "Ø " + f(G.tipOut)) + ord(xb - 80, PY(G.rootOut / 2), yB, PX(-G.Hb), "Ø " + f(G.rootOut));
-      g += ord(xb - (G.P117 ? 62 : G.wiper ? 28 : 34), PY(G.intCalc / 2), yB, PX(G.P117 ? -H + 2 * G.aV : G.wiper ? -H + G.rampL : -H + (G.chcZ ?? G.chc)), (G.fi ? tl("Ø " + f(G.intCalc), G.tol.B) : tolMk("Ø " + f(G.intCalc), p.tiS, p.tiI)));
-      g += ord(xb - (G.P117 ? 90 : G.wiper ? 106 : 68), PY(G.extCalc / 2), yB, PX(G.step ? G.zS + G.chc : G.wiper ? -G.Hb + G.chc : -H + G.chc), (G.fe ? tl("Ø " + f(G.extCalc), G.tol.C) : tolMk("Ø " + f(G.extCalc), p.teS, p.teI)));
+      // v5.67.2 (usuário 17/11/2026): PSR 211 — Ø da ponta do raspador é a 1ª cota de trás (encostada na peça); as outras andam uma casa
+      const T211 = p.tipoGen === "psr211", sh = T211 ? 26 : 0;
+      if (G.wiper) g += ord(xb - 54 - sh, PY(G.tipOut / 2), yB, xb, "Ø " + f(G.tipOut)) + ord(xb - 80 - sh, PY(G.rootOut / 2), yB, PX(-G.Hb), "Ø " + f(G.rootOut));
+      g += ord(xb - (G.P117 ? 62 : G.wiper ? 28 + sh : 34), PY(G.intCalc / 2), yB, PX(G.P117 ? -H + 2 * G.aV : G.wiper ? -H + G.rampL : -H + (G.chcZ ?? G.chc)), (G.fi ? tl("Ø " + f(G.intCalc), G.tol.B) : tolMk("Ø " + f(G.intCalc), p.tiS, p.tiI)));
+      g += ord(xb - (G.P117 ? 90 : G.wiper ? 106 + sh : 68), PY(G.extCalc / 2), yB, PX(G.step ? G.zS + G.chc : G.wiper ? -G.Hb + G.chc : -H + G.chc), (G.fe ? tl("Ø " + f(G.extCalc), G.tol.C) : tolMk("Ø " + f(G.extCalc), p.teS, p.teI)));
       g += ord(xf + 28, PY(G.intAp / 2), yB, PX(G.zI - G.chI), tl("Ø " + f(G.intAp), G.tol.A));
-      if (G.wiper) g += ord(xb - 132, PY(G.tipIn / 2), yB, PX(-H + G.cTz), tl("Ø " + f(G.tipIn), G.tol.A));
+      if (G.wiper) g += ord(xb - (T211 ? 28 : 132), PY(G.tipIn / 2), yB, PX(-H + G.cTz), tl("Ø " + f(G.tipIn), G.tol.A));
       if (G.step) g += ord(xb - 158, PY(G.dS / 2), yB, PX(-G.Hb + G.chc), "Ø " + f(G.dS));   // PSR 212: Ø do degrau   // v5.21.23: PSR 211 — Ø do lábio (ponta do raspador) também do lado de trás (usuário 12/11/2026)
       g += ord(xf + 56, PY(G.xgIn / 2), yB, PX(G.zI), "Ø " + f(G.xgIn));
       g += ord(xf + 84, PY(G.xgOut / 2), yB, PX(G.zO), "Ø " + f(G.xgOut));

@@ -1247,12 +1247,12 @@ GEN.psr211 = Object.assign({}, GEN.psh105, { name: "PSR 211",
          ["rpt","Nº de repetições RPT (vazio = 0)",""],["mat","Material","PU"],["bi","Bucha Ø interno (vazio = automática)",""],["bo","Bucha Ø externo (vazio = automática)",""]],
   params: [...GEN.psh105.params.map(f => f[0] === "ae" ? ["ae","Aperto externo (vazio = 1,0 como nos programas)",""] : [f[0], f[1].replace("PSH 105", "PSR 211"), f[2]]),
            ["tL","Raspador: espessura da ponta (vazio = 0,3 × secção)",""],["wAng","Raspador: ângulo com a face (°)",65],
-           ["rampa","Raspador: rampa interna (vazio = 1,24 × altura do raspador)",""],["cT","Raspador: chanfro da ponta",0.5],["bed","Largura do bedame do canal de trás (desbaste externo vai até altura + isso)",2]],
+           ["rampa","Raspador: rampa interna (vazio = 1,24 × altura do raspador)",""],["bed","Largura do bedame do canal de trás (desbaste externo vai até altura + isso)",2]],
   build(p){ return pseFscBuild(p, psr211Geom(p)); } });
 // PSR 212 (usuário 16/11/2026): PSR 211 com degrau no externo, atrás do corpo (foto do catálogo)
 GEN.psr212 = Object.assign({}, GEN.psr211, { name: "PSR 212",
   main: [...GEN.psr211.main.slice(0, 4), ["ds","Ø do degrau externo (vazio = Ø ext. − 0,6 × secção)",""],["hs","Comprimento do degrau em Z, a partir da trás do corpo (vazio = 0,3 × corpo)",""],["pt","Passes da T6D6 na parte de trás — degrau + raspador (vazio = 1)",""], ...GEN.psr211.main.slice(4)],
-  params: GEN.psr211.params.map(f => [f[0], f[1].replace("PSR 211", "PSR 212"), f[2]]),
+  params: [...GEN.psr211.params.map(f => [f[0], f[1].replace("PSR 211", "PSR 212"), f[2]]), ["cT","Raspador: chanfro da ponta",0.5]],   // PSR 212 continua 0,5 a 45° (o PSR 211 não tem mais o campo)
   check(p){
     const base = GEN.psr211.check(p), g = psr211Geom(p), m = [];
     if (!(g.dS < g.extCalc - 2 * g.chc - 0.2)) m.push(`Ø do degrau (${fmtN(g.dS, 2)}) tem que ficar abaixo do Ø externo do corpo (${fmtN(g.extCalc, 2)}) menos os chanfros`);
@@ -1626,7 +1626,11 @@ function psr211Geom(p){
   // v5.57.2 (usuário 16/11/2026): com as alturas próximas (raspador baixo) a rampa interna de trás ficava curta e muito inclinada
   // (41° a 84° com o eixo). Agora ela tem no mínimo o comprimento para 20° com o eixo (o mesmo dos padrões, raspador 3 mm) —
   // avança para a frente; os Ø não mudam. Limite de sempre: até 0,3 antes do lábio interno.
-  const cT = opt(p.cT) ?? 0.5, rampMin = cT + (g.intCalc - tipIn) / 2 / Math.tan(20 * Math.PI / 180);
+  // v5.67.1 (usuário 17/11/2026): PSR 211 — o chanfro da ponta é cortado pelas costas da T1D45: no máximo 30° com o eixo
+  // (antes 45°); no raio = 0,1 × secção, entre 0,2 e 0,4 (antes 0,5) — chanfro só de estética, sem campo para mudar.
+  // Comprimento em Z = cT / tan 30°. O PSR 212 continua 0,5 a 45° (campo cT).
+  const cT = p.tipoGen === "psr211" ? Math.min(0.4, Math.max(0.2, xround(0.1 * (p.dext - p.dint) / 2, 1))) : opt(p.cT) ?? 0.5, cTz = p.tipoGen === "psr211" ? xround(cT / Math.tan(30 * Math.PI / 180), 3) : cT, cTk = cT / cTz;
+  const rampMin = cTz + (g.intCalc - tipIn) / 2 / Math.tan(20 * Math.PI / 180);
   const rampL = opt(p.rampa) ?? xround(Math.min(Math.max(1.24 * prot, rampMin), Ht + g.zI - g.lipLen - 0.3), 2);
   // PSR 212: degrau no externo, atrás do corpo — Ø do degrau dS de Z −(corpo − Ls) até a trás do corpo (chanfro chc nas duas arestas).
   // A T2D2 faz o externo igual ao PSR 211 (não corta parede virada para trás); o degrau é feito pela T6D6 (lâmina), junto com o raspador.
@@ -1640,9 +1644,9 @@ function psr211Geom(p){
   const big = STEP && rS < R(g.extCalc) - g.chc - 1e-6 && rS < R(xoB) && zMeet > -Hb - k45 + 1e-6 && zBig > zMeet + 1e-6;
   const stepPts = !STEP ? [g.outer[3]] : big ? [[zS + g.chc, R(g.extCalc)], [zBig, rS], [zMeet, rS]] : [[zS + g.chc, R(g.extCalc)], [zS, R(g.extCalc) - g.chc], [-Hb, R(xoB)]];
   const outer = [...g.outer.slice(0, 3), ...stepPts, ...(STEP ? [] : [[-Hb, R(xoB)]]), [-Hb - k45, R(xoB) - k45], [-Ht - 0.5, R(xoB) - k45]];   // o resto fica para a T6D6
-  const inner = [...g.inner.slice(0, 3), [-Ht + rampL, R(g.intCalc)], [-Ht + cT, R(tipIn)], [-Ht, R(tipIn) + cT], [-Ht - 0.5, R(tipIn) + cT + 0.5]];
+  const inner = [...g.inner.slice(0, 3), [-Ht + rampL, R(g.intCalc)], [-Ht + cTz, R(tipIn)], [-Ht, R(tipIn) + cT], [-Ht - 0.5, R(tipIn) + cT + 0.5 * cTk]];
   const outerRough = [...outer.slice(0, -1), [-Ht - (Number(p.bed) > 0 ? Number(p.bed) : 2) + (Number(p.rn) || 0.4), outer[outer.length - 1][1]]];   // + raio da ponta: a ferramenta para em Z −(altura + 2)   // desbaste e acabamento externos: altura + bedame de 2 mm
-  return Object.assign({}, g, { H: Ht, Hb, prot, tth, tipIn, tipOut, rootOut, wAng, cT, rampL, outer: outerRough, outerRough, inner, wiper: true, hHead: Hb, step: STEP, dS, Ls, zS, xoBack: xoStep, xoBody: xoB });
+  return Object.assign({}, g, { H: Ht, Hb, prot, tth, tipIn, tipOut, rootOut, wAng, cT, cTz, rampL, outer: outerRough, outerRough, inner, wiper: true, hHead: Hb, step: STEP, dS, Ls, zS, xoBack: xoStep, xoBody: xoB });
 }
 // PSR 212 (v5.50.3, usuário 16/11/2026): T6D6 na parte de trás — o chanfro da aresta já foi feito pela T2D2 (fica no Ø xa);
 // a lâmina (canto da frente) desce a parede, faz o Ø do degrau, o chanfro de trás e o raspador a 65°. "pt" passes: cada passe
@@ -1951,7 +1955,7 @@ function psr211Profile(p){
   const span = ((a1 - a0) < 0 ? a1 - a0 + 2 * Math.PI : a1 - a0);
   for (let k = 0; k <= 16; k++){ const a = a0 + span * k / 16; arc.push([cz + c * Math.cos(a), g.Cg[1] + c * Math.sin(a)]); }
   return [[g.zO, R(g.xo1)], [g.zO - g.chO, R(g.extAp)], [g.zO - g.lipLen, R(g.extCalc)], ...(g.step ? [[g.zS + g.chc, R(g.extCalc)], [g.zS, R(g.extCalc) - g.chc], [g.zS, R(g.dS)], [-g.Hb + g.chc, R(g.dS)]] : [[-g.Hb + g.chc, R(g.extCalc)]]), [-g.Hb, R(g.xoBack)],
-          [-g.Hb, R(g.rootOut)], [-H, R(g.tipOut)], [-H, R(g.tipIn) + g.cT], [-H + g.cT, R(g.tipIn)], [-H + g.rampL, R(g.intCalc)],
+          [-g.Hb, R(g.rootOut)], [-H, R(g.tipOut)], [-H, R(g.tipIn) + g.cT], [-H + g.cTz, R(g.tipIn)], [-H + g.rampL, R(g.intCalc)],
           [g.zI - g.lipLen, R(g.intCalc)], [g.zI - g.chI, R(g.intAp)], [g.zI, R(g.xi1)], [g.zI, R(g.xgIn)], ...arc.reverse(), [g.zO, R(g.xgOut)], [g.zO, R(g.xo1)]].map(([z, r]) => [-H - z, r]);
 }
 function pieceName(p){ if (p.tipoGen === "pse120") return "PSE 120"; if (p.tipoGen === "psr101") return "PSR 101"; if (p.tipoGen === "psh110") return "PSH 110"; if (p.tipoGen === "psh110t") return "PSH 110 30°"; if (p.tipoGen === "dhr") return "PSH 124 (DHR)"; if (p.tipoGen === "dpr") return (p.desc || "PSE 125 (DPR)").toUpperCase(); if (p.tipoGen === "custom") return p.desc || "PERFIL ESPECIAL"; if (p.tipoGen === "psa109") return "PSA 109"; if (p.tipoGen === "psa108" || p.tipoGen === "semch") return "PSA 108"; if (p.tipoGen === "psg101") return "PSG 101"; if (p.tipoGen === "psg103") return "PSG 103"; if (p.tipoGen === "psg104") return "PSG 104"; if (p.tipoGen === "pso") return "PSO 109"; if (p.tipoGen === "psr102") return "PSR 102"; if (p.tipoGen === "pse102r") return "PSE 102 R"; if (p.tipoGen === "psr212") return "PSR 212"; if (p.tipoGen === "psr211") return "PSR 211"; if (p.tipoGen === "psh117") return "PSH 117"; if (p.tipoGen === "psh125") return "PSH 125"; if (p.tipoGen === "psh105") return "PSH 105"; if (p.tipoGen === "pse105") return "PSE 105"; if (p.tipoGen === "pse103") return "PSE 103"; if (p.tipoGen === "pse107") return "PSE 107"; if (p.tipoGen === "pse118") return "PSE 118"; if (p.tipoGen === "psh107") return "PSH 107"; if (p.tipoGen === "psh121") return "PSH 121"; if (p.tipoGen === "psh103") return "PSH 103"; if (p.tipoGen === "psh108") return "PSH 108"; if (["pse106","psh106","psh108","psh117","psh105","pse105","pse107","psh107","psh103","pse103","pse118","psh121","psh125","psr211","psr212","pse102r"].includes(p.tipoGen)) return isPSH(p) ? "PSH 106" : "PSE 106"; if (p.tipoGen === "lip") return (p.desc || "DH PSH 129").toUpperCase(); return pieceKind(p) === "dp" ? "PSE 108 (DP)" : "ARRUELA ISO"; }
@@ -4823,7 +4827,7 @@ function pseViewsSVG(p, PT){
       g += ord(xb - (G.P117 ? 62 : G.wiper ? 28 : 34), PY(G.intCalc / 2), yB, PX(G.P117 ? -H + 2 * G.aV : G.wiper ? -H + G.rampL : -H + (G.chcZ ?? G.chc)), (G.fi ? tl("Ø " + f(G.intCalc), G.tol.B) : tolMk("Ø " + f(G.intCalc), p.tiS, p.tiI)));
       g += ord(xb - (G.P117 ? 90 : G.wiper ? 106 : 68), PY(G.extCalc / 2), yB, PX(G.step ? G.zS + G.chc : G.wiper ? -G.Hb + G.chc : -H + G.chc), (G.fe ? tl("Ø " + f(G.extCalc), G.tol.C) : tolMk("Ø " + f(G.extCalc), p.teS, p.teI)));
       g += ord(xf + 28, PY(G.intAp / 2), yB, PX(G.zI - G.chI), tl("Ø " + f(G.intAp), G.tol.A));
-      if (G.wiper) g += ord(xb - 132, PY(G.tipIn / 2), yB, PX(-H + G.cT), tl("Ø " + f(G.tipIn), G.tol.A));
+      if (G.wiper) g += ord(xb - 132, PY(G.tipIn / 2), yB, PX(-H + G.cTz), tl("Ø " + f(G.tipIn), G.tol.A));
       if (G.step) g += ord(xb - 158, PY(G.dS / 2), yB, PX(-G.Hb + G.chc), "Ø " + f(G.dS));   // PSR 212: Ø do degrau   // v5.21.23: PSR 211 — Ø do lábio (ponta do raspador) também do lado de trás (usuário 12/11/2026)
       g += ord(xf + 56, PY(G.xgIn / 2), yB, PX(G.zI), "Ø " + f(G.xgIn));
       g += ord(xf + 84, PY(G.xgOut / 2), yB, PX(G.zO), "Ø " + f(G.xgOut));
@@ -4834,11 +4838,12 @@ function pseViewsSVG(p, PT){
     } else {
       // calcanhar
       const xs = xb - 44;
-      g += ln(PX(G.step ? G.zS + G.chc : G.wiper ? -G.Hb + G.chc : -H + G.chc), PY(G.extCalc / 2), xs - 5, PY(G.extCalc / 2), "e") + (G.wiper ? ln(PX(-H + G.cT), PY(G.tipIn / 2), xs - 5, PY(G.tipIn / 2), "e") : ln(PX(-H + (G.chcZ ?? G.chc)), PY(G.intCalc / 2), xs - 5, PY(G.intCalc / 2), "e"));   // PSR 211: puxada na ponta do lábio raspador (como no Fast Seal)
+      g += ln(PX(G.step ? G.zS + G.chc : G.wiper ? -G.Hb + G.chc : -H + G.chc), PY(G.extCalc / 2), xs - 5, PY(G.extCalc / 2), "e") + (G.wiper ? ln(PX(-H + G.cTz), PY(G.tipIn / 2), xs - 5, PY(G.tipIn / 2), "e") : ln(PX(-H + (G.chcZ ?? G.chc)), PY(G.intCalc / 2), xs - 5, PY(G.intCalc / 2), "e"));   // PSR 211: puxada na ponta do lábio raspador (como no Fast Seal)
       if (G.P117) g += ln(PX(-H + G.aVb), PY(G.Vd / 2), xs - 5, PY(G.Vd / 2), "e");   // PSH 117: secção do calcanhar vai até o fundo do V (Ø ext. − Ø V) / 2
       g += G.wiper ? vdim(xs, PY(G.extCalc / 2), PY(G.tipIn / 2), f((G.extCalc - G.tipIn) / 2)) : G.P117 ? vdim(xs, PY(G.extCalc / 2), PY(G.Vd / 2), tm(f((G.extCalc - G.Vd) / 2), G.tol.sec, 1)) : vdim(xs, PY(G.extCalc / 2), PY(G.intCalc / 2), tm(f((G.extCalc - G.intCalc) / 2), G.tol.sec, 1));
-      if (!G.ring) g += call(PX((G.wiper ? -G.Hb : -H) + G.chc / 2), PY(((G.step ? G.dS : G.extCalc) + G.xoBack) / 4), xb - 12, PY(G.extCalc / 2) - 22, `${f(G.chc)} x 45°`, "end");
-      if (G.wiper) g += call(PX(-H + G.cT / 2), PY(G.tipIn / 2 + G.cT / 2), xb - 12, PY(G.tipIn / 2) + 18, `${f(G.cT)} x 45°`, "end");
+      const semCh = p.tipoGen === "psr211";   // v5.67.1 (usuário 17/11/2026): PSR 211 sem as cotas de chanfro no desenho
+      if (!G.ring && !semCh) g += call(PX((G.wiper ? -G.Hb : -H) + G.chc / 2), PY(((G.step ? G.dS : G.extCalc) + G.xoBack) / 4), xb - 12, PY(G.extCalc / 2) - 22, `${f(G.chc)} x 45°`, "end");
+      if (G.wiper && !semCh) g += call(PX(-H + G.cT / 2), PY(G.tipIn / 2 + G.cT / 2), xb - 12, PY(G.tipIn / 2) + 18, `${f(G.cT)} x 45°`, "end");
       if (G.step){   // PSR 212: degrau — comprimento em Z e profundidade no raio, mais o chanfro da aresta do degrau
         const xw = PX(-G.Hb), xS = PX(G.zS), yS = PY(G.dS / 2), yE = PY(G.extCalc / 2), yM = (yS + yE) / 2 + 4, xv = xw - 12;
         g += ln(xw, yS - 3, xw, yM - 6, "e") + hdim(xw, xS, yM, f(G.Ls));
@@ -4846,7 +4851,7 @@ function pseViewsSVG(p, PT){
         if (G.ring) g += call(PX(-H + G.chc / 2), PY(G.intCalc / 2 + G.chc / 2), xb - 12, PY(G.intCalc / 2) + 24, `${f(G.chc)} x 45°`, "end");   // PSE 102 R: degrau reto; chanfro só no interno de trás
         else g += call(PX(G.zS + G.chc / 2), PY(G.extCalc / 2 - G.chc / 2), xS + 30, yE - 18, `${f(G.chc)} x 45°`, "start");
       }
-      else if (!G.P117) g += call(PX(-H + (G.chcZ ?? G.chc) / 2), PY((G.intCalc + G.xiBack) / 4), xb - 12, PY(G.intCalc / 2) + 24, G.chcZ ? `${f(G.chc)} x 30°` : `${f(G.chc)} x 45°`, "end");
+      else if (!G.P117){ if (!semCh) g += call(PX(-H + (G.chcZ ?? G.chc) / 2), PY((G.intCalc + G.xiBack) / 4), xb - 12, PY(G.intCalc / 2) + 24, G.chcZ ? `${f(G.chc)} x 30°` : `${f(G.chc)} x 45°`, "end"); }
       else { const rv = yBot + 34, x1 = PX(-H + G.aVb), x2 = PX(-H + G.aVb + G.aVf); g += ln(x1, PY(G.Vd / 2) + 3, x1, rv + 6, "e") + ln(x2, PY(G.intCalc / 2) + 3, x2, rv + 6, "e") + ln(xb, PY(G.intCalc / 2) + 3, xb, rv + 6, "e") + hdim(xb, x2, rv, f(2 * G.aV)) + call(x1, PY(G.Vd / 2) + 2, xb - 12, rv + 22, `V Ø${f(G.Vd)} · ${f(G.aVb)} + ${f(G.aVf)} · ${fmtN(Number(p.vAb) > 5 ? Number(p.vAb) : 30, 0)}°/${fmtN(Number(p.vAf) > 5 ? Number(p.vAf) : 45, 0)}°`, "end"); }
       // lábios e canal (corrente) + secção total
       const xc = xf + 34, xt = xf + 84;
@@ -4858,9 +4863,9 @@ function pseViewsSVG(p, PT){
       // secção: do lábio externo ao lábio interno (Ø ext. do lábio → Ø int. do lábio) em todos, PSH também
       // (usuário 09/11/2026: 54,50 → 44,00 = 5,25 = 1,30 + 2,55 + 1,40; antes o PSH media do calcanhar → ponta do lábio)
       g += vdim(xt, PY(G.extAp / 2), PY(G.intAp / 2), tl(f((G.extAp - G.intAp) / 2), G.tol.sec, 1), 1);
-      g += call(PX(G.zO - (G.chOz ?? G.chO) / 2), PY((G.xo1 + G.extAp) / 4), xf + 8, yTop - 8, `${f(G.chO)} x ${G.chOz ? 52 : 45}°`, "start");
-      g += call(PX(G.zI - G.chI / 2), PY((G.xi1 + G.intAp) / 4), xf + 8, yBot + 14, `${f(G.chI)} x 45°`, "start");
-      if (G.wiper) g += call(PX(-H + G.cT + 0.2), PY(G.tipOut / 2), xb + 6, yBot + 52, `corpo ${f(G.Hb)} · raspador ${f(G.prot)} a ${fmtN(G.wAng, 0)}° · ponta ${f(G.tth)} · raiz Ø${f(G.rootOut)}` + (G.step ? ` · degrau Ø${f(G.dS)} x ${f(G.Ls)}` : ""), "start");
+      if (!semCh) g += call(PX(G.zO - (G.chOz ?? G.chO) / 2), PY((G.xo1 + G.extAp) / 4), xf + 8, yTop - 8, `${f(G.chO)} x ${G.chOz ? 52 : 45}°`, "start");
+      if (!semCh) g += call(PX(G.zI - G.chI / 2), PY((G.xi1 + G.intAp) / 4), xf + 8, yBot + 14, `${f(G.chI)} x 45°`, "start");
+      if (G.wiper) g += call(PX(-H + G.cTz + 0.2), PY(G.tipOut / 2), xb + 6, yBot + 52, `corpo ${f(G.Hb)} · raspador ${f(G.prot)} a ${fmtN(G.wAng, 0)}° · ponta ${f(G.tth)} · raiz Ø${f(G.rootOut)}` + (G.step ? ` · degrau Ø${f(G.dS)} x ${f(G.Ls)}` : ""), "start");
       // comprimento do lábio embaixo, profundidade e abertura do canal
       const rb = yBot + 34;
       g += ln(PX(G.zI - G.lipLen), PY(G.intCalc / 2) + 3, PX(G.zI - G.lipLen), rb + 6, "e") + ln(PX(G.zI), PY(G.xi1 / 2) + 3, PX(G.zI), rb + 6, "e") + hdim(PX(G.zI - G.lipLen), PX(G.zI), rb, f(G.lipLen));

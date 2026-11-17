@@ -6,6 +6,13 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.67.1 — PSR 211: chanfro de trás a 30° e desenho sem cotas de chanfro (17/11/2026)
+- Pedido do usuário (19,05x25,4x4,4x7): o chanfro da ponta do raspador (atrás, interno) é cortado pelas costas da T1D45 —
+  agora a **30° com o eixo** (antes 45°), tamanho no raio **0,1 × secção, entre 0,2 e 0,4** (antes 0,5). Chanfro só de estética:
+  o campo "Raspador: chanfro da ponta" saiu do PSR 211 (sempre automático).
+- Desenho do PSR 211: sem as cotas de chanfro (lábios, corpo e ponta).
+- PSR 212 não muda (continua 0,5 a 45°, com o campo). 33 perfis geraram; só o PSR 211 mudou de programa.
+
 ## 5.67.0 — Material PTFE+GR (17/11/2026)
 - Pedido do usuário: **PTFE+GR** (PTFE com grafite) na lista de materiais das gaxetas/raspadores, das arruelas/guias e do
   anel de apoio (PSE 120 / PSE 102 R). Mesmas regras e ferramentas do PTFE puro e do PTFE+BR (T3D3, T7D7, T4D4 —

@@ -6,6 +6,10 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.64.4 — PSE 102 R: imagem da escolha com o anel de apoio (16/11/2026)
+- O quadro do PSE 102 R na janela "Escolha o perfil" mostrava só a gaxeta. Agora mostra também o anel de apoio (arruela,
+  em branco) no degrau de trás. Programas iguais (32 perfis).
+
 ## 5.64.3 — PSE 102 R: nome só "PSE 102 R" (16/11/2026)
 - Na escolha do perfil o nome aparecia "PSE 102 R (U com degrau para o anel de apoio)". Agora fica só "PSE 102 R".
   Programas iguais (32 perfis).

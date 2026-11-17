@@ -3225,12 +3225,13 @@ function profThumb(type){
   if (!pts || !pts.length) pts = [[0, 1], [-1, 1], [-1, 0], [0, 0]];
   // PSE 102 R (usuário 16/11/2026): o quadro mostra a gaxeta E o anel de apoio (arruela em PTFE) no degrau
   let ring = null;
-  if (type === "pse102r") try { const g = pse102rGeom(profDefaults("pse102r")), gap = 0.15;
-    ring = [[-gap, g.ringI / 2 + gap], [-g.Ls + gap, g.ringI / 2 + gap], [-g.Ls + gap, g.ringO / 2], [-gap, g.ringO / 2]]; } catch(e){ ring = null; }
-  // PSE 120: os dois anéis de apoio, um em cada assento
+  // 5.64.5: anel encaixado certinho no degrau (mesma largura e topo alinhado com o corpo da gaxeta)
+  if (type === "pse102r") try { const g = pse102rGeom(profDefaults("pse102r"));
+    ring = [[0, g.dS / 2], [-g.Ls, g.dS / 2], [-g.Ls, g.extCalc / 2], [0, g.extCalc / 2]]; } catch(e){ ring = null; }
+  // PSE 120: os dois anéis de apoio encaixados nos assentos (largura do assento, do Ø do assento ao Ø externo)
   let ring2 = null;
-  if (type === "pse120") try { const g = pse120Geom(profDefaults("pse120")), gap = 0.15, H = g.H, a = g.ringI / 2 + gap, b = g.ringO / 2;
-    ring = [[-gap, a], [-g.w + gap, a], [-g.w + gap, b], [-gap, b]]; ring2 = [[-H + g.w - gap, a], [-H + gap, a], [-H + gap, b], [-H + g.w - gap, b]]; } catch(e){ ring = ring2 = null; }
+  if (type === "pse120") try { const g = pse120Geom(profDefaults("pse120")), H = g.H, a = g.s, b = g.D / 2;
+    ring = [[0, a], [-g.w, a], [-g.w, b], [0, b]]; ring2 = [[-H + g.w, a], [-H, a], [-H, b], [-H + g.w, b]]; } catch(e){ ring = ring2 = null; }
   const zs = pts.concat(ring || [], ring2 || []).map(q => q[0]), rs = pts.concat(ring || [], ring2 || []).map(q => q[1]);
   const z0 = Math.min(...zs), z1 = Math.max(...zs), r0 = Math.min(...rs), r1 = Math.max(...rs);
   const W = 112, Hh = 80, pad = 8, s = Math.min((W - 2 * pad) / Math.max(z1 - z0, 1e-6), (Hh - 2 * pad) / Math.max(r1 - r0, 1e-6));
@@ -3240,7 +3241,7 @@ function profThumb(type){
   const dR = ring ? ring.map(([z, r], i) => `${i ? "L" : "M"}${(ox + (z1 - z) * s).toFixed(1)},${(oy + (r1 - r) * s).toFixed(1)}`).join("") + "Z" : "";
   const dR2 = ring2 ? ring2.map(([z, r], i) => `${i ? "L" : "M"}${(ox + (z1 - z) * s).toFixed(1)},${(oy + (r1 - r) * s).toFixed(1)}`).join("") + "Z" : "";
   return `<svg viewBox="0 0 ${W} ${Hh}" width="${W}" height="${Hh}"><path d="${d}" fill="${col}" stroke="${col === "#e2dfd8" ? "#8d8a83" : "#222"}" stroke-width="1"/>` +
-    (dR ? `<path d="${dR}" fill="#f1efea" stroke="#555" stroke-width="1"/>` : "") + (dR2 ? `<path d="${dR2}" fill="#f1efea" stroke="#555" stroke-width="1"/>` : "") + `</svg>`;
+    (dR ? `<path d="${dR}" fill="#ecebe6" stroke="#222" stroke-width="1" stroke-linejoin="round"/>` : "") + (dR2 ? `<path d="${dR2}" fill="#ecebe6" stroke="#222" stroke-width="1" stroke-linejoin="round"/>` : "") + `</svg>`;
 }
 function profOptText(t){ if (t === "dp") return "PSE 108 (DP)"; const o = [...$("genType").options].find(o => o.value === t); return o ? o.textContent : (GEN[t] && GEN[t].name) || t; }
 // quadros da escolha pela imagem: só o código do perfil (ex.: "PSH 108"), sem a descrição entre parênteses (usuário 12/11/2026);

@@ -21,6 +21,10 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - Imagem da escolha do perfil com os dois anéis de apoio (como a do PSE 102 R).
 - Os outros 32 perfis geram os mesmos programas, desenhos e imagens de antes.
 
+## 5.64.5 — PSE 102 R: anel da imagem de escolha alinhado (16/11/2026)
+- O anel de apoio no quadro do PSE 102 R ficava com folga e mais alto que a gaxeta. Agora fica encaixado no degrau, com a
+  mesma largura e o topo alinhado com o corpo, contorno igual ao da gaxeta. Programas iguais (32 perfis).
+
 ## 5.64.4 — PSE 102 R: imagem da escolha com o anel de apoio (16/11/2026)
 - O quadro do PSE 102 R na janela "Escolha o perfil" mostrava só a gaxeta. Agora mostra também o anel de apoio (arruela,
   em branco) no degrau de trás. Programas iguais (32 perfis).

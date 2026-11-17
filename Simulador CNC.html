@@ -1678,8 +1678,9 @@ function pse102rGeom(p){
   // anel de apoio (só no desenho, como no Fast Seal): Ø int. = Ø do degrau + 0,1 %, Ø ext. = Ø ext. − 0,2 (até Ø100) / − 0,3
   const ringI = xround(dS * 1.001, 2), ringO = xround(p.dext - (p.dext <= 100 ? 0.2 : 0.3), 2);
   // externo da T2D2 (como o Fast Seal): lábio e corpo até a parede do degrau, 45° até Ø do degrau + 1 e reto até passar da altura;
-  // a parede e o Ø do degrau ficam para a T6D6 (OUTSIDE HAMMER GROOVE)
-  const zc = zS, zEnd = -H - 1, drop = Math.max(0.01, R(g.extCalc) - R(dS) - 0.5);
+  // a parede e o Ø do degrau ficam para a T6D6 (OUTSIDE HAMMER GROOVE). Usuário 16/11/2026: o externo vai até 2 além da altura
+  // (o bedame do corte, que faz o canal atrás da peça, tem 2 de largura)
+  const zc = zS, zEnd = -H - 2, drop = Math.max(0.01, R(g.extCalc) - R(dS) - 0.5);
   const back = zc - drop > zEnd + 0.05 ? [[zc - drop, R(g.extCalc) - drop], [zEnd, R(g.extCalc) - drop]] : [[zEnd, R(g.extCalc) - (zc - zEnd)]];
   const outer = [[g.zO, R(xo1)], [g.zO - chOz, R(g.extAp)], [g.zO - g.lipLen, R(g.extCalc)], [zc, R(g.extCalc)], ...back];
   const inner = [[0, R(xi1)], [-chI, R(g.intAp)], [-g.lipLen, R(g.intCalc)], [-H + g.chc, R(g.intCalc)], [-H - 0.5, R(g.intCalc) + g.chc + 0.5]];

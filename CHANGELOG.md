@@ -6,6 +6,12 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.64.1 — PSE 102 R: externo da gaxeta vai até 2 além da altura (16/11/2026)
+- Gaxeta (U) do PSE 102 R: o desbaste e o acabamento do externo (T2D2) agora descem até a altura + 2 (antes + 1), porque o
+  bedame do corte, que faz o canal atrás da peça, tem 2 de largura. Ex.: altura 9 → externo até Z-11,4 (antes Z-10,4).
+  O intervalo entre peças (G92) sobe 1 mm junto (25,55 → 26,55 no exemplo 114 × 142 × 9 do teste).
+- Anel de apoio (A) e os outros 31 perfis geram os mesmos programas de antes.
+
 ## 5.64.0 — PSE 102 R: programa do anel de apoio (peça A) (16/11/2026)
 - Campo "Peça do conjunto" no PSE 102 R: GAXETA (U) ou ANEL DE APOIO (A). A peça A gera o programa do anel em PTFE (campo
   "Material do anel"), como os programas "NNNNNNA" do Fast Seal (PS05P-2): face e externo T7D7, interno T4D4, corte T8D8 na

@@ -6,6 +6,11 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.66.7 — VEDADOR 10 X 16 X 6 (46310): desenho com os Ø só no corte A-A (17/11/2026)
+- Usuário: "ficou muito poluído, colocar os diâmetros só na parte de cima". Os 10 Ø (cada canal e degrau) vão no
+  corte A-A, 5 de cada lado; a secção ampliada fica só com larguras, chanfros, ângulos e raios. Só este desenho
+  (`gerar_desenho.js` da pasta); o Desenho do 3D do Simulador não muda.
+
 ## 5.66.6 — VEDADOR 10 X 16 X 6 (46310): desenho (17/11/2026)
 - Desenho do 3D em PDF na pasta do programa (`VEDADOR (9.606 X 16.706 X 6) 46310.pdf`): programa 46310, PU, frente da
   usinagem (canal fundo e aresta Ø16,706) à direita. Simulador não muda.

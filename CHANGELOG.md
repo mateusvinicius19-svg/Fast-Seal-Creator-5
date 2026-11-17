@@ -6,6 +6,17 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.69.0 — Perfil novo DUAL SEAL (S03) (17/11/2026)
+- Pedido do usuário: **DUAL SEAL** (base Fast Seal S03), grupo novo "Simétricos" na janela de perfis. Dois lábios por fora e dois
+  por dentro: lábios a H/4 e 3H/4, vales na face, no meio e atrás; altura dos lábios no raio 0,1 × secção + 0,23 (tirado dos 49
+  programas S03 do W:; 037806 100x110x8 confere: 110,72 / 109,26 / 99,28 / 100,74). Secção ±0,1, altura ±0,2.
+- Campo **Medidas** (3 opções): Padrão (Ø de haste/alojamento — lábios com aperto —, altura da peça) · Medidas da peça (pontas
+  dos lábios no Ø digitado, altura igual) · Tudo alojamento (Ø como o padrão, altura −10 %, máx. 0,7 mm até H10; acima a regra das gaxetas).
+- Programa como o Fast Seal (`%S03`): FACING DOWNWARD T3D3, OUTSIDE T2D2, INSIDE (T4D14 < Ø11, T1D45 até Ø40, T2D12), CUTTING T5D5;
+  bucha automática, tarugo, PTFE, G92 = 15 + Z mais fundo + 0,15. Lábio interno limitado a 30° para T1D45/T4D14/T4D4 pelas costas (ATENÇÃO).
+- Desenho DIÂMETROS + SECÇÃO; pasta DESENHOS\DUAL SEAL\DUAL SEAL (I X O X H) nº. Os outros 33 perfis não mudaram.
+- A regra nova das ferramentas internas (T2D12 só de Ø40 para cima etc.) fica em versão de teste separada, ainda não publicada.
+
 ## 5.68.0 — Controle de pastilhas (17/11/2026)
 - Pedido do usuário: botão **🧰 Pastilhas** (ao lado do 🔎 Ver programa) — estoque das pastilhas/insertos com baixa manual.
   Cadastro (código, descrição, ferramentas que usam, local, saldo, mínimo), **Baixa** (qtd, máquina, motivo, obs., usuário

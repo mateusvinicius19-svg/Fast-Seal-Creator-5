@@ -6,6 +6,14 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.71.0 (TESTE — branch teste/pse127-psh131, NÃO publicada) — Perfis novos PSE 127 e PSH 131
+- PSE 127 (Fast Seal PS15P, pistão: lábio raiado por fora, canal raiado por dentro) e PSH 131 (RS15P, haste: espelhado).
+- Regras dos programas do W: — ponta no meio da altura R 0,21 × secção; aperto do lábio 0,1 × secção + 0,28 no Ø; queda até a face
+  0,1 × secção + 0,19; lado do canal Ø + 0,35 %, chanfros 0,3 × 45°; canal 0,5 × H de largura, 0,12 × secção de profundidade.
+  Tudo em Parâmetros fixos. PSE 127 85x95x8,5 confere com o 029919 no lábio (X95.741 Z-4.413 R1.450).
+- FALTA: conferir no Fast Seal (aperto do lábio e tamanho do canal variam nos programas). Por isso sai ATENÇÃO "perfil novo".
+- roughPasses: arco com raio próprio (it.R); os outros perfis não mudam (34 iguais).
+
 ## 5.69.0 — Perfil novo DUAL SEAL (S03) (17/11/2026)
 - Pedido do usuário: **DUAL SEAL** (base Fast Seal S03), grupo novo "Simétricos" na janela de perfis. Dois lábios por fora e dois
   por dentro: lábios a H/4 e 3H/4, vales na face, no meio e atrás; altura dos lábios no raio 0,1 × secção + 0,23 (tirado dos 49

@@ -1719,7 +1719,7 @@ function pse102rPiece(p){ return String(p.peca || "U").toUpperCase() === "A" ? "
 // Chanfros proporcionais à espessura t do anel, como nos anéis do Fast Seal (045617A / 045639A / 045626A): externo 45° 0,042 × t
 // na frente e atrás; interno 45° 0,105 × t na frente; interno de trás a 30° com o eixo, 0,063 × t em Z (a T4D4 faz no máximo 30° nas costas).
 function pse102rRingBuild(p){ return fscRingBuild(p, pse102rGeom(p), { hdr: "PSE102R-A", desc: "PSE 102 R - ANEL DE APOIO (A)" }); }
-// Anel de apoio (peça A do PSE 102 R e do PSE 120), usuário 16/11/2026: material escolhido na lista das arruelas (ARR_MAT) e
+// Anel de apoio (peça A) — SÓ NO PSE 120 (usuário 16/11/2026; o PSE 102 R fica como estava): material escolhido na lista das arruelas (ARR_MAT) e
 // desenho próprio do anel (Corte A-A + Detalhe B, como as arruelas) com a altura para menos (0/−0,1) quando o campo está vazio.
 function ringMatKey(p){
   const v = String(p.matR || "PTFE").trim().toUpperCase();
@@ -1750,18 +1750,19 @@ function ringProfile(p){   // z de 0 (frente) a −L, como as arruelas
 function fscRingBuild(p, g, o){
   const opt = v => (v === "" || v === null || v === undefined || isNaN(v)) ? null : Number(v);
   const f3 = v => fx(v, 3), r = Number(p.rn) || 0.4, L = g.Ls, R = x => x / 2, T30 = Math.tan(30 * Math.PI / 180);
-  const mk = ringMatKey(p), q = Object.assign({}, p, { mat: ringMatLabel(p) });
+  // usuário 16/11/2026: lista de materiais só no PSE 120; o PSE 102 R continua com o campo de texto (PTFE) como antes
+  const N120 = p.tipoGen === "pse120", mk = N120 ? ringMatKey(p) : null, q = Object.assign({}, p, { mat: N120 ? ringMatLabel(p) : (String(p.matR || "PTFE").trim() || "PTFE") });
   const rI = R(g.ringI), rO = R(g.ringO), { c, cF, zBI } = ringChamf(p, g, o);
   let bi = opt(p.bi), bo = opt(p.bo);
   if (bi === null || bo === null){
     // PU: bucha da lista; os outros materiais (PTFE, POM, PEAD...): tubo sob medida 2 mm para cada lado no Ø (regra do PTFE)
-    const hit = mk === "PU" ? buchaPick(g.ringI, g.ringO) : g.ringI > 2 ? [+(g.ringI - 2).toFixed(3), +(g.ringO + 2).toFixed(3)] : null;
+    const hit = !N120 ? (teflonBucha(q, g.ringI, g.ringO) || buchaPick(g.ringI, g.ringO)) : mk === "PU" ? buchaPick(g.ringI, g.ringO) : g.ringI > 2 ? [+(g.ringI - 2).toFixed(3), +(g.ringO + 2).toFixed(3)] : null;
     if (bi === null) bi = hit ? hit[0] : Math.max(0, Math.floor(g.ringI - 3));
     if (bo === null) bo = hit ? hit[1] : Math.ceil(g.ringO + 3);
   }
   const tI = bi, tO = bo, S = (p.S === "" || isNaN(p.S)) ? rpmLookup(Math.max(g.ringO, tO), RPM_TABLE) : p.S;
   // ferramentas pelo material, como nas arruelas (ARR_MAT): externo / interno / corte (vazio = T8D8); T4D4 no mínimo Ø14
-  const am = ARR_MAT[mk], TL = { ext: am[1], int: p.tInt || (["PTFE", "PTFEBR", "POM", "NYLON"].includes(mk) && g.ringI < T4D4_MIN ? "T2D14" : am[2]), cut: am[3] || "T8D8", fCut: "0.100" };
+  const am = N120 ? ARR_MAT[mk] : null, TL = !N120 ? fscTools(q, "T7D7", "T4D4") : { ext: am[1], int: p.tInt || (["PTFE", "PTFEBR", "POM", "NYLON"].includes(mk) && g.ringI < T4D4_MIN ? "T2D14" : am[2]), cut: am[3] || "T8D8", fCut: "0.100" };
   const now = new Date(), pad = n => String(n).padStart(2, "0");
   const date = `${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()} @ ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
   const sec = name => [";( *********************** )", ";( " + name.padEnd(24, " ").slice(0, 24) + ")", ";( *********************** )"];
@@ -2014,7 +2015,7 @@ function fieldHTML([k, label, def], wide){
   if (k === "aloj") return `<label>${label}<select data-k="aloj" class="orient" style="width:100%"><option value="N"${def !== "S" ? " selected" : ""}>Não · medidas da peça</option><option value="S"${def === "S" ? " selected" : ""}>${ALOJ_RASP[$("genType").value] ? "Sim · altura menor −4 % (0,3 a 1 mm)" : "Sim · altura −10 % (máx. 1 mm até 20; máx. 2 mm acima)"}</option></select></label>`;
   if (k === "sec" && $("genType").value === "pso") return `<label>${label}<input data-k="sec" type="text" inputmode="decimal" list="psoSecList" value="${String(def).replace(".", ",")}" placeholder="1,78 · 2,62 · 3,53 · 5,33 · 6,99 · 8,4 ou outra"><datalist id="psoSecList">${[1.78, 2.62, 3.53, 5.33, 6.99, 8.4].map(v => `<option value="${String(v).replace(".", ",")}">Parker ±${String(parkerTol(50, v).wTol).replace(".", ",")}</option>`).join("")}</datalist></label>`;   // PSO 109: secção livre, 5 padrão Parker sugeridas
   if (k === "peca") return `<label>${label}<select data-k="peca" class="orient" style="width:100%">${Object.entries($("genType").value === "pse120" ? PSE120_PECAS : $("genType").value === "pse102r" ? PSE102R_PECAS : PSH110_PECAS).map(([v, t]) => `<option value="${v}"${def === v ? " selected" : ""}>${t}</option>`).join("")}</select></label>`;
-  if (k === "matM" || k === "matF" || k === "matR") return `<label>${label}<select data-k="${k}" class="orient" style="width:100%">${Object.entries(ARR_MAT).map(([v, a]) => `<option value="${v}"${def === v ? " selected" : ""}>${v === "NYLON" ? "PEAD (Nylon / PEAD)" : a[0]}</option>`).join("")}</select></label>`;
+  if (k === "matM" || k === "matF" || (k === "matR" && $("genType").value === "pse120")) return `<label>${label}<select data-k="${k}" class="orient" style="width:100%">${Object.entries(ARR_MAT).map(([v, a]) => `<option value="${v}"${def === v ? " selected" : ""}>${v === "NYLON" ? "PEAD (Nylon / PEAD)" : a[0]}</option>`).join("")}</select></label>`;
   if (k === "corte") return `<label>${label}<select data-k="corte" class="orient" style="width:100%"><option value="S"${def !== "N" ? " selected" : ""}>Com corte (como o PSG 101)</option><option value="N"${def === "N" ? " selected" : ""}>Sem corte</option></select></label>`;
   if (k === "angC") return `<label>${label}<input data-k="angC" type="text" inputmode="decimal" list="angCList" value="${String(def).replace(".", ",")}" placeholder="30 · 45 · 60"><datalist id="angCList"><option value="30"><option value="45"><option value="60"></datalist></label>`;
   if (k === "matA") return `<label>${label}<select data-k="matA" class="orient" style="width:100%">${Object.entries(ARR_MAT).map(([v, a]) => `<option value="${v}"${def === v ? " selected" : ""}>${a[0]}</option>`).join("")}</select></label>`;
@@ -5013,7 +5014,7 @@ function drawingTools(p){
 function drawingSVG(p){   // v5.48.0: erro no desenho aparece na tela (e o PDF não é salvo)
   try { return drawingSVGCore(p); } catch(e){ errShow("Erro ao montar o desenho", e); return `<svg xmlns="http://www.w3.org/2000/svg" data-erro="1" viewBox="0 0 794 300" width="794" height="300"><rect width="794" height="300" fill="#fff"/><text x="20" y="60" fill="#a2231d" font-family="Arial" font-size="18" font-weight="700">ERRO NO DESENHO: ${esc(e && e.message ? e.message : String(e))}</text><text x="20" y="95" fill="#333" font-family="Arial" font-size="14">AVISE O RESPONSÁVEL. Confira as medidas; se continuar, tire um print.</text></svg>`; }
 }
-function drawingSVGCore(p){ if (p && ["pse102r","pse120"].includes(p.tipoGen) && pse102rPiece(p) === "A") p = ringDrawP(p);   // anel de apoio: desenho do anel
+function drawingSVGCore(p){ if (p && p.tipoGen === "pse120" && pse102rPiece(p) === "A") p = ringDrawP(p);   // PSE 120: anel de apoio com desenho do anel (só o PSE 120 — usuário 16/11/2026)
    if (p && p.tipoGen === "psh110") p = psh110DrawP(p); if (p && p.tipoGen === "psh110t") p = psh110tDrawP(p);   // PSH 110: desenho com as medidas da peça escolhida
   const PT = state.orient === "portrait";
   const info = dwgInfo();

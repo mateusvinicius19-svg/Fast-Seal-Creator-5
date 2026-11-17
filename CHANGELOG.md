@@ -6,6 +6,10 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.66.5 — VEDADOR 10 X 16 X 6 (46310): peça desvirada (17/11/2026)
+- Usuário: "fez ao contrário". A frente (OP1) agora é a face do canal fundo (1,4) e da aresta Ø16,706; o lábio Ø14,988 e o
+  canal de 0,9 ficam atrás e vão na OP2. Canal externo Ø14,088 passa para Z −3,7 a −5,2. Simulador não muda.
+
 ## 5.66.4 — VEDADOR 10 X 16 X 6: programa 46310 (17/11/2026)
 - Pedido do usuário (STL do Inventor): `Programas avulsos/VEDADOR (10 X 16 X 6) 46310/` com `046310.PIT` (OP1) e
   `046310 OP2.PIT` (peça virada: face de trás + canal de trás) + MCS 500 (`46310.txt`, `46310 OP2.txt`). PU, tarugo Ø20.

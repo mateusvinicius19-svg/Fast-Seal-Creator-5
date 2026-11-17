@@ -51,3 +51,4 @@ metadata:
 - Secção no desenho: +0 / −0,05.
 - Celeron: chanfro externo a 30° (medida em Z, 30° com o eixo), em vez de 45°.
 - Celeron (todas as arruelas/guias): corte com a T6D16 → bedame 2 nas peças e G92 +1 (como secção > 14,8); desbaste vai até o fim da faixa do corte (N×B6 + sobreposição), 0,1 antes da peça seguinte; acabamento termina no mesmo Z (paralelo = meio bedame + sobreposição, no fundo do chanfro, sem degrau): nada passa para a peça seguinte. Vale também para secção > 14,8.
+- 17/11/2026 (usuário): material PTFE+GR (grafite) = mesmas ferramentas/regras do PTFE puro e PTFE+BR (isTeflon, ARR_MAT PTFEGR, GAX_MAT, ringMatKey, gerar.ps1).

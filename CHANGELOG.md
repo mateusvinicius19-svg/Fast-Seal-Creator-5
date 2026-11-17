@@ -6,6 +6,12 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.67.0 — Material PTFE+GR (17/11/2026)
+- Pedido do usuário: **PTFE+GR** (PTFE com grafite) na lista de materiais das gaxetas/raspadores, das arruelas/guias e do
+  anel de apoio (PSE 120 / PSE 102 R). Mesmas regras e ferramentas do PTFE puro e do PTFE+BR (T3D3, T7D7, T4D4 —
+  T2D14 abaixo de Ø14 —, T8D8; bucha com 2 mm de sobremetal; passe único saindo de bucha). Linha `;MATERIAL: PTFE+GR`.
+- `Claude contexto/Rotina/gerar.ps1` reconhece "PTFE+GR" no desenho. Programas dos outros materiais não mudam (33 perfis iguais).
+
 ## 5.66.8 — VEDADOR 10 X 16 X 6 (46310): secção ampliada só com alturas e secção (17/11/2026)
 - Usuário: "não precisa cotar os raios e chanfros, preciso apenas das alturas dos rebaixos e secções igual já fazemos".
   Secção ampliada: largura 6, alturas do externo em cota corrida (0,8 · 1,5 · 2,2 · 1,5), do interno (1,5 · 3 · 1,5),

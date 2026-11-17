@@ -6,6 +6,11 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.66.8 — VEDADOR 10 X 16 X 6 (46310): secção ampliada só com alturas e secção (17/11/2026)
+- Usuário: "não precisa cotar os raios e chanfros, preciso apenas das alturas dos rebaixos e secções igual já fazemos".
+  Secção ampliada: largura 6, alturas do externo em cota corrida (0,8 · 1,5 · 2,2 · 1,5), do interno (1,5 · 3 · 1,5),
+  profundidade dos canais das faces (0,9 e 1,4) e Secção 3,55. Sem raios, chanfros nem ângulos. Só este desenho.
+
 ## 5.66.7 — VEDADOR 10 X 16 X 6 (46310): desenho com os Ø só no corte A-A (17/11/2026)
 - Usuário: "ficou muito poluído, colocar os diâmetros só na parte de cima". Os 10 Ø (cada canal e degrau) vão no
   corte A-A, 5 de cada lado; a secção ampliada fica só com larguras, chanfros, ângulos e raios. Só este desenho

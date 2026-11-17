@@ -23,7 +23,33 @@ const svg=await pg.evaluate(()=>{const p=state.genParams; p.desc="VEDADOR";
    const lados=[[-1,[5.094,5.594,6.494,7.044,7.494]],[1,[4.803,5.743,6.744,8.044,8.353]]];
    for(const [sd,rs] of lados) rs.forEach((r,k)=>{const xe=X2(edge(r,sd)), xx=sd<0?X2(0)-20*(k+1):X2(L)+24*(k+1);
      g+=ext(xe+sd*3,Y2(r),xx+sd*5,Y2(r))+ext(xe+sd*3,Y2(-r),xx+sd*5,Y2(-r))+dimV(xx,Y2(r),Y2(-r),"Ø "+f(2*r));});
-   return g; };
+   // secção ampliada: só o contorno + alturas dos rebaixos, profundidade dos canais das faces e a secção (sem raios/chanfros/ângulos)
+   const iT=g.indexOf("SECÇÃO (ampliada)</text>"), head=g.slice(0,iT), tail=g.slice(iT+"SECÇÃO (ampliada)</text>".length);
+   const prof=head.match(/<path d="[^"]*" class="p"\/>/)[0];
+   const rmin=Math.min(...poly.map(q=>q[1])), Hh=rmax-rmin, bx0=170,bx1=600,by0=530,by1=715, s=Math.min((bx1-bx0)/L,(by1-by0)/Hh,60);
+   const ox=(bx0+bx1)/2-L*s/2, oy=(by0+by1)/2+Hh*s/2, X=a=>ox+a*s, Y=r=>oy-(r-rmin)*s, yT=Y(rmax), yB=Y(rmin);
+   const dimH=(x1,x2,y,txt,ty)=>arr(x1,y,x2,y)+`<text x="${(x1+x2)/2}" y="${ty??y-5}" class="t" text-anchor="middle">${txt}</text>`;
+   const dimV2=(x,y1,y2,txt)=>{const tx=x+16,ty=(y1+y2)/2;return arr(x,y1,x,y2)+`<text x="${tx}" y="${ty}" class="t" text-anchor="middle" transform="rotate(-90 ${tx} ${ty})">${txt}</text>`;};
+   const rAt=(a,top)=>{const v=poly.filter(q=>Math.abs(q[0]-a)<1e-6).map(q=>q[1]); return top?Math.max(...v):Math.min(...v);};
+   let h=prof;
+   // largura total
+   h+=ext(X(0),Y(rAt(0,1))-4,X(0),yT-52)+ext(X(L),Y(rAt(L,1))-4,X(L),yT-52)+dimH(X(0),X(L),yT-46,f(L));
+   // alturas dos rebaixos do externo (cota corrida em cima): lábio, canal, degrau Ø16,088, até a face
+   const zt=[0,0.8,2.3,4.5,L], yd=yT-20;
+   zt.forEach(z=>{const r=Math.max(...poly.filter(q=>Math.abs(q[0]-z)<0.051).map(q=>q[1])); h+=ext(X(z),Y(r)-4,X(z),yd-6);});
+   for(let i=1;i<zt.length;i++) h+=dimH(X(zt[i-1]),X(zt[i]),yd,f(zt[i]-zt[i-1]));
+   // alturas do interno (cota corrida embaixo): lábio + rampa, rebaixo Ø10,188, rampa + lábio
+   const zb=[0,1.5,4.5,L], yb=yB+28;
+   zb.forEach(z=>{const r=Math.min(...poly.filter(q=>Math.abs(q[0]-z)<0.051).map(q=>q[1])); h+=ext(X(z),Y(r)+4,X(z),yb+6);});
+   for(let i=1;i<zb.length;i++) h+=dimH(X(zb[i-1]),X(zb[i]),yb,f(zb[i]-zb[i-1]),yb+14);
+   // profundidade dos canais das faces (a partir da face)
+   const gl=[0.9,6.044], gr=[L-1.4,6.321];
+   h+=arr(X(0),Y(gl[1]),X(gl[0]),Y(gl[1]))+ext(X(0)-40,Y(gl[1]),X(0),Y(gl[1]))+`<text x="${X(0)-8}" y="${Y(gl[1])-4}" class="t" text-anchor="end">${f(0.9)}</text>`;
+   h+=arr(X(gr[0]),Y(gr[1]),X(L),Y(gr[1]))+ext(X(L),Y(gr[1]),X(L)+40,Y(gr[1]))+`<text x="${X(L)+8}" y="${Y(gr[1])-4}" class="t" text-anchor="start">${f(1.4)}</text>`;
+   // secção (Ø ext − Ø int)/2
+   const xs=X(L)+70; h+=ext(X(5.4)+4,yT,xs+6,yT)+ext(X(L)+4,yB,xs+6,yB)+dimV2(xs,yT,yB,"Secção "+f(rmax-rmin));
+   h+=`<text x="${X(L/2)}" y="${yB+74}" class="vt" text-anchor="middle">SECÇÃO (ampliada)</text>`;
+   return h+tail; };
  return drawingSVG(p);});
 const html=`<html><head><style>@page{size:A4;margin:0}body{margin:0}svg{width:210mm;height:297mm;display:block}</style></head><body>${svg}</body></html>`;
 const p2=await b.newPage();await p2.setContent(html);await p2.pdf({path:out+".pdf",format:"A4",printBackground:true});

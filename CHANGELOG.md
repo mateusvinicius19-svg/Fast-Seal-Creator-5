@@ -6,6 +6,12 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.66.2 — PSE 102 R: anel de apoio com o mesmo Ø externo do corpo da gaxeta (16/11/2026)
+- O Ø externo do anel de apoio agora é o Ø do corpo da gaxeta (Ø ext. − folga externa), antes Ø ext. − 0,3 (− 0,2 até Ø100)
+  como no Fast Seal. Ex.: 121,2 x 133,8 x 9 → anel Ø128,26 x Ø133,17 x 2 (antes Ø133,50); no desenho o anel fica 2,45 de
+  espessura para o degrau de 2,52 (a diferença é a folga do Ø interno do anel, degrau + 0,1 %).
+- Muda o desenho do PSE 102 R e o programa do anel (peça A); a gaxeta e os outros perfis sem mudança.
+
 ## 5.66.1 — PSE 120: um desenho para as duas peças e paralelo de 0,6 no fim do externo (16/11/2026)
 - Desenho: um só para o ANEL GT e o anel de apoio (o do conjunto). A peça A não tem mais desenho próprio; a altura do anel de
   apoio aparece com tolerância para menos no desenho do conjunto: "anel de apoio Ø... x Ø... x 2,00 0/−0,1 (2x)" nas duas vistas.

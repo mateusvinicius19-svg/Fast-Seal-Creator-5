@@ -6,8 +6,8 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
-## 5.65.0 — Perfil novo: PSE 120 (lábio redondo com 2 anéis de apoio) (16/11/2026)
-- Gerador "PSE 120" (base Fast Seal PS16P) no grupo Pistão, com "Peça do conjunto": GAXETA (U) ou ANEL DE APOIO (A).
+## 5.65.0 — Perfil novo: PSE 120 (16/11/2026)
+- Gerador "PSE 120" (base Fast Seal PS16P; nome só "PSE 120" na escolha do perfil) no grupo Pistão, com "Peça do conjunto": GAXETA (U) ou ANEL DE APOIO (A).
 - Regras tiradas do acabamento REAL dos programas PS16P (a passada manual com G42 que os operadores põem depois do contorno do
   Fast Seal): lábio = bulbo de raio R (0,214 × altura) no meio da altura com retas a 45° tangentes; topo Ø ext. + 0,9 / 1,1 / 1,5
   (até Ø40 / Ø100 / acima); assentos dos anéis com largura (H − 2R) / 2 e Ø = Ø int. + 0,8 × secção; interno com chanfro
@@ -19,6 +19,14 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
   (como o 045740A; externo igual). Salva com o mesmo número + "A".
 - O programa do anel (PSE 102 R e PSE 120) agora é uma função só (fscRingBuild); o anel do PSE 102 R continua igual.
 - Os outros 32 perfis geram os mesmos programas e desenhos de antes.
+
+## 5.64.3 — PSE 102 R: nome só "PSE 102 R" (16/11/2026)
+- Na escolha do perfil o nome aparecia "PSE 102 R (U com degrau para o anel de apoio)". Agora fica só "PSE 102 R".
+  Programas iguais (32 perfis).
+
+## 5.64.2 — Arruela ISO: tolerância da altura para menos (16/11/2026)
+- Arruela ISO: com o campo de tolerância da altura vazio, o desenho sai com H 0/−0,1 (para menos, como PSA 108 e DP).
+  Digitado no campo continua valendo. Só a Arruela ISO muda (o PSE 108 / DP continua 0/−0,1 como antes); programas iguais (32 perfis).
 
 ## 5.64.1 — PSE 102 R: externo da gaxeta vai até 2 além da altura (16/11/2026)
 - Gaxeta (U) do PSE 102 R: o desbaste e o acabamento do externo (T2D2) agora descem até a altura + 2 (antes + 1), porque o

@@ -221,7 +221,7 @@ body.printing #dwgModal .dwgf{display:none}
           <option value="psh106">PSH 106 (externo sem folga)</option><option value="psh108">PSH 108 (106 com canal raso de fundo reto)</option>
           <option value="psh105">PSH 105 (lábio interno recuado)</option>
           <option value="psh117">PSH 117 (lábio interno recuado + V)</option><option value="psh125">PSH 125 (117 com O-ring no canal)</option>
-          <option value="pse105">PSE 105 (lábio externo recuado)</option><option value="pse102r">PSE 102 R (U com degrau para o anel de apoio)</option><option value="pse120">PSE 120 (lábio redondo com 2 anéis de apoio)</option><option value="pse103">PSE 103 (105 com O-ring no canal)</option>
+          <option value="pse105">PSE 105 (lábio externo recuado)</option><option value="pse102r">PSE 102 R</option><option value="pse120">PSE 120</option><option value="pse103">PSE 103 (105 com O-ring no canal)</option>
           <option value="pse107">PSE 107 (106 com O-ring no canal)</option><option value="pse118">PSE 118 (107 com chanfro dos lábios 1/4)</option>
           <option value="psh107">PSH 107 (106 com O-ring no canal)</option><option value="psh110">PSH 110 (chevron: base, intermediárias e tampa)</option><option value="psh110t">PSH 110 30° (chevron a 30°: base, intermediárias e tampa)</option><option value="psh121">PSH 121 (107 com chanfro dos lábios 1/4)</option><option value="psh103">PSH 103 (105 com O-ring no canal)</option>
           <option value="psr101">PSR 101 (raspador com degrau)</option><option value="psr102">PSR 102 (raspador)</option>
@@ -2078,6 +2078,8 @@ function readParams(){
     for (const pre of ["ti", "te"]) if (empty(pre)){ p[pre + "S"] = dhTolVal(pre === "ti" ? p.dint : p.dext); p[pre + "I"] = 0; }   // v5.42.0: igual ao PSE 125
     if (empty("th")){ p.thS = 0; p.thI = -0.1; }
   }
+  // Arruela ISO (usuário 16/11/2026): altura para menos (0/−0,1, como PSA 108 e DP) quando o campo está vazio
+  if ($("genType").value === "iso" && pieceKind(p) !== "dp" && (p.thS === "" || p.thS === undefined) && (p.thI === "" || p.thI === undefined)){ p.thS = 0; p.thI = -0.1; }
   return p;
 }
 const OPT_KEYS = new Set(["r1CP","r1Ap","r1ZT","r1St","r1LipE","r1E0","r1BR","r1BB","r1C45","r1CB","r1CI","pZ","pM","pL","chEF","chIF","rF","pF","chR","angIT","rpt","S","rpm","ai","ae","fi","fe","chc","bi","bo","tInt","xLe","xHe","xLi","xHi","lLab","cLab","pCan","rCan","wCan","rec","vD","vL","oc","oID","tL","lipF","rampa","chE","hb"]);

@@ -6,6 +6,7 @@ Secção tirada do STL do Inventor: Ø int 9,606 · Ø ext 16,706 · altura 6.
 |---|---|
 | `046310.PIT`, `046310 OP2.PIT` | `Programas_CNC` (Fagor) |
 | `46310.txt`, `46310 OP2.txt` | `Programas_CNC\MCS 500` |
+| `VEDADOR (9.606 X 16.706 X 6) 46310.pdf` | `DESENHOS\VEDADOR\VEDADOR (9.606 X 16.706 X 6) 46310\` |
 
 **Frente (OP1) = face do canal fundo e da aresta Ø16,706**; o lábio Ø14,988 e o canal de 0,9 ficam atrás (OP2)
 (v2 — a 1ª versão estava ao contrário).

@@ -18,7 +18,12 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - Peça A: anel de apoio em PTFE (2 por conjunto), Ø int. = assento + 0,1, Ø ext. = Ø ext., largura do assento, chanfros 0,2
   (como o 045740A; externo igual). Salva com o mesmo número + "A".
 - O programa do anel (PSE 102 R e PSE 120) agora é uma função só (fscRingBuild); o anel do PSE 102 R continua igual.
-- Os outros 32 perfis geram os mesmos programas e desenhos de antes.
+- Imagem da escolha do perfil com os dois anéis de apoio (como a do PSE 102 R).
+- Os outros 32 perfis geram os mesmos programas, desenhos e imagens de antes.
+
+## 5.64.4 — PSE 102 R: imagem da escolha com o anel de apoio (16/11/2026)
+- O quadro do PSE 102 R na janela "Escolha o perfil" mostrava só a gaxeta. Agora mostra também o anel de apoio (arruela,
+  em branco) no degrau de trás. Programas iguais (32 perfis).
 
 ## 5.64.3 — PSE 102 R: nome só "PSE 102 R" (16/11/2026)
 - Na escolha do perfil o nome aparecia "PSE 102 R (U com degrau para o anel de apoio)". Agora fica só "PSE 102 R".

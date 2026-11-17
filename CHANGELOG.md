@@ -6,6 +6,17 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.64.0 — PSE 102 R: programa do anel de apoio (peça A) (16/11/2026)
+- Campo "Peça do conjunto" no PSE 102 R: GAXETA (U) ou ANEL DE APOIO (A). A peça A gera o programa do anel em PTFE (campo
+  "Material do anel"), como os programas "NNNNNNA" do Fast Seal (PS05P-2): face e externo T7D7, interno T4D4, corte T8D8 na
+  largura do anel; medidas do anel = as do desenho do conjunto (Ø int. = degrau + 0,1 %, Ø ext. = Ø ext. − 0,2 / 0,3).
+- Chanfros proporcionais à espessura t do anel, tirados dos anéis 045617A / 045639A / 045626A: externo 45° 0,042 × t (frente e
+  trás), interno 45° 0,105 × t na frente, interno de trás a 30° com o eixo 0,063 × t em Z. Conferido com o 045639A: interno e
+  externo a menos de 0,05 mm.
+- Salvar: a gaxeta salva com o número normal e o anel com o MESMO número + "A" (ex.: 045639 e 045639A); o desenho do anel vai
+  na mesma pasta como "…A.pdf" (como no PSH 110).
+- Os outros perfis e a gaxeta (U) do PSE 102 R geram os mesmos programas e desenhos de antes.
+
 ## 5.63.0 — Perfil novo: PSE 102 R (U de pistão com degrau para o anel de apoio) (16/11/2026)
 - Gerador "PSE 102 R" (base Fast Seal PS05P) no grupo Pistão: entradas Ø int., Ø ext. e altura; opcionais largura do anel
   (comprimento do degrau) e Ø do degrau. Regras tiradas de 195 programas PS05P do Programas_CNC e dos desenhos do Fast Seal

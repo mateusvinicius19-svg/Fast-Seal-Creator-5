@@ -1204,7 +1204,7 @@ const GEN = {
 };
 
 /* ------------------------- formulário --------------------------- */
-const TEXT_KEYS = new Set(["peca","matM","matF","corte","aloj","sf","tExt","tInt","tBed","nome","desc","mat","tipoP","tiT","tiV","tiV2","teT","teV","teV2","thT","thV","thV2","tsT","tsV","tsV2","tolG"]);
+const TEXT_KEYS = new Set(["peca","matM","matF","matR","corte","aloj","sf","tExt","tInt","tBed","nome","desc","mat","tipoP","tiT","tiV","tiV2","teT","teV","teV2","thT","thV","thV2","tsT","tsV","tsV2","tolG"]);
 const TOL_KEYS = ["tipoP","tiT","tiV","tiV2","teT","teV","teV2","thT","thV","thV2","tsT","tsV","tsV2","tolG"];
 const TOL_DIMS = [["ti","Ø interno"],["te","Ø externo"],["th","Altura"],["ts","Secção"]];   // Secção: v5.21.21 ("sem" = tolerância padrão do perfil)
 // v5.21.21: tolerância da secção escolhida no bloco "Tolerâncias do desenho" (substitui a padrão do perfil); null = usar a padrão
@@ -1265,16 +1265,17 @@ GEN.psr212 = Object.assign({}, GEN.psr211, { name: "PSR 212",
   } });
 // PSE 102 R (usuário 16/11/2026, base Fast Seal PS05P): regras em pse102rGeom
 GEN.pse102r = Object.assign({}, GEN.pse106, { name: "PSE 102 R",
-  main: [["dint","Diâmetro interno (mm)",121.2],["dext","Diâmetro externo (mm)",133.8],["h","Altura (mm)",9],
+  main: [["peca","Peça do conjunto","U"],["dint","Diâmetro interno (mm)",121.2],["dext","Diâmetro externo (mm)",133.8],["h","Altura (mm)",9],
          ["lr","Largura do anel = comprimento do degrau (vazio = 1,5 · 2 · 2,5 · 3 pela secção)",""],["ds","Ø do degrau do anel (vazio = Ø int. + 1,1 × secção)",""],
-         ...GEN.pse106.main.slice(3)],
+         ...GEN.pse106.main.slice(3), ["matR","Material do anel (peça A)","PTFE"]],
   params: [...GEN.pse106.params.filter(f => !["ai","ae","fe","fi","chc","cLab","rCan"].includes(f[0])),
+           ["cA","Anel (peça A): chanfros 45° do externo, frente e trás (vazio = 0,042 × espessura do anel)",""],["cAF","Anel (peça A): chanfro 45° do interno na frente (vazio = 0,105 × espessura)",""],["cAI","Anel (peça A): chanfro interno de trás a 30° com o eixo, comprimento em Z (vazio = 0,063 × espessura)",""],
            ["ai","Aperto interno no Ø (vazio = 1,5 como no Fast Seal)",""],["ae","Aperto externo no Ø (vazio = 1,5 como no Fast Seal)",""],
            ["fe","Folga externa no Ø (vazio = 0,25 + 0,06 × secção)",""],["rec","Recuo da face do lábio externo (vazio = 0,11 × secção)",""],
            ["chc","Chanfro interno de trás 45° (vazio = 0,5; secção a partir de 7,5: 0,8)",""],
            ["cLabE","Chanfro do lábio externo a 52° com o eixo, no raio (vazio = 0,6 + 0,015 × secção)",""],["cLabI","Chanfro 45° do lábio interno (vazio = 0,5 + 0,015 × secção)",""],
            ["rCan","ESPECIAL: raio do fundo do canal (vazio = 0,08 × secção, mín. 0,5)",""],["dCan","ESPECIAL: Ø do fundo do canal (vazio = Ø médio)",""]],
-  build(p){ return pseFscBuild(p, pse102rGeom(p)); },
+  build(p){ return pse102rPiece(p) === "A" ? pse102rRingBuild(p) : pseFscBuild(p, pse102rGeom(p)); },
   check(p){
     if (!(p.dext > p.dint) || !(p.h > 0)) return "ATENÇÃO: diâmetro externo tem que ser maior que o interno e a altura maior que zero.";
     const g = pse102rGeom(p), m = [];
@@ -1696,6 +1697,60 @@ function pse102rProfile(p){
 }
 // geometria das gaxetas em U para desenho/bucha/tolerância (PSR 211/212 e PSE 102 R têm a sua)
 function pseG(p){ return p.tipoGen === "pse102r" ? pse102rGeom(p) : ["psr211","psr212"].includes(p.tipoGen) ? psr211Geom(p) : pseFscGeom(p); }
+// PSE 102 R — peças do conjunto (usuário 16/11/2026): U = gaxeta (número do programa), A = anel de apoio (mesmo número + "A")
+const PSE102R_PECAS = { U: "GAXETA (U)", A: "ANEL DE APOIO (A)" };
+function pse102rPiece(p){ return String(p.peca || "U").toUpperCase() === "A" ? "A" : "U"; }
+// Peça A: anel de apoio em PTFE, como os programas "NNNNNNA" do Fast Seal (PS05P-2): face T7D7, interno T4D4, externo T7D7,
+// corte T8D8 na largura do anel. Medidas do anel = as do desenho do conjunto (Ø int. = degrau + 0,1 %, Ø ext. = Ø ext. − 0,2/0,3).
+// Chanfros proporcionais à espessura t do anel, como nos anéis do Fast Seal (045617A / 045639A / 045626A): externo 45° 0,042 × t
+// na frente e atrás; interno 45° 0,105 × t na frente; interno de trás a 30° com o eixo, 0,063 × t em Z (a T4D4 faz no máximo 30° nas costas).
+function pse102rRingBuild(p){
+  const opt = v => (v === "" || v === null || v === undefined || isNaN(v)) ? null : Number(v);
+  const g = pse102rGeom(p), f3 = v => fx(v, 3), r = Number(p.rn) || 0.4, L = g.Ls, R = x => x / 2, T30 = Math.tan(30 * Math.PI / 180);
+  const q = Object.assign({}, p, { mat: String(p.matR || "PTFE").trim() || "PTFE" });
+  const rI = R(g.ringI), rO = R(g.ringO), t = rO - rI;
+  const c = opt(p.cA) ?? xround(0.042 * t, 2), cF = opt(p.cAF) ?? xround(0.105 * t, 2), zBI = opt(p.cAI) ?? xround(0.063 * t, 2);
+  let bi = opt(p.bi), bo = opt(p.bo);
+  if (bi === null || bo === null){
+    const hit = teflonBucha(q, g.ringI, g.ringO) || buchaPick(g.ringI, g.ringO);
+    if (bi === null) bi = hit ? hit[0] : Math.max(0, Math.floor(g.ringI - 3));
+    if (bo === null) bo = hit ? hit[1] : Math.ceil(g.ringO + 3);
+  }
+  const tI = bi, tO = bo, S = (p.S === "" || isNaN(p.S)) ? rpmLookup(Math.max(g.ringO, tO), RPM_TABLE) : p.S;
+  const TL = fscTools(q, "T7D7", "T4D4");
+  const now = new Date(), pad = n => String(n).padStart(2, "0");
+  const date = `${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()} @ ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+  const sec = name => [";( *********************** )", ";( " + name.padEnd(24, " ").slice(0, 24) + ")", ";( *********************** )"];
+  const L0 = [`%PSE102R-A ${f3(p.dint)}/${f3(p.dext)}/${f3(p.h)},MX,`, `;PSE 102 R - ANEL DE APOIO (A) ${f3(g.ringI)}/${f3(g.ringO)}/${f3(L)}`,
+    `;MATERIAL: USER DEFINED ${q.mat} ${f3(tI)}/${f3(tO)} - TUBE ${f3(tI)}/${f3(tO)}`, `;DATE OF FILE: ${date}`, ";INTERVALO    MM", "G90 ", "G95 ", "G54", `G97S${gen15(S)}M3`, "N10", "", ""];
+  // face (T7D7)
+  const xf0 = tO + 3.2, xf1 = Math.max(0, tI - 4.8);
+  L0.push(...sec("FACING DOWNWARD"), "G0 Z100", TL.ext, ";", ";", `G0 X${f3(xf0)} Z2.000`, `G1 X${f3(xf0)} Z0.690 F1.000`, ";( FINISH )",
+          `G1 X${f3(xf0)} Z0.000 F0.140`, `G1 X${f3(xf1)} Z0.000 F0.140`, `G0 X${f3(xf1)} Z0.690`, "");
+  // interno (T4D4): chanfro 45° na frente, reto, chanfro 30° com o eixo atrás
+  const zE = -L - 1.25;
+  // chanfros de trás continuam 0,5 além do corte e depois seguem retos (como o Fast Seal; o corte fica no meio do chanfro)
+  const inner = [[0, rI + cF], [-cF, rI], [-L + zBI, rI], [-L - 0.5, rI + (zBI + 0.5) * T30], [zE, rI + (zBI + 0.5) * T30]];
+  const pin = tipPath(extendStart(inner, 1.0), r, "left", [-r, r]);
+  L0.push(...sec("INSIDE"), "G0 Z70", TL.int, ";", ";", ...roughPasses(pin, tI, "id", "0.140", Number(p.apR), Number(p.alR), r),
+          ";( FINISH )", `G0 X${f3(2 * pin[0].p[1])} Z3.000`, `G1 X${f3(2 * pin[0].p[1])} Z${f3(pin[0].p[0])}`, ...tipLines(pin, r, "0.140"));
+  const lastIn = pin[pin.length - 1].p;
+  L0.push(`G0 X${f3(g.ringI - 2)} Z${f3(lastIn[0] + 0.2)}`, `G0 X${f3(g.ringI - 2)} Z5.000`, "");
+  // externo (T7D7): chanfros 45° na frente e atrás
+  const outer = [[0, rO - c], [-c, rO], [-L + c, rO], [-L - 0.5, rO - c - 0.5], [zE, rO - c - 0.5]];
+  const pout = tipPath(extendStart(outer, 1.0), r, "right", [-r, -r]);
+  L0.push(...sec("OUTSIDE"), "G0 Z70", TL.ext, ";", ";", ...roughPasses(pout, tO, "od", "0.140", Number(p.apR), Number(p.alR), r),
+          ";( FINISH )", `G0 X${f3(2 * pout[0].p[1])} Z3.000`, `G1 X${f3(2 * pout[0].p[1])} Z${f3(pout[0].p[0])}`, ...tipLines(pout, r, "0.120"));
+  const lastOut = pout[pout.length - 1].p;
+  L0.push(`G0 X${f3(tO + 1)} Z${f3(lastOut[0] + 0.2)}`, `G0 X${f3(tO + 1)} Z5.000`, "");
+  // corte (T8D8) na largura do anel
+  const xc = tO + 1.5, xe = g.ringI - 1.6;
+  L0.push(...sec("CUTTING"), "G0 Z70", TL.cut, ";", ";", `G0 X${f3(xc)} Z3.000`, `G0 X${f3(xc)} Z${f3(-L)}`, `G1 X${f3(xe)} Z${f3(-L)} F${TL.fCut}`,
+          `G0 X${f3(xc)} Z${f3(-L)}`, `G0 X${f3(xc)} Z15.000`, "", "");
+  const g92 = 15 + progMaxZ(L0) + 0.15, rpt = (p.rpt === "" || isNaN(p.rpt)) ? "0" : gen15(p.rpt);
+  L0.push(`G92 Z${f3(g92)}`, "N20 G00 Z100", `(RPT N10,N20)N${rpt}`, "G54", "G00 X250 Z250", "M05", "M30");
+  return L0;
+}
 function psr211Profile(p){
   const g = psr211Geom(p), H = g.H, R = x => x / 2, c = g.Rg, cz = g.Cg[0];
   const arc = []; const a0 = Math.atan2(g.Tout[1] - g.Cg[1], g.Tout[0] - cz), a1 = Math.atan2(g.Tin[1] - g.Cg[1], g.Tin[0] - cz);
@@ -1706,7 +1761,7 @@ function psr211Profile(p){
           [g.zI - g.lipLen, R(g.intCalc)], [g.zI - g.chI, R(g.intAp)], [g.zI, R(g.xi1)], [g.zI, R(g.xgIn)], ...arc.reverse(), [g.zO, R(g.xgOut)], [g.zO, R(g.xo1)]].map(([z, r]) => [-H - z, r]);
 }
 function pieceName(p){ if (p.tipoGen === "psr101") return "PSR 101"; if (p.tipoGen === "psh110") return "PSH 110"; if (p.tipoGen === "psh110t") return "PSH 110 30°"; if (p.tipoGen === "dhr") return "PSH 124 (DHR)"; if (p.tipoGen === "dpr") return (p.desc || "PSE 125 (DPR)").toUpperCase(); if (p.tipoGen === "custom") return p.desc || "PERFIL ESPECIAL"; if (p.tipoGen === "psa109") return "PSA 109"; if (p.tipoGen === "psa108" || p.tipoGen === "semch") return "PSA 108"; if (p.tipoGen === "psg101") return "PSG 101"; if (p.tipoGen === "psg103") return "PSG 103"; if (p.tipoGen === "psg104") return "PSG 104"; if (p.tipoGen === "pso") return "PSO 109"; if (p.tipoGen === "psr102") return "PSR 102"; if (p.tipoGen === "pse102r") return "PSE 102 R"; if (p.tipoGen === "psr212") return "PSR 212"; if (p.tipoGen === "psr211") return "PSR 211"; if (p.tipoGen === "psh117") return "PSH 117"; if (p.tipoGen === "psh125") return "PSH 125"; if (p.tipoGen === "psh105") return "PSH 105"; if (p.tipoGen === "pse105") return "PSE 105"; if (p.tipoGen === "pse103") return "PSE 103"; if (p.tipoGen === "pse107") return "PSE 107"; if (p.tipoGen === "pse118") return "PSE 118"; if (p.tipoGen === "psh107") return "PSH 107"; if (p.tipoGen === "psh121") return "PSH 121"; if (p.tipoGen === "psh103") return "PSH 103"; if (p.tipoGen === "psh108") return "PSH 108"; if (["pse106","psh106","psh108","psh117","psh105","pse105","pse107","psh107","psh103","pse103","pse118","psh121","psh125","psr211","psr212","pse102r"].includes(p.tipoGen)) return isPSH(p) ? "PSH 106" : "PSE 106"; if (p.tipoGen === "lip") return (p.desc || "DH PSH 129").toUpperCase(); return pieceKind(p) === "dp" ? "PSE 108 (DP)" : "ARRUELA ISO"; }
-function pieceFile(p){ if (p.tipoGen === "psr101") return `PSR 101 ${gen15(p.dint)}x${gen15(p.dext)}x${gen15(p.h1)}x${gen15(p.h2)}x${gen15(p.h)}`; if (p.tipoGen === "psh110") return `PSH 110 ${gen15(p.dint)}x${gen15(p.dext)}x${gen15(p.h)}` + ({ M: " INTERMEDIARIA", A: " A (BASE)", B: " B (TAMPA)" })[psh110Piece(p)]; if (p.tipoGen === "psh110t") return `PSH 110 30° ${gen15(p.dint)}x${gen15(p.dext)}x${gen15(p.h)}` + ({ M: " INTERMEDIARIA", A: " A (BASE)", B: " B (TAMPA)" })[psh110Piece(p)]; if (p.tipoGen === "dpr") return `${safeName(p.desc || "PSE 125 (DPR)")} ${gen15(p.dext - 2 * p.sec)}x${gen15(p.dext)}x${gen15(p.h)}`; if (p.tipoGen === "dhr") return `PSH 124 ${gen15(p.dint)}x${gen15(p.dext)}x${gen15(p.h)}`; if (p.tipoGen === "psa108" || p.tipoGen === "psa109" || p.tipoGen === "psg101" || p.tipoGen === "psg103" || p.tipoGen === "psg104" || p.tipoGen === "semch") return `${pieceName(p)} ${gen15(p.dint)}x${gen15(p.dext)}x${gen15(p.h)}`; if (p.tipoGen === "pso") return `PSO 109 ${gen15(p.sec)}x${gen15(p.dint)}`; if (p.tipoGen === "psr211" || p.tipoGen === "psr212") return `PSR ${p.tipoGen === "psr212" ? "212" : "211"} ${gen15(p.dint)}x${gen15(p.dext)}x${gen15(p.hb)}x${gen15(p.h)}`; if (p.tipoGen === "psr102") return `PSR 102 ${gen15(p.dint)}x${gen15(p.dext)}x${gen15(p.hh)}x${gen15(p.h)}`; if (["pse106","psh106","psh108","psh117","psh105","pse105","pse107","psh107","psh103","pse103","pse118","psh121","psh125","psr211","psr212","pse102r"].includes(p.tipoGen)) return `${pieceName(p)} ${gen15(p.dint)}x${gen15(p.dext)}x${gen15(p.h)}`; if (p.tipoGen === "lip") return `${safeName(p.desc || "DH PSH 129")} ${gen15(p.dint)}x${gen15(p.dint + 2 * p.sec)}x${gen15(p.h)}`; return (pieceKind(p) === "dp" ? "DP " : "Arruela ISO ") + `${gen15(p.dint)}x${gen15(p.dext)}x${gen15(p.h)}`; }
+function pieceFile(p){ if (p.tipoGen === "pse102r") return `PSE 102 R ${gen15(p.dint)}x${gen15(p.dext)}x${gen15(p.h)}` + (pse102rPiece(p) === "A" ? " A (ANEL)" : ""); if (p.tipoGen === "psr101") return `PSR 101 ${gen15(p.dint)}x${gen15(p.dext)}x${gen15(p.h1)}x${gen15(p.h2)}x${gen15(p.h)}`; if (p.tipoGen === "psh110") return `PSH 110 ${gen15(p.dint)}x${gen15(p.dext)}x${gen15(p.h)}` + ({ M: " INTERMEDIARIA", A: " A (BASE)", B: " B (TAMPA)" })[psh110Piece(p)]; if (p.tipoGen === "psh110t") return `PSH 110 30° ${gen15(p.dint)}x${gen15(p.dext)}x${gen15(p.h)}` + ({ M: " INTERMEDIARIA", A: " A (BASE)", B: " B (TAMPA)" })[psh110Piece(p)]; if (p.tipoGen === "dpr") return `${safeName(p.desc || "PSE 125 (DPR)")} ${gen15(p.dext - 2 * p.sec)}x${gen15(p.dext)}x${gen15(p.h)}`; if (p.tipoGen === "dhr") return `PSH 124 ${gen15(p.dint)}x${gen15(p.dext)}x${gen15(p.h)}`; if (p.tipoGen === "psa108" || p.tipoGen === "psa109" || p.tipoGen === "psg101" || p.tipoGen === "psg103" || p.tipoGen === "psg104" || p.tipoGen === "semch") return `${pieceName(p)} ${gen15(p.dint)}x${gen15(p.dext)}x${gen15(p.h)}`; if (p.tipoGen === "pso") return `PSO 109 ${gen15(p.sec)}x${gen15(p.dint)}`; if (p.tipoGen === "psr211" || p.tipoGen === "psr212") return `PSR ${p.tipoGen === "psr212" ? "212" : "211"} ${gen15(p.dint)}x${gen15(p.dext)}x${gen15(p.hb)}x${gen15(p.h)}`; if (p.tipoGen === "psr102") return `PSR 102 ${gen15(p.dint)}x${gen15(p.dext)}x${gen15(p.hh)}x${gen15(p.h)}`; if (["pse106","psh106","psh108","psh117","psh105","pse105","pse107","psh107","psh103","pse103","pse118","psh121","psh125","psr211","psr212","pse102r"].includes(p.tipoGen)) return `${pieceName(p)} ${gen15(p.dint)}x${gen15(p.dext)}x${gen15(p.h)}`; if (p.tipoGen === "lip") return `${safeName(p.desc || "DH PSH 129")} ${gen15(p.dint)}x${gen15(p.dint + 2 * p.sec)}x${gen15(p.h)}`; return (pieceKind(p) === "dp" ? "DP " : "Arruela ISO ") + `${gen15(p.dint)}x${gen15(p.dext)}x${gen15(p.h)}`; }
 // bloco de tolerâncias: tipo (sem, ±, +, −, + e −) + valor(es); attr = "data-k" (formulário) ou "data-src" (visualização)
 function tolBlockHTML(attr, get, withKind = true){
   const tp = get("tipoP") || "";
@@ -1769,7 +1824,7 @@ function matFromText(v){ const m = String(v || "").toUpperCase().trim(); return 
 function fieldHTML([k, label, def], wide){
   if (k === "aloj") return `<label>${label}<select data-k="aloj" class="orient" style="width:100%"><option value="N"${def !== "S" ? " selected" : ""}>Não · medidas da peça</option><option value="S"${def === "S" ? " selected" : ""}>${ALOJ_RASP[$("genType").value] ? "Sim · altura menor −4 % (0,3 a 1 mm)" : "Sim · altura −10 % (máx. 1 mm até 20; máx. 2 mm acima)"}</option></select></label>`;
   if (k === "sec" && $("genType").value === "pso") return `<label>${label}<input data-k="sec" type="text" inputmode="decimal" list="psoSecList" value="${String(def).replace(".", ",")}" placeholder="1,78 · 2,62 · 3,53 · 5,33 · 6,99 · 8,4 ou outra"><datalist id="psoSecList">${[1.78, 2.62, 3.53, 5.33, 6.99, 8.4].map(v => `<option value="${String(v).replace(".", ",")}">Parker ±${String(parkerTol(50, v).wTol).replace(".", ",")}</option>`).join("")}</datalist></label>`;   // PSO 109: secção livre, 5 padrão Parker sugeridas
-  if (k === "peca") return `<label>${label}<select data-k="peca" class="orient" style="width:100%">${Object.entries(PSH110_PECAS).map(([v, t]) => `<option value="${v}"${def === v ? " selected" : ""}>${t}</option>`).join("")}</select></label>`;
+  if (k === "peca") return `<label>${label}<select data-k="peca" class="orient" style="width:100%">${Object.entries($("genType").value === "pse102r" ? PSE102R_PECAS : PSH110_PECAS).map(([v, t]) => `<option value="${v}"${def === v ? " selected" : ""}>${t}</option>`).join("")}</select></label>`;
   if (k === "matM" || k === "matF") return `<label>${label}<select data-k="${k}" class="orient" style="width:100%">${Object.entries(ARR_MAT).map(([v, a]) => `<option value="${v}"${def === v ? " selected" : ""}>${v === "NYLON" ? "PEAD (Nylon / PEAD)" : a[0]}</option>`).join("")}</select></label>`;
   if (k === "corte") return `<label>${label}<select data-k="corte" class="orient" style="width:100%"><option value="S"${def !== "N" ? " selected" : ""}>Com corte (como o PSG 101)</option><option value="N"${def === "N" ? " selected" : ""}>Sem corte</option></select></label>`;
   if (k === "angC") return `<label>${label}<input data-k="angC" type="text" inputmode="decimal" list="angCList" value="${String(def).replace(".", ",")}" placeholder="30 · 45 · 60"><datalist id="angCList"><option value="30"><option value="45"><option value="60"></datalist></label>`;
@@ -3194,7 +3249,7 @@ async function saveDrawingPdf(p, num, dd, keepIfExists){
   const fam = await dd.getDirectoryHandle(desFam(p), { create: true });
   const fd = desenhoFolderName(p, num), sub = await fam.getDirectoryHandle(fd, { create: true });
   // PSH 110 (usuário 13/11/2026): as 3 peças na MESMA pasta do conjunto, como no W: — meio "… 30249.pdf", macho "…A.pdf", fêmea "…B.pdf"
-  const nm = fd + (p.tipoGen === "psh110" || p.tipoGen === "psh110t" ? ({ M: "", A: "A", B: "B" })[psh110Piece(p)] : "");
+  const nm = fd + (p.tipoGen === "psh110" || p.tipoGen === "psh110t" ? ({ M: "", A: "A", B: "B" })[psh110Piece(p)] : "") + (p.tipoGen === "pse102r" && pse102rPiece(p) === "A" ? "A" : "");   // PSE 102 R: anel de apoio "…A.pdf" na mesma pasta
   if (await fileExists(sub, nm + ".pdf")){ if (keepIfExists) return " · desenho já existe (mantido)"; if (!confirm(`O desenho "${nm}.pdf" já existe. Substituir?`)) return " · PDF mantido"; }
   await writeFile(sub, nm + ".pdf", await drawingPdfBytes(p));
   let ped = "";
@@ -3338,7 +3393,7 @@ async function saveProgram(auto){
   if (state.alterNum) sug = state.alterNum;   // Alterar programa: mesmo número + sufixo da bucha
   else if (dir){ $("genMsg").textContent = "Procurando o próximo número livre…"; $("genMsg").style.color = ""; sug = await nextFreeProg(dir); }
   // PSH 110 (usuário 13/11/2026): o meio salva com o número normal; macho e fêmea com o MESMO número + A / B (030249, 030249A, 030249B)
-  const p110 = !auto && state.genParams && (state.genParams.tipoGen === "psh110" || state.genParams.tipoGen === "psh110t") ? psh110Piece(state.genParams) : "", k110 = state.genParams && state.genParams.tipoGen === "psh110t" ? "ps_psh110tNum" : "ps_psh110Num";   // PSH 110 30°: número próprio
+  const p110 = !auto && state.genParams && (state.genParams.tipoGen === "psh110" || state.genParams.tipoGen === "psh110t") ? psh110Piece(state.genParams) : !auto && state.genParams && state.genParams.tipoGen === "pse102r" ? (pse102rPiece(state.genParams) === "A" ? "A" : "M") : "", k110 = state.genParams && state.genParams.tipoGen === "psh110t" ? "ps_psh110tNum" : state.genParams && state.genParams.tipoGen === "pse102r" ? "ps_pse102rNum" : "ps_psh110Num";   // PSH 110 30°: número próprio
   if (p110 === "A" || p110 === "B"){ try { const k = localStorage.getItem(k110); if (k) sug = k; } catch(e){} }
   const num = auto ? sug : prompt("Número do programa" + (state.alterNum ? " (alterando " + sug + ")" : sug ? " (próximo livre: " + sug + ")" : " (ex.: 046004)") + (suf ? ` — bucha especial: vai salvar como "número ${suf[1]}"` : "") + ":", sug);
   if (num === null) return;

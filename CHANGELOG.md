@@ -6,6 +6,13 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.66.3 — PSE 102 R: altura do anel de apoio para menos e lista de materiais (16/11/2026)
+- Desenho do PSE 102 R: a altura do anel de apoio sai com tolerância para menos (0/−0,1) nas chamadas do anel, nas duas vistas
+  (como no PSE 120).
+- "Material do anel" do PSE 102 R virou lista, igual à do PSE 120: PTFE puro, PTFE+BR, POM, PEAD, PU, NBR, Viton e Celeron;
+  ferramentas e tubo seguem o material como nas arruelas. Com PTFE (padrão) o programa do anel continua igual.
+- A gaxeta e os outros perfis sem mudança.
+
 ## 5.66.2 — PSE 102 R: anel de apoio com o mesmo Ø externo do corpo da gaxeta (16/11/2026)
 - O Ø externo do anel de apoio agora é o Ø do corpo da gaxeta (Ø ext. − folga externa), antes Ø ext. − 0,3 (− 0,2 até Ø100)
   como no Fast Seal. Ex.: 121,2 x 133,8 x 9 → anel Ø128,26 x Ø133,17 x 2 (antes Ø133,50); no desenho o anel fica 2,45 de

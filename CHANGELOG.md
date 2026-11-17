@@ -6,6 +6,20 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.65.0 — Perfil novo: PSE 120 (lábio redondo com 2 anéis de apoio) (16/11/2026)
+- Gerador "PSE 120" (base Fast Seal PS16P) no grupo Pistão, com "Peça do conjunto": GAXETA (U) ou ANEL DE APOIO (A).
+- Regras tiradas do acabamento REAL dos programas PS16P (a passada manual com G42 que os operadores põem depois do contorno do
+  Fast Seal): lábio = bulbo de raio R (0,214 × altura) no meio da altura com retas a 45° tangentes; topo Ø ext. + 0,9 / 1,1 / 1,5
+  (até Ø40 / Ø100 / acima); assentos dos anéis com largura (H − 2R) / 2 e Ø = Ø int. + 0,8 × secção; interno com chanfro
+  0,08 × secção a 45° na frente e 30° atrás. Programa: face T3D3, externo T2D2, interno, "OUTSIDE 2" T6D6 no assento de trás,
+  corte T5D5; externo até a altura + 2 (bedame). Conferido com o 045740: interno igual (Z −0,9 a −6,9) e a mesma forma da passada G42.
+- Como o usuário avisou, o desenho tem leve diferença do Fast Seal: segue o programa (canto vivo na raiz do lábio, onde o
+  desenho do Fast Seal mostra R0,63). Anéis de apoio desenhados nos dois assentos.
+- Peça A: anel de apoio em PTFE (2 por conjunto), Ø int. = assento + 0,1, Ø ext. = Ø ext., largura do assento, chanfros 0,2
+  (como o 045740A; externo igual). Salva com o mesmo número + "A".
+- O programa do anel (PSE 102 R e PSE 120) agora é uma função só (fscRingBuild); o anel do PSE 102 R continua igual.
+- Os outros 32 perfis geram os mesmos programas e desenhos de antes.
+
 ## 5.64.1 — PSE 102 R: externo da gaxeta vai até 2 além da altura (16/11/2026)
 - Gaxeta (U) do PSE 102 R: o desbaste e o acabamento do externo (T2D2) agora descem até a altura + 2 (antes + 1), porque o
   bedame do corte, que faz o canal atrás da peça, tem 2 de largura. Ex.: altura 9 → externo até Z-11,4 (antes Z-10,4).

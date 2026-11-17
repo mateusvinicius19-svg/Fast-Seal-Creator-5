@@ -6,6 +6,16 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.66.0 — Anel de apoio: desenho próprio com altura para menos e mais materiais (16/11/2026)
+- Peça A (anel de apoio) do PSE 102 R e do PSE 120: o desenho agora é do ANEL (Corte A-A + Detalhe B, como as arruelas), com
+  as medidas do anel (Ø int., Ø ext., largura = H) e a altura para menos: H 0/−0,1 quando o campo de tolerância da altura está
+  vazio. Chanfros cotados (45° no externo e na frente do interno, 30° atrás no interno). A gaxeta / ANEL GT continua com o
+  desenho do conjunto.
+- "Material do anel" virou lista com os materiais das arruelas: PTFE puro, PTFE+BR, POM, PEAD, PU, NBR, Viton e Celeron.
+  As ferramentas seguem o material como nas arruelas (Celeron: T2D54 / T2D64 / T6D16; os outros T7D7 / T4D4, corte T8D8;
+  T2D14 no interno abaixo de Ø14 em PTFE, POM e PEAD). Tubo: PU pela lista de buchas; os outros sob medida (−2 / +2 no Ø).
+- Com PTFE (padrão) o programa do anel continua igual; gaxetas e os outros perfis sem mudança (33 perfis).
+
 ## 5.65.1 — PSE 120: peça principal se chama "ANEL GT" (16/11/2026)
 - No campo "Peça do conjunto" do PSE 120 a peça principal aparece como "ANEL GT" (antes "GAXETA (U)"). O anel de apoio
   continua "ANEL DE APOIO (A)". Só o nome mudou: programas, desenhos e o número ao salvar iguais (33 perfis).

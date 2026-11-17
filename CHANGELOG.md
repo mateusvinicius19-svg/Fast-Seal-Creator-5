@@ -6,6 +6,11 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.66.4 — VEDADOR 10 X 16 X 6: programa 46310 (17/11/2026)
+- Pedido do usuário (STL do Inventor): `Programas avulsos/VEDADOR (10 X 16 X 6) 46310/` com `046310.PIT` (OP1) e
+  `046310 OP2.PIT` (peça virada: face de trás + canal de trás) + MCS 500 (`46310.txt`, `46310 OP2.txt`). PU, tarugo Ø20.
+- Canais das faces com ferramenta de forma: T4D92 / T4D93 provisórios (confirmar T/D). Simulador não muda.
+
 ## 5.66.3 — PSE 102 R: altura do anel de apoio para menos e lista de materiais (16/11/2026)
 - Desenho do PSE 102 R: a altura do anel de apoio sai com tolerância para menos (0/−0,1) nas chamadas do anel, nas duas vistas
   (como no PSE 120).

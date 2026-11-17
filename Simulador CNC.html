@@ -1750,8 +1750,8 @@ function ringProfile(p){   // z de 0 (frente) a −L, como as arruelas
 function fscRingBuild(p, g, o){
   const opt = v => (v === "" || v === null || v === undefined || isNaN(v)) ? null : Number(v);
   const f3 = v => fx(v, 3), r = Number(p.rn) || 0.4, L = g.Ls, R = x => x / 2, T30 = Math.tan(30 * Math.PI / 180);
-  // usuário 16/11/2026: lista de materiais só no PSE 120; o PSE 102 R continua com o campo de texto (PTFE) como antes
-  const N120 = p.tipoGen === "pse120", mk = N120 ? ringMatKey(p) : null, q = Object.assign({}, p, { mat: N120 ? ringMatLabel(p) : (String(p.matR || "PTFE").trim() || "PTFE") });
+  // usuário 16/11/2026: lista de materiais no PSE 120 e (5.66.3) no PSE 102 R
+  const N120 = ["pse120","pse102r"].includes(p.tipoGen), mk = N120 ? ringMatKey(p) : null, q = Object.assign({}, p, { mat: N120 ? ringMatLabel(p) : (String(p.matR || "PTFE").trim() || "PTFE") });
   const rI = R(g.ringI), rO = R(g.ringO), { c, cF, zBI } = ringChamf(p, g, o);
   let bi = opt(p.bi), bo = opt(p.bo);
   if (bi === null || bo === null){
@@ -2019,7 +2019,7 @@ function fieldHTML([k, label, def], wide){
   if (k === "aloj") return `<label>${label}<select data-k="aloj" class="orient" style="width:100%"><option value="N"${def !== "S" ? " selected" : ""}>Não · medidas da peça</option><option value="S"${def === "S" ? " selected" : ""}>${ALOJ_RASP[$("genType").value] ? "Sim · altura menor −4 % (0,3 a 1 mm)" : "Sim · altura −10 % (máx. 1 mm até 20; máx. 2 mm acima)"}</option></select></label>`;
   if (k === "sec" && $("genType").value === "pso") return `<label>${label}<input data-k="sec" type="text" inputmode="decimal" list="psoSecList" value="${String(def).replace(".", ",")}" placeholder="1,78 · 2,62 · 3,53 · 5,33 · 6,99 · 8,4 ou outra"><datalist id="psoSecList">${[1.78, 2.62, 3.53, 5.33, 6.99, 8.4].map(v => `<option value="${String(v).replace(".", ",")}">Parker ±${String(parkerTol(50, v).wTol).replace(".", ",")}</option>`).join("")}</datalist></label>`;   // PSO 109: secção livre, 5 padrão Parker sugeridas
   if (k === "peca") return `<label>${label}<select data-k="peca" class="orient" style="width:100%">${Object.entries($("genType").value === "pse120" ? PSE120_PECAS : $("genType").value === "pse102r" ? PSE102R_PECAS : PSH110_PECAS).map(([v, t]) => `<option value="${v}"${def === v ? " selected" : ""}>${t}</option>`).join("")}</select></label>`;
-  if (k === "matM" || k === "matF" || (k === "matR" && $("genType").value === "pse120")) return `<label>${label}<select data-k="${k}" class="orient" style="width:100%">${Object.entries(ARR_MAT).map(([v, a]) => `<option value="${v}"${def === v ? " selected" : ""}>${v === "NYLON" ? "PEAD (Nylon / PEAD)" : a[0]}</option>`).join("")}</select></label>`;
+  if (k === "matM" || k === "matF" || (k === "matR" && ["pse120","pse102r"].includes($("genType").value))) return `<label>${label}<select data-k="${k}" class="orient" style="width:100%">${Object.entries(ARR_MAT).map(([v, a]) => `<option value="${v}"${def === v ? " selected" : ""}>${v === "NYLON" ? "PEAD (Nylon / PEAD)" : a[0]}</option>`).join("")}</select></label>`;
   if (k === "corte") return `<label>${label}<select data-k="corte" class="orient" style="width:100%"><option value="S"${def !== "N" ? " selected" : ""}>Com corte (como o PSG 101)</option><option value="N"${def === "N" ? " selected" : ""}>Sem corte</option></select></label>`;
   if (k === "angC") return `<label>${label}<input data-k="angC" type="text" inputmode="decimal" list="angCList" value="${String(def).replace(".", ",")}" placeholder="30 · 45 · 60"><datalist id="angCList"><option value="30"><option value="45"><option value="60"></datalist></label>`;
   if (k === "matA") return `<label>${label}<select data-k="matA" class="orient" style="width:100%">${Object.entries(ARR_MAT).map(([v, a]) => `<option value="${v}"${def === v ? " selected" : ""}>${a[0]}</option>`).join("")}</select></label>`;
@@ -4808,7 +4808,7 @@ function pseViewsSVG(p, PT){
       const c = Math.min(0.2, G.Ls / 6), rI = G.ringI / 2, rO = G.ringO / 2, za = -H, zb = G.zS;
       const ring = [[za + c, rO], [zb - c, rO], [zb, rO - c], [zb, rI + c], [zb - c, rI], [za + c, rI], [za, rI + c], [za, rO - c]];
       g += `<path d="${ring.map(([z, r], i) => `${i ? "L" : "M"}${PX(z).toFixed(2)},${PY(r).toFixed(2)}`).join("")}Z" fill="#f4f4f1" stroke="#111" stroke-width="1"/>`;
-      g += call(PX((za + zb) / 2), PY((rI + rO) / 2), xb - 12, PY(rO) - (vi ? 40 : 30), vi ? `anel de apoio ${f(G.Ls)} x ${f((G.ringO - G.ringI) / 2)}` : `anel de apoio Ø${f(G.ringI)} x Ø${f(G.ringO)} x ${f(G.Ls)}`, "end");
+      g += call(PX((za + zb) / 2), PY((rI + rO) / 2), xb - 12, PY(rO) - (vi ? 40 : 30), vi ? `anel de apoio altura ${ringHTol(p, G.Ls)} x ${f((G.ringO - G.ringI) / 2)}` : `anel de apoio Ø${f(G.ringI)} x Ø${f(G.ringO)} x ${ringHTol(p, G.Ls)}`, "end");
     }
     if (G.O107) g += `<circle cx="${PX(-G.OC / 2)}" cy="${PY(G.Dm / 2)}" r="${G.OC / 2 * sc}" fill="#e6e6e6" fill-opacity=".8" stroke="#111" stroke-width="1.2"/>` + call(PX(-G.OC / 2) + G.OC / 2 * sc * 0.7, PY(G.Dm / 2) - G.OC / 2 * sc * 0.7, xf + 8, yTop - 28, vi ? `O-ring ${f(G.OC)} · alojamento prof. ${f(G.prof)} · R${f(G.Rg)}` : `O-ring ${f(G.OC)} x Ø int. ${f(G.Dm - G.OC)}`, "start");
     // altura total e comprimento do lábio (em cima)

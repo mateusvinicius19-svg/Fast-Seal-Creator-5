@@ -6,6 +6,15 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.68.0 — Controle de pastilhas (17/11/2026)
+- Pedido do usuário: botão **🧰 Pastilhas** (ao lado do 🔎 Ver programa) — estoque das pastilhas/insertos com baixa manual.
+  Cadastro (código, descrição, ferramentas que usam, local, saldo, mínimo), **Baixa** (qtd, máquina, motivo, obs., usuário
+  logado; não deixa baixar mais que o saldo), **Entrada** (qtd, NF/obs.), ✎ editar/ajustar saldo (vira "ajuste" no histórico),
+  excluir (histórico fica). Saldo ≤ mínimo: linha vermelha "⚠ comprar" e contador no botão. Histórico com busca; Exportar (CSV/Excel).
+- Dados em `W:\...\Arruela Padronizada\pastilhas.json` pelo servidor (o mesmo para todos os PCs, como o usuarios.json);
+  cada operação relê o arquivo antes de gravar. Sem W: fica no navegador, com aviso. `pastilhas.json` no .gitignore.
+- Programas e desenhos não mudam (33 perfis iguais).
+
 ## 5.67.2 — PSR 211: Ø da ponta é a 1ª cota de trás (17/11/2026)
 - Desenho do PSR 211 (vista DIÂMETROS): a cota do Ø da ponta do raspador (lábio int., com tolerância) passa a ser a primeira
   do lado de trás, encostada na peça; as outras (calcanhar int., ponta ext., raiz, Ø ext.) andam uma casa para fora.

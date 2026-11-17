@@ -234,7 +234,7 @@ body.printing #dwgModal .dwgf{display:none}
       <details class="params" id="buchaBox" style="display:none"><summary>Buchas (tabela + adicionadas)</summary><div class="buchas" id="buchaList"></div><div class="fields"><label>Ø interno da bucha<input id="bNewI" type="text" inputmode="decimal"></label><label>Ø externo da bucha<input id="bNewO" type="text" inputmode="decimal"></label></div><button class="btn" id="bAdd" type="button">+ Adicionar bucha</button> <span class="note">Vermelha: a escolhida (a mais leve que serve, com 1 mm de folga). T = tarugo. Amarelas: adicionadas. ✕ remove. Mudanças ficam salvas neste computador.</span></details>
       <div class="genbar">
         <button class="btn primary" id="btnCopy" style="display:none">&#x29C9; Copiar</button>
-        <button class="btn" id="btnSave" title="Salva o Fagor (.PIT) no Programas_CNC e a versão convertida (.txt) no MCS 500">&#x1F4BE; Salvar Fagor + MCS 500</button><button class="btn" id="btnPreview" style="display:none" title="Ver o desenho desta peça antes de salvar (não salva nada e não pede o código)">&#x1F441; Ver desenho</button><button class="btn" id="btnCopyMcs" style="display:none" title="Copia a versão convertida para o MCS 500">&#x29C9; Copiar MCS</button><button class="btn" id="btnDirRoot" style="display:none" title="Pasta única W:\Parts\PartsSeals\PROJETOS (tem Programas_CNC, MCS 500 e DESENHOS): escolha uma vez; nos outros dias é só clicar e Permitir">&#x1F513; PROJETOS</button><button class="btn" id="btnDirProg" style="display:none" title="Escolher a pasta W:\Parts\PartsSeals\PROJETOS\Programas_CNC">&#x1F4C1; Programas_CNC</button><button class="btn" id="btnDirMcs" style="display:none" title="Escolher a pasta W:\Parts\PartsSeals\PROJETOS\Programas_CNC\MCS 500">&#x1F4C1; MCS 500</button><button class="btn" id="btnAlt" title="Abrir um programa do Programas_CNC pelo número e refazer com outra bucha (salva como NNNNNN BIxBO — o original não muda)">&#x270F;&#xFE0F; Alterar programa</button><button class="btn" id="btnVer" title="Digitar o número e ver o programa e as variantes (NNNNNN BIxBO...)">&#x1F50E; Ver programa</button><button class="btn" id="btnHist" title="Programas salvos pelo Simulador (Programas_CNC\Historico Simulador CNC.csv)">&#x1F4CB; Histórico</button><button class="btn" id="btnDirDes" title="Escolher a pasta W:\Parts\PartsSeals\PROJETOS\DESENHOS">&#x1F4C1; DESENHOS</button>
+        <button class="btn" id="btnSave" title="Salva o Fagor (.PIT) no Programas_CNC e a versão convertida (.txt) no MCS 500">&#x1F4BE; Salvar Fagor + MCS 500</button><button class="btn" id="btnPreview" style="display:none" title="Ver o desenho desta peça antes de salvar (não salva nada e não pede o código)">&#x1F441; Ver desenho</button><button class="btn" id="btnCopyMcs" style="display:none" title="Copia a versão convertida para o MCS 500">&#x29C9; Copiar MCS</button><button class="btn" id="btnDirRoot" style="display:none" title="Pasta única W:\Parts\PartsSeals\PROJETOS (tem Programas_CNC, MCS 500 e DESENHOS): escolha uma vez; nos outros dias é só clicar e Permitir">&#x1F513; PROJETOS</button><button class="btn" id="btnDirProg" style="display:none" title="Escolher a pasta W:\Parts\PartsSeals\PROJETOS\Programas_CNC">&#x1F4C1; Programas_CNC</button><button class="btn" id="btnDirMcs" style="display:none" title="Escolher a pasta W:\Parts\PartsSeals\PROJETOS\Programas_CNC\MCS 500">&#x1F4C1; MCS 500</button><button class="btn" id="btnAlt" title="Abrir um programa do Programas_CNC pelo número e refazer com outra bucha (salva como NNNNNN BIxBO — o original não muda)">&#x270F;&#xFE0F; Alterar programa</button><button class="btn" id="btnVer" title="Digitar o número e ver o programa e as variantes (NNNNNN BIxBO...)">&#x1F50E; Ver programa</button><button class="btn" id="btnPast" title="Estoque de pastilhas: entrada, baixa e histórico">&#x1F9F0; Pastilhas</button><button class="btn" id="btnHist" title="Programas salvos pelo Simulador (Programas_CNC\Historico Simulador CNC.csv)">&#x1F4CB; Histórico</button><button class="btn" id="btnDirDes" title="Escolher a pasta W:\Parts\PartsSeals\PROJETOS\DESENHOS">&#x1F4C1; DESENHOS</button>
         <button class="btn" id="btnDraw" style="display:none">&#x1F4D0; Desenho</button>
         <button class="btn" id="btnProgDes" title="Desenho a partir do programa aberto/gerado: simula a usinagem e cota a peça que sobra (como o desenho do 3D).">&#x1F4D0; Desenho do programa</button><button class="btn" id="btn3D" title="Desenho a partir do 3D do Inventor: no Inventor, Arquivo → Exportar → Formato CAD → STL (mm). Também dá para arrastar o .stl para a tela.">&#x1F9CA; Desenho do 3D (Inventor)</button><input type="file" id="file3D" accept=".stl" style="display:none">
         <span class="note" id="genMsg"></span>
@@ -6102,6 +6102,124 @@ function userSet(name){
   const d = document.querySelector("#dwgFields [data-d=des]"); if (d && name){ d.value = name; const pv = document.querySelector("#pvSide [data-dd=des]"); if (pv) pv.value = name; try { saveForm(); } catch(e){} try { rerenderDrawing(); } catch(e){} }
   const b = $("btnUser"); if (b) b.textContent = name ? "👤 " + name : "👤 Entrar";
 }
+// ---- 🧰 Pastilhas (v5.68.0, usuário 17/11/2026): controle de estoque das pastilhas/insertos com baixa manual ----
+// Dados em W:\...\PROGRAMAÇÃO\PADRONIZAÇÃO\Arruela Padronizada\pastilhas.json (o mesmo para todos os computadores, pelo servidor,
+// igual ao usuarios.json); sem W: fica só neste computador (localStorage, com aviso). Cada operação relê o arquivo, aplica e grava
+// (dois computadores dando baixa ao mesmo tempo não se apagam). Saldo ≤ mínimo = linha vermelha e aviso no botão.
+const PAST_FILE = "pastilhas.json", PAST_MOTIVOS = ["Desgaste", "Quebra", "Lascou", "Teste / ajuste", "Outro"];
+function pastNorm(j){ return { itens: Array.isArray(j && j.itens) ? j.itens : [], movs: Array.isArray(j && j.movs) ? j.movs : [] }; }
+async function pastRead(){
+  const d = await usersDir();
+  if (d) try { const f = await (await d.getFileHandle(PAST_FILE)).getFile(), j = JSON.parse(await f.text()); try { localStorage.setItem("ps_pastilhas", JSON.stringify(j)); } catch(e){} return { db: pastNorm(j), onW: true }; }
+    catch(e){ if (!/NotFound/i.test(String(e && (e.name || e.message)))) throw new Error("não consegui ler " + PAST_FILE + " no W:: " + e.message); return { db: pastNorm({}), onW: true }; }
+  try { return { db: pastNorm(JSON.parse(localStorage.getItem("ps_pastilhas") || "{}")), onW: false }; } catch(e){ return { db: pastNorm({}), onW: false }; }
+}
+// op(db) altera o db lido agora (relido do W: a cada operação); devolve texto de erro para cancelar
+async function pastApply(op){
+  const { db, onW } = await pastRead(), err = op(db); if (err) throw new Error(err);
+  const txt = JSON.stringify(Object.assign(db, { alterado: new Date().toISOString(), por: state.user || "" }), null, 1);
+  try { localStorage.setItem("ps_pastilhas", txt); } catch(e){}
+  const d = await usersDir(); if (d) await writeFile(d, PAST_FILE, new TextEncoder().encode(txt));
+  return { db, onW };
+}
+const pastNum = v => { const s = String(v ?? "").trim().replace(",", "."); const n = s === "" ? NaN : Number(s); return isFinite(n) ? n : NaN; };
+const pastBaixo = it => Number(it.min) > 0 && Number(it.saldo) <= Number(it.min);
+function pastBadge(db){ const b = $("btnPast"); if (!b) return; const n = db.itens.filter(pastBaixo).length; b.innerHTML = "&#x1F9F0; Pastilhas" + (n ? ` <b style="color:#b2221f">(${n} ⚠)</b>` : ""); b.title = n ? `${n} pastilha(s) no estoque mínimo ou abaixo — comprar` : "Estoque de pastilhas: entrada, baixa e histórico"; }
+function pastCSV(db){
+  const q = s => `"${String(s ?? "").replace(/"/g, '""')}"`, L = [["Código","Descrição","Ferramentas","Local","Saldo","Mínimo","Comprar"].map(q).join(";")];
+  db.itens.forEach(it => L.push([it.cod, it.desc, it.ferr, it.local, String(it.saldo).replace(".", ","), String(it.min || 0).replace(".", ","), pastBaixo(it) ? "SIM" : ""].map(q).join(";")));
+  L.push(""); L.push(["Data","Usuário","Código","Tipo","Qtd","Máquina","Motivo","Obs."].map(q).join(";"));
+  db.movs.slice().reverse().forEach(m => L.push([new Date(m.t).toLocaleString("pt-BR"), m.user, m.cod, m.tipo, String(m.qtd).replace(".", ","), m.maq, m.motivo, m.obs].map(q).join(";")));
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob(["\ufeff" + L.join("\r\n")], { type: "text/csv" })); a.download = `Pastilhas ${new Date().toLocaleDateString("pt-BR").replace(/\//g, "-")}.csv`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+}
+async function pastOpen(){
+  let m = $("pastModal"); if (m) m.remove();
+  m = document.createElement("div"); m.id = "pastModal"; m.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;display:flex;align-items:flex-start;justify-content:center;padding:40px 12px;overflow:auto";
+  m.innerHTML = `<style>#pastModal table{border-collapse:collapse;width:100%}#pastModal th,#pastModal td{border-bottom:1px solid #e6e6ee;padding:5px 7px;text-align:left;vertical-align:middle}#pastModal th{background:#f2f2f6;position:sticky;top:0;font-weight:700}</style>
+    <div style="background:#fff;border-radius:12px;max-width:1000px;width:100%;padding:16px 18px;box-shadow:0 10px 40px rgba(0,0,0,.35);color:#222;font:13px Segoe UI,Arial;display:grid;gap:10px">
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b style="font:700 16px Segoe UI,Arial;flex:1">🧰 Pastilhas — estoque e baixa</b>
+      <input id="pastBusca" placeholder="buscar código, descrição, ferramenta…" autocomplete="off" style="padding:6px 9px;border:1px solid #ccd;border-radius:6px;min-width:220px">
+      <button class="btn" id="pastNovo" type="button">＋ Nova pastilha</button><button class="btn" id="pastHist" type="button">Histórico</button><button class="btn" id="pastCsv" type="button">Exportar (Excel)</button><button class="btn" id="pastFechar" type="button">Fechar</button></div>
+    <div id="pastAviso"></div><div id="pastForm"></div><div id="pastOut" style="max-height:62vh;overflow:auto"></div></div>`;
+  document.body.appendChild(m);
+  m.onclick = e => { if (e.target === m) m.remove(); };
+  $("pastFechar").onclick = () => m.remove();
+  let db = { itens: [], movs: [] }, onW = true, hist = false;
+  const out = $("pastOut"), form = $("pastForm"), aviso = $("pastAviso");
+  const msg = (t, ok) => aviso.innerHTML = t ? `<div style="padding:7px 10px;border-radius:6px;background:${ok ? "#e8f5e9" : "#fdecea"};color:${ok ? "#1b5e20" : "#b2221f"};font-weight:600">${esc(t)}</div>` : "";
+  const inp = (id, lbl, val = "", ex = "") => `<label style="display:grid;gap:2px;font-size:12px;color:#555">${lbl}<input id="${id}" value="${esc(val)}" ${ex} autocomplete="off" style="padding:6px 8px;border:1px solid #ccd;border-radius:6px;font:13px Segoe UI,Arial;color:#222"></label>`;
+  const grid = h => `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;align-items:end;background:#f6f6f8;border:1px solid #e2e2ea;border-radius:8px;padding:10px">${h}</div>`;
+  const maqs = () => [...new Set(db.movs.map(x => x.maq).filter(Boolean))];
+  const nf = v => String(v ?? "").replace(".", ",");
+  function render(){
+    pastBadge(db);
+    const q = ($("pastBusca").value || "").trim().toLowerCase();
+    if (hist){
+      const L = db.movs.slice().reverse().filter(x => !q || [x.cod, x.user, x.maq, x.motivo, x.obs, x.tipo].join(" ").toLowerCase().includes(q)).slice(0, 500);
+      out.innerHTML = `<table><tr><th>Data</th><th>Usuário</th><th>Código</th><th>Tipo</th><th>Qtd</th><th>Máquina</th><th>Motivo</th><th>Obs.</th></tr>` +
+        (L.map(x => `<tr><td>${esc(new Date(x.t).toLocaleString("pt-BR"))}</td><td>${esc(x.user || "")}</td><td>${esc(x.cod)}</td><td style="font-weight:600;color:${x.tipo === "baixa" ? "#b2221f" : x.tipo === "entrada" ? "#1b5e20" : "#555"}">${esc(x.tipo)}</td><td style="text-align:right">${esc(nf(x.qtd))}</td><td>${esc(x.maq || "")}</td><td>${esc(x.motivo || "")}</td><td>${esc(x.obs || "")}</td></tr>`).join("") || `<tr><td colspan="8"><i>Nenhuma movimentação.</i></td></tr>`) + `</table>`;
+      return;
+    }
+    const L = db.itens.map((it, i) => [it, i]).filter(([it]) => !q || [it.cod, it.desc, it.ferr, it.local].join(" ").toLowerCase().includes(q))
+      .sort((a, b) => (pastBaixo(b[0]) - pastBaixo(a[0])) || String(a[0].cod).localeCompare(String(b[0].cod)));
+    out.innerHTML = `<table><tr><th>Código</th><th>Descrição</th><th>Ferramentas</th><th>Local</th><th style="text-align:right">Saldo</th><th style="text-align:right">Mín.</th><th></th></tr>` +
+      (L.map(([it, i]) => `<tr style="${pastBaixo(it) ? "background:#fdecea" : ""}"><td><b>${esc(it.cod)}</b></td><td>${esc(it.desc || "")}</td><td>${esc(it.ferr || "")}</td><td>${esc(it.local || "")}</td>
+        <td style="text-align:right;font-weight:700;color:${pastBaixo(it) ? "#b2221f" : "#222"}">${esc(nf(it.saldo))}${pastBaixo(it) ? " ⚠ comprar" : ""}</td><td style="text-align:right">${esc(nf(it.min || 0))}</td>
+        <td style="white-space:nowrap;text-align:right"><button class="btn primary" data-a="baixa" data-i="${i}" type="button">Baixa</button> <button class="btn" data-a="entrada" data-i="${i}" type="button">Entrada</button> <button class="btn" data-a="editar" data-i="${i}" type="button" title="Editar / ajustar saldo">✎</button></td></tr>`).join("")
+        || `<tr><td colspan="7"><i>${db.itens.length ? "Nada encontrado." : "Nenhuma pastilha cadastrada. Clique em ＋ Nova pastilha."}</i></td></tr>`) + `</table>`;
+  }
+  async function load(){ try { ({ db, onW } = await pastRead()); render(); if (!onW) msg("Sem acesso ao W: (abra pelo Fast.bat): o estoque fica só neste computador."); } catch(e){ msg(e.message); } }
+  // ok(db) monta a mensagem depois de gravar
+  async function run(op, ok){ try { ({ db, onW } = await pastApply(op)); form.innerHTML = ""; render(); const t = ok(db); msg(t[0], t[1]); } catch(e){ msg(e.message); } }
+  const mov = (d, it, tipo, qtd, extra = {}) => d.movs.push(Object.assign({ t: new Date().toISOString(), user: state.user || "", id: it.id, cod: it.cod, tipo, qtd }, extra));
+  function formItem(i){
+    const it = i == null ? { cod: "", desc: "", ferr: "", local: "", saldo: 0, min: 0 } : db.itens[i];
+    form.innerHTML = grid(`<b style="grid-column:1/-1">${i == null ? "Nova pastilha" : "Editar " + esc(it.cod)}</b>` + inp("pfCod", "Código (ex.: VCGT 160404)", it.cod) + inp("pfDesc", "Descrição / classe", it.desc) +
+      inp("pfFerr", "Ferramentas que usam (ex.: T2D2, T7D7)", it.ferr) + inp("pfLocal", "Local (gaveta, armário)", it.local) +
+      inp("pfSaldo", i == null ? "Saldo inicial" : "Saldo (mudar = ajuste no histórico)", nf(it.saldo), 'inputmode="decimal"') + inp("pfMin", "Estoque mínimo (avisa comprar)", nf(it.min), 'inputmode="decimal"') +
+      `<div style="display:flex;gap:6px"><button class="btn primary" id="pfOk" type="button">Salvar</button><button class="btn" id="pfCan" type="button">Cancelar</button>${i != null ? '<button class="btn" id="pfDel" type="button" style="color:#b2221f">Excluir</button>' : ""}</div>`);
+    $("pfCod").focus(); $("pfCan").onclick = () => form.innerHTML = "";
+    $("pfOk").onclick = () => {
+      const cod = $("pfCod").value.trim().toUpperCase().replace(/\s+/g, " "), saldo = pastNum($("pfSaldo").value), min = pastNum($("pfMin").value || 0);
+      if (!cod) return msg("Preencha o código."); if (!(saldo >= 0) || !(min >= 0)) return msg("Saldo e mínimo: números maiores ou iguais a zero.");
+      const v = { cod, desc: $("pfDesc").value.trim(), ferr: $("pfFerr").value.trim().toUpperCase(), local: $("pfLocal").value.trim(), min };
+      run(d => {
+        if (d.itens.some(x => x.cod === cod && x.id !== it.id)) return `Já existe a pastilha ${cod}.`;
+        if (i == null){ const n = Object.assign({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), saldo }, v); d.itens.push(n); mov(d, n, "cadastro", saldo); return; }
+        const x = d.itens.find(y => y.id === it.id); if (!x) return "A pastilha foi excluída em outro computador.";
+        Object.assign(x, v); if (saldo !== Number(x.saldo)){ mov(d, x, "ajuste", +(saldo - Number(x.saldo)).toFixed(3), { obs: `saldo ${nf(x.saldo)} → ${nf(saldo)}` }); x.saldo = saldo; }
+      }, () => [`${cod} salva.`, true]);
+    };
+    if (i != null) $("pfDel").onclick = () => { if (confirm(`Excluir a pastilha ${it.cod}? O histórico continua guardado.`)) run(d => { const k = d.itens.findIndex(y => y.id === it.id); if (k < 0) return "Já foi excluída."; mov(d, d.itens[k], "exclusão", 0); d.itens.splice(k, 1); }, () => [`${it.cod} excluída.`, true]); };
+  }
+  function formMov(i, tipo){
+    const it = db.itens[i], B = tipo === "baixa";
+    form.innerHTML = grid(`<b style="grid-column:1/-1">${B ? "Baixa" : "Entrada"} — ${esc(it.cod)} (saldo ${esc(nf(it.saldo))})${state.user ? "" : ' <span style="color:#b2221f">· entre com o seu usuário (👤) para o nome ficar no histórico</span>'}</b>` +
+      inp("pmQtd", "Quantidade", 1, 'inputmode="decimal"') +
+      (B ? inp("pmMaq", "Máquina", localStorage.getItem("ps_past_maq") || "", 'list="pmMaqL"') + `<datalist id="pmMaqL">${maqs().map(x => `<option value="${esc(x)}">`).join("")}</datalist>` +
+        `<label style="display:grid;gap:2px;font-size:12px;color:#555">Motivo<select id="pmMot" style="padding:6px 8px;border:1px solid #ccd;border-radius:6px">${PAST_MOTIVOS.map(x => `<option>${x}</option>`).join("")}</select></label>` : "") +
+      inp("pmObs", B ? "Obs. (programa, OP…)" : "Obs. (NF, fornecedor…)") +
+      `<div style="display:flex;gap:6px"><button class="btn primary" id="pmOk" type="button">${B ? "Dar baixa" : "Dar entrada"}</button><button class="btn" id="pmCan" type="button">Cancelar</button></div>`);
+    $("pmQtd").select(); $("pmCan").onclick = () => form.innerHTML = "";
+    $("pmOk").onclick = () => {
+      const qtd = pastNum($("pmQtd").value); if (!(qtd > 0)) return msg("Quantidade tem que ser maior que zero.");
+      const extra = { obs: $("pmObs").value.trim() };
+      if (B){ extra.maq = $("pmMaq").value.trim().toUpperCase(); extra.motivo = $("pmMot").value; try { localStorage.setItem("ps_past_maq", extra.maq); } catch(e){} }
+      run(d => { const x = d.itens.find(y => y.id === it.id); if (!x) return "A pastilha foi excluída em outro computador.";
+          if (B && qtd > Number(x.saldo)) return `Saldo de ${x.cod} é ${nf(x.saldo)} — não dá para baixar ${nf(qtd)}. Confira ou ajuste o saldo (✎).`;
+          x.saldo = +(Number(x.saldo) + (B ? -qtd : qtd)).toFixed(3); mov(d, x, tipo, qtd, extra); },
+        d => { const x = d.itens.find(y => y.id === it.id) || it, low = pastBaixo(x); return [`${B ? "Baixa" : "Entrada"} de ${nf(qtd)} ${x.cod}: saldo ${nf(x.saldo)}${low ? " — no estoque mínimo, avisar compras" : ""}.`, !low]; });
+    };
+  }
+  out.onclick = e => { const b = e.target.closest("button[data-a]"); if (!b) return; msg(""); const i = +b.dataset.i; b.dataset.a === "editar" ? formItem(i) : formMov(i, b.dataset.a); };
+  $("pastNovo").onclick = () => { msg(""); hist = false; $("pastHist").textContent = "Histórico"; render(); formItem(null); };
+  $("pastHist").onclick = () => { hist = !hist; $("pastHist").textContent = hist ? "Estoque" : "Histórico"; form.innerHTML = ""; render(); };
+  $("pastCsv").onclick = () => pastCSV(db);
+  $("pastBusca").oninput = render;
+  await load();
+}
+$("btnPast").onclick = () => pastOpen();
+setTimeout(() => pastRead().then(r => pastBadge(r.db)).catch(() => {}), 2500);
 function loginCard(html){
   let ov = $("loginOv");
   if (!ov){ ov = document.createElement("div"); ov.id = "loginOv"; ov.style.cssText = "position:fixed;inset:0;z-index:99999;background:rgba(20,20,24,.72);display:flex;align-items:center;justify-content:center;padding:16px"; document.body.appendChild(ov); }

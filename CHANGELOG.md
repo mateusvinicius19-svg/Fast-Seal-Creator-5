@@ -6,6 +6,13 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.66.1 — PSE 120: um desenho para as duas peças e paralelo de 0,6 no fim do externo (16/11/2026)
+- Desenho: um só para o ANEL GT e o anel de apoio (o do conjunto). A peça A não tem mais desenho próprio; a altura do anel de
+  apoio aparece com tolerância para menos no desenho do conjunto: "anel de apoio Ø... x Ø... x 2,00 0/−0,1 (2x)" nas duas vistas.
+- ANEL GT: o externo (T2D2) termina com um paralelo (reta) de 0,6 no fim do perfil, já fora da peça — a descida a 45° de
+  trás para 0,6 antes do fim (altura + 2). Ex.: 83,5 x 96 x 7 → G1 X89,674 Z-8,4 / G1 X89,674 Z-9.
+- Programa do anel (A), o PSE 102 R e os outros perfis sem mudança.
+
 ## 5.66.0 — PSE 120: anel de apoio com desenho próprio, altura para menos e mais materiais (16/11/2026)
 - Só o PSE 120 (usuário: os outros ficam como estão). Peça A (anel de apoio) do PSE 120: o desenho agora é do ANEL (Corte A-A + Detalhe B, como as arruelas), com
   as medidas do anel (Ø int., Ø ext., largura = H) e a altura para menos: H 0/−0,1 quando o campo de tolerância da altura está

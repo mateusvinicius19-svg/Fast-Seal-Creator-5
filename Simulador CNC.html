@@ -1847,7 +1847,8 @@ function pse120Build(p){
   const cen = [[1.0, g.s + r], [-g.w + r, g.s + r], [-g.w + r, g.r1 + r * (Math.SQRT2 - 1)], [C[0] + Rr * S2, C[1] + Rr * S2]];
   const arcN = 12, arcPts = []; for (let k = 1; k <= arcN; k++){ const a = Math.PI / 4 - k * (Math.PI / 2) / arcN; arcPts.push([C[0] + Rr * Math.sin(a), C[1] + Rr * Math.cos(a)]); }
   const T2c = arcPts[arcPts.length - 1], zHit = T2c[0] - (T2c[1] - (g.s + r));   // reta 45° de trás até o Ø do assento, depois reta até a altura + 2
-  const backs = zHit > zEnd + 0.05 ? [[zHit, g.s + r], [zEnd, g.s + r]] : [[zEnd, Math.max(g.s + r, T2c[1] - (T2c[0] - zEnd))]];
+  // usuário 16/11/2026: termina com um paralelo (reta) de 0,6 no fim do perfil, já fora da peça — o 45° para 0,6 antes do fim
+  const zPar = zEnd + 0.6, backs = zHit > zPar ? [[zHit, g.s + r], [zEnd, g.s + r]] : [[zPar, T2c[1] - (T2c[0] - zPar)], [zEnd, T2c[1] - (T2c[0] - zPar)]];
   const tip = q => [q[0] - r, q[1] - r];
   const finish = [...cen, T2c, ...backs].map(tip), rough = [...cen, ...arcPts, ...backs].map(q => ({ t: "L", p: tip(q) }));
   L.push(...sec("OUTSIDE"), "G0 Z70", TL.ext, ";", ";", ...roughPasses(rough, tO, "od", "0.160", Number(p.apR), Number(p.alR), r, deepAbove(p, tO)));
@@ -1885,6 +1886,8 @@ function pse120Notes(p){
   const g = pse120Geom(p), f = v => fmtN(v, 2);
   return [`Lábio R${f(g.R)} (topo Ø${f(g.apex)}, +${f(g.ap)}) · assentos ${f(g.w)} x Ø${f(g.seat)} · anel de apoio Ø${f(g.ringI)} x Ø${f(g.ringO)} x ${f(g.w)} (2 por conjunto, peça A) · interno sem folga · cotas em mm`];
 }
+// altura (largura) do anel de apoio com tolerância para menos 0/−0,1 (usuário 16/11/2026) — no desenho do conjunto, que vale para as duas peças
+function ringHTol(p, w){ return tolMk(fmtN(w, 2), "0", "-0.1"); }
 // desenho PSE 120: vistas DIÂMETROS e SECÇÃO como no padrão PSE (anéis de apoio desenhados nos assentos)
 function pse120ViewsSVG(p, PT){
   const G = pse120Geom(p), H = G.H, prof = pse120Profile(p), f = v => fmtN(v, 2);
@@ -1926,6 +1929,7 @@ function pse120ViewsSVG(p, PT){
       g += ord(xb - 34, PY(G.d / 2), yB, PX(-H + G.chI), tolMk("Ø " + f(G.d), p.tiS, p.tiI));
       g += ord(xb - 62, PY(G.s), yB, xb, "Ø " + f(G.seat));
       g += ord(xf + 28, PY(G.ringI / 2), yB, xf, "Ø " + f(G.ringI) + " (anel)");
+      g += call(PX(-G.w / 2), PY((rI + rO) / 2), xb - 12, yTop - 8, `anel de apoio Ø${f(G.ringI)} x Ø${f(G.ringO)} x ${ringHTol(p, G.w)} (2x)`, "end");
       g += ord(xf + 56, PY(rO), yB, xf, tolMk("Ø " + f(G.D), p.teS, p.teI));
       g += ord(xf + 84, PY(rTop), yB, PX(G.zc), tl("Ø " + f(G.apex), G.tol.D));
       g += call(PX(G.zc - G.R * 0.5), PY(G.rc + G.R * 0.87), PX(G.zc) + 40, yTop - 8, `R${f(G.R)}`, "start");
@@ -1936,7 +1940,7 @@ function pse120ViewsSVG(p, PT){
       const xt2 = xf + 84; g += ln(PX(G.zc), PY(rTop), xt2 + 5, PY(rTop), "e") + ln(xf, PY(G.d / 2), xt2 + 5, PY(G.d / 2), "e") + vdim(xt2, PY(rTop), PY(G.d / 2), tl(f((G.apex - G.d) / 2), G.tol.sec), 1);
       g += call(PX(-G.chI / 2), PY(G.d / 2 + G.chI / 2), xf + 8, yBot + 14, `${f(G.chI)} x 45°`, "start");
       g += call(PX(-H + G.chI / 2), PY(G.d / 2 + G.chI * G.T30 / 2), xb - 12, PY(G.d / 2) + 24, `${f(G.chI)} x 30°`, "end");
-      g += call(PX(-G.w / 2), PY((rI + rO) / 2), xf + 8, yTop - 8, `anel de apoio ${f(G.w)} x ${f((G.ringO - G.ringI) / 2)} (2x)`, "start");
+      g += call(PX(-G.w / 2), PY((rI + rO) / 2), xf + 8, yTop - 8, `anel de apoio altura ${ringHTol(p, G.w)} x ${f((G.ringO - G.ringI) / 2)} (2x)`, "start");
     }
   });
   return g;
@@ -5014,7 +5018,7 @@ function drawingTools(p){
 function drawingSVG(p){   // v5.48.0: erro no desenho aparece na tela (e o PDF não é salvo)
   try { return drawingSVGCore(p); } catch(e){ errShow("Erro ao montar o desenho", e); return `<svg xmlns="http://www.w3.org/2000/svg" data-erro="1" viewBox="0 0 794 300" width="794" height="300"><rect width="794" height="300" fill="#fff"/><text x="20" y="60" fill="#a2231d" font-family="Arial" font-size="18" font-weight="700">ERRO NO DESENHO: ${esc(e && e.message ? e.message : String(e))}</text><text x="20" y="95" fill="#333" font-family="Arial" font-size="14">AVISE O RESPONSÁVEL. Confira as medidas; se continuar, tire um print.</text></svg>`; }
 }
-function drawingSVGCore(p){ if (p && p.tipoGen === "pse120" && pse102rPiece(p) === "A") p = ringDrawP(p);   // PSE 120: anel de apoio com desenho do anel (só o PSE 120 — usuário 16/11/2026)
+function drawingSVGCore(p){ // PSE 120 (usuário 16/11/2026): UM desenho só para as duas peças (ANEL GT e anel de apoio) — o do conjunto; ringDrawP não é mais usado aqui
    if (p && p.tipoGen === "psh110") p = psh110DrawP(p); if (p && p.tipoGen === "psh110t") p = psh110tDrawP(p);   // PSH 110: desenho com as medidas da peça escolhida
   const PT = state.orient === "portrait";
   const info = dwgInfo();

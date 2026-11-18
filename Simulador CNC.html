@@ -5284,8 +5284,14 @@ GEN.psh131 = { name: "PSH 131",
          ["rpt","Nº de repetições RPT (vazio = 0)",""],["mat","Material","PU"],["bi","Bucha Ø interno (vazio = automática)",""],["bo","Bucha Ø externo (vazio = automática)",""]],
   params: S15_PARAMS, build(p){ return s15Build(p); }, check(p){ return s15Check(p); } };
 function s15ViewsSVG(p, PT){
+  // NBR 10126 (usuário 18/11/2026): tolerância com as mesmas casas da cota (2) e cotas paralelas a 10 mm da peça e 7 mm entre si (mm de papel, 96 dpi)
+  const MM = 96 / 25.4, t2 = v => v === 0 ? "0" : (v > 0 ? "+" : "−") + fmtN(Math.abs(v), 2);
+  const TM = (base, sS, iS, small = 9) => { const s = tolNum(sS), i = tolNum(iS); if (s === null && i === null) return esc(base);
+    if (s !== null && i !== null && Math.abs(s + i) < 1e-9 && s !== 0) return `${esc(base)} ±${fmtN(Math.abs(s), 2)}`;
+    const a = s === null ? "0" : t2(s), b = i === null ? "0" : t2(i);
+    return `${esc(base)}<tspan dx="3" dy="-4.5" style="font-size:${small}px">${a}</tspan><tspan dx="-${(a.length * small * 0.56).toFixed(1)}" dy="9.5" style="font-size:${small}px">${b}</tspan><tspan dy="-5" style="font-size:1px"> </tspan>`; };
   const G = s15Geom(p), H = G.H, prof = s15Profile(p);
-  const f = v => fmtN(v, 2), tl = (base, t, sc) => (sc && secTolOv(p, base)) || (t ? tolMk(base, String(t), String(-t)) : esc(base));
+  const f = v => fmtN(v, 2), tl = (base, t, sc) => (sc && secTolOv(p, base)) || (t ? TM(base, String(t), String(-t)) : esc(base));
   const rTop = G.maxD / 2, rBot = G.minD / 2;
   const boxes = PT ? [[30, 28, 764, 452], [30, 458, 764, 814]] : [[30, 30, 555, 495], [568, 30, 1093, 495]];
   const ML = 118, MR = 150, MT = 110, MB = 120, MBv = [MB, 62], ihv = boxes.map((b, i) => b[3] - b[1] - MT - MBv[i]);
@@ -5300,7 +5306,7 @@ function s15ViewsSVG(p, PT){
     return s + `<text x="${(a + b) / 2}" y="${y - 5}" class="t" text-anchor="middle">${txt}</text>`; };
   const ord = (x, yF, yB, xF, txt) => ln(xF, yF, x + (x > xF ? 5 : -5), yF, "e") + ln(x, yB, x, yF) + ah(x, yF, 0, -1) + `<text x="${x - 5}" y="${yB - 2}" class="t" transform="rotate(-90 ${x - 5} ${yB - 2})">${txt}</text>`;
   const call = (x, y, tx, ty, txt, anchor) => ln(x, y, tx, ty, "e") + `<text x="${tx + (anchor === "end" ? -3 : 3)}" y="${ty + 4}" class="tn" text-anchor="${anchor}">${txt}</text>`;
-  const Htxt = (tolNum(p.thS) !== null || tolNum(p.thI) !== null) ? tolMk("H " + f(H), p.thS, p.thI) : (G.ALOJ ? tl("H " + f(H), H < 6 ? 0.1 : 0.2) : tolMk("H " + f(H), "0", String(-(H < 6 ? 0.1 : 0.2))));   // Fast Seal: altura da peça < 6 → 0,1, senão 0,2; medida de peça (usuário 18/11/2026): só para menos
+  const Htxt = (tolNum(p.thS) !== null || tolNum(p.thI) !== null) ? TM("H " + f(H), p.thS, p.thI) : (G.ALOJ ? tl("H " + f(H), H < 6 ? 0.1 : 0.2) : TM("H " + f(H), "0", String(-(H < 6 ? 0.1 : 0.2))));   // Fast Seal: altura da peça < 6 → 0,1, senão 0,2; medida de peça (usuário 18/11/2026): só para menos
   let g = "";
   boxes.forEach((bx, vi) => {
     const x0 = bx[0] + ML + (iw - H * sc) / 2, yT = bx[1] + MT + (ihv[vi] - (rTop - rBot) * sc) / 2;
@@ -5309,25 +5315,25 @@ function s15ViewsSVG(p, PT){
     g += `<rect x="${bx[0]}" y="${bx[1]}" width="${bx[2] - bx[0]}" height="${bx[3] - bx[1]}" fill="none" stroke="#999" stroke-width=".8"/>`;
     g += `<text x="${(bx[0] + bx[2]) / 2}" y="${bx[1] + 20}" class="vt" text-anchor="middle">${vi ? "SECÇÃO" : "DIÂMETROS"}</text>`;
     g += `<path d="${prof.map(([z, r], i) => `${i ? "L" : "M"}${(x0 - z * sc).toFixed(2)},${PY(r).toFixed(2)}`).join("")}Z" class="p"/>`;
-    const r1 = yTop - 62, r2 = yTop - 32;
-    const xg1 = PX(-H / 2 + G.w / 2), xg2 = PX(-H / 2 - G.w / 2), yG = PY(G.grvD / 2), ryG = G.LIP_OUT ? yBot + 34 : r2;
+    const r1 = yTop - 17 * MM, r2 = yTop - 10 * MM;
+    const xg1 = PX(-H / 2 + G.w / 2), xg2 = PX(-H / 2 - G.w / 2), yG = PY(G.grvD / 2), ryG = G.LIP_OUT ? yBot + 10 * MM : r2;
     const outL = G.LIP_OUT ? -1 : 1, outG = -outL, edgeL = G.LIP_OUT ? yTop : yBot, edgeG = G.LIP_OUT ? yBot : yTop;   // lado do lábio / do canal na tela (−1 = para cima)
     if (vi === 0){
       // DIÂMETROS — cotagem pela NBR 10126 / ISO 129 (usuário 18/11/2026): cada Ø do lado do seu elemento, linhas de cota e de chamada
       // fora da peça (nenhuma atravessa o hachurado), as menores perto da peça e o H por fora, espaçamento igual e textos alinhados;
       // largura do canal, faixa, chanfro e ângulo ficam só na SECÇÃO (cota uma vez só).
-      const L = 50, yEL = edgeL + outL * L, yEG = edgeG + outG * L;
+      const L = 13 * MM, yEL = edgeL + outL * L, yEG = edgeG + outG * L;
       const odim = (xA, yF, xFeat, yE, out, txt) => (Math.abs(xA - xFeat) > 0.5 ? ln(xFeat, yF, xA + (xA > xFeat ? 5 : -5), yF, "e") : "") + ln(xA, yE, xA, yF) + ah(xA, yF, 0, -out)
         + `<text x="${xA - 5}" y="${(yE + yF) / 2}" class="t" text-anchor="middle" transform="rotate(-90 ${xA - 5} ${(yE + yF) / 2})">${txt}</text>`;
-      const yF = PY(G.faceD / 2), rH = edgeL + outL * (L + 14);
+      const yF = PY(G.faceD / 2), rH = edgeL + outL * (L + 4 * MM);
       // lado do lábio: Ø da ponta mais perto da peça, Ø do calcanhar mais longe (as chamadas não cruzam as linhas de cota)
-      g += odim(xb - 26, PY(G.lipD / 2), xm, yEL, outL, tolMk("Ø " + f(G.lipD), G.LIP_OUT ? p.teS : p.tiS, G.LIP_OUT ? p.teI : p.tiI));
-      g += odim(xb - 54, yF, xb, yEL, outL, "Ø " + f(G.faceD));
+      g += odim(xb - 7 * MM, PY(G.lipD / 2), xm, yEL, outL, TM("Ø " + f(G.lipD), G.LIP_OUT ? p.teS : p.tiS, G.LIP_OUT ? p.teI : p.tiI));
+      g += odim(xb - 14 * MM, yF, xb, yEL, outL, "Ø " + f(G.faceD));
       // H por fora, do lado do lábio
       g += ln(xb, yF + outL * 3, xb, rH + outL * 6, "e") + ln(xf, yF + outL * 3, xf, rH + outL * 6, "e") + hdim(xb, xf, rH, Htxt);
       // lado do canal: Ø do fundo com a seta entrando direto no canal; Ø do lado do canal na face da frente
       g += odim(xm, PY(G.botD / 2), xm, yEG, outG, "Ø " + f(G.botD));
-      g += odim(xf + 26, yG, xf, yEG, outG, tolMk("Ø " + f(G.grvD), G.LIP_OUT ? p.tiS : p.teS, G.LIP_OUT ? p.tiI : p.teI));
+      g += odim(xf + 7 * MM, yG, xf, yEG, outG, TM("Ø " + f(G.grvD), G.LIP_OUT ? p.tiS : p.teS, G.LIP_OUT ? p.tiI : p.teI));
     } else {
       g += ln(xb, PY(G.LIP_OUT ? G.faceD / 2 : G.grvD / 2) - 3, xb, r1 - 6, "e") + ln(xf, PY(G.LIP_OUT ? G.faceD / 2 : G.grvD / 2) - 3, xf, r1 - 6, "e") + hdim(xb, xf, r1, Htxt);
       // canal: largura em cima (PSH 131) ou embaixo (PSE 127), faixa reta até a face, chanfro 0,3 × 45° e ângulo do lábio (como o Fast Seal)
@@ -5339,7 +5345,7 @@ function s15ViewsSVG(p, PT){
         const ang = Math.round(Math.atan2(Math.abs(G.T1[0] + H), Math.abs(G.T1[1] - G.faceD / 2)) * 180 / Math.PI), cr = v[0] * u[1] - v[1] * u[0], bi = [(u[0] + v[0]) / 2, (u[1] + v[1]) / 2], bl = Math.hypot(...bi);
         g += ln(xb, yF, xb, yF + v[1] * (Ra + 8), "e") + `<path d="M${xb},${yF + v[1] * Ra} A${Ra},${Ra} 0 0 ${cr > 0 ? 1 : 0} ${xb + u[0] * Ra},${yF + u[1] * Ra}" class="e" fill="none"/>`
           + `<text x="${xb + bi[0] / bl * (Ra + 12)}" y="${yF + bi[1] / bl * (Ra + 12) + 4}" class="tn" text-anchor="middle">${ang}°</text>`; }
-      const xs = xb - 44, xt = xf + 50;
+      const xs = xb - 10 * MM, xt = xf + 10 * MM + 7 * MM;
       g += ln(xb, PY(G.faceD / 2), xs - 5, PY(G.faceD / 2), "e") + ln(xb, PY(G.grvD / 2), xs - 5, PY(G.grvD / 2), "e");
       g += vdim(xs, PY(G.faceD / 2), PY(G.grvD / 2), f(Math.abs(G.faceD - G.grvD) / 2));
       g += ln(xm, PY(G.lipD / 2), xt + 5, PY(G.lipD / 2), "e") + ln(xf, PY(G.grvD / 2), xt + 5, PY(G.grvD / 2), "e");

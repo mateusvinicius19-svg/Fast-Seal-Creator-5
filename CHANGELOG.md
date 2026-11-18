@@ -6,6 +6,11 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.73.1 — PSR 211: sem o chanfro interno da ponta (18/11/2026)
+- PSR 211: tirado o chanfro do interno na ponta do raspador (0,2 a 0,4 a 30°), no programa e no desenho — o interno desce pela
+  rampa até o Ø da ponta e segue reto. G92 igual. PSR 212 continua com o campo do chanfro da ponta.
+- Só o PSR 211 muda (todos os outros perfis saem iguais).
+
 ## 5.73.0 — Perfil novo PSA 108 C/ CORTE (18/11/2026)
 - PSA 108 C/ CORTE (aba Arruelas): o PSA 108 (mesmo programa e desbaste em etapas) com o corte em ângulo do PSG 101 — campo do
   ângulo (30 · 45 · 60°), serra 1,8 no acabamento, POM e Celeron usinados 0,9 maiores nos Ø, comentário do corte no programa

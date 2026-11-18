@@ -6,6 +6,14 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.75.0 (TESTE — branch teste/cotas-nbr, NÃO publicada) — Cotas dos Ø pela NBR 10126 em todos os desenhos (18/11/2026)
+- Pedido do usuário (depois de aprovar o padrão no PSE 127): vista DIÂMETROS de PSE/PSH 106 e família (105, 117, 107, 103, 118,
+  121, 125, 108, 102 R, PSR 211/212), PSR 102, PSR 101, PSE 120 e DUAL SEAL com a distribuição da NBR 10126 / ISO 129:
+  Ø de fora por cima e de dentro por baixo, nenhuma linha atravessando a peça (se a chamada passaria pela peça — ex.: calcanhar
+  atrás do raspador do PSR 211 ou do V do PSH 125 — a seta entra reta no elemento), o elemento mais por fora com a cota mais perto,
+  espaçamento 7 mm, textos começando na ponta de fora. Textos do O-ring e do anel de apoio no meio da altura (sem cotas ali).
+- Programas não mudam (35 perfis iguais); só os desenhos desses 20 perfis.
+
 ## 5.74.0 — PSA 108: chanfro sugerido pela secção também (18/11/2026)
 - PSA 108 e PSA 108 C/ CORTE: chanfro sugerido (externo 45° e interno 30°) era só 10 % da altura e ficava grande na secção fina.
   Agora = o menor entre 10 % da altura e 15 % da secção, de 0,2 a 1 mm, arredondado em 0,1 (nunca maior que antes).

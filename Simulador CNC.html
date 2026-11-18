@@ -1586,6 +1586,25 @@ function psr101Profile(p){
 }
 // v5.47.5 (usuário 14/11/2026): desenho no MESMO padrão do PSR 102 — duas vistas (DIÂMETROS e SECÇÃO), Ø em ordenadas,
 // alturas em cima e chamadas dos chanfros. Função própria: o desenho do PSR 102 (psrViewsSVG) não muda.
+// v5.75.0 (usuário 18/11/2026): distribuição das cotas dos Ø pela NBR 10126 / ISO 129 para as vistas DIÂMETROS (PSR 101, PSE 120,
+// DUAL SEAL, PSR 102): Ø de fora por cima e de dentro por baixo, nenhuma linha atravessando a peça (se a chamada passaria pela peça, a seta
+// entra reta no elemento), o elemento mais por fora com a cota mais perto da peça, espaçamento de 7 mm, textos começando na ponta de fora.
+function ordNBR(Q, o){
+  const { xb, xf, yTop, yBot, yC, poly, ln, ah } = o, MM = 96 / 25.4, gap = 7 * MM, L = 21 * MM; let s = "";
+  const inP = (x, y) => { let c = false; for (let a = 0, b = poly.length - 1; a < poly.length; b = a++){ const [xa, ya] = poly[a], [xb2, yb2] = poly[b]; if ((ya > y) !== (yb2 > y) && x < (xb2 - xa) * (y - ya) / (yb2 - ya) + xa) c = !c; } return c; };
+  const blocked = (x1, x2, y) => { for (let k = 1; k < 20; k++){ const x = x1 + (x2 - x1) * k / 20; if (Math.abs(x - x1) > 4 && inP(x, y)) return true; } return false; };
+  const txt = (x, yE, out, t) => `<text x="${x - 5}" y="${yE - out * 2}" class="t" text-anchor="${out < 0 ? "end" : "start"}" transform="rotate(-90 ${x - 5} ${yE - out * 2})">${t}</text>`;
+  const rest = [];
+  Q.forEach(q => { const out = q.yF < yC ? -1 : 1, xA = q.x < xb ? xb - 4 : xf + 4;
+    if (!blocked(q.xF, xA, q.yF + out * 1.5)){ rest.push(q); return; }
+    const yE = out < 0 ? yTop - L : yBot + L, x = q.xF + (q.x < xb ? 8 : -8); s += ln(x, yE, x, q.yF) + ah(x, q.yF, 0, -out) + txt(x, yE, out, q.txt); });
+  [["L", -1], ["L", 1], ["R", -1], ["R", 1]].forEach(([sd, out]) => {
+    const grp = rest.filter(q => (q.x < xb ? "L" : "R") === sd && (q.yF < yC ? -1 : 1) === out).sort((a, b) => out < 0 ? a.yF - b.yF : b.yF - a.yF), yE = out < 0 ? yTop - L : yBot + L;
+    grp.forEach((q, k) => { const x = sd === "L" ? xb - gap * (k + 1) : xf + gap * (k + 1);
+      s += ln(q.xF, q.yF, x + (x > q.xF ? 5 : -5), q.yF, "e") + ln(x, yE, x, q.yF) + ah(x, q.yF, 0, -out) + txt(x, yE, out, q.txt); });
+  });
+  Q.length = 0; return s;
+}
 function psr101ViewsSVG(p, PT){
   const G = psr101Geom(p), H = G.H, prof = psr101Profile(p), De = G.D, tip = G.d - G.ap, furo = G.d + G.bB, tolS = tgSecTol(G.S);
   const T30 = PSR101_TAN(30), T60 = PSR101_TAN(60);
@@ -1602,7 +1621,7 @@ function psr101ViewsSVG(p, PT){
   const hdim = (x1, x2, y, txt) => { const a = Math.min(x1, x2), b = Math.max(x1, x2); let s = ln(a, y, b, y);
     s += b - a >= 22 ? ah(a, y, -1, 0) + ah(b, y, 1, 0) : ln(a - 12, y, a, y) + ln(b, y, b + 12, y) + ah(a, y, 1, 0) + ah(b, y, -1, 0);
     return s + `<text x="${(a + b) / 2}" y="${y - 5}" class="t" text-anchor="middle">${txt}</text>`; };
-  const ord = (x, yF, yB, xF, txt) => ln(xF, yF, x + (x > xF ? 5 : -5), yF, "e") + ln(x, yB, x, yF) + ah(x, yF, 0, -1) + `<text x="${x - 5}" y="${yB - 2}" class="t" transform="rotate(-90 ${x - 5} ${yB - 2})">${txt}</text>`;
+  const ordQ = [], ord = (x, yF, yB, xF, txt) => { ordQ.push({ x, yF, xF, txt }); return ""; };   // v5.75.0: distribuída em ordNBR (NBR 10126)
   const call = (x, y, tx, ty, txt, anchor) => ln(x, y, tx, ty, "e") + `<text x="${tx + (anchor === "end" ? -3 : 3)}" y="${ty + 4}" class="tn" text-anchor="${anchor}">${txt}</text>`;
   let g = "";
   boxes.forEach((bx, vi) => {
@@ -1624,6 +1643,7 @@ function psr101ViewsSVG(p, PT){
       g += ord(xf + 28, PY(rBot), yB, PX(G.zt), "Ø " + f(tip));
       g += ord(xf + 56, PY(G.Le / 2), yB, xL, "Ø " + f(G.Le));
       g += ord(xf + 84, PY(G.Ds / 2), yB, xL - G.cP * sc, "Ø " + f(G.Ds));
+      g += ordNBR(ordQ, { xb, xf, yTop, yBot, yC: (yTop + yBot) / 2, poly: prof.map(([z, r]) => [x0 - z * sc, PY(r)]), ln, ah });
     } else {
       const xs = xb - 44;
       g += ln(PX(-H + G.cB * T60), PY(rTop), xs - 5, PY(rTop), "e") + ln(PX(-H + G.cI / T30), PY(furo / 2), xs - 5, PY(furo / 2), "e");
@@ -2007,8 +2027,7 @@ function pse120ViewsSVG(p, PT){
   const hdim = (x1, x2, y, txt) => { const a = Math.min(x1, x2), b = Math.max(x1, x2); let s = ln(a, y, b, y);
     s += b - a >= 22 ? ah(a, y, -1, 0) + ah(b, y, 1, 0) : ln(a - 12, y, a, y) + ln(b, y, b + 12, y) + ah(a, y, 1, 0) + ah(b, y, -1, 0);
     return s + `<text x="${(a + b) / 2}" y="${y - 5}" class="t" text-anchor="middle">${txt}</text>`; };
-  const ord = (x, yF, yB, xF, txt) => ln(xF, yF, x + (x > xF ? 5 : -5), yF, "e") + ln(x, yB, x, yF) + ah(x, yF, 0, -1)
-    + `<text x="${x - 5}" y="${yB - 2}" class="t" transform="rotate(-90 ${x - 5} ${yB - 2})">${txt}</text>`;
+  const ordQ = [], ord = (x, yF, yB, xF, txt) => { ordQ.push({ x, yF, xF, txt }); return ""; };   // v5.75.0: distribuída em ordNBR (NBR 10126)
   const call = (x, y, tx, ty, txt, anchor) => ln(x, y, tx, ty, "e") + `<text x="${tx + (anchor === "end" ? -3 : 3)}" y="${ty + 4}" class="tn" text-anchor="${anchor}">${txt}</text>`;
   let g = "";
   boxes.forEach((bx, vi) => {
@@ -2032,9 +2051,10 @@ function pse120ViewsSVG(p, PT){
       g += ord(xb - 34, PY(G.d / 2), yB, PX(-H + G.chI), tolMk("Ø " + f(G.d), p.tiS, p.tiI));
       g += ord(xb - 62, PY(G.s), yB, xb, "Ø " + f(G.seat));
       g += ord(xf + 28, PY(G.ringI / 2), yB, xf, "Ø " + f(G.ringI) + " (anel)");
-      g += call(PX(-G.w / 2), PY((rI + rO) / 2), xb - 12, yTop - 8, `anel de apoio Ø${f(G.ringI)} x Ø${f(G.ringO)} x ${ringHTol(p, G.w)} (2x)`, "end");
+      g += call(PX(-H + G.w / 2), PY((rI + rO) / 2), xb - 12, (yTop + yBot) / 2, `anel de apoio Ø${f(G.ringI)} x Ø${f(G.ringO)} x ${ringHTol(p, G.w)} (2x)`, "end");
       g += ord(xf + 56, PY(rO), yB, xf, tolMk("Ø " + f(G.D), p.teS, p.teI));
       g += ord(xf + 84, PY(rTop), yB, PX(G.zc), tl("Ø " + f(G.apex), G.tol.D));
+      g += ordNBR(ordQ, { xb, xf, yTop, yBot, yC: (yTop + yBot) / 2, poly: prof.map(([z, r]) => [x0 - z * sc, PY(r)]), ln, ah });
       g += call(PX(G.zc - G.R * 0.5), PY(G.rc + G.R * 0.87), PX(G.zc) + 40, yTop - 8, `R${f(G.R)}`, "start");
     } else {
       const xs = xb - 44, xt = xf + 34;
@@ -5042,8 +5062,29 @@ function pseViewsSVG(p, PT){
     return s + `<text x="${(a + b) / 2}" y="${y - 5}" class="t" text-anchor="middle">${txt}</text>`;
   };
   // cota de diâmetro: seta saindo da base até a aresta, texto ao longo da linha
-  const ord = (x, yF, yB, xF, txt) => ln(xF, yF, x + (x > xF ? 5 : -5), yF, "e") + ln(x, yB, x, yF) + ah(x, yF, 0, -1)
-    + `<text x="${x - 5}" y="${yB - 2}" class="t" transform="rotate(-90 ${x - 5} ${yB - 2})">${txt}</text>`;
+  // v5.75.0 (usuário 18/11/2026): cotas dos Ø pela NBR 10126 / ISO 129 — cada Ø sai do lado do seu elemento (de fora por cima, de dentro
+  // por baixo), nenhuma linha atravessa a peça, o elemento mais por fora fica com a cota mais perto da peça (as chamadas não se cruzam),
+  // espaçamento igual (7 mm) e os textos começam alinhados na ponta de fora. ord() só guarda a cota; ordFlush() desenha.
+  let ordQ = [];
+  const ord = (x, yF, yB, xF, txt) => { ordQ.push({ x, yF, xF, txt }); return ""; };
+  const ordFlush = (xb, xf, yTop, yBot, yC, poly) => {
+    const MM = 96 / 25.4, gap = 7 * MM, L = 21 * MM; let s = "";
+    // a chamada passaria por dentro da peça (ex.: calcanhar atrás do raspador do PSR 211)? então a seta entra reta, direto no elemento
+    const inP = (x, y) => { let c = false; for (let a = 0, b = poly.length - 1; a < poly.length; b = a++){ const [xa, ya] = poly[a], [xb2, yb2] = poly[b]; if ((ya > y) !== (yb2 > y) && x < (xb2 - xa) * (y - ya) / (yb2 - ya) + xa) c = !c; } return c; };
+    const blocked = (x1, x2, y) => { for (let k = 1; k < 20; k++){ const x = x1 + (x2 - x1) * k / 20; if (Math.abs(x - x1) > 4 && inP(x, y)) return true; } return false; };
+    const direct = [];
+    ordQ = ordQ.filter(o => { const xA = o.x < xb ? xb - 4 : xf + 4, yt = o.yF + (o.yF < yC ? -1.5 : 1.5); if (!blocked(o.xF, xA, yt)) return true; direct.push(o); return false; });   // testa 1,5 px para fora (aresta reta não conta)
+    direct.forEach(o => { const out = o.yF < yC ? -1 : 1, yE = out < 0 ? yTop - L : yBot + L, x = o.xF + (o.x < xb ? 8 : -8);
+      s += ln(x, yE, x, o.yF) + ah(x, o.yF, 0, -out) + `<text x="${x - 5}" y="${yE - out * 2}" class="t" text-anchor="${out < 0 ? "end" : "start"}" transform="rotate(-90 ${x - 5} ${yE - out * 2})">${o.txt}</text>`; });
+    [["L", -1], ["L", 1], ["R", -1], ["R", 1]].forEach(([sd, out]) => {
+      const grp = ordQ.filter(o => (o.x < xb ? "L" : "R") === sd && (o.yF < yC ? -1 : 1) === out).sort((a, b) => out < 0 ? a.yF - b.yF : b.yF - a.yF);
+      const yE = out < 0 ? yTop - L : yBot + L;
+      grp.forEach((o, k) => { const x = sd === "L" ? xb - gap * (k + 1) : xf + gap * (k + 1);
+        s += ln(o.xF, o.yF, x + (x > o.xF ? 5 : -5), o.yF, "e") + ln(x, yE, x, o.yF) + ah(x, o.yF, 0, -out)
+          + `<text x="${x - 5}" y="${yE - out * 2}" class="t" text-anchor="${out < 0 ? "end" : "start"}" transform="rotate(-90 ${x - 5} ${yE - out * 2})">${o.txt}</text>`; });
+    });
+    ordQ = []; return s;
+  };
   const call = (x, y, tx, ty, txt, anchor) => ln(x, y, tx, ty, "e") + `<text x="${tx + (anchor === "end" ? -3 : 3)}" y="${ty + 4}" class="tn" text-anchor="${anchor}">${txt}</text>`;
 
   let g = "";
@@ -5058,9 +5099,9 @@ function pseViewsSVG(p, PT){
       const c = Math.min(0.2, G.Ls / 6), rI = G.ringI / 2, rO = G.ringO / 2, za = -H, zb = G.zS;
       const ring = [[za + c, rO], [zb - c, rO], [zb, rO - c], [zb, rI + c], [zb - c, rI], [za + c, rI], [za, rI + c], [za, rO - c]];
       g += `<path d="${ring.map(([z, r], i) => `${i ? "L" : "M"}${PX(z).toFixed(2)},${PY(r).toFixed(2)}`).join("")}Z" fill="#f4f4f1" stroke="#111" stroke-width="1"/>`;
-      g += call(PX((za + zb) / 2), PY((rI + rO) / 2), xb - 12, PY(rO) - (vi ? 40 : 30), vi ? `anel de apoio altura ${ringHTol(p, G.Ls)} x ${f((G.ringO - G.ringI) / 2)}` : `anel de apoio Ø${f(G.ringI)} x Ø${f(G.ringO)} x ${ringHTol(p, G.Ls)}`, "end");
+      g += call(PX((za + zb) / 2), PY((rI + rO) / 2), xb - 12, vi ? PY(rO) - 40 : PY(G.Dm / 2), vi ? `anel de apoio altura ${ringHTol(p, G.Ls)} x ${f((G.ringO - G.ringI) / 2)}` : `anel de apoio Ø${f(G.ringI)} x Ø${f(G.ringO)} x ${ringHTol(p, G.Ls)}`, "end");
     }
-    if (G.O107) g += `<circle cx="${PX(-G.OC / 2)}" cy="${PY(G.Dm / 2)}" r="${G.OC / 2 * sc}" fill="#e6e6e6" fill-opacity=".8" stroke="#111" stroke-width="1.2"/>` + call(PX(-G.OC / 2) + G.OC / 2 * sc * 0.7, PY(G.Dm / 2) - G.OC / 2 * sc * 0.7, xf + 8, yTop - 28, vi ? `O-ring ${f(G.OC)} · alojamento prof. ${f(G.prof)} · R${f(G.Rg)}` : `O-ring ${f(G.OC)} x Ø int. ${f(G.Dm - G.OC)}`, "start");
+    if (G.O107) g += `<circle cx="${PX(-G.OC / 2)}" cy="${PY(G.Dm / 2)}" r="${G.OC / 2 * sc}" fill="#e6e6e6" fill-opacity=".8" stroke="#111" stroke-width="1.2"/>` + call(PX(-G.OC / 2) + G.OC / 2 * sc * 0.7, PY(G.Dm / 2) - G.OC / 2 * sc * 0.7, xf + 8, vi ? yTop - 28 : PY(G.Dm / 2), vi ? `O-ring ${f(G.OC)} · alojamento prof. ${f(G.prof)} · R${f(G.Rg)}` : `O-ring ${f(G.OC)} x Ø int. ${f(G.Dm - G.OC)}`, "start");
     // altura total e comprimento do lábio (em cima)
     const r1 = yTop - 50, r2 = yTop - 24;
     g += ln(xb, PY((G.wiper ? G.tipOut : G.xoBack) / 2) - 3, xb, r1 - 6, "e") + ln(xf, PY(G.xo1 / 2) - 3, xf, r1 - 6, "e") + hdim(xb, xf, r1, (tolNum(p.thS) !== null || tolNum(p.thI) !== null) ? tolMk("H " + f(H), p.thS, p.thI) : tm("H " + f(H), Math.min(G.tol.sec, 0.4)));   // altura: no máximo −0,4 (usuário 09/11/2026)
@@ -5080,6 +5121,7 @@ function pseViewsSVG(p, PT){
       g += ord(xf + 56, PY(G.xgIn / 2), yB, PX(G.zI), "Ø " + f(G.xgIn));
       g += ord(xf + 84, PY(G.xgOut / 2), yB, PX(G.zO), "Ø " + f(G.xgOut));
       g += ord(xf + 112, PY(G.extAp / 2), yB, PX(G.zO - (G.chOz ?? G.chO)), tl("Ø " + f(G.extAp), G.tol.D));
+      g += ordFlush(xb, xf, yTop, yBot, yC, prof.map(([z, r]) => [x0 - z * sc, PY(r)]));
       // raio do fundo do canal
       const cx = PX(G.Cg[0]), ax = PX(G.Cg[0] - G.Rg * Math.SQRT1_2), ay = PY(G.Cg[1] + (G.hb || 0) + G.Rg * Math.SQRT1_2);   // PSH 108: aponta o raio externo (são 2 raios iguais)
       if (!G.O107) g += ln(cx, yC, ax, ay) + ah(ax, ay, -Math.SQRT1_2, -Math.SQRT1_2) + `<text x="${cx + 4}" y="${yC + 4}" class="t">${tl((G.hb > 0 ? "2x R" : "R") + f(G.Rg), G.tol.F)}</text>`;
@@ -5329,7 +5371,7 @@ function dualViewsSVG(p, PT){
   const hdim = (x1, x2, y, txt) => { const a = Math.min(x1, x2), b = Math.max(x1, x2); let s = ln(a, y, b, y);
     s += b - a >= 22 ? ah(a, y, -1, 0) + ah(b, y, 1, 0) : ln(a - 12, y, a, y) + ln(b, y, b + 12, y) + ah(a, y, 1, 0) + ah(b, y, -1, 0);
     return s + `<text x="${(a + b) / 2}" y="${y - 5}" class="t" text-anchor="middle">${txt}</text>`; };
-  const ord = (x, yF, yB, xF, txt) => ln(xF, yF, x + (x > xF ? 5 : -5), yF, "e") + ln(x, yB, x, yF) + ah(x, yF, 0, -1) + `<text x="${x - 5}" y="${yB - 2}" class="t" transform="rotate(-90 ${x - 5} ${yB - 2})">${txt}</text>`;
+  const ordQ = [], ord = (x, yF, yB, xF, txt) => { ordQ.push({ x, yF, xF, txt }); return ""; };   // v5.75.0: distribuída em ordNBR (NBR 10126)
   const Htxt = (tolNum(p.thS) !== null || tolNum(p.thI) !== null) ? tolMk("H " + f(H), p.thS, p.thI) : (String(p.med || "").toUpperCase() === "T" ? tl("H " + f(H), 0.2) : tolMk("H " + f(H), "0", "-0.2"));   // altura só para menos; "Tudo alojamento" fica ±0,2 (usuário 17/11/2026)
   let g = "";
   boxes.forEach((bx, vi) => {
@@ -5349,6 +5391,7 @@ function dualViewsSVG(p, PT){
       g += ord(xb - 58, PY(rTop), yB, x1, tolMk("Ø " + f(G.lipO), p.teS, p.teI));
       g += ord(xf + 30, PY(G.valI / 2), yB, xf, "Ø " + f(G.valI));
       g += ord(xf + 58, PY(rBot), yB, x3, tolMk("Ø " + f(G.lipI), p.tiS, p.tiI));
+      g += ordNBR(ordQ, { xb, xf, yTop, yBot, yC: (yTop + yBot) / 2, poly: prof.map(([z, r]) => [x0 - z * sc, PY(r)]), ln, ah });
     } else {
       const xs = xb - 44, xt = xf + 50;
       g += ln(xb, PY(G.valO / 2), xs - 5, PY(G.valO / 2), "e") + ln(xb, PY(G.valI / 2), xs - 5, PY(G.valI / 2), "e");
@@ -5374,7 +5417,7 @@ function psrViewsSVG(p, PT){
   const hdim = (x1, x2, y, txt) => { const a = Math.min(x1, x2), b = Math.max(x1, x2); let s = ln(a, y, b, y);
     s += b - a >= 22 ? ah(a, y, -1, 0) + ah(b, y, 1, 0) : ln(a - 12, y, a, y) + ln(b, y, b + 12, y) + ah(a, y, 1, 0) + ah(b, y, -1, 0);
     return s + `<text x="${(a + b) / 2}" y="${y - 5}" class="t" text-anchor="middle">${txt}</text>`; };
-  const ord = (x, yF, yB, xF, txt) => ln(xF, yF, x + (x > xF ? 5 : -5), yF, "e") + ln(x, yB, x, yF) + ah(x, yF, 0, -1) + `<text x="${x - 5}" y="${yB - 2}" class="t" transform="rotate(-90 ${x - 5} ${yB - 2})">${txt}</text>`;
+  const ordQ = [], ord = (x, yF, yB, xF, txt) => { ordQ.push({ x, yF, xF, txt }); return ""; };   // v5.75.0: distribuída em ordNBR (NBR 10126)
   const call = (x, y, tx, ty, txt, anchor) => ln(x, y, tx, ty, "e") + `<text x="${tx + (anchor === "end" ? -3 : 3)}" y="${ty + 4}" class="tn" text-anchor="${anchor}">${txt}</text>`;
   let g = "";
   boxes.forEach((bx, vi) => {
@@ -5394,6 +5437,7 @@ function psrViewsSVG(p, PT){
       g += ord(xf + 28, PY(G.tip / 2), yB, xf, "Ø " + f(G.tip));
       g += ord(xf + 56, PY(G.tipo / 2), yB, xf, "Ø " + f(G.tipo));
       g += ord(xf + 84, PY(G.lipf / 2), yB, xh, "Ø " + f(G.lipf));
+      g += ordNBR(ordQ, { xb, xf, yTop, yBot, yC: (yTop + yBot) / 2, poly: prof.map(([z, r]) => [x0 - z * sc, PY(r)]), ln, ah });
     } else {
       const xs = xb - 44;
       g += ln(PX(-H + G.cI), PY(rTop), xs - 5, PY(rTop), "e") + ln(PX(-H + G.cI), PY(G.calc / 2), xs - 5, PY(G.calc / 2), "e");

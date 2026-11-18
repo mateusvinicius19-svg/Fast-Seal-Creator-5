@@ -242,6 +242,9 @@ header .logo{background:linear-gradient(135deg,#c8102e,#8f1a17);box-shadow:0 2px
 .hhead{display:flex;align-items:flex-end;justify-content:space-between;margin:4px 0 16px}
 .htitle{font:700 24px "Segoe UI",Arial,sans-serif;color:var(--text)}
 .hsub{color:var(--muted);font-size:14px;margin-top:2px}
+.hclock{text-align:right}
+#hTime{font:700 30px "Segoe UI",Arial,sans-serif;color:var(--text);font-variant-numeric:tabular-nums;line-height:1}
+#hDate{color:var(--muted);font-size:13.5px;margin-top:4px}
 .hgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
 .hcard{display:flex;align-items:center;gap:14px;text-align:left;border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--text);padding:16px 18px;cursor:pointer;box-shadow:var(--shadow);transition:transform .12s,border-color .12s,box-shadow .12s;font-family:"Segoe UI",Arial,sans-serif}
 .hcard:hover{transform:translateY(-2px);border-color:var(--brand)}
@@ -3414,6 +3417,11 @@ function chooseProf(t){
   if (tp && $("genType").value === "iso"){ tp.value = dp ? "dp" : ""; if (state.tolVals) state.tolVals.tipoP = tp.value; syncTolRows(); generate(); }
   updateProfBtn();
 }
+// relógio da tela inicial (usuário 17/11/2026): hora e data, atualiza sozinho
+function homeClock(){ const t = $("hTime"), d = $("hDate"); if (!t || !d) return; const n = new Date();
+  t.textContent = n.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+  const s = n.toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long", year: "numeric" }); d.textContent = s.charAt(0).toUpperCase() + s.slice(1); }
+setInterval(homeClock, 15000);
 function homeHide(){ const h = $("home"); if (h) h.style.display = "none"; }
 function homeShow(){
   let h = $("home");
@@ -3422,7 +3430,7 @@ function homeShow(){
   h.style.cssText = `position:fixed;inset:0;z-index:1;overflow:auto;background:var(--bg);padding:${top + 18}px 20px 30px`;   // embaixo do cabeçalho (z-index 2)
   const card = (id, ic, t, s) => `<button type="button" class="hcard" data-h="${id}"><span class="hic">${ic}</span><span><b>${t}</b><small>${s}</small></span></button>`;
   h.innerHTML = `<div class="hwrap">
-    <div class="hhead"><div><div class="htitle">${state.user ? "Olá, " + esc(state.user.split(" ")[0].replace(/\.$/, "")) : "Bem-vindo"}</div><div class="hsub">O que vamos fazer hoje?</div></div></div>
+    <div class="hhead"><div><div class="htitle">${state.user ? "Olá, " + esc(state.user.split(" ")[0].replace(/\.$/, "")) : "Bem-vindo"}</div><div class="hsub">O que vamos fazer hoje?</div></div><div class="hclock"><div id="hTime"></div><div id="hDate"></div></div></div>
     <div class="hgrid">
       ${card("novo", "&#x2795;", "Novo programa", "Escolher o perfil e gerar programa + desenho")}
       ${card("ver", "&#x1F50E;", "Ver programa", "Abrir pelo número (Programas_CNC / MCS 500)")}
@@ -3437,7 +3445,7 @@ function homeShow(){
     PROF_GROUPS.map(([gname, list]) => `<div class="hfam">${esc(gname)}</div><div class="hprofs">` +
       list.filter(t => GEN[t] || t === "dp").map(t => `<button type="button" class="hprof" data-prof="${t}" title="${esc(profOptText(t))}">${profThumb(t)}<span>${esc((s => s.length > 16 ? s.replace(/\s*\(.*$/, "") : s)(profCode(t)))}</span>${PROF_DESC[t] ? `<small>${esc(PROF_DESC[t])}</small>` : ""}</button>`).join("") + `</div>`).join("") +
     `</div>`;
-  h.style.display = "";
+  h.style.display = ""; homeClock();
   h.querySelectorAll("[data-prof]").forEach(b => b.onclick = () => { chooseProf(b.dataset.prof); homeHide(); });
   h.querySelectorAll("[data-h]").forEach(b => b.onclick = () => {
     const k = b.dataset.h; homeHide();

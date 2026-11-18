@@ -6,6 +6,12 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.70.1 — Tela inicial: hora/data e pesquisa; topo sem o cabeçalho (17/11/2026)
+- Tela inicial: **hora e data** no canto direito (atualiza sozinha) e **barra de pesquisa** (perfil pelo código ou descrição,
+  atalho, ou nº do programa → Ver programa; Enter abre o 1º resultado, Esc limpa; sem acento / maiúscula).
+- Topo: saiu a linha do cabeçalho do programa embaixo do título (escondida).
+- Programas não mudam (34 perfis iguais).
+
 ## 5.70.0 — Tela inicial, tema escuro, passo a passo; PSH 138 (DHR); ajustes do Dual Seal (17/11/2026)
 - **Tela inicial** (abre depois do login; botão 🏠 Início no topo): atalhos Novo programa, Ver programa, Alterar programa,
   Pastilhas, Abrir arquivo, Desenho do programa, Histórico, Ferramentas + perfis por família com descrição curta (PROF_DESC).

@@ -5712,7 +5712,8 @@ function askDes(){
 function askCod(force){
   const p = state.genParams, el = document.querySelector("#dwgFields [data-d=cod]");
   if (!p || !el || !DESENHO_TYPES.includes(p.tipoGen)) return true;
-  const key = pieceFile(p), same = state.codKey === key;
+  // PSE 102 R (usuário 18/11/2026): gaxeta (U) e anel de apoio (A) têm o mesmo Cód. interno — não pergunta de novo no anel
+  const key = pieceFile(p.tipoGen === "pse102r" ? Object.assign({}, p, { peca: "U" }) : p), same = state.codKey === key;
   if (!force && same && el.value.trim()) return true;
   const v = prompt("Cód. interno do item (vai no desenho e no Anexo 1 do ARGUS):", same ? el.value.trim() : "");
   if (v === null) return false;

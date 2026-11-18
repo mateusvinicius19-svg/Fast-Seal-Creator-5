@@ -6,6 +6,10 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.70.4 — PSE 102 R: Cód. interno uma vez só (18/11/2026)
+- PSE 102 R: a gaxeta (U) e o anel de apoio (A) usam o mesmo Cód. interno; ao salvar o anel ele não pergunta de novo.
+- Programas não mudam (34 perfis iguais).
+
 ## 5.70.3 — Salvar: diz por que não salvou (18/11/2026)
 - Salvar programa: se o número, o Cód. interno ou "Quem desenhou?" for cancelado (ou o arquivo já existir e não for substituído),
   aparece "NÃO salvo: …" com o motivo, em vez de ficar parado em "Procurando o próximo número livre…" (visto no PSE 102 R peça A).

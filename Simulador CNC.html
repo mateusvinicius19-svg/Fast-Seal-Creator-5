@@ -273,8 +273,8 @@ header .logo{background:linear-gradient(135deg,#c8102e,#8f1a17);box-shadow:0 2px
     <input type="file" id="file" accept=".pit,.PIT,.txt,.nc,.cnc,.mpf,.tap" hidden>
     Abrir arquivo
   </label>
-  <button class="btn" id="btnPaste">Colar programa</button>
-  <button class="btn" id="btnExample">Exemplo</button>
+  <button class="btn" id="btnPaste" style="display:none">Colar programa</button>
+  <button class="btn" id="btnExample" style="display:none">Exemplo</button>   <!-- escondidos (usuário 17/11/2026: não usam) -->
 </header>
 
 <div class="wrap">
@@ -3418,7 +3418,6 @@ function homeShow(){
       ${card("alt", "&#x270F;&#xFE0F;", "Alterar programa", "Refazer um programa com outra bucha")}
       ${card("past", "&#x1F9F0;", "Pastilhas", "Estoque, entrada e baixa")}
       ${card("abrir", "&#x1F4C2;", "Abrir arquivo", "Simular um .PIT / .txt do computador")}
-      ${card("colar", "&#x1F4CB;", "Colar programa", "Colar o código e simular")}
       ${card("progdes", "&#x1F4D0;", "Desenho do programa", "Desenho a partir de um programa aberto ou colado")}
       ${card("hist", "&#x1F5C2;&#xFE0F;", "Histórico", "Programas salvos pelo Simulador")}
       ${card("ferr", "&#x1F527;", "Ferramentas", "Cadastro das ferramentas e pastilhas de cada T")}

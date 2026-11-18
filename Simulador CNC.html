@@ -3821,11 +3821,13 @@ async function saveProgram(auto){
   const p110 = !auto && state.genParams && (state.genParams.tipoGen === "psh110" || state.genParams.tipoGen === "psh110t") ? psh110Piece(state.genParams) : !auto && state.genParams && ["pse102r","pse120"].includes(state.genParams.tipoGen) ? (pse102rPiece(state.genParams) === "A" ? "A" : "M") : "", k110 = state.genParams && state.genParams.tipoGen === "psh110t" ? "ps_psh110tNum" : state.genParams && state.genParams.tipoGen === "pse102r" ? "ps_pse102rNum" : state.genParams && state.genParams.tipoGen === "pse120" ? "ps_pse120Num" : "ps_psh110Num";   // PSH 110 30°: número próprio
   if (p110 === "A" || p110 === "B"){ try { const k = localStorage.getItem(k110); if (k) sug = k; } catch(e){} }
   const num = auto ? sug : prompt("Número do programa" + (state.alterNum ? " (alterando " + sug + ")" : sug ? " (próximo livre: " + sug + ")" : " (ex.: 046004)") + (suf ? ` — bucha especial: vai salvar como "número ${suf[1]}"` : "") + ":", sug);
-  if (num === null) return;
-  if (!auto && !askCod()) return;
-  if (!auto && state.genParams && DESENHO_TYPES.includes(state.genParams.tipoGen) && !askDes()) return;
+  // v5.70.3 (usuário 18/11/2026): pergunta cancelada não deixa mais "Procurando o próximo número livre…" na tela — diz por que não salvou
+  const parar = t => { $("genMsg").textContent = "NÃO salvo: " + t; $("genMsg").style.color = "#b2221f"; };
+  if (num === null) return parar("número do programa cancelado. Se a janela do número nem apareceu, aperte F5 e salve de novo.");
+  if (!auto && !askCod()) return parar("Cód. interno cancelado. Para salvar sem código, deixe em branco e clique em OK.");
+  if (!auto && state.genParams && DESENHO_TYPES.includes(state.genParams.tipoGen) && !askDes()) return parar("\"Quem desenhou?\" cancelado.");
   let base = num.trim().replace(/\.(pit|txt|nc)$/i, "");
-  if (!base) return;
+  if (!base) return parar("número do programa em branco.");
   if (/^\d{1,6}[A-Z]?$/i.test(base)) base = base.replace(/^(\d+)/, d => d.padStart(6, "0"));
   if (p110){ const m = /^(\d+)[AB]?(.*)$/i.exec(base); if (m) base = m[1] + (p110 === "M" ? "" : p110) + m[2]; }   // PSH 110: A = macho, B = fêmea
   if (suf && !base.toUpperCase().includes(suf[1].toUpperCase())) base += " " + suf[1];
@@ -3846,7 +3848,7 @@ async function saveProgram(auto){
   const ex = [];
   if (await fileExists(dir, pitName)) ex.push(pitName + " (Programas_CNC)");
   if (await fileExists(mcsDir, mcsName)) ex.push(mcsName + " (MCS 500)");
-  if (ex.length && !confirm("Já existe:\n" + ex.join("\n") + "\n\nSubstituir?")) return;
+  if (ex.length && !confirm("Já existe:\n" + ex.join("\n") + "\n\nSubstituir?")) return parar("já existe " + ex.join(" e ") + " e não foi substituído.");
   try {
     await writeFile(dir, pitName, pitBytes); await writeFile(mcsDir, mcsName, mcsBytes);
     { const m = /^(\d{6})/.exec(base); if (m && +m[1] < 900000) try { if (+m[1] > (+localStorage.getItem("ps_lastProg") || 0)) localStorage.setItem("ps_lastProg", String(+m[1])); } catch(e){} }

@@ -6,6 +6,11 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.73.2 — PSR 212: sem o chanfro interno da ponta (18/11/2026)
+- PSR 212: igual ao PSR 211 (5.73.1) — tirado o chanfro do interno na ponta do raspador (era 0,5 a 45°), no programa e no desenho;
+  saiu também o campo "Raspador: chanfro da ponta". G92 igual. Os chanfros do degrau externo continuam.
+- Só o PSR 212 muda (todos os outros perfis saem iguais).
+
 ## 5.73.1 — PSR 211: sem o chanfro interno da ponta (18/11/2026)
 - PSR 211: tirado o chanfro do interno na ponta do raspador (0,2 a 0,4 a 30°), no programa e no desenho — o interno desce pela
   rampa até o Ø da ponta e segue reto. G92 igual. PSR 212 continua com o campo do chanfro da ponta.

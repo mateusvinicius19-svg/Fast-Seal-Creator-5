@@ -1347,7 +1347,7 @@ GEN.psr211 = Object.assign({}, GEN.psh105, { name: "PSR 211",
 // PSR 212 (usuário 16/11/2026): PSR 211 com degrau no externo, atrás do corpo (foto do catálogo)
 GEN.psr212 = Object.assign({}, GEN.psr211, { name: "PSR 212",
   main: [...GEN.psr211.main.slice(0, 4), ["ds","Ø do degrau externo (vazio = Ø ext. − 0,6 × secção)",""],["hs","Comprimento do degrau em Z, a partir da trás do corpo (vazio = 0,3 × corpo)",""],["pt","Passes da T6D6 na parte de trás — degrau + raspador (vazio = 1)",""], ...GEN.psr211.main.slice(4)],
-  params: [...GEN.psr211.params.map(f => [f[0], f[1].replace("PSR 211", "PSR 212"), f[2]]), ["cT","Raspador: chanfro da ponta",0.5]],   // PSR 212 continua 0,5 a 45° (o PSR 211 não tem mais o campo)
+  params: [...GEN.psr211.params.map(f => [f[0], f[1].replace("PSR 211", "PSR 212"), f[2]])],   // v5.73.2: sem o campo do chanfro da ponta (PSR 211 e PSR 212 sem esse chanfro)
   check(p){
     const base = GEN.psr211.check(p), g = psr211Geom(p), m = [];
     if (!(g.dS < g.extCalc - 2 * g.chc - 0.2)) m.push(`Ø do degrau (${fmtN(g.dS, 2)}) tem que ficar abaixo do Ø externo do corpo (${fmtN(g.extCalc, 2)}) menos os chanfros`);
@@ -1724,8 +1724,8 @@ function psr211Geom(p){
   // v5.67.1 (usuário 17/11/2026): PSR 211 — o chanfro da ponta é cortado pelas costas da T1D45: no máximo 30° com o eixo
   // (antes 45°); no raio = 0,1 × secção, entre 0,2 e 0,4 (antes 0,5) — chanfro só de estética, sem campo para mudar.
   // Comprimento em Z = cT / tan 30°. O PSR 212 continua 0,5 a 45° (campo cT).
-  // v5.73.1 (usuário 18/11/2026): PSR 211 SEM o chanfro interno da ponta ("ainda muito grande") — programa e desenho; o PSR 212 continua com o cT
-  const cT = p.tipoGen === "psr211" ? 0 : opt(p.cT) ?? 0.5, cTz = p.tipoGen === "psr211" ? 0 : cT, cTk = cTz > 0 ? cT / cTz : 0;
+  // v5.73.1 (usuário 18/11/2026): PSR 211 SEM o chanfro interno da ponta ("ainda muito grande") — programa e desenho · v5.73.2: PSR 212 também (sem o campo cT)
+  const cT = ["psr211", "psr212"].includes(p.tipoGen) ? 0 : opt(p.cT) ?? 0.5, cTz = ["psr211", "psr212"].includes(p.tipoGen) ? 0 : cT, cTk = cTz > 0 ? cT / cTz : 0;
   const rampMin = cTz + (g.intCalc - tipIn) / 2 / Math.tan(20 * Math.PI / 180);
   const rampL = opt(p.rampa) ?? xround(Math.min(Math.max(1.24 * prot, rampMin), Ht + g.zI - g.lipLen - 0.3), 2);
   // PSR 212: degrau no externo, atrás do corpo — Ø do degrau dS de Z −(corpo − Ls) até a trás do corpo (chanfro chc nas duas arestas).

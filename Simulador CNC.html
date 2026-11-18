@@ -2614,8 +2614,12 @@ function psaChSug(h){ return xround(Math.min(1, Math.max(0.2, 0.10 * (Number(h) 
 // 10 % da altura e 15 % da secção (5.60.1: era 20 %; 100x108x9,7 dava 0,8, usuário quer 0,6), de 0,2 a no máximo 1 mm, arredondado em 0,1 (só o PSG 101; digitado no campo continua valendo).
 function psg101ChSug(p){ const sec = (Number(p.dext) - Number(p.dint)) / 2, h = Number(p.h) || 0, v = Math.min(0.10 * h, sec > 0 ? 0.15 * sec : 1, 1);
   return xround(Math.max(0.2, Math.round(v * 10 + 1e-9) / 10), 2); }
+// v5.74.0 (usuário 18/11/2026): PSA 108 e PSA 108 C/ CORTE — chanfro sugerido ficava grande na secção fina (só 10 % da altura).
+// Agora = o menor entre 10 % da altura e 15 % da secção, de 0,2 a no máximo 1 mm, arredondado em 0,1 (a regra do PSG 101), nunca maior que antes (10 % da altura). psaSugOld = avisos das PSG continuam com a regra antiga.
+function psa108ChSug(p){ const sec = (Number(p.dext) - Number(p.dint)) / 2, h = Number(p.h) || 0, v = Math.min(0.10 * h, sec > 0 ? 0.15 * sec : 1, 1);
+  return Math.min(psaChSug(h), xround(Math.max(0.2, Math.round(v * 10 + 1e-9) / 10), 2)); }   // nunca maior que a regra antiga
 function psaFill(p){
-  const s = (p.tipoGen || (document.getElementById("genType") || {}).value) === "psg101" ? psg101ChSug(p) : (p.tipoGen || (document.getElementById("genType") || {}).value) === "psg103" ? psg103ChSug(p) : (p.tipoGen || (document.getElementById("genType") || {}).value) === "psg104" ? psg104ChSug(p) : psaChSug(p.h), e = v => v === "" || v === undefined || v === null || isNaN(v);
+  const s = (p.tipoGen || (document.getElementById("genType") || {}).value) === "psg101" ? psg101ChSug(p) : (p.tipoGen || (document.getElementById("genType") || {}).value) === "psg103" ? psg103ChSug(p) : (p.tipoGen || (document.getElementById("genType") || {}).value) === "psg104" ? psg104ChSug(p) : !p.psaSugOld && ["psa108", "psa108c"].includes(p.tipoGen || (document.getElementById("genType") || {}).value) ? psa108ChSug(p) : psaChSug(p.h), e = v => v === "" || v === undefined || v === null || isNaN(v);
   if (e(p.chE)) p.chE = s; if (e(p.chI)) p.chI = s;
   p.chF = p.chT = p.chE; p.angI = 60; p.angE = isPSG(p.tipoGen) ? psgAngE(p) : (p.angE > 0 ? p.angE : 45); p.angLbl = 30; p.tipoP = "arruela";
   { const a = Number(p.angIT); p.angIB = p.angIT !== "" && p.angIT !== undefined && a > 0 && a < 90 ? a : 30; }   // v5.21.22: ângulo do chanfro interno de trás (com o eixo)   // perfil/desenho usam o mesmo meio perfil da arruela (chI em Z, 30° com o eixo)
@@ -2734,7 +2738,7 @@ GEN.psg101 = {
     return L;
   },
   check(p){
-    const a = psgAcr(p), q = Object.assign({}, p, { tipoGen: "psa108", zCont: false, dint: p.dint + a, dext: p.dext + a });
+    const a = psgAcr(p), q = Object.assign({}, p, { tipoGen: "psa108", psaSugOld: true, zCont: false, dint: p.dint + a, dext: p.dext + a });
     return GEN.psa108.check(q) || "";
   }
 };
@@ -2810,7 +2814,7 @@ GEN.psg103 = {
     return L;
   },
   check(p){
-    const a = psgAcr(p), q = Object.assign({}, p, { tipoGen: "psa108", zCont: false, n: 1, dint: p.dint + a, dext: p.dext + a }), m = [];
+    const a = psgAcr(p), q = Object.assign({}, p, { tipoGen: "psa108", psaSugOld: true, zCont: false, n: 1, dint: p.dint + a, dext: p.dext + a }), m = [];
     const base = GEN.psa108.check(q) || "";
     const cI = (p.chI === "" || p.chI === undefined) ? psg103ChSug(p) : Number(p.chI), cE = (p.chE === "" || p.chE === undefined) ? psg103ChSug(p) : Number(p.chE);
     if ((p.dext - p.dReb) / 2 - cE * TAN(psgAngE(p)) - cI / TAN(60) < 0.2) m.push("chanfros grandes para a parede da frente (Ø ext. − Ø rebaixo): diminua os chanfros");
@@ -2868,7 +2872,7 @@ GEN.psg104 = {
     return L;
   },
   check(p){
-    const a = psgAcr(p), q = Object.assign({}, p, { tipoGen: "psa108", zCont: false, n: 1, dint: p.dint + a, dext: p.dext + a }), m = [];
+    const a = psgAcr(p), q = Object.assign({}, p, { tipoGen: "psa108", psaSugOld: true, zCont: false, n: 1, dint: p.dint + a, dext: p.dext + a }), m = [];
     const base = GEN.psa108.check(q) || "";
     const cI = (p.chI === "" || p.chI === undefined) ? psg104ChSug(p) : Number(p.chI), cE = (p.chE === "" || p.chE === undefined) ? psg104ChSug(p) : Number(p.chE);
     if (!(p.dReb > p.dint && p.dReb < p.dext)) m.push("Ø do rebaixo tem que ficar entre o Ø interno e o externo");

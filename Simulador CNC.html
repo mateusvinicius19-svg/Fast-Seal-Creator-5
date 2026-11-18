@@ -3310,8 +3310,7 @@ const PROF_GROUPS = [
   ["Veio (haste)", ["psh106", "psh108", "psh105", "psh117", "psh125", "psh107", "psh121", "psh103", "psh110", "psh110t", "lip", "dhr"]],
   ["Pistão (camisa)", ["pse106", "pse105", "pse102r", "pse120", "pse107", "pse118", "pse103", "dp", "dpr"]],
   ["Raspadores", ["psr101", "psr102", "psr211", "psr212"]],
-  ["Estáticos", ["pso"]],
-  ["Simétricos", ["dual"]],
+  ["Estáticos", ["pso", "dual"]],   // DUAL SEAL na aba Estáticos (usuário 18/11/2026)
   ["Guias", ["psg101", "psg103", "psg104"]],
   ["Arruelas", ["psa108", "psa109", "iso", "ciclo", "semch"]]];
 function profDefaults(type){
@@ -3449,7 +3448,7 @@ function homeShow(){
     </div>
     <div class="hsec">Perfis</div>` +
     PROF_GROUPS.map(([gname, list]) => `<div class="hfam">${esc(gname)}</div><div class="hprofs">` +
-      list.filter(t => GEN[t] || t === "dp").map(t => `<button type="button" class="hprof" data-prof="${t}" title="${esc(profOptText(t))}">${profThumb(t)}<span>${esc((s => s.length > 16 ? s.replace(/\s*\(.*$/, "") : s)(profCode(t)))}</span>${PROF_DESC[t] ? `<small>${esc(PROF_DESC[t])}</small>` : ""}</button>`).join("") + `</div>`).join("") +
+      list.filter(t => GEN[t] || t === "dp").map(t => `<button type="button" class="hprof" data-prof="${t}" title="${esc(profOptText(t))}">${profThumb(t)}<span>${esc((s => s.length > 16 ? s.replace(/\s*\(.*$/, "") : s)(profCode(t)))}</span></button>`).join("") + `</div>`).join("") +
     `</div>`;
   h.style.display = ""; homeClock();
   // pesquisa (usuário 17/11/2026): filtra atalhos e perfis pelo nome / descrição; só número = Ver programa com esse nº

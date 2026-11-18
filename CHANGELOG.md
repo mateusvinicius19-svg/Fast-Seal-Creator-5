@@ -6,6 +6,11 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.70.2 — DUAL SEAL na aba Estáticos; cards de perfil só com o código (18/11/2026)
+- Escolha do perfil: DUAL SEAL saiu da aba "Simétricos" (removida) e foi para "Estáticos", junto do PSO 109.
+- Cards de perfil mostram só o código, sem a descrição embaixo.
+- Programas não mudam (34 perfis iguais).
+
 ## 5.70.1 — Tela inicial: hora/data e pesquisa; topo sem o cabeçalho (17/11/2026)
 - Tela inicial: **hora e data** no canto direito (atualiza sozinha) e **barra de pesquisa** (perfil pelo código ou descrição,
   atalho, ou nº do programa → Ver programa; Enter abre o 1º resultado, Esc limpa; sem acento / maiúscula).

@@ -2023,7 +2023,7 @@ const GAX_MAT = [["PU", "PU"], ["NBR", "NBR / borracha"], ["VITON", "Viton (FKM)
 // material salvo antes como texto livre (ex.: "TEFLON", "nbr") → opção da lista; vazio/desconhecido = PU
 function matFromText(v){ const m = String(v || "").toUpperCase().trim(); return /VITON|FKM/.test(m) ? "VITON" : /NBR|BORRACHA/.test(m) ? "NBR" : /\+\s*BR/.test(m) ? "PTFE+BR" : /\+\s*GR/.test(m) ? "PTFE+GR" : /PTFE|TEFLON/.test(m) ? "PTFE PURO" : "PU"; }
 function fieldHTML([k, label, def], wide){
-  if (k === "aloj") return `<label>${label}<select data-k="aloj" class="orient" style="width:100%"><option value="N"${def !== "S" ? " selected" : ""}>Não · medidas da peça</option><option value="S"${def === "S" ? " selected" : ""}>${ALOJ_RASP[$("genType").value] ? "Sim · altura menor −4 % (0,3 a 1 mm)" : "Sim · altura −10 % (máx. 1 mm até 20; máx. 2 mm acima)"}</option></select></label>`;
+  if (k === "aloj") return `<label>${label}<select data-k="aloj" class="orient" style="width:100%"><option value="N"${def !== "S" ? " selected" : ""}>Não · medidas da peça</option><option value="S"${def === "S" ? " selected" : ""}>${S15_TYPES.includes($("genType").value) ? "Sim · altura menor como o Fast Seal (8,5 → 8,19)" : ALOJ_RASP[$("genType").value] ? "Sim · altura menor −4 % (0,3 a 1 mm)" : "Sim · altura −10 % (máx. 1 mm até 20; máx. 2 mm acima)"}</option></select></label>`;
   if (k === "sec" && $("genType").value === "pso") return `<label>${label}<input data-k="sec" type="text" inputmode="decimal" list="psoSecList" value="${String(def).replace(".", ",")}" placeholder="1,78 · 2,62 · 3,53 · 5,33 · 6,99 · 8,4 ou outra"><datalist id="psoSecList">${[1.78, 2.62, 3.53, 5.33, 6.99, 8.4].map(v => `<option value="${String(v).replace(".", ",")}">Parker ±${String(parkerTol(50, v).wTol).replace(".", ",")}</option>`).join("")}</datalist></label>`;   // PSO 109: secção livre, 5 padrão Parker sugeridas
   if (k === "med") return `<label>${label}<select data-k="med" class="orient" style="width:100%"><option value="A"${!["P","T"].includes(def) ? " selected" : ""}>Padrão · Ø de haste/alojamento, altura da peça</option><option value="P"${def === "P" ? " selected" : ""}>Medidas da peça · pontas dos lábios no Ø digitado</option><option value="T"${def === "T" ? " selected" : ""}>Tudo alojamento · altura menor (−10 %, máx. 0,7 até H10)</option></select></label>`;   // DUAL SEAL (usuário 17/11/2026)
   if (k === "peca") return `<label>${label}<select data-k="peca" class="orient" style="width:100%">${Object.entries($("genType").value === "pse120" ? PSE120_PECAS : $("genType").value === "pse102r" ? PSE102R_PECAS : PSH110_PECAS).map(([v, t]) => `<option value="${v}"${def === v ? " selected" : ""}>${t}</option>`).join("")}</select></label>`;
@@ -5123,22 +5123,36 @@ function dualViewsSVG(p, PT){
 // ---- PSE 127 (base Fast Seal PS15P, pistão) e PSH 131 (base RS15P, haste), usuário 17/11/2026 ----
 // Vedação compacta: um lábio raiado no meio da altura de um lado e um canal raiado do outro (o mesmo perfil espelhado).
 //  · PSE 127: lábio por FORA (camisa), canal por DENTRO; PSH 131: lábio por DENTRO (haste), canal por FORA.
-// Regras tiradas dos programas PS15P / RS15P do W: (029919, 035503, 038113, 039411, 041708, 043114, 038445…) e dos desenhos
-// 29919 (85x95x8,5) e 35656 (90x100x7,8) — a conferir no Fast Seal (FSC) — tudo nos Parâmetros fixos para ajustar:
-//  · ponta do lábio no meio da altura, raio da ponta 0,21 × secção (bate em todos os programas: 5 → 1,05);
-//  · aperto do lábio no Ø 0,1 × secção + 0,28 (5 → 0,78: 95,78 no 29919; 100 → 89,27 no 35656);
-//  · queda do lábio até a face, no raio, 0,1 × secção + 0,19 (29919: 95,78 → 94,41);
-//  · lado do canal: Ø com aperto de 0,35 % (85 → 84,70; 100 → 100,35), chanfros 0,3 × 45° nas duas arestas;
-//  · canal no meio da altura, largura 0,5 × H, profundidade 0,12 × secção (35656: 0,6), raio pelo arco que passa pelos três pontos.
+// Medidas tiradas do próprio Fast Seal (Mastor FSC, aba V, valores padrão) em 18/11/2026 — PSE127 (= PS15P) e RS15P, 20 tamanhos cada
+// (Ø 20 a 300, secção 2,5 a 12,5, altura 4 a 15; o FSC aceita altura até 16). Os programas do W: variam porque foram mexidos à mão.
+//  · altura: "Medidas do alojamento" (METAL DIM, padrão do FSC) → peça menor pela tabela S15_HALOJ (8,5 → 8,19); "peça" (PART DIM) = a digitada;
+//  · calcanhar (face do lado do lábio): PSE Ø ext − (0,0037·Ø + 0,0095·sec + 0,19); PSH Ø int + 0,0037·Ø + 0,024·sec + 0,20;
+//  · ponta do lábio no meio da altura, acima do calcanhar (no raio) S15_LIP(sec) + 0,00037·Ø (igual nos dois perfis);
+//  · lado do canal: PSE Ø int ÷ 1,003 − 0,013·sec; PSH Ø ext × 1,003 + 0,013·sec; chanfros 0,3 × 45°;
+//  · canal no meio, largura 0,569 × altura da peça (FSC: faixas retas de 0,2155 × altura de cada lado);
+//    profundidade (raio): peça < 8 → pela altura (S15_GH: 4,76 → 0,25 … 7,70 → 0,60; PSE no máx. 0,1 × sec), peça ≥ 8 → 0,218·sec − sec²/150;
+//  · raio da ponta do lábio 0,21 × secção (o FSC não mostra; dos programas).
 const S15_TYPES = ["pse127", "psh131"];
+const S15_HALOJ = [[4, 3.78], [5, 4.76], [6, 5.74], [7, 6.73], [7.2, 6.92], [8, 7.70], [8.5, 8.19], [9, 8.67], [10, 9.62], [12, 11.46], [15, 13.99]];
+const S15_LIP = [[2.5, 0.392], [3, 0.463], [4, 0.587], [5, 0.658], [6, 0.682], [7.5, 0.783], [8, 0.798], [10, 0.848], [12.5, 1.003]];
+const S15_GH = [[4.76, 0.25], [5.74, 0.35], [6.73, 0.475], [6.92, 0.475], [7.70, 0.60]];
+function s15Lerp(T, x){   // interpola na tabela; fora dela segue o último trecho (abaixo do 1º: proporcional)
+  if (x <= T[0][0]) return T[0][1] * x / T[0][0];
+  for (let i = 1; i < T.length; i++) if (x <= T[i][0] || i === T.length - 1){ const [a, b] = [T[i - 1], T[i]]; return a[1] + (b[1] - a[1]) * (x - a[0]) / (b[0] - a[0]); }
+}
 function s15Geom(p){
   const opt = v => (v === "" || v === null || v === undefined || isNaN(v)) ? null : Number(v);
-  const I = Number(p.dint), O = Number(p.dext), H = Number(p.h), sec = (O - I) / 2, R = x => x / 2;
+  const I = Number(p.dint), O = Number(p.dext), H0 = Number(p.h), sec = (O - I) / 2, R = x => x / 2;
+  const ALOJ = String(p.aloj || "S").toUpperCase() !== "N", H = ALOJ ? xround(s15Lerp(S15_HALOJ, H0), 2) : H0;   // H = altura da PEÇA
   const LIP_OUT = p.tipoGen === "pse127";   // PSE 127: lábio por fora
-  const a = opt(p.s15Ap) ?? xround(0.1 * sec + 0.28, 2), drop = opt(p.s15Dr) ?? xround(0.1 * sec + 0.19, 2), Rt = opt(p.s15Rt) ?? xround(0.21 * sec, 2);
-  const kG = opt(p.s15Ag) ?? 0.35, c = opt(p.s15Ch) ?? 0.3, w = opt(p.s15Wg) ?? xround(0.5 * H, 2), g = opt(p.s15Pg) ?? xround(0.12 * sec, 2);
+  const Dl = LIP_OUT ? O : I, fsFace = LIP_OUT ? O - (0.0037 * O + 0.0095 * sec + 0.19) : I + 0.0037 * I + 0.024 * sec + 0.20;
+  const fsLip = s15Lerp(S15_LIP, sec) + 0.00037 * Dl, fsLipD = LIP_OUT ? fsFace + 2 * fsLip : fsFace - 2 * fsLip;
+  const a = opt(p.s15Ap) ?? xround(LIP_OUT ? fsLipD - O : I - fsLipD, 2), drop = opt(p.s15Dr) ?? xround(fsLip, 2), Rt = opt(p.s15Rt) ?? xround(0.21 * sec, 2);
+  const gFs = H < 8 ? Math.min(Math.max(0.25, s15Lerp(S15_GH, Math.min(H, 7.70))), LIP_OUT ? 0.1 * sec : 99) : 0.218 * sec - sec * sec / 150;
+  const kG = opt(p.s15Ag), c = opt(p.s15Ch) ?? 0.3, w = opt(p.s15Wg) ?? xround(0.569 * H, 2), g = opt(p.s15Pg) ?? xround(gFs, 3);
   const lipD = LIP_OUT ? O + a : I - a, faceD = LIP_OUT ? lipD - 2 * drop : lipD + 2 * drop;
-  const grvD = LIP_OUT ? xround(I * (1 - kG / 100), 2) : xround(O * (1 + kG / 100), 2), botD = LIP_OUT ? grvD + 2 * g : grvD - 2 * g;
+  const grvD = kG !== null ? (LIP_OUT ? xround(I * (1 - kG / 100), 2) : xround(O * (1 + kG / 100), 2)) : (LIP_OUT ? xround(I / 1.003 - 0.013 * sec, 2) : xround(O * 1.003 + 0.013 * sec, 2));
+  const botD = LIP_OUT ? grvD + 2 * g : grvD - 2 * g;
   const Rg = xround((w * w / 4 + g * g) / (2 * g), 3);
   const minD = Math.min(lipD, faceD, grvD, botD), maxD = Math.max(lipD, faceD, grvD, botD);
   let bi = opt(p.bi), bo = opt(p.bo), sobMedida = false;
@@ -5163,7 +5177,7 @@ function s15Geom(p){
     { t: "A", a: P(zm + w / 2, rG), b: P(zm - w / 2, rG), c: Cg, R: Rg, cv: false },
     { t: "L", a: P(zm - w / 2, rG), b: P(-H + cz, rG) }, { t: "L", a: P(-H + cz, rG), b: P(-H - 0.3, rG - sG * (c + 0.3)) }];
   const outer = LIP_OUT ? lip : grv, inner = LIP_OUT ? grv : lip;
-  return { I, O, H, sec, LIP_OUT, a, drop, Rt, kG, c, w, g, Rg, lipD, faceD, grvD, botD, minD, maxD, bi, bo, sobMedida, outer, inner, T0, T1, C, Cg, tol: { sec: tgSecTol(sec) } };
+  return { I, O, H, H0, ALOJ, sec, LIP_OUT, a, drop, Rt, kG, c, w, g, Rg, lipD, faceD, grvD, botD, minD, maxD, bi, bo, sobMedida, outer, inner, T0, T1, C, Cg, tol: { sec: tgSecTol(sec) } };
 }
 // percurso da ponta da ferramenta (ponto teórico, como no Fast Seal) para primitivas com arcos: retas deslocadas r para o lado do ar,
 // arcos com raio R ± r (convexo / côncavo); canto vivo convexo → arco de raio r em volta do canto. v = deslocamento do ponto teórico.
@@ -5208,7 +5222,7 @@ function s15Build(p){
   const now = new Date(), pad = n => String(n).padStart(2, "0");
   const date = `${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()} @ ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
   const sec = name => [";( *********************** )", ";( " + name.padEnd(24, " ").slice(0, 24) + ")", ";( *********************** )"];
-  const L = [`%${g.LIP_OUT ? "PSE127" : "PSH131"} ${f3(p.dint)}/${f3(p.dext)}/${f3(H)},MX,`, `;MATERIAL: USER DEFINED ${p.mat || "PU"} ${f3(tI)}/${f3(tO)} - TUBE ${f3(tI)}/${f3(tO)}`,
+  const L = [`%${g.LIP_OUT ? "PSE127" : "PSH131"} ${f3(p.dint)}/${f3(p.dext)}/${f3(g.H0)},MX,`, `;MATERIAL: USER DEFINED ${p.mat || "PU"} ${f3(tI)}/${f3(tO)} - TUBE ${f3(tI)}/${f3(tO)}`,
              `;DATE OF FILE: ${date}`, ";INTERVALO    MM", "G90 ", "G95 ", "G54", `G97S${gen15(S)}M3`, "N10", "", ""];
   const xf0 = tO + 4, xf1 = tI >= 20 ? tI - 4 : -4;
   L.push(...sec("FACING DOWNWARD"), "G0 Z100", "T3D3", ";", ";", `G0 X${f3(xf0)} Z2.000`, `G1 X${f3(xf0)} Z0.690 F1.000`, ";( FINISH )",
@@ -5246,9 +5260,9 @@ function s15Build(p){
 }
 const S15_PARAMS = [["apR","Desbaste: quanto tirar por passada (no raio, mm)",3],["alR","Sobremetal deixado para o acabamento (no raio, mm)",1.5],["rn","Raio da ponta das ferramentas (mm)",0.4],
   ["tInt","Ferramenta interna (vazio = T4D14 abaixo de Ø11, T1D45 até Ø40, senão T2D12)",""],["S","Rotação S (vazio = tabela pelo Ø ext.)",""],
-  ["s15Ap","Lábio: aperto no Ø (vazio = 0,1 × secção + 0,28)",""],["s15Dr","Lábio: queda até a face no raio (vazio = 0,1 × secção + 0,19)",""],["s15Rt","Lábio: raio da ponta (vazio = 0,21 × secção)",""],
-  ["s15Ag","Lado do canal: aperto em % do Ø (vazio = 0,35)",""],["s15Ch","Lado do canal: chanfros 45° (vazio = 0,3)",""],
-  ["s15Wg","Canal: largura (vazio = 0,5 × altura)",""],["s15Pg","Canal: profundidade no raio (vazio = 0,12 × secção)",""]];
+  ["s15Ap","Lábio: aperto no Ø (vazio = como o Fast Seal)",""],["s15Dr","Lábio: queda até a face no raio (vazio = como o Fast Seal)",""],["s15Rt","Lábio: raio da ponta (vazio = 0,21 × secção)",""],
+  ["s15Ag","Lado do canal: aperto em % do Ø (vazio = como o Fast Seal, ±0,3 % + 0,013 × secção)",""],["s15Ch","Lado do canal: chanfros 45° (vazio = 0,3)",""],
+  ["s15Wg","Canal: largura (vazio = 0,569 × altura da peça)",""],["s15Pg","Canal: profundidade no raio (vazio = como o Fast Seal)",""]];
 function s15Check(p){
   const m = [];
   if (!(p.dext > p.dint && p.dint > 0)) m.push("diâmetro externo tem que ser maior que o interno");
@@ -5258,15 +5272,15 @@ function s15Check(p){
   if (!(g.w < g.H - 2 * g.c - 0.4)) m.push("canal largo demais para a altura (diminua a largura do canal)");
   if (!(Math.abs(g.botD - g.faceD) / 2 > 0.5)) m.push("secção pequena demais: o fundo do canal chega perto da face do lábio");
   if (g.sobMedida) m.push(`nenhuma bucha da lista serve — usando tubo sob medida Ø${fmtN(g.bi, 0)} x Ø${fmtN(g.bo, 0)} (confira ou adicione a bucha)`);
-  m.push("perfil novo — regras tiradas dos programas, ainda não conferidas no Fast Seal");
+  m.push("perfil novo em teste — medidas do Fast Seal (aba V) de 18/11/2026; confira a primeira peça");
   return "ATENÇÃO: " + m.join("; ") + ".";
 }
 GEN.pse127 = { name: "PSE 127",
-  main: [["dint","Diâmetro interno – fundo do canal do pistão (mm)",85],["dext","Diâmetro externo – camisa (mm)",95],["h","Altura (mm)",8.5],
+  main: [["dint","Diâmetro interno – fundo do canal do pistão (mm)",85],["dext","Diâmetro externo – camisa (mm)",95],["h","Altura (mm)",8.5],["aloj","Medidas do alojamento? (altura como o Fast Seal)","S"],
          ["rpt","Nº de repetições RPT (vazio = 0)",""],["mat","Material","PU"],["bi","Bucha Ø interno (vazio = automática)",""],["bo","Bucha Ø externo (vazio = automática)",""]],
   params: S15_PARAMS, build(p){ return s15Build(p); }, check(p){ return s15Check(p); } };
 GEN.psh131 = { name: "PSH 131",
-  main: [["dint","Diâmetro interno – haste (mm)",90],["dext","Diâmetro externo – alojamento (mm)",100],["h","Altura (mm)",7.8],
+  main: [["dint","Diâmetro interno – haste (mm)",90],["dext","Diâmetro externo – alojamento (mm)",100],["h","Altura (mm)",7.8],["aloj","Medidas do alojamento? (altura como o Fast Seal)","S"],
          ["rpt","Nº de repetições RPT (vazio = 0)",""],["mat","Material","PU"],["bi","Bucha Ø interno (vazio = automática)",""],["bo","Bucha Ø externo (vazio = automática)",""]],
   params: S15_PARAMS, build(p){ return s15Build(p); }, check(p){ return s15Check(p); } };
 function s15ViewsSVG(p, PT){

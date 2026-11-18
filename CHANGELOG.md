@@ -11,7 +11,10 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - Regras dos programas do W: — ponta no meio da altura R 0,21 × secção; aperto do lábio 0,1 × secção + 0,28 no Ø; queda até a face
   0,1 × secção + 0,19; lado do canal Ø + 0,35 %, chanfros 0,3 × 45°; canal 0,5 × H de largura, 0,12 × secção de profundidade.
   Tudo em Parâmetros fixos. PSE 127 85x95x8,5 confere com o 029919 no lábio (X95.741 Z-4.413 R1.450).
-- FALTA: conferir no Fast Seal (aperto do lábio e tamanho do canal variam nos programas). Por isso sai ATENÇÃO "perfil novo".
+- 18/11/2026: CONFERIDO NO FAST SEAL (aba V do PSE127 = PS15P e do RS15P, 40 tamanhos; diferença máx. 0,04 mm). Regras novas:
+  calcanhar, ponta do lábio, lado do canal (±0,3 % + 0,013 × secção), canal 0,569 × altura, profundidade pela altura da peça (< 8)
+  ou pela secção (≥ 8). Campo novo "Medidas do alojamento?" (Sim = altura menor como o METAL DIM do FSC: 8,5 → 8,19).
+  Tabelas em `Claude contexto/fsc-ps15p-rs15p-medidas.md`. Continua com ATENÇÃO "perfil novo em teste". Os outros 34 perfis iguais.
 - roughPasses: arco com raio próprio (it.R); os outros perfis não mudam (34 iguais).
 
 ## 5.69.0 — Perfil novo DUAL SEAL (S03) (17/11/2026)

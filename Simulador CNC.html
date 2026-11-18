@@ -1342,7 +1342,7 @@ GEN.psr211 = Object.assign({}, GEN.psh105, { name: "PSR 211",
          ["rpt","Nº de repetições RPT (vazio = 0)",""],["mat","Material","PU"],["bi","Bucha Ø interno (vazio = automática)",""],["bo","Bucha Ø externo (vazio = automática)",""]],
   params: [...GEN.psh105.params.map(f => f[0] === "ae" ? ["ae","Aperto externo (vazio = 1,0 como nos programas)",""] : [f[0], f[1].replace("PSH 105", "PSR 211"), f[2]]),
            ["tL","Raspador: espessura da ponta (vazio = 0,3 × secção)",""],["wAng","Raspador: ângulo com a face (°)",65],
-           ["rampa","Raspador: rampa interna (vazio = 1,24 × altura do raspador)",""],["bed","Largura do bedame do canal de trás (desbaste externo vai até altura + isso; PSR 211: mínimo 2)",2]],
+           ["rampa","Raspador: rampa interna (vazio = 1,24 × altura do raspador)",""],["bed","Largura do bedame do canal de trás (desbaste externo vai até altura + isso; mínimo 2)",2]],
   build(p){ return pseFscBuild(p, psr211Geom(p)); } });
 // PSR 212 (usuário 16/11/2026): PSR 211 com degrau no externo, atrás do corpo (foto do catálogo)
 GEN.psr212 = Object.assign({}, GEN.psr211, { name: "PSR 212",
@@ -1740,8 +1740,9 @@ function psr211Geom(p){
   const stepPts = !STEP ? [g.outer[3]] : big ? [[zS + g.chc, R(g.extCalc)], [zBig, rS], [zMeet, rS]] : [[zS + g.chc, R(g.extCalc)], [zS, R(g.extCalc) - g.chc], [-Hb, R(xoB)]];
   const outer = [...g.outer.slice(0, 3), ...stepPts, ...(STEP ? [] : [[-Hb, R(xoB)]]), [-Hb - k45, R(xoB) - k45], [-Ht - 0.5, R(xoB) - k45]];   // o resto fica para a T6D6
   const inner = [...g.inner.slice(0, 3), [-Ht + rampL, R(g.intCalc)], [-Ht + cTz, R(tipIn)], [-Ht, R(tipIn) + cT], [-Ht - 0.5, R(tipIn) + cT + 0.5 * cTk]];
-  // v5.73.0 (usuário 18/11/2026): PSR 211 — externo sempre pelo menos 2 mm além da peça (o campo "bed" vinha com 1, o da arruela, e parava em altura + 1)
-  const bedT = p.tipoGen === "psr211" ? Math.max(2, Number(p.bed) || 0) : (Number(p.bed) > 0 ? Number(p.bed) : 2);
+  // v5.72.1 (usuário 18/11/2026): PSR 211 e PSR 212 (os da T6D6) — desbaste e acabamento externos sempre pelo menos 2 mm além da peça
+  // (o campo "bed" vinha com 1, o da arruela, e parava em altura + 1); bedame maior que 2 continua valendo
+  const bedT = Math.max(2, Number(p.bed) || 0);
   const outerRough = [...outer.slice(0, -1), [-Ht - bedT + (Number(p.rn) || 0.4), outer[outer.length - 1][1]]];   // + raio da ponta: a ferramenta para em Z −(altura + 2)   // desbaste e acabamento externos: altura + bedame de 2 mm
   return Object.assign({}, g, { H: Ht, Hb, prot, tth, tipIn, tipOut, rootOut, wAng, cT, cTz, rampL, outer: outerRough, outerRough, inner, wiper: true, hHead: Hb, step: STEP, dS, Ls, zS, xoBack: xoStep, xoBody: xoB });
 }

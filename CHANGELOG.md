@@ -6,6 +6,12 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.74.0 — PSA 108: chanfro sugerido pela secção também (18/11/2026)
+- PSA 108 e PSA 108 C/ CORTE: chanfro sugerido (externo 45° e interno 30°) era só 10 % da altura e ficava grande na secção fina.
+  Agora = o menor entre 10 % da altura e 15 % da secção, de 0,2 a 1 mm, arredondado em 0,1 (nunca maior que antes).
+  Ex.: 100x104x8 de 0,8 para 0,3; 50x53x5 de 0,5 para 0,2; 40x60x8 continua 0,8. Chanfro digitado no campo continua valendo.
+- Só o PSA 108 e o PSA 108 C/ CORTE mudam (PSA 109, PSG e todos os outros perfis saem iguais).
+
 ## 5.73.2 — PSR 212: sem o chanfro interno da ponta (18/11/2026)
 - PSR 212: igual ao PSR 211 (5.73.1) — tirado o chanfro do interno na ponta do raspador (era 0,5 a 45°), no programa e no desenho;
   saiu também o campo "Raspador: chanfro da ponta". G92 igual. Os chanfros do degrau externo continuam.

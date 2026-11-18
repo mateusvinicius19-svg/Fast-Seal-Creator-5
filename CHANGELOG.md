@@ -21,6 +21,7 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
   lábio, Ø do lado do canal e do fundo do lado do canal, nenhuma linha atravessando a peça, a menor perto da peça e o H por fora;
   largura do canal, faixa, chanfro e ângulo só na SECÇÃO (cota uma vez só); profundidade do canal dentro do canal e sem a cota
   lábio–fundo (cadeia fechada).
+  Espessura das linhas pela NBR 8403 (só PSE 127 / PSH 131): contorno da peça 0,6 mm, linhas de cota e de chamada 0,25 mm.
   Tabelas em `Claude contexto/fsc-ps15p-rs15p-medidas.md`. Continua com ATENÇÃO "perfil novo em teste". Os outros 34 perfis iguais.
 - roughPasses: arco com raio próprio (it.R); os outros perfis não mudam (34 iguais).
 

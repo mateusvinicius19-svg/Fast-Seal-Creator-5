@@ -6,6 +6,17 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.70.0 — Tela inicial, tema escuro, passo a passo; PSH 138 (DHR); ajustes do Dual Seal (17/11/2026)
+- **Tela inicial** (abre depois do login; botão 🏠 Início no topo): atalhos Novo programa, Ver programa, Alterar programa,
+  Pastilhas, Abrir arquivo, Desenho do programa, Histórico, Ferramentas + perfis por família com descrição curta (PROF_DESC).
+- **Tema escuro** (botão 🌙/☀️, lembra a escolha; 1ª vez segue o Windows) e acabamento mais limpo (sombras, foco, logo).
+  A folha do desenho e a impressão continuam brancas; o canvas da simulação usa as cores do tema (--canvas-*).
+- **Passo a passo** no gerador: Perfil → Medidas → Simulação → Desenho → Salvar (clicar leva ao passo; feito = verde).
+- Topo: saíram "Colar programa" e "Exemplo" (escondidos).
+- **PSH 124 (DHR) → PSH 138 (DHR)** (nome, quadro e pasta DESENHOS\PSH 138 (DHR), que é a do W:).
+- DUAL SEAL: nome curto, miniatura vermelha, altura 0/−0,2 (Tudo alojamento ±0,2).
+- Programas não mudam (34 perfis iguais).
+
 ## 5.69.0 — Perfil novo DUAL SEAL (S03) (17/11/2026)
 - Pedido do usuário: **DUAL SEAL** (base Fast Seal S03), grupo novo "Simétricos" na janela de perfis. Dois lábios por fora e dois
   por dentro: lábios a H/4 e 3H/4, vales na face, no meio e atrás; altura dos lábios no raio 0,1 × secção + 0,23 (tirado dos 49

@@ -3419,6 +3419,9 @@ function homeShow(){
       ${card("past", "&#x1F9F0;", "Pastilhas", "Estoque, entrada e baixa")}
       ${card("abrir", "&#x1F4C2;", "Abrir arquivo", "Simular um .PIT / .txt do computador")}
       ${card("colar", "&#x1F4CB;", "Colar programa", "Colar o código e simular")}
+      ${card("progdes", "&#x1F4D0;", "Desenho do programa", "Desenho a partir de um programa aberto ou colado")}
+      ${card("hist", "&#x1F5C2;&#xFE0F;", "Histórico", "Programas salvos pelo Simulador")}
+      ${card("ferr", "&#x1F527;", "Ferramentas", "Cadastro das ferramentas e pastilhas de cada T")}
     </div>
     <div class="hsec">Perfis</div>` +
     PROF_GROUPS.map(([gname, list]) => `<div class="hfam">${esc(gname)}</div><div class="hprofs">` +
@@ -3430,6 +3433,7 @@ function homeShow(){
     const k = b.dataset.h; homeHide();
     if (k === "novo") openProfPicker(); else if (k === "ver") $("btnVer").click(); else if (k === "alt") $("btnAlt").click();
     else if (k === "past") pastOpen(); else if (k === "abrir") $("file").click(); else if (k === "colar") $("btnPaste").click();
+    else if (k === "progdes") $("btnProgDes").click(); else if (k === "hist") $("btnHist").click(); else if (k === "ferr" && $("btnFerr")) $("btnFerr").click();
   });
 }
 $("btnHome").onclick = () => { const h = $("home"); h && h.style.display !== "none" ? homeHide() : homeShow(); };

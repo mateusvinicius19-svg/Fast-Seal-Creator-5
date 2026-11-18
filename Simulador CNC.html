@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Simulador CNC</title>
+<script>try{var t=localStorage.getItem("ps_theme");document.documentElement.dataset.theme=t||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light")}catch(e){}</script>
 <style>
 :root{
   --bg:#eef1f5; --card:#ffffff; --line:#dfe3ea; --text:#1d232c; --muted:#667085;
@@ -188,6 +189,53 @@ body.printing #dwgModal .dwgf{display:none}
 }
   /* caixas alinhadas embaixo mesmo quando o rótulo quebra em 2 linhas */
   #genMain > label, #genParams > label { display:flex; flex-direction:column; justify-content:flex-end; }
+/* ===== v5.70 visual (usuário 17/11/2026): acabamento mais limpo + tema escuro (botão 🌙 no topo) ===== */
+:root{ --shadow:0 1px 2px rgba(16,24,40,.06),0 2px 8px rgba(16,24,40,.06); --ring:0 0 0 3px rgba(178,34,31,.18);
+  --btn-bg:#f4f6f9; --btn-hover:#e9edf3; --field:#ffffff; --field-y:#fff3c4; --field-y-line:#d6a800; --field-y-text:#003399;
+  --canvas-bg:#ffffff; --canvas-grid:#edf0f5; --canvas-label:#8a94a6; --canvas-axis:#4b5563; --canvas-text:#1d232c; --canvas-tool:#111111; }
+header{box-shadow:var(--shadow);position:relative;z-index:2}
+header .logo{background:linear-gradient(135deg,#c8102e,#8f1a17);box-shadow:0 2px 6px rgba(178,34,31,.35)}
+.card{box-shadow:var(--shadow)}
+.btn{background:var(--btn-bg);transition:background .15s,border-color .15s,box-shadow .15s,transform .05s}
+.btn:hover{background:var(--btn-hover)}
+.btn:active{transform:translateY(1px)}
+.btn:focus-visible,.chk:focus-within,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none;box-shadow:var(--ring)}
+.stat,.tc,.chk,.stage{box-shadow:var(--shadow)}
+.left h2::before{border-radius:3px}
+#btnTheme{width:38px;justify-content:center;padding:7px 0;font-size:15px}
+/* ---------- tema escuro ---------- */
+:root[data-theme="dark"]{ color-scheme:dark;
+  --bg:#12151b; --card:#1b2029; --line:#2d3441; --text:#e6e9ef; --muted:#9aa4b4;
+  --brand:#e0453f; --brand-soft:#3a1c1d; --grid:#262c37; --axis:#a3adbd; --rapid:#7d8798; --code-bg:#151920;
+  --hl:#3d3517; --hl-line:#e0b000; --accent-bg:#13282b; --accent-line:#235459; --accent:#5cc3cf;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 2px 10px rgba(0,0,0,.35); --ring:0 0 0 3px rgba(224,69,63,.35);
+  --btn-bg:#232a35; --btn-hover:#2c3442; --field:#151920; --field-y:#2e2a14; --field-y-line:#8a7420; --field-y-text:#ffd970;
+  --canvas-bg:#151920; --canvas-grid:#232a35; --canvas-label:#7d8798; --canvas-axis:#a3adbd; --canvas-text:#e6e9ef; --canvas-tool:#e6e9ef; }
+[data-theme="dark"] body{background:var(--bg);color:var(--text)}
+[data-theme="dark"] .chk,[data-theme="dark"] .stage,[data-theme="dark"] .stat,[data-theme="dark"] .tc,
+[data-theme="dark"] .controls select,[data-theme="dark"] .genhead select,[data-theme="dark"] .gen,[data-theme="dark"] .meta .tag,
+[data-theme="dark"] .buchas span,[data-theme="dark"] .modal .box,[data-theme="dark"] .dwg .row .orient{background:var(--card);color:var(--text);border-color:var(--line)}
+[data-theme="dark"] .code .ln:hover{background:#1f2530}
+[data-theme="dark"] .code .ln .n{color:#5d6675}
+[data-theme="dark"] .code .ln.cmt .t{color:#7d8798}
+[data-theme="dark"] .code textarea,[data-theme="dark"] .modal textarea{color:var(--text);background:var(--code-bg)}
+[data-theme="dark"] input,[data-theme="dark"] select,[data-theme="dark"] textarea{background:var(--field);color:var(--text);border-color:var(--line)}
+[data-theme="dark"] #genMain input,[data-theme="dark"] #genMain select,[data-theme="dark"] .pvside .tolrow select,[data-theme="dark"] .pvside .tolrow input,
+[data-theme="dark"] .pvside .fields label.wide input,[data-theme="dark"] .pvside .fields input.y,[data-theme="dark"] .tolrow select,[data-theme="dark"] .tolrow input{background:var(--field-y);border-color:var(--field-y-line);color:var(--field-y-text)}
+[data-theme="dark"] input[type=checkbox],[data-theme="dark"] input[type=radio],[data-theme="dark"] input[type=range]{background:none}
+[data-theme="dark"] .fields .sep{border-top-color:var(--field-y-line);color:#d8b84a}
+[data-theme="dark"] .kindtag{background:#2a313d;color:#cfd5df}
+[data-theme="dark"] .badge.alta{background:#123824;color:#6fd59a}[data-theme="dark"] .badge.media{background:#3a3014;color:#f0c75e}[data-theme="dark"] .badge.baixa{background:#3d1a19;color:#ff8f87}
+[data-theme="dark"] .pill{background:#e6e9ef;color:#12151b}
+[data-theme="dark"] .pvside{background:#1b2029;border-left-color:#2d3441}
+[data-theme="dark"] .pvside h4{color:var(--text)}
+/* janelas montadas pelo programa com fundo branco no estilo: ficam escuras (o desenho / folha continua branco) */
+[data-theme="dark"] div[style*="background:#fff;"],[data-theme="dark"] form[style*="background:#fff;"]{background:var(--card)!important;color:var(--text)!important}
+[data-theme="dark"] #loginOv > div{background:var(--card)!important;color:var(--text)!important}
+[data-theme="dark"] #pastModal th{background:#232a35!important}
+[data-theme="dark"] #pastModal th,[data-theme="dark"] #pastModal td{border-bottom-color:var(--line)!important}
+[data-theme="dark"] #pastModal tr[style*="fdecea"]{background:#3d1a19!important}
+[data-theme="dark"] .dwg .sheet,[data-theme="dark"] .pvpage{background:#fff;color:#1d232c}
 </style>
 </head>
 <body>
@@ -198,6 +246,7 @@ body.printing #dwgModal .dwgf{display:none}
     <div class="sub" id="progName">Abra um .PIT / .txt ou cole o programa da planilha</div>
   </div>
   <div class="spacer"></div>
+  <button class="btn" id="btnTheme" title="Tema claro / escuro">&#x1F319;</button>
   <button class="btn" id="btnUser" title="Usuário (vai no DESENHADO do carimbo) · trocar senha · cadastrar usuários">&#x1F464; Entrar</button>
   <label class="btn primary" title="Abrir arquivo do programa">
     <input type="file" id="file" accept=".pit,.PIT,.txt,.nc,.cnc,.mpf,.tap" hidden>
@@ -628,17 +677,23 @@ function zoom(f, px, py){
 }
 function niceStep(px){ const raw = 90 / px; const p = Math.pow(10, Math.floor(Math.log10(raw))); for (const k of [1,2,5,10]) if (raw <= k*p) return k*p; return 10*p; }
 
+// cores do canvas pelo tema (claro / escuro): variáveis --canvas-* do CSS
+function themeColors(){ const cs = getComputedStyle(document.documentElement), v = (k, d) => (cs.getPropertyValue(k) || "").trim() || d;
+  return { bg: v("--canvas-bg", "#fff"), grid: v("--canvas-grid", "#edf0f5"), label: v("--canvas-label", "#8a94a6"), axis: v("--canvas-axis", "#4b5563"), text: v("--canvas-text", "#1d232c"), tool: v("--canvas-tool", "#111") }; }
+function setTheme(t){ document.documentElement.dataset.theme = t; try { localStorage.setItem("ps_theme", t); } catch(e){}
+  const b = document.getElementById("btnTheme"); if (b){ b.innerHTML = t === "dark" ? "&#x2600;&#xFE0F;" : "&#x1F319;"; b.title = t === "dark" ? "Tema claro" : "Tema escuro"; }
+  try { draw(); } catch(e){} }
 function draw(){
   const w = W(), h = H(); ctx.clearRect(0, 0, w, h);
-  ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, w, h);
+  const TC = themeColors(); ctx.fillStyle = TC.bg; ctx.fillRect(0, 0, w, h);
   // grid
   const st = niceStep(state.view.s);
   const [zl, rt] = toWorld(0, 0), [zr, rb] = toWorld(w, h);
-  ctx.lineWidth = 1; ctx.font = "11px Consolas, monospace"; ctx.fillStyle = "#8a94a6";
-  for (let z = Math.ceil(zl/st)*st; z <= zr; z += st){ const [x] = toScr(z, 0); ctx.strokeStyle = "#edf0f5"; ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); ctx.fillText(+z.toFixed(4) + "", x + 3, h - 34); }
-  for (let r = Math.ceil(rb/st)*st; r <= rt; r += st){ const [, y] = toScr(0, r); ctx.strokeStyle = "#edf0f5"; ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); ctx.fillText(+(2*r).toFixed(4) + "", 4, y - 3); }
+  ctx.lineWidth = 1; ctx.font = "11px Consolas, monospace"; ctx.fillStyle = TC.label;
+  for (let z = Math.ceil(zl/st)*st; z <= zr; z += st){ const [x] = toScr(z, 0); ctx.strokeStyle = TC.grid; ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); ctx.fillText(+z.toFixed(4) + "", x + 3, h - 34); }
+  for (let r = Math.ceil(rb/st)*st; r <= rt; r += st){ const [, y] = toScr(0, r); ctx.strokeStyle = TC.grid; ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); ctx.fillText(+(2*r).toFixed(4) + "", 4, y - 3); }
   // axes
-  ctx.strokeStyle = "#4b5563"; ctx.lineWidth = 1.2;
+  ctx.strokeStyle = TC.axis; ctx.lineWidth = 1.2;
   let [ax] = toScr(0, 0); ctx.beginPath(); ctx.moveTo(ax, 0); ctx.lineTo(ax, h); ctx.stroke();
   let [, ay] = toScr(0, 0); ctx.beginPath(); ctx.moveTo(0, ay); ctx.lineTo(w, ay); ctx.stroke();
   if (!state.moves.length) return;
@@ -672,10 +727,10 @@ function draw(){
   if (cur){
     const [x, y] = toScr(cur.p.z, cur.p.r);
     ctx.fillStyle = cur.m.type === 0 ? "#6b7280" : state.toolColor[cur.m.tool];
-    ctx.strokeStyle = "#111"; ctx.lineWidth = 1;
+    ctx.strokeStyle = TC.tool; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + 9, y + 15); ctx.lineTo(x + 20, y + 4); ctx.closePath(); ctx.fill(); ctx.stroke();
-    ctx.beginPath(); ctx.arc(x, y, 3, 0, 7); ctx.fillStyle = "#fff"; ctx.fill(); ctx.stroke();
-    ctx.fillStyle = "#1d232c"; ctx.font = "bold 12px Consolas, monospace"; ctx.fillText(cur.m.tool, x + 22, y + 16);
+    ctx.beginPath(); ctx.arc(x, y, 3, 0, 7); ctx.fillStyle = TC.bg; ctx.fill(); ctx.stroke();
+    ctx.fillStyle = TC.text; ctx.font = "bold 12px Consolas, monospace"; ctx.fillText(cur.m.tool, x + 22, y + 16);
   }
 }
 function poly(pts){ ctx.beginPath(); pts.forEach((p, k) => { const [x, y] = toScr(p.z, p.r); k ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }); ctx.stroke(); }
@@ -6374,6 +6429,8 @@ async function pastOpen(){
   await load();
 }
 $("btnPast").onclick = () => pastOpen();
+$("btnTheme").onclick = () => setTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
+setTheme(document.documentElement.dataset.theme === "dark" ? "dark" : "light");
 setTimeout(() => pastRead().then(r => pastBadge(r.db)).catch(() => {}), 2500);
 function loginCard(html){
   let ov = $("loginOv");

@@ -6,6 +6,11 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.72.0 — PSG 101: opção sem corte (18/11/2026)
+- PSG 101 (guia): campo **Corte da guia** (Com corte / Sem corte), igual ao PSG 103/104. Sem corte = sem serra, sem o acréscimo
+  de 0,9 nos Ø (POM/Celeron), cabeçalho `;PSG 101 (GUIA) - PECA SEM CORTE`, desenho sem a vista do corte e nota "Sem corte".
+- Com corte (padrão) o programa sai igual ao de antes (conferido POM, PU, Celeron e PEAD). PSG 103/104: sem mudança (o campo vem do 101).
+
 ## 5.71.0 — Desenho do programa entra no cadastro do item (ARGUS) + PSH 107 E 46356 (18/11/2026)
 - Desenho do programa (📐): o Imprimir / PDF pergunta o Cód. interno, salva o PDF em DESENHOS e grava o pedido ARGUS
   (Anexo 1 + programa) — antes só pelo 💾 Salvar no W: e só se o Cód. interno fosse digitado ali. O 💾 Salvar no W: também

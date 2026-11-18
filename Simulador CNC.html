@@ -1724,7 +1724,8 @@ function psr211Geom(p){
   // v5.67.1 (usuário 17/11/2026): PSR 211 — o chanfro da ponta é cortado pelas costas da T1D45: no máximo 30° com o eixo
   // (antes 45°); no raio = 0,1 × secção, entre 0,2 e 0,4 (antes 0,5) — chanfro só de estética, sem campo para mudar.
   // Comprimento em Z = cT / tan 30°. O PSR 212 continua 0,5 a 45° (campo cT).
-  const cT = p.tipoGen === "psr211" ? Math.min(0.4, Math.max(0.2, xround(0.1 * (p.dext - p.dint) / 2, 1))) : opt(p.cT) ?? 0.5, cTz = p.tipoGen === "psr211" ? xround(cT / Math.tan(30 * Math.PI / 180), 3) : cT, cTk = cT / cTz;
+  // v5.73.1 (usuário 18/11/2026): PSR 211 SEM o chanfro interno da ponta ("ainda muito grande") — programa e desenho; o PSR 212 continua com o cT
+  const cT = p.tipoGen === "psr211" ? 0 : opt(p.cT) ?? 0.5, cTz = p.tipoGen === "psr211" ? 0 : cT, cTk = cTz > 0 ? cT / cTz : 0;
   const rampMin = cTz + (g.intCalc - tipIn) / 2 / Math.tan(20 * Math.PI / 180);
   const rampL = opt(p.rampa) ?? xround(Math.min(Math.max(1.24 * prot, rampMin), Ht + g.zI - g.lipLen - 0.3), 2);
   // PSR 212: degrau no externo, atrás do corpo — Ø do degrau dS de Z −(corpo − Ls) até a trás do corpo (chanfro chc nas duas arestas).
@@ -1739,7 +1740,7 @@ function psr211Geom(p){
   const big = STEP && rS < R(g.extCalc) - g.chc - 1e-6 && rS < R(xoB) && zMeet > -Hb - k45 + 1e-6 && zBig > zMeet + 1e-6;
   const stepPts = !STEP ? [g.outer[3]] : big ? [[zS + g.chc, R(g.extCalc)], [zBig, rS], [zMeet, rS]] : [[zS + g.chc, R(g.extCalc)], [zS, R(g.extCalc) - g.chc], [-Hb, R(xoB)]];
   const outer = [...g.outer.slice(0, 3), ...stepPts, ...(STEP ? [] : [[-Hb, R(xoB)]]), [-Hb - k45, R(xoB) - k45], [-Ht - 0.5, R(xoB) - k45]];   // o resto fica para a T6D6
-  const inner = [...g.inner.slice(0, 3), [-Ht + rampL, R(g.intCalc)], [-Ht + cTz, R(tipIn)], [-Ht, R(tipIn) + cT], [-Ht - 0.5, R(tipIn) + cT + 0.5 * cTk]];
+  const inner = [...g.inner.slice(0, 3), [-Ht + rampL, R(g.intCalc)], ...(cT > 0 ? [[-Ht + cTz, R(tipIn)], [-Ht, R(tipIn) + cT]] : [[-Ht, R(tipIn)]]), [-Ht - 0.5, R(tipIn) + cT + 0.5 * cTk]];   // sem chanfro: rampa até a ponta e segue reto
   // v5.72.1 (usuário 18/11/2026): PSR 211 e PSR 212 (os da T6D6) — desbaste e acabamento externos sempre pelo menos 2 mm além da peça
   // (o campo "bed" vinha com 1, o da arruela, e parava em altura + 1); bedame maior que 2 continua valendo
   const bedT = Math.max(2, Number(p.bed) || 0);
@@ -2053,7 +2054,7 @@ function psr211Profile(p){
   const span = ((a1 - a0) < 0 ? a1 - a0 + 2 * Math.PI : a1 - a0);
   for (let k = 0; k <= 16; k++){ const a = a0 + span * k / 16; arc.push([cz + c * Math.cos(a), g.Cg[1] + c * Math.sin(a)]); }
   return [[g.zO, R(g.xo1)], [g.zO - g.chO, R(g.extAp)], [g.zO - g.lipLen, R(g.extCalc)], ...(g.step ? [[g.zS + g.chc, R(g.extCalc)], [g.zS, R(g.extCalc) - g.chc], [g.zS, R(g.dS)], [-g.Hb + g.chc, R(g.dS)]] : [[-g.Hb + g.chc, R(g.extCalc)]]), [-g.Hb, R(g.xoBack)],
-          [-g.Hb, R(g.rootOut)], [-H, R(g.tipOut)], [-H, R(g.tipIn) + g.cT], [-H + g.cTz, R(g.tipIn)], [-H + g.rampL, R(g.intCalc)],
+          [-g.Hb, R(g.rootOut)], [-H, R(g.tipOut)], ...(g.cT > 0 ? [[-H, R(g.tipIn) + g.cT], [-H + g.cTz, R(g.tipIn)]] : [[-H, R(g.tipIn)]]), [-H + g.rampL, R(g.intCalc)],
           [g.zI - g.lipLen, R(g.intCalc)], [g.zI - g.chI, R(g.intAp)], [g.zI, R(g.xi1)], [g.zI, R(g.xgIn)], ...arc.reverse(), [g.zO, R(g.xgOut)], [g.zO, R(g.xo1)]].map(([z, r]) => [-H - z, r]);
 }
 function pieceName(p){ if (p.tipoGen === "psa108c") return "PSA 108 C/ CORTE"; if (p.tipoGen === "dual") return "DUAL SEAL"; if (p.tipoGen === "pse120") return "PSE 120"; if (p.tipoGen === "psr101") return "PSR 101"; if (p.tipoGen === "psh110") return "PSH 110"; if (p.tipoGen === "psh110t") return "PSH 110 30°"; if (p.tipoGen === "dhr") return "PSH 138 (DHR)"; if (p.tipoGen === "dpr") return (p.desc || "PSE 125 (DPR)").toUpperCase(); if (p.tipoGen === "custom") return p.desc || "PERFIL ESPECIAL"; if (p.tipoGen === "psa109") return "PSA 109"; if (p.tipoGen === "psa108" || p.tipoGen === "semch") return "PSA 108"; if (p.tipoGen === "psg101") return "PSG 101"; if (p.tipoGen === "psg103") return "PSG 103"; if (p.tipoGen === "psg104") return "PSG 104"; if (p.tipoGen === "pso") return "PSO 109"; if (p.tipoGen === "psr102") return "PSR 102"; if (p.tipoGen === "pse102r") return "PSE 102 R"; if (p.tipoGen === "psr212") return "PSR 212"; if (p.tipoGen === "psr211") return "PSR 211"; if (p.tipoGen === "psh117") return "PSH 117"; if (p.tipoGen === "psh125") return "PSH 125"; if (p.tipoGen === "psh105") return "PSH 105"; if (p.tipoGen === "pse105") return "PSE 105"; if (p.tipoGen === "pse103") return "PSE 103"; if (p.tipoGen === "pse107") return "PSE 107"; if (p.tipoGen === "pse118") return "PSE 118"; if (p.tipoGen === "psh107") return "PSH 107"; if (p.tipoGen === "psh121") return "PSH 121"; if (p.tipoGen === "psh103") return "PSH 103"; if (p.tipoGen === "psh108") return "PSH 108"; if (["pse106","psh106","psh108","psh117","psh105","pse105","pse107","psh107","psh103","pse103","pse118","psh121","psh125","psr211","psr212","pse102r"].includes(p.tipoGen)) return isPSH(p) ? "PSH 106" : "PSE 106"; if (p.tipoGen === "lip") return (p.desc || "DH PSH 129").toUpperCase(); return pieceKind(p) === "dp" ? "PSE 108 (DP)" : "ARRUELA ISO"; }
@@ -5086,7 +5087,7 @@ function pseViewsSVG(p, PT){
       g += G.wiper ? vdim(xs, PY(G.extCalc / 2), PY(G.tipIn / 2), f((G.extCalc - G.tipIn) / 2)) : G.P117 ? vdim(xs, PY(G.extCalc / 2), PY(G.Vd / 2), tm(f((G.extCalc - G.Vd) / 2), G.tol.sec, 1)) : vdim(xs, PY(G.extCalc / 2), PY(G.intCalc / 2), tm(f((G.extCalc - G.intCalc) / 2), G.tol.sec, 1));
       const semCh = p.tipoGen === "psr211";   // v5.67.1 (usuário 17/11/2026): PSR 211 sem as cotas de chanfro no desenho
       if (!G.ring && !semCh) g += call(PX((G.wiper ? -G.Hb : -H) + G.chc / 2), PY(((G.step ? G.dS : G.extCalc) + G.xoBack) / 4), xb - 12, PY(G.extCalc / 2) - 22, `${f(G.chc)} x 45°`, "end");
-      if (G.wiper && !semCh) g += call(PX(-H + G.cT / 2), PY(G.tipIn / 2 + G.cT / 2), xb - 12, PY(G.tipIn / 2) + 18, `${f(G.cT)} x 45°`, "end");
+      if (G.wiper && !semCh && G.cT > 0) g += call(PX(-H + G.cT / 2), PY(G.tipIn / 2 + G.cT / 2), xb - 12, PY(G.tipIn / 2) + 18, `${f(G.cT)} x 45°`, "end");
       if (G.step){   // PSR 212: degrau — comprimento em Z e profundidade no raio, mais o chanfro da aresta do degrau
         const xw = PX(-G.Hb), xS = PX(G.zS), yS = PY(G.dS / 2), yE = PY(G.extCalc / 2), yM = (yS + yE) / 2 + 4, xv = xw - 12;
         g += ln(xw, yS - 3, xw, yM - 6, "e") + hdim(xw, xS, yM, f(G.Ls));

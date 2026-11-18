@@ -6,6 +6,12 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.73.0 — Perfil novo PSA 108 C/ CORTE (18/11/2026)
+- PSA 108 C/ CORTE (aba Arruelas): o PSA 108 (mesmo programa e desbaste em etapas) com o corte em ângulo do PSG 101 — campo do
+  ângulo (30 · 45 · 60°), serra 1,8 no acabamento, POM e Celeron usinados 0,9 maiores nos Ø, comentário do corte no programa
+  (`%PSA108C …`), vista "CORTE DA ARRUELA" e nota do corte no desenho. Pasta do desenho: DESENHOS\PSA 108\PSA 108 C CORTE (…).
+- O PSA 108 e os outros perfis não mudam (238 programas de teste iguais).
+
 ## 5.72.1 — PSR 211 e PSR 212: externo sempre 2 mm além da peça (18/11/2026)
 - PSR 211 e PSR 212 (os perfis da T6D6): desbaste e acabamento externos vão até Z −(altura + 2) no mínimo, em qualquer material.
   O campo "Largura do bedame do canal de trás" (chave `bed`) aparecia com 1 — o mesmo nome do bedame das arruelas — e o externo

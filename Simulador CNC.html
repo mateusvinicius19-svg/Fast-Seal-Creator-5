@@ -5300,7 +5300,7 @@ function s15ViewsSVG(p, PT){
     return s + `<text x="${(a + b) / 2}" y="${y - 5}" class="t" text-anchor="middle">${txt}</text>`; };
   const ord = (x, yF, yB, xF, txt) => ln(xF, yF, x + (x > xF ? 5 : -5), yF, "e") + ln(x, yB, x, yF) + ah(x, yF, 0, -1) + `<text x="${x - 5}" y="${yB - 2}" class="t" transform="rotate(-90 ${x - 5} ${yB - 2})">${txt}</text>`;
   const call = (x, y, tx, ty, txt, anchor) => ln(x, y, tx, ty, "e") + `<text x="${tx + (anchor === "end" ? -3 : 3)}" y="${ty + 4}" class="tn" text-anchor="${anchor}">${txt}</text>`;
-  const Htxt = (tolNum(p.thS) !== null || tolNum(p.thI) !== null) ? tolMk("H " + f(H), p.thS, p.thI) : tl("H " + f(H), 0.2);
+  const Htxt = (tolNum(p.thS) !== null || tolNum(p.thI) !== null) ? tolMk("H " + f(H), p.thS, p.thI) : tl("H " + f(H), H < 6 ? 0.1 : 0.2);   // Fast Seal: altura da peça < 6 → ±0,1
   let g = "";
   boxes.forEach((bx, vi) => {
     const x0 = bx[0] + ML + (iw - H * sc) / 2, yT = bx[1] + MT + (ihv[vi] - (rTop - rBot) * sc) / 2;
@@ -5314,6 +5314,14 @@ function s15ViewsSVG(p, PT){
     // canal: largura em cima (PSH 131) ou embaixo (PSE 127)
     const xg1 = PX(-H / 2 + G.w / 2), xg2 = PX(-H / 2 - G.w / 2), yG = PY(G.grvD / 2), ryG = G.LIP_OUT ? yBot + 34 : r2;
     g += ln(xg1, yG + (G.LIP_OUT ? 3 : -3), xg1, ryG + (G.LIP_OUT ? 6 : -6), "e") + ln(xg2, yG + (G.LIP_OUT ? 3 : -3), xg2, ryG + (G.LIP_OUT ? 6 : -6), "e") + hdim(xg2, xg1, ryG, f(G.w));
+    // como o desenho do Fast Seal (usuário 18/11/2026): faixa reta até a face, chanfro 0,3 × 45° e ângulo do lábio
+    g += ln(xf, yG + (G.LIP_OUT ? 3 : -3), xf, ryG + (G.LIP_OUT ? 6 : -6), "e") + hdim(xg1, xf, ryG, f((H - G.w) / 2));
+    const sG = G.LIP_OUT ? 1 : -1, cc = G.c * sc;   // sG: lado do ar do canal na tela (+1 = para baixo)
+    g += call(xf - cc / 2, yG - sG * cc / 2, xf + (G.LIP_OUT ? 70 : 26), yG + sG * (G.LIP_OUT ? 16 : 22), `${f(G.c)} × 45°`, "start");   // PSE: à direita das linhas dos Ø
+    { const yF = PY(G.faceD / 2), tz = PX(G.T1[0]), ty = PY(G.T1[1]), dx = tz - xb, dy = ty - yF, dl = Math.hypot(dx, dy), u = [dx / dl, dy / dl], v = [0, ty > yF ? 1 : -1], Ra = 42;
+      const ang = Math.round(Math.atan2(Math.abs(G.T1[0] + H), Math.abs(G.T1[1] - G.faceD / 2)) * 180 / Math.PI), cr = v[0] * u[1] - v[1] * u[0], bi = [(u[0] + v[0]) / 2, (u[1] + v[1]) / 2], bl = Math.hypot(...bi);
+      g += ln(xb, yF, xb, yF + v[1] * (Ra + 8), "e") + `<path d="M${xb},${yF + v[1] * Ra} A${Ra},${Ra} 0 0 ${cr > 0 ? 1 : 0} ${xb + u[0] * Ra},${yF + u[1] * Ra}" class="e" fill="none"/>`
+        + `<text x="${xb + bi[0] / bl * (Ra + 12)}" y="${yF + bi[1] / bl * (Ra + 12) + 4}" class="tn" text-anchor="middle">${ang}°</text>`; }
     if (vi === 0){
       const yB = yBot + MB - 14;
       g += ord(xb - 30, PY(G.faceD / 2), yB, xb, "Ø " + f(G.faceD));
@@ -5326,6 +5334,10 @@ function s15ViewsSVG(p, PT){
       g += vdim(xs, PY(G.faceD / 2), PY(G.grvD / 2), f(Math.abs(G.faceD - G.grvD) / 2));
       g += ln(xm, PY(G.lipD / 2), xt + 5, PY(G.lipD / 2), "e") + ln(xf, PY(G.grvD / 2), xt + 5, PY(G.grvD / 2), "e");
       g += vdim(xt, PY(G.lipD / 2), PY(G.grvD / 2), tl(f(Math.abs(G.lipD - G.grvD) / 2), G.tol.sec, 1), 1);
+      // profundidade do canal e lábio até o fundo do canal (como o Fast Seal)
+      const xd = xf + 22, xq = xf + 84;
+      g += ln(xm, PY(G.botD / 2), xq + 5, PY(G.botD / 2), "e") + vdim(xd, PY(G.grvD / 2), PY(G.botD / 2), f(G.g), 1);
+      g += vdim(xq, PY(G.lipD / 2), PY(G.botD / 2), f(Math.abs(G.lipD - G.botD) / 2), 1);
       g += call(xm, PY(G.lipD / 2 - (G.LIP_OUT ? 1 : -1) * G.Rt * 0.3), xm + 40, G.LIP_OUT ? yTop - 12 : yBot + 18, `R${f(G.Rt)}`, "start");
       g += call(xm, PY(G.botD / 2), xm - 40, G.LIP_OUT ? yBot + 18 : yTop - 12, `R${f(G.Rg)}`, "end");
     }

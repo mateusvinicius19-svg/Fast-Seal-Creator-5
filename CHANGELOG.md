@@ -17,6 +17,10 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
   Desenho como o do Fast Seal (PDFs 46216 e 46322): faixa reta ao lado do canal, chanfro 0,3 × 45°, ângulo do lábio (79° no
   108,03x116,3x7,2, tangente ao raio da ponta), na SECÇÃO a profundidade do canal e o lábio até o fundo; tolerância da altura ±0,1
   abaixo de 6 e ±0,2 de 6 para cima (como no FSC); com medida de peça (alojamento = Não) só para menos: 0 / −0,1 ou 0 / −0,2.
+  Cotagem pela NBR 10126 / ISO 129 (pedido do usuário): DIÂMETROS só com os 4 Ø e o H — Ø do lábio e do calcanhar do lado do
+  lábio, Ø do lado do canal e do fundo do lado do canal, nenhuma linha atravessando a peça, a menor perto da peça e o H por fora;
+  largura do canal, faixa, chanfro e ângulo só na SECÇÃO (cota uma vez só); profundidade do canal dentro do canal e sem a cota
+  lábio–fundo (cadeia fechada).
   Tabelas em `Claude contexto/fsc-ps15p-rs15p-medidas.md`. Continua com ATENÇÃO "perfil novo em teste". Os outros 34 perfis iguais.
 - roughPasses: arco com raio próprio (it.R); os outros perfis não mudam (34 iguais).
 

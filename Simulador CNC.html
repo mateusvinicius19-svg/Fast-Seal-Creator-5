@@ -5309,37 +5309,46 @@ function s15ViewsSVG(p, PT){
     g += `<rect x="${bx[0]}" y="${bx[1]}" width="${bx[2] - bx[0]}" height="${bx[3] - bx[1]}" fill="none" stroke="#999" stroke-width=".8"/>`;
     g += `<text x="${(bx[0] + bx[2]) / 2}" y="${bx[1] + 20}" class="vt" text-anchor="middle">${vi ? "SECÇÃO" : "DIÂMETROS"}</text>`;
     g += `<path d="${prof.map(([z, r], i) => `${i ? "L" : "M"}${(x0 - z * sc).toFixed(2)},${PY(r).toFixed(2)}`).join("")}Z" class="p"/>`;
-    const r1 = yTop - 62, r2 = yTop - 32, yLipSide = G.LIP_OUT ? yTop : yBot;
-    g += ln(xb, PY(G.LIP_OUT ? G.faceD / 2 : G.grvD / 2) - 3, xb, r1 - 6, "e") + ln(xf, PY(G.LIP_OUT ? G.faceD / 2 : G.grvD / 2) - 3, xf, r1 - 6, "e") + hdim(xb, xf, r1, Htxt);
-    // canal: largura em cima (PSH 131) ou embaixo (PSE 127)
+    const r1 = yTop - 62, r2 = yTop - 32;
     const xg1 = PX(-H / 2 + G.w / 2), xg2 = PX(-H / 2 - G.w / 2), yG = PY(G.grvD / 2), ryG = G.LIP_OUT ? yBot + 34 : r2;
-    g += ln(xg1, yG + (G.LIP_OUT ? 3 : -3), xg1, ryG + (G.LIP_OUT ? 6 : -6), "e") + ln(xg2, yG + (G.LIP_OUT ? 3 : -3), xg2, ryG + (G.LIP_OUT ? 6 : -6), "e") + hdim(xg2, xg1, ryG, f(G.w));
-    // como o desenho do Fast Seal (usuário 18/11/2026): faixa reta até a face, chanfro 0,3 × 45° e ângulo do lábio
-    g += ln(xf, yG + (G.LIP_OUT ? 3 : -3), xf, ryG + (G.LIP_OUT ? 6 : -6), "e") + hdim(xg1, xf, ryG, f((H - G.w) / 2));
-    const sG = G.LIP_OUT ? 1 : -1, cc = G.c * sc;   // sG: lado do ar do canal na tela (+1 = para baixo)
-    g += call(xf - cc / 2, yG - sG * cc / 2, xf + (G.LIP_OUT ? 70 : 26), yG + sG * (G.LIP_OUT ? 16 : 22), `${f(G.c)} × 45°`, "start");   // PSE: à direita das linhas dos Ø
-    { const yF = PY(G.faceD / 2), tz = PX(G.T1[0]), ty = PY(G.T1[1]), dx = tz - xb, dy = ty - yF, dl = Math.hypot(dx, dy), u = [dx / dl, dy / dl], v = [0, ty > yF ? 1 : -1], Ra = 42;
-      const ang = Math.round(Math.atan2(Math.abs(G.T1[0] + H), Math.abs(G.T1[1] - G.faceD / 2)) * 180 / Math.PI), cr = v[0] * u[1] - v[1] * u[0], bi = [(u[0] + v[0]) / 2, (u[1] + v[1]) / 2], bl = Math.hypot(...bi);
-      g += ln(xb, yF, xb, yF + v[1] * (Ra + 8), "e") + `<path d="M${xb},${yF + v[1] * Ra} A${Ra},${Ra} 0 0 ${cr > 0 ? 1 : 0} ${xb + u[0] * Ra},${yF + u[1] * Ra}" class="e" fill="none"/>`
-        + `<text x="${xb + bi[0] / bl * (Ra + 12)}" y="${yF + bi[1] / bl * (Ra + 12) + 4}" class="tn" text-anchor="middle">${ang}°</text>`; }
+    const outL = G.LIP_OUT ? -1 : 1, outG = -outL, edgeL = G.LIP_OUT ? yTop : yBot, edgeG = G.LIP_OUT ? yBot : yTop;   // lado do lábio / do canal na tela (−1 = para cima)
     if (vi === 0){
-      const yB = yBot + MB - 14;
-      g += ord(xb - 30, PY(G.faceD / 2), yB, xb, "Ø " + f(G.faceD));
-      g += ord(xm - 14, PY(G.lipD / 2), yB, xm, tolMk("Ø " + f(G.lipD), G.LIP_OUT ? p.teS : p.tiS, G.LIP_OUT ? p.teI : p.tiI));
-      g += ord(xf + 30, PY(G.grvD / 2), yB, xf, tolMk("Ø " + f(G.grvD), G.LIP_OUT ? p.tiS : p.teS, G.LIP_OUT ? p.tiI : p.teI));
-      g += ord(xf + 58, PY(G.botD / 2), yB, xm, "Ø " + f(G.botD));
+      // DIÂMETROS — cotagem pela NBR 10126 / ISO 129 (usuário 18/11/2026): cada Ø do lado do seu elemento, linhas de cota e de chamada
+      // fora da peça (nenhuma atravessa o hachurado), as menores perto da peça e o H por fora, espaçamento igual e textos alinhados;
+      // largura do canal, faixa, chanfro e ângulo ficam só na SECÇÃO (cota uma vez só).
+      const L = 50, yEL = edgeL + outL * L, yEG = edgeG + outG * L;
+      const odim = (xA, yF, xFeat, yE, out, txt) => (Math.abs(xA - xFeat) > 0.5 ? ln(xFeat, yF, xA + (xA > xFeat ? 5 : -5), yF, "e") : "") + ln(xA, yE, xA, yF) + ah(xA, yF, 0, -out)
+        + `<text x="${xA - 5}" y="${(yE + yF) / 2}" class="t" text-anchor="middle" transform="rotate(-90 ${xA - 5} ${(yE + yF) / 2})">${txt}</text>`;
+      const yF = PY(G.faceD / 2), rH = edgeL + outL * (L + 14);
+      // lado do lábio: Ø da ponta mais perto da peça, Ø do calcanhar mais longe (as chamadas não cruzam as linhas de cota)
+      g += odim(xb - 26, PY(G.lipD / 2), xm, yEL, outL, tolMk("Ø " + f(G.lipD), G.LIP_OUT ? p.teS : p.tiS, G.LIP_OUT ? p.teI : p.tiI));
+      g += odim(xb - 54, yF, xb, yEL, outL, "Ø " + f(G.faceD));
+      // H por fora, do lado do lábio
+      g += ln(xb, yF + outL * 3, xb, rH + outL * 6, "e") + ln(xf, yF + outL * 3, xf, rH + outL * 6, "e") + hdim(xb, xf, rH, Htxt);
+      // lado do canal: Ø do fundo com a seta entrando direto no canal; Ø do lado do canal na face da frente
+      g += odim(xm, PY(G.botD / 2), xm, yEG, outG, "Ø " + f(G.botD));
+      g += odim(xf + 26, yG, xf, yEG, outG, tolMk("Ø " + f(G.grvD), G.LIP_OUT ? p.tiS : p.teS, G.LIP_OUT ? p.tiI : p.teI));
     } else {
+      g += ln(xb, PY(G.LIP_OUT ? G.faceD / 2 : G.grvD / 2) - 3, xb, r1 - 6, "e") + ln(xf, PY(G.LIP_OUT ? G.faceD / 2 : G.grvD / 2) - 3, xf, r1 - 6, "e") + hdim(xb, xf, r1, Htxt);
+      // canal: largura em cima (PSH 131) ou embaixo (PSE 127), faixa reta até a face, chanfro 0,3 × 45° e ângulo do lábio (como o Fast Seal)
+      g += ln(xg1, yG + (G.LIP_OUT ? 3 : -3), xg1, ryG + (G.LIP_OUT ? 6 : -6), "e") + ln(xg2, yG + (G.LIP_OUT ? 3 : -3), xg2, ryG + (G.LIP_OUT ? 6 : -6), "e") + hdim(xg2, xg1, ryG, f(G.w));
+      g += ln(xf, yG + (G.LIP_OUT ? 3 : -3), xf, ryG + (G.LIP_OUT ? 6 : -6), "e") + hdim(xg1, xf, ryG, f((H - G.w) / 2));
+      const sG = G.LIP_OUT ? 1 : -1, cc = G.c * sc;   // sG: lado do ar do canal na tela (+1 = para baixo)
+      g += call(xf - cc / 2, yG - sG * cc / 2, xf + 26, yG + sG * 22, `${f(G.c)} × 45°`, "start");
+      { const yF = PY(G.faceD / 2), tz = PX(G.T1[0]), ty = PY(G.T1[1]), dx = tz - xb, dy = ty - yF, dl = Math.hypot(dx, dy), u = [dx / dl, dy / dl], v = [0, ty > yF ? 1 : -1], Ra = 42;
+        const ang = Math.round(Math.atan2(Math.abs(G.T1[0] + H), Math.abs(G.T1[1] - G.faceD / 2)) * 180 / Math.PI), cr = v[0] * u[1] - v[1] * u[0], bi = [(u[0] + v[0]) / 2, (u[1] + v[1]) / 2], bl = Math.hypot(...bi);
+        g += ln(xb, yF, xb, yF + v[1] * (Ra + 8), "e") + `<path d="M${xb},${yF + v[1] * Ra} A${Ra},${Ra} 0 0 ${cr > 0 ? 1 : 0} ${xb + u[0] * Ra},${yF + u[1] * Ra}" class="e" fill="none"/>`
+          + `<text x="${xb + bi[0] / bl * (Ra + 12)}" y="${yF + bi[1] / bl * (Ra + 12) + 4}" class="tn" text-anchor="middle">${ang}°</text>`; }
       const xs = xb - 44, xt = xf + 50;
       g += ln(xb, PY(G.faceD / 2), xs - 5, PY(G.faceD / 2), "e") + ln(xb, PY(G.grvD / 2), xs - 5, PY(G.grvD / 2), "e");
       g += vdim(xs, PY(G.faceD / 2), PY(G.grvD / 2), f(Math.abs(G.faceD - G.grvD) / 2));
       g += ln(xm, PY(G.lipD / 2), xt + 5, PY(G.lipD / 2), "e") + ln(xf, PY(G.grvD / 2), xt + 5, PY(G.grvD / 2), "e");
       g += vdim(xt, PY(G.lipD / 2), PY(G.grvD / 2), tl(f(Math.abs(G.lipD - G.grvD) / 2), G.tol.sec, 1), 1);
-      // profundidade do canal e lábio até o fundo do canal (como o Fast Seal)
-      const xd = xf + 22, xq = xf + 84;
-      g += ln(xm, PY(G.botD / 2), xq + 5, PY(G.botD / 2), "e") + vdim(xd, PY(G.grvD / 2), PY(G.botD / 2), f(G.g), 1);
-      g += vdim(xq, PY(G.lipD / 2), PY(G.botD / 2), f(Math.abs(G.lipD - G.botD) / 2), 1);
+      // profundidade do canal dentro do próprio canal (linha de chamada na boca do canal, sem atravessar a peça); sem a cota
+      // lábio–fundo, que fecharia a cadeia (= total − profundidade)
+      g += ln(xg2, yG, xg1, yG, "e") + vdim(xm + 14, yG, PY(G.botD / 2), f(G.g), 1);
       g += call(xm, PY(G.lipD / 2 - (G.LIP_OUT ? 1 : -1) * G.Rt * 0.3), xm + 40, G.LIP_OUT ? yTop - 12 : yBot + 18, `R${f(G.Rt)}`, "start");
-      g += call(xm, PY(G.botD / 2), xm - 40, G.LIP_OUT ? yBot + 18 : yTop - 12, `R${f(G.Rg)}`, "end");
+      g += call(xm - 4, PY(G.botD / 2) + (G.LIP_OUT ? -1 : 1) * 2, xm - 40, G.LIP_OUT ? yBot + 18 : yTop - 12, `R${f(G.Rg)}`, "end");
     }
   });
   return g;

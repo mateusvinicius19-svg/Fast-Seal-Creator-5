@@ -6,6 +6,15 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.71.0 — Desenho do programa entra no cadastro do item (ARGUS) + PSH 107 E 46356 (18/11/2026)
+- Desenho do programa (📐): o Imprimir / PDF pergunta o Cód. interno, salva o PDF em DESENHOS e grava o pedido ARGUS
+  (Anexo 1 + programa) — antes só pelo 💾 Salvar no W: e só se o Cód. interno fosse digitado ali. O 💾 Salvar no W: também
+  aparece no desenho do programa reconhecido como perfil padrão. Desenho do 3D e perfis padrão: sem mudança.
+- `Programas avulsos/PSH 107 E (16 X 26 X 5.6) 46356/`: peça do STL do Inventor em UHMW (= PEAD), bucha 12 x 35. Programa no padrão do
+  PSH 107 (T3D3 · canal frontal reto 2,9 x 3,2 com o bedame T1D86 · T2D14 · T7D7 · T8D8) e desenho na folha Parts Seals pelo
+  "Desenho do 3D", invertido (face do canal à direita = Z0 do programa) e com a cota da abertura do canal.
+- Geradores de programa não mudam.
+
 ## 5.70.4 — PSE 102 R: Cód. interno uma vez só (18/11/2026)
 - PSE 102 R: a gaxeta (U) e o anel de apoio (A) usam o mesmo Cód. interno; ao salvar o anel ele não pergunta de novo.
 - Programas não mudam (34 perfis iguais).

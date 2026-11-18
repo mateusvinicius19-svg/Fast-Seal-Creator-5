@@ -6223,6 +6223,7 @@ function progDrawing(){
     if (rank[0] && rank[0].t === "lip"){ const fit = progFitLip(poly, L, nome);
       if (fit && fit.dev <= 0.3) std = { t: "lip", name: rank[0].name, p: fit.p, dev: fit.dev, txt: `Ø${fv3(fit.p.dint)} · secção ${fv3(fit.p.sec)} · altura ${fv3(fit.p.h)} · rebaixo ${fv3(fit.p.h2)} x ${fv3(fit.p.b)} · flanco ${fmtN(fit.p.af - 90, 1)}° · base ${fmtN(fit.p.ab, 1)}° · chanfro ${fv3(fit.p.ch)}` }; }
     progTolAsk(p, rank, sp => { if (sp) state.genParams = sp;
+      state.genParams.fromProg = true;   // v5.71.0: desenho do programa → Imprimir também salva no W: e grava o pedido ARGUS
       // v5.61.2 (usuário 16/11/2026): Programa Nº = o do programa aberto (ficava o da peça anterior); Cód. interno da peça anterior sai
       const nm = String(state.fileName || "").match(/^0*(\d+[A-Z]?)/i), set = (k, v) => { const a = document.querySelector(`#dwgFields [data-d="${k}"]`), b = document.querySelector(`#pvSide [data-dd="${k}"]`); if (a) a.value = v; if (b) b.value = v; };
       set("prog", nm ? nm[1].toUpperCase() : ""); set("cod", ""); try { saveForm(); } catch(e){}
@@ -6272,32 +6273,39 @@ window.addEventListener("dragover", e => { if (e.dataTransfer && [...(e.dataTran
 window.addEventListener("drop", e => { const f = e.dataTransfer && [...(e.dataTransfer.files || [])].find(x => /\.stl$/i.test(x.name)); if (f){ e.preventDefault(); rev3DOpen(f); } });
 // v5.54.0 (usuário 16/11/2026): desenho do 3D (itens fora de padrão) salva no W: como os perfis padrão:
 // DESENHOS\<família = descrição>\<descrição (Ø int X Ø ext X largura) programa>\….pdf + pedido ARGUS se tiver Cód. interno
-$("pvSave3D").onclick = async () => {
-  const p = state.genParams; if (!p || !p.from3D) return;
-  const fam = prompt("Família / pasta em DESENHOS (ex.: VEDADOR, PSE 124 E, PSO 11 E R):", p.desc || "");
-  if (fam === null) return;
-  const famT = fam.trim().toUpperCase().replace(/[\\/:*?"<>|]/g, "-"); if (!famT){ alert("Escreva a família (nome da pasta)."); return; }
-  if (famT !== p.desc){ p.desc = famT; rerenderDrawing(); }
+// v5.71.0 (usuário 18/11/2026): o desenho do programa também (botão e Imprimir / PDF) — "os desenhos que faço por aqui quero que
+// salve no cadastro também" = item do ARGUS (Anexo 1 + programa). fromPrint: chamado pelo Imprimir (Cód. interno já perguntado, sem alert).
+async function save3DDrawing(fromPrint){
+  const p = state.genParams; if (!p || !(p.from3D || p.fromProg)) return false;
+  const tit = p.fromProg ? "Desenho do programa" : "Desenho do 3D";
+  if (p.tipoGen === "custom"){   // perfil padrão reconhecido (PSH 129…) já tem a família certa
+    const fam = prompt("Família / pasta em DESENHOS (ex.: VEDADOR, PSE 124 E, PSO 11 E R):", p.desc || "");
+    if (fam === null) return false;
+    const famT = fam.trim().toUpperCase().replace(/[\\/:*?"<>|]/g, "-"); if (!famT){ alert("Escreva a família (nome da pasta)."); return false; }
+    if (famT !== p.desc){ p.desc = famT; rerenderDrawing(); }
+  }
   const progEl = document.querySelector("#dwgFields input[data-d=prog]"), pvProg = document.querySelector("#pvSide [data-dd=prog]");
   let num = String((progEl && progEl.value) || (pvProg && pvProg.value) || "").trim();
-  if (!num){ const v = prompt("Número do programa (vazio = desenho sem programa):", ""); if (v === null) return; num = v.trim(); }
-  if (num && !/^\d+$/.test(num)){ alert(`"${num}" não é número de programa.`); return; }
+  if (!num){ const v = prompt("Número do programa (vazio = desenho sem programa):", ""); if (v === null) return false; num = v.trim(); }
+  if (num && !/^\d+$/.test(num)){ alert(`"${num}" não é número de programa.`); return false; }
   const codEl = document.querySelector("#dwgFields [data-d=cod]");
-  if (codEl && !codEl.value.trim()){ const v = prompt("Cód. interno do item (vai no desenho e no Anexo 1 do ARGUS; vazio = sem):", ""); if (v === null) return; codEl.value = v.trim(); const pc = document.querySelector("#pvSide [data-dd=cod]"); if (pc) pc.value = codEl.value; }
-  if (!askDes()) return;
+  if (!fromPrint && codEl && !codEl.value.trim()){ const v = prompt("Cód. interno do item (vai no desenho e no Anexo 1 do ARGUS; vazio = sem):", ""); if (v === null) return false; codEl.value = v.trim(); const pc = document.querySelector("#pvSide [data-dd=cod]"); if (pc) pc.value = codEl.value; }
+  if (!askDes()) return false;
   rerenderDrawing();
   try {
     let dd = await desDir(false, true); if (!dd) dd = await desDir(false, false);
     const m = await saveDrawingPdf(p, num, dd);
-    $("genMsg").textContent = "Desenho do 3D" + m + "."; $("genMsg").style.color = /NÃO|não salvo/.test(m) ? "#b2221f" : "";
-    alert(("Desenho do 3D" + m).replace(/ · /g, "\n"));
-  } catch(e){ errShow("Erro ao salvar o desenho do 3D", e); }
-};
+    $("genMsg").textContent = tit + m + "."; $("genMsg").style.color = /NÃO|não salvo/.test(m) ? "#b2221f" : "";
+    if (!fromPrint) alert((tit + m).replace(/ · /g, "\n"));
+    return true;
+  } catch(e){ errShow("Erro ao salvar o " + tit.toLowerCase(), e); return false; }
+}
+$("pvSave3D").onclick = () => save3DDrawing(false);
 function openPreview(){
   if (!state.genParams) return;
   $("pvPage").innerHTML = drawingSVG(state.genParams);
   pvZoom = 1; $("pvModal").classList.add("show"); buildPvSide(); pvLayout();
-  $("pvSave3D").style.display = state.genParams.from3D ? "" : "none";   // v5.54.0: desenho do 3D salva no W:
+  $("pvSave3D").style.display = state.genParams.from3D || state.genParams.fromProg ? "" : "none";   // v5.54.0: desenho do 3D salva no W: (v5.71.0: e o do programa)
 }
 $("pvClose").onclick = () => $("pvModal").classList.remove("show");
 $("pvZoomIn").onclick = () => { pvZoom = Math.min(4, pvZoom * 1.25); pvLayout(); };
@@ -6398,9 +6406,16 @@ $("pvPrint").onclick = async () => { if (!state.genParams) return;
   // v5.7.1 (usuário 10/11/2026): Cód. interno ANTES da janela de impressão (não precisa fechar a prévia para editar)
   const codEl = document.querySelector("#dwgFields [data-d=cod]"), codOld = codEl ? codEl.value.trim() : "";
   if (!askCod(true)) return;
+  // v5.71.0 (usuário 18/11/2026): desenho do programa — pergunta o Cód. interno (o askCod não pergunta no desenho custom) e, se ainda
+  // não foi salvo, salva no W: (DESENHOS) e grava o pedido ARGUS (Anexo 1 + programa) antes de imprimir
+  const gp = state.genParams;
+  if (gp.fromProg && gp.tipoGen === "custom" && codEl){ const v = prompt("Cód. interno do item (vai no desenho e no Anexo 1 do ARGUS; vazio = sem):", codEl.value.trim()); if (v === null) return; codEl.value = v.trim(); try { saveForm(); } catch(e){} }
   if (!askDes()) return;
   const pvCod = document.querySelector("#pvSide [data-dd=cod]"); if (pvCod && codEl) pvCod.value = codEl.value;
   rerenderDrawing();
+  if (gp.fromProg && !(state.lastDrawing && pieceFile(state.lastDrawing.p) === pieceFile(gp))){
+    if (!(await save3DDrawing(true))) return;   // salvou agora: PDF e pedido já com o código
+    updatePrintCss(); window.print(); return; }
   const ld = state.lastDrawing && pieceFile(state.lastDrawing.p) === pieceFile(state.genParams) ? state.lastDrawing : null;   // só o desenho salvo DESTA peça
   // código mudou depois de salvar: regrava o PDF do desenho na pasta DESENHOS com o código novo
   if (ld && codEl && codEl.value.trim() !== codOld) try { const nm = desenhoFolderName(ld.p, ld.num), sub = await (await ld.dd.getDirectoryHandle(desFam(ld.p))).getDirectoryHandle(nm); await writeFile(sub, nm + ".pdf", await drawingPdfBytes(state.genParams)); } catch(e){ $("genMsg").textContent = "PDF NÃO regravado com o código novo: " + e.message; }   // código interno digitado só na hora de imprimir: grava o pedido do Anexo 1 do desenho já salvo

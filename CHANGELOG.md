@@ -6,6 +6,12 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.72.1 — PSR 211: desbaste externo sempre 2 mm além da peça (18/11/2026)
+- PSR 211: o desbaste e o acabamento externos vão até Z −(altura + 2) no mínimo (PU, NBR e os outros materiais). O campo
+  "Largura do bedame do canal de trás" (chave `bed`) aparecia com 1 — o mesmo nome do bedame das arruelas — e o externo parava em
+  altura + 1 (ex.: 20 x 25 x 4 x 5 parava em Z −6, agora Z −7). Bedame maior que 2 continua valendo.
+- Conferido: 34 perfis × 6 variações, só muda o PSR 211 com bedame 1; PSR 212 e os outros saem iguais.
+
 ## 5.72.0 — PSG 101: opção sem corte (18/11/2026)
 - PSG 101 (guia): campo **Corte da guia** (Com corte / Sem corte), igual ao PSG 103/104. Sem corte = sem serra, sem o acréscimo
   de 0,9 nos Ø (POM/Celeron), cabeçalho `;PSG 101 (GUIA) - PECA SEM CORTE`, desenho sem a vista do corte e nota "Sem corte".

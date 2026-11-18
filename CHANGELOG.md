@@ -16,7 +16,7 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
   ou pela secção (≥ 8). Campo novo "Medidas do alojamento?" (Sim = altura menor como o METAL DIM do FSC: 8,5 → 8,19).
   Desenho como o do Fast Seal (PDFs 46216 e 46322): faixa reta ao lado do canal, chanfro 0,3 × 45°, ângulo do lábio (79° no
   108,03x116,3x7,2, tangente ao raio da ponta), na SECÇÃO a profundidade do canal e o lábio até o fundo; tolerância da altura ±0,1
-  abaixo de 6 e ±0,2 de 6 para cima (como no FSC).
+  abaixo de 6 e ±0,2 de 6 para cima (como no FSC); com medida de peça (alojamento = Não) só para menos: 0 / −0,1 ou 0 / −0,2.
   Tabelas em `Claude contexto/fsc-ps15p-rs15p-medidas.md`. Continua com ATENÇÃO "perfil novo em teste". Os outros 34 perfis iguais.
 - roughPasses: arco com raio próprio (it.R); os outros perfis não mudam (34 iguais).
 

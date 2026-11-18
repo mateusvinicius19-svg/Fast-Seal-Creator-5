@@ -5300,7 +5300,7 @@ function s15ViewsSVG(p, PT){
     return s + `<text x="${(a + b) / 2}" y="${y - 5}" class="t" text-anchor="middle">${txt}</text>`; };
   const ord = (x, yF, yB, xF, txt) => ln(xF, yF, x + (x > xF ? 5 : -5), yF, "e") + ln(x, yB, x, yF) + ah(x, yF, 0, -1) + `<text x="${x - 5}" y="${yB - 2}" class="t" transform="rotate(-90 ${x - 5} ${yB - 2})">${txt}</text>`;
   const call = (x, y, tx, ty, txt, anchor) => ln(x, y, tx, ty, "e") + `<text x="${tx + (anchor === "end" ? -3 : 3)}" y="${ty + 4}" class="tn" text-anchor="${anchor}">${txt}</text>`;
-  const Htxt = (tolNum(p.thS) !== null || tolNum(p.thI) !== null) ? tolMk("H " + f(H), p.thS, p.thI) : tl("H " + f(H), H < 6 ? 0.1 : 0.2);   // Fast Seal: altura da peça < 6 → ±0,1
+  const Htxt = (tolNum(p.thS) !== null || tolNum(p.thI) !== null) ? tolMk("H " + f(H), p.thS, p.thI) : (G.ALOJ ? tl("H " + f(H), H < 6 ? 0.1 : 0.2) : tolMk("H " + f(H), "0", String(-(H < 6 ? 0.1 : 0.2))));   // Fast Seal: altura da peça < 6 → 0,1, senão 0,2; medida de peça (usuário 18/11/2026): só para menos
   let g = "";
   boxes.forEach((bx, vi) => {
     const x0 = bx[0] + ML + (iw - H * sc) / 2, yT = bx[1] + MT + (ihv[vi] - (rTop - rBot) * sc) / 2;

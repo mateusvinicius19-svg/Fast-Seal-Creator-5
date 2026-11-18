@@ -236,6 +236,26 @@ header .logo{background:linear-gradient(135deg,#c8102e,#8f1a17);box-shadow:0 2px
 [data-theme="dark"] #pastModal th,[data-theme="dark"] #pastModal td{border-bottom-color:var(--line)!important}
 [data-theme="dark"] #pastModal tr[style*="fdecea"]{background:#3d1a19!important}
 [data-theme="dark"] .dwg .sheet,[data-theme="dark"] .pvpage{background:#fff;color:#1d232c}
+/* ---------- tela inicial ---------- */
+#btnHome{font-size:14px}
+.hwrap{max-width:1180px;margin:0 auto}
+.hhead{display:flex;align-items:flex-end;justify-content:space-between;margin:4px 0 16px}
+.htitle{font:700 24px "Segoe UI",Arial,sans-serif;color:var(--text)}
+.hsub{color:var(--muted);font-size:14px;margin-top:2px}
+.hgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.hcard{display:flex;align-items:center;gap:14px;text-align:left;border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--text);padding:16px 18px;cursor:pointer;box-shadow:var(--shadow);transition:transform .12s,border-color .12s,box-shadow .12s;font-family:"Segoe UI",Arial,sans-serif}
+.hcard:hover{transform:translateY(-2px);border-color:var(--brand)}
+.hcard .hic{width:48px;height:48px;flex:none;border-radius:12px;display:grid;place-items:center;font-size:24px;background:var(--brand-soft)}
+.hcard b{display:block;font-size:16px}
+.hcard small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
+.hsec{font:700 15px "Segoe UI",Arial;margin:26px 0 4px;color:var(--text)}
+.hfam{margin:14px 0 8px;font:700 12.5px "Segoe UI",Arial;color:var(--brand);text-transform:uppercase;letter-spacing:.5px}
+.hprofs{display:flex;flex-wrap:wrap;gap:10px}
+.hprof{border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--text);padding:8px 8px 6px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;box-shadow:var(--shadow);transition:transform .12s,border-color .12s}
+.hprof:hover{transform:translateY(-2px);border-color:var(--brand)}
+.hprof span{font:700 12px "Segoe UI",Arial}
+[data-theme="dark"] .hprof svg{background:#e9ebef;border-radius:8px}
+@media (max-width:640px){ .hgrid{grid-template-columns:1fr} }
 </style>
 </head>
 <body>
@@ -246,6 +266,7 @@ header .logo{background:linear-gradient(135deg,#c8102e,#8f1a17);box-shadow:0 2px
     <div class="sub" id="progName">Abra um .PIT / .txt ou cole o programa da planilha</div>
   </div>
   <div class="spacer"></div>
+  <button class="btn" id="btnHome" title="Tela inicial">&#x1F3E0; Início</button>
   <button class="btn" id="btnTheme" title="Tema claro / escuro">&#x1F319;</button>
   <button class="btn" id="btnUser" title="Usuário (vai no DESENHADO do carimbo) · trocar senha · cadastrar usuários">&#x1F464; Entrar</button>
   <label class="btn primary" title="Abrir arquivo do programa">
@@ -3374,6 +3395,49 @@ function openProfPicker(){
   });
 }
 $("btnProf").onclick = openProfPicker;
+// ---- Tela inicial (usuário 17/11/2026): atalhos grandes + perfis por família; abre sempre depois do login, botão 🏠 Início volta ----
+function chooseProf(t){
+  const dp = t === "dp";
+  $("genType").value = dp ? "iso" : t; $("genType").onchange();
+  const tp = document.querySelector("#genBox [data-k=tipoP]");
+  if (tp && $("genType").value === "iso"){ tp.value = dp ? "dp" : ""; if (state.tolVals) state.tolVals.tipoP = tp.value; syncTolRows(); generate(); }
+  updateProfBtn();
+}
+function homeHide(){ const h = $("home"); if (h) h.style.display = "none"; }
+function homeShow(){
+  let h = $("home");
+  if (!h){ h = document.createElement("section"); h.id = "home"; document.body.appendChild(h); }
+  const top = (document.querySelector("header") || {}).offsetHeight || 60;
+  h.style.cssText = `position:fixed;inset:0;z-index:1;overflow:auto;background:var(--bg);padding:${top + 18}px 20px 30px`;   // embaixo do cabeçalho (z-index 2)
+  const card = (id, ic, t, s) => `<button type="button" class="hcard" data-h="${id}"><span class="hic">${ic}</span><span><b>${t}</b><small>${s}</small></span></button>`;
+  h.innerHTML = `<div class="hwrap">
+    <div class="hhead"><div><div class="htitle">${state.user ? "Olá, " + esc(state.user.split(" ")[0].replace(/\.$/, "")) : "Bem-vindo"}</div><div class="hsub">O que vamos fazer hoje?</div></div></div>
+    <div class="hgrid">
+      ${card("novo", "&#x2795;", "Novo programa", "Escolher o perfil e gerar programa + desenho")}
+      ${card("ver", "&#x1F50E;", "Ver programa", "Abrir pelo número (Programas_CNC / MCS 500)")}
+      ${card("alt", "&#x270F;&#xFE0F;", "Alterar programa", "Refazer um programa com outra bucha")}
+      ${card("past", "&#x1F9F0;", "Pastilhas", "Estoque, entrada e baixa")}
+      ${card("abrir", "&#x1F4C2;", "Abrir arquivo", "Simular um .PIT / .txt do computador")}
+      ${card("colar", "&#x1F4CB;", "Colar programa", "Colar o código e simular")}
+    </div>
+    <div class="hsec">Perfis</div>` +
+    PROF_GROUPS.map(([gname, list]) => `<div class="hfam">${esc(gname)}</div><div class="hprofs">` +
+      list.filter(t => GEN[t] || t === "dp").map(t => `<button type="button" class="hprof" data-prof="${t}" title="${esc(profOptText(t))}">${profThumb(t)}<span>${esc((s => s.length > 16 ? s.replace(/\s*\(.*$/, "") : s)(profCode(t)))}</span></button>`).join("") + `</div>`).join("") +
+    `</div>`;
+  h.style.display = "";
+  h.querySelectorAll("[data-prof]").forEach(b => b.onclick = () => { chooseProf(b.dataset.prof); homeHide(); });
+  h.querySelectorAll("[data-h]").forEach(b => b.onclick = () => {
+    const k = b.dataset.h; homeHide();
+    if (k === "novo") openProfPicker(); else if (k === "ver") $("btnVer").click(); else if (k === "alt") $("btnAlt").click();
+    else if (k === "past") pastOpen(); else if (k === "abrir") $("file").click(); else if (k === "colar") $("btnPaste").click();
+  });
+}
+$("btnHome").onclick = () => { const h = $("home"); h && h.style.display !== "none" ? homeHide() : homeShow(); };
+// abre a tela inicial já no começo: ela fica embaixo da janela de login (z-index menor) e aparece quando o login fecha
+setTimeout(homeShow, 0);   // depois de todos os perfis (GEN) estarem carregados
+// quem entra (login) muda a saudação
+{ const _us = userSet; userSet = function(n){ _us(n); const h = $("home"); if (h && h.style.display !== "none") homeShow(); }; }
+
 // Enter passa para o próximo campo (como o Tab) no formulário e nos dados do desenho
 document.addEventListener("keydown", e => {
   if (e.key !== "Enter" || e.shiftKey || e.ctrlKey || e.altKey) return;

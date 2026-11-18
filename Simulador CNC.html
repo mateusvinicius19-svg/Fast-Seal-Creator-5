@@ -224,7 +224,7 @@ body.printing #dwgModal .dwgf{display:none}
           <option value="pse105">PSE 105 (lábio externo recuado)</option><option value="pse102r">PSE 102 R</option><option value="pse120">PSE 120</option><option value="pse103">PSE 103 (105 com O-ring no canal)</option>
           <option value="pse107">PSE 107 (106 com O-ring no canal)</option><option value="pse118">PSE 118 (107 com chanfro dos lábios 1/4)</option>
           <option value="psh107">PSH 107 (106 com O-ring no canal)</option><option value="psh110">PSH 110 (chevron: base, intermediárias e tampa)</option><option value="psh110t">PSH 110 30° (chevron a 30°: base, intermediárias e tampa)</option><option value="psh121">PSH 121 (107 com chanfro dos lábios 1/4)</option><option value="psh103">PSH 103 (105 com O-ring no canal)</option>
-          <option value="psr101">PSR 101 (raspador com degrau)</option><option value="psr102">PSR 102 (raspador)</option><option value="dual">DUAL SEAL (S03 – dois lábios dentro e fora)</option>
+          <option value="psr101">PSR 101 (raspador com degrau)</option><option value="psr102">PSR 102 (raspador)</option><option value="dual">DUAL SEAL</option>
           <option value="psr211">PSR 211 (U + raspador a 65°)</option><option value="psr212">PSR 212 (211 com degrau no externo)</option>
         </select>
         <button class="btn" id="btnProf" type="button" title="Escolher o perfil pela imagem" style="margin-top:6px;display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:6px 10px">&#x1F5BC; Escolher pela imagem</button>
@@ -3281,7 +3281,7 @@ function profThumb(type){
   const W = 112, Hh = 80, pad = 8, s = Math.min((W - 2 * pad) / Math.max(z1 - z0, 1e-6), (Hh - 2 * pad) / Math.max(r1 - r0, 1e-6));
   const ox = pad + ((W - 2 * pad) - (z1 - z0) * s) / 2, oy = pad + ((Hh - 2 * pad) - (r1 - r0) * s) / 2;
   const d = pts.map(([z, r], i) => `${i ? "L" : "M"}${(ox + (z1 - z) * s).toFixed(1)},${(oy + (r1 - r) * s).toFixed(1)}`).join("") + "Z";
-  const col = (type.startsWith("ps") || type === "lip") ? "#c8102e" : "#e2dfd8";
+  const col = (type.startsWith("ps") || type === "lip" || type === "dual") ? "#c8102e" : "#e2dfd8";   // DUAL SEAL em vermelho como os outros (usuário 17/11/2026)
   const dR = ring ? ring.map(([z, r], i) => `${i ? "L" : "M"}${(ox + (z1 - z) * s).toFixed(1)},${(oy + (r1 - r) * s).toFixed(1)}`).join("") + "Z" : "";
   const dR2 = ring2 ? ring2.map(([z, r], i) => `${i ? "L" : "M"}${(ox + (z1 - z) * s).toFixed(1)},${(oy + (r1 - r) * s).toFixed(1)}`).join("") + "Z" : "";
   return `<svg viewBox="0 0 ${W} ${Hh}" width="${W}" height="${Hh}"><path d="${d}" fill="${col}" stroke="${col === "#e2dfd8" ? "#8d8a83" : "#222"}" stroke-width="1"/>` +
@@ -5090,7 +5090,7 @@ function dualViewsSVG(p, PT){
     s += b - a >= 22 ? ah(a, y, -1, 0) + ah(b, y, 1, 0) : ln(a - 12, y, a, y) + ln(b, y, b + 12, y) + ah(a, y, 1, 0) + ah(b, y, -1, 0);
     return s + `<text x="${(a + b) / 2}" y="${y - 5}" class="t" text-anchor="middle">${txt}</text>`; };
   const ord = (x, yF, yB, xF, txt) => ln(xF, yF, x + (x > xF ? 5 : -5), yF, "e") + ln(x, yB, x, yF) + ah(x, yF, 0, -1) + `<text x="${x - 5}" y="${yB - 2}" class="t" transform="rotate(-90 ${x - 5} ${yB - 2})">${txt}</text>`;
-  const Htxt = (tolNum(p.thS) !== null || tolNum(p.thI) !== null) ? tolMk("H " + f(H), p.thS, p.thI) : tl("H " + f(H), 0.2);
+  const Htxt = (tolNum(p.thS) !== null || tolNum(p.thI) !== null) ? tolMk("H " + f(H), p.thS, p.thI) : (String(p.med || "").toUpperCase() === "T" ? tl("H " + f(H), 0.2) : tolMk("H " + f(H), "0", "-0.2"));   // altura só para menos; "Tudo alojamento" fica ±0,2 (usuário 17/11/2026)
   let g = "";
   boxes.forEach((bx, vi) => {
     const x0 = bx[0] + ML + (iw - H * sc) / 2, yT = bx[1] + MT + (ihv[vi] - (rTop - rBot) * sc) / 2;

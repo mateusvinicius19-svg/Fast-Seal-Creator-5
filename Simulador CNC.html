@@ -3814,12 +3814,17 @@ async function saveDrawingPdf(p, num, dd, keepIfExists){
   const fd = desenhoFolderName(p, num), sub = await fam.getDirectoryHandle(fd, { create: true });
   // PSH 110 (usuário 13/11/2026): as 3 peças na MESMA pasta do conjunto, como no W: — meio "… 30249.pdf", macho "…A.pdf", fêmea "…B.pdf"
   const nm = fd + (p.tipoGen === "psh110" || p.tipoGen === "psh110t" ? ({ M: "", A: "A", B: "B" })[psh110Piece(p)] : "") + (["pse102r","pse120"].includes(p.tipoGen) && pse102rPiece(p) === "A" ? "A" : "");   // PSE 102 R: anel de apoio "…A.pdf" na mesma pasta
-  if (await fileExists(sub, nm + ".pdf")){ if (keepIfExists) return " · desenho já existe (mantido)"; if (!confirm(`O desenho "${nm}.pdf" já existe. Substituir?`)) return " · PDF mantido"; }
-  await writeFile(sub, nm + ".pdf", await drawingPdfBytes(p));
+  // v5.80.1 (usuário 19/11/2026: "está duplicando os desenhos"): a pasta pode já ter o desenho com sufixo, salvo pelo navegador
+  // (ex.: "PSH 129 (235 X 245 X 7.9) 46359 - PU - PREPARACAO.pdf"). Antes o simulador só via o nome exato e criava outro PDF
+  // ("… 46359.pdf"). Agora acha "<nome> - ….pdf" e, se substituir, grava em cima DELE (mesmo nome) — um PDF só por desenho.
+  let fn = nm + ".pdf";
+  if (!(await fileExists(sub, fn))) try { for await (const [n, h] of sub.entries()) if (h.kind === "file" && n.startsWith(nm + " - ") && /\.pdf$/i.test(n)){ fn = n; break; } } catch(e){}
+  if (await fileExists(sub, fn)){ if (keepIfExists) return " · desenho já existe (mantido)"; if (!confirm(`O desenho "${fn}" já existe. Substituir?`)) return " · PDF mantido"; }
+  await writeFile(sub, fn, await drawingPdfBytes(p));
   let ped = "";
-  state.lastDrawing = { dd, p, num, pdf: `${DESENHOS_W}\\${desFam(p)}\\${nm}\\${nm}.pdf` };   // imprimir depois (pvPrint) também grava o pedido
+  state.lastDrawing = { dd, p, num, pdf: `${DESENHOS_W}\\${desFam(p)}\\${nm}\\${fn}` };   // imprimir depois (pvPrint) também grava o pedido
   try { ped = await pedidoArgus(dd, p, num, state.lastDrawing.pdf); } catch(e){ ped = " · pedido ARGUS NÃO gravado: " + e.message; }
-  return ` · desenho: DESENHOS\\${desFam(p)}\\${nm}\\${nm}.pdf${ped}`;
+  return ` · desenho: DESENHOS\\${desFam(p)}\\${nm}\\${fn}${ped}`;
 }
 // v5.6.0 (usuário 10/11/2026): com o "Cód. interno (item)" preenchido, ao salvar o desenho grava um pedido em
 // DESENHOS\_PEDIDOS ARGUS\<item>_<programa>.json. O Claude (rotina / "processar pedidos ARGUS") abre o item no
@@ -6806,7 +6811,7 @@ $("pvPrint").onclick = async () => { if (!state.genParams) return;
     updatePrintCss(); window.print(); return; }
   const ld = state.lastDrawing && pieceFile(state.lastDrawing.p) === pieceFile(state.genParams) ? state.lastDrawing : null;   // só o desenho salvo DESTA peça
   // código mudou depois de salvar: regrava o PDF do desenho na pasta DESENHOS com o código novo
-  if (ld && codEl && codEl.value.trim() !== codOld) try { const nm = desenhoFolderName(ld.p, ld.num), sub = await (await ld.dd.getDirectoryHandle(desFam(ld.p))).getDirectoryHandle(nm); await writeFile(sub, nm + ".pdf", await drawingPdfBytes(state.genParams)); } catch(e){ $("genMsg").textContent = "PDF NÃO regravado com o código novo: " + e.message; }   // código interno digitado só na hora de imprimir: grava o pedido do Anexo 1 do desenho já salvo
+  if (ld && codEl && codEl.value.trim() !== codOld) try { const nm = desenhoFolderName(ld.p, ld.num), sub = await (await ld.dd.getDirectoryHandle(desFam(ld.p))).getDirectoryHandle(nm); await writeFile(sub, String(ld.pdf).split("\\").pop() || nm + ".pdf", await drawingPdfBytes(state.genParams)); } catch(e){ $("genMsg").textContent = "PDF NÃO regravado com o código novo: " + e.message; }   // código interno digitado só na hora de imprimir: grava o pedido do Anexo 1 do desenho já salvo
   if (ld) try { const m = await pedidoArgus(ld.dd, ld.p, ld.num, ld.pdf); $("genMsg").textContent = "Impressão" + m + "."; } catch(e){ $("genMsg").textContent = "Pedido ARGUS NÃO gravado: " + e.message; }
   updatePrintCss(); window.print(); };
 $("dwgSvg").onclick = () => { const p = state.genParams; saveBytes(new TextEncoder().encode(drawingSVG(p)), `${pieceFile(p)}.svg`, "image/svg+xml", "svg"); };

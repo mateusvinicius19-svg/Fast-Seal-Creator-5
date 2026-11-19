@@ -6,6 +6,12 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.80.3 — PSR 102: recuo do desbaste externo acima do caminho do G1 (19/11/2026)
+- Usuário (120 x 138,6 x 10 x 14/18, PU, bucha 142): "linha verde em G1, a pontilhada em G0 — isso não pode". O contorno de
+  desbaste da T2D2 sobe em G1 até X143,6 em cima do calcanhar e o recuo em G0 voltava em X142,4 (abaixo do G1, colado na bucha).
+  Agora o recuo vai ao maior X do contorno (ou da bucha) + 2: `G0 X145.600 Z-18.900` / `G0 X145.600 Z3.000`.
+- Só o PSR 102 muda. Teste no navegador: 37 perfis geram programa; só o PSR 102 mudou.
+
 ## 5.80.2 — PSR 102: recuo da T3D3 não passa mais em G0 por cima do lábio (19/11/2026)
 - Usuário (120 x 138,6 x 10 x 18, PU, bucha 101 x 142): depois de facear o calcanhar (T3D3 em Z −8 até X129,73) o recuo era
   `G0 X129.730 Z5.000` — rápido em Z rente ao lábio (0,4 do contorno). Agora: `G1 X129.730 Z-7.800` (sai 0,2 da face),

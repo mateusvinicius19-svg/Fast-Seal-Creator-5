@@ -5296,7 +5296,10 @@ function psr102Build(p){
   const cp = pout.map(it => [it.p[0], it.p[0] > zF - 1e-6 ? Math.min(2 * it.p[1] + sh, clip) : 2 * it.p[1] + sh]);
   L.push(`G0 X${f3(cp[0][1])} Z3.500`, `G1 X${f3(cp[0][1])} Z3.000 F1.000`);
   cp.slice(1).forEach((q, i) => L.push(`G1 X${f3(q[1])} Z${f3(q[0])}` + (i === 0 ? " F0.160" : "")));
-  L.push(`G0 X${f3(tO + 0.4)} Z${f3(cp[cp.length - 1][0] + 0.2)}`, `G0 X${f3(tO + 0.4)} Z3.000`);
+  // v5.80.3 (usuário 19/11/2026): o contorno em G1 sobe acima da bucha (X143,6 no 120x138,6 bucha 142) e o recuo em G0 voltava em
+  // X142,4 — abaixo do caminho do G1, colado na bucha. Recuo = maior X do contorno (ou da bucha) + 2
+  const xRc = Math.max(tO, ...cp.map(q => q[1])) + 2;
+  L.push(`G0 X${f3(xRc)} Z${f3(cp[cp.length - 1][0] + 0.2)}`, `G0 X${f3(xRc)} Z3.000`);
   L.push(";( FINISH )", `G0 X${f3(2 * pout[0].p[1])} Z3.000`, `G1 X${f3(2 * pout[0].p[1])} Z${f3(pout[0].p[0])}`, ...tipLines(pout, r, "0.130"));
   const lastOut = pout[pout.length - 1].p;
   L.push(`G0 X${f3(tO + 1)} Z${f3(lastOut[0] + 0.2)}`, `G0 X${f3(tO + 1)} Z5.000`, "");

@@ -4860,6 +4860,9 @@ function roughPasses(path, stock, mode, feed, apRad, allowRad, rn, above){
     const a = seq[i - 1], b = seq[i], c = seq[i + 1];
     if (b.t === "L" && c.t === "L" && Math.abs(a.x - b.x) < 1e-6 && Math.abs(b.x - c.x) < 1e-6) seq.splice(i, 1);
   }
+  // v5.79.1 (usuário 19/11/2026, PSE 107 e "nas outras"): bucha com pouco material — a passada de contorno ficava toda no Ø da
+  // bucha (sem cortar nada) colada no lábio/acabamento. Se nenhum ponto dela entra no material, ela sai (o acabamento faz tudo).
+  if (clip === stock && seq.every(q => od ? q.x >= stock - 1e-6 : q.x <= stock + 1e-6)){ L.semCorte = true; return L; }
   const s0 = seq[0];
   L.push(`G0 X${f3(s0.x)} Z3.500`, `G1 X${f3(s0.x)} Z3.000 F1.000`);
   let prev = s0, first = true;
@@ -4989,11 +4992,9 @@ function pseFscBuild(p, gOver){
   const vout = [-r, -r];
   const pout = tipPath(extendStart(g.outer, 1.0), r, "right", vout);
   const rOut = roughPasses(g.outerRough ? tipPath(extendStart(g.outerRough, 1.0), r, "right", vout) : pout, tO, "od", "0.160", Number(p.apR), Number(p.alR), r, deepAbove(p, tO));
-  // v5.78.1 (usuário 19/11/2026, PSE 107 125x140x18 bucha 112x142): bucha com pouco material acima do lábio → o desbaste externo
-  // ficava inteiro no Ø da bucha (X142, cortando nada) e passava a 0,27 do lábio. Só no PSE 107: se nenhum G1 do desbaste fica
-  // abaixo do Ø da bucha, o passe sai (o acabamento faz tudo). Com bucha maior o desbaste continua igual.
-  const semDesbE = p.tipoGen === "pse107" && rOut.length && !rOut.some(l => { const m = /^G1 X([\d.]+)/.exec(l); return m && +m[1] < tO - 1e-3; });
-  if (semDesbE) rOut.length = 0;
+  // v5.78.1 / v5.79.1 (usuário 19/11/2026, PSE 107 125x140x18 bucha 112x142): o desbaste que só andava no Ø da bucha sai dentro do
+  // roughPasses (todos os perfis); aqui o acabamento ganha o F que vinha do desbaste
+  const semDesbE = !!rOut.semCorte;
   L.push(...rOut);
   L.push(";( FINISH )", `G0 X${f3(2 * pout[0].p[1])} Z3.000`, `G1 X${f3(2 * pout[0].p[1])} Z${f3(pout[0].p[0])}` + (semDesbE ? " F0.160" : ""), ...tipLines(pout, r, "0.130"));
   const lastOut = pout[pout.length - 1].p;

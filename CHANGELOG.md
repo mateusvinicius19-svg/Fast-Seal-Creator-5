@@ -6,6 +6,14 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.79.1 — Desbaste que só andava no Ø da bucha sai em TODOS os perfis (19/11/2026)
+- O que foi feito no PSE 107 (5.78.1) agora vale para todos os perfis que usam o desbaste estilo Fast Seal, no externo e no
+  interno: com bucha de pouco material, a passada de contorno ficava inteira no Ø da bucha (sem cortar nada), colada no
+  lábio / no acabamento. Se nenhum ponto dela entra no material, ela sai; o acabamento externo ganha o F0.160.
+- Com bucha Ø int − 2 / Ø ext + 2 mudam: PSE 102 R, 103, 105, 106, 107, 118, 120; PSH 103, 105, 106, 107, 108, 117, 121, 125;
+  PSR 211, 212. Nas medidas padrão só o PSE 118 (interno em X96, na bucha). Com bucha normal: iguais.
+- Teste: 71 casos (37 perfis no padrão + bucha apertada) geram programa; só saíram passes que não cortavam.
+
 ## 5.79.0 — Faca aproxima no mínimo 10 mm acima da peça em TODOS os perfis (19/11/2026)
 - Pedido do usuário: a ferramenta de corte (faca T5D5, bedame T8D8 / T6D16) aproxima e recua no mínimo 10 (no Ø) acima do
   maior Ø da peça (lábio incluído). Quando já ficava mais longe (bucha grande, parâmetro maior), continua como antes — nunca

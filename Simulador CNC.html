@@ -2667,6 +2667,11 @@ GEN.psa108 = {
     const zRough = bed2f ? -(N * B6 + p.sobrep) : -(N * B6 + p.par - (p.soPSA108 === false ? 0 : prol));
     const B7 = Math.max(p.dext, buchaOf(p).bo) + p.recE, B8 = Math.min(p.dint, buchaOf(p).bi) - p.xAb, B9 = B7 - B8, B10 = p.dext - E3;
     const S = (p.S === "" || isNaN(p.S)) ? rpmLookup(Math.max(p.dext, buchaOf(p).bo), RPM_TABLE) : p.S;
+    // v5.76.1 (usuário 19/11/2026, 46341): depois do desbaste externo o PSA 108 voltava em rápido até X(Ø int − xAb) (X88.3, abaixo da
+    // bucha) só para subir de novo em G91 até o início do perfil. Agora o desbaste termina direto no Ø do início do perfil (B10).
+    // Só o PSA 108 (os perfis que usam este build mandam soPSA108: false); sem desbaste, como antes.
+    const rOD = p.soPSA108 === false ? [] : arrRough(p, "od", zRough, B10, p.fExt);
+    const odSeq = rOD.length ? rOD : [...arrRough(p, "od", zRough, B8, p.fExt), "X" + g3(B10 - B8)];
     const c = g3, name = p.nome ? p.nome : `%PSA108 ${fx3(p.dint)}/${fx3(p.dext)}/${fx3(p.h)},MX,`;
     const L = [name,
       ";T7D7 (EXTERNO)  CUTA 93 - NOSEA 35 - NOSEW 16  - R0.4 - F3",
@@ -2674,7 +2679,7 @@ GEN.psa108 = {
       ";T8D8 (BEDAME)   CUTA 90 - NOSEA 90 - NOSEW 1   - R0   - F21",
       ";BUCHA " + buchaOf(p).txt, `;${N} PECA(S) POR CICLO - CHANFRO EXT ${fx3(cE)} X ${fx(aE, 0)} - INT ${fx3(cI)} X 30` + (IB !== I3 ? ` (TRAS X ${fx(p.angIB, 0)})` : ""), "G90", "G95", "G54", "G97 S" + c(S) + " M3", "N10", "G0 Z" + c(p.z0),
       "T7D7; (EXTERNO) PECA 1", "G0 X" + c(p.dext) + " Z" + c(p.zAp) + "; (DIAMETRO EXTERNO) PECA 1", "G91",
-      "X" + c(B7 - p.dext), "Z" + c(-p.zAp), "G1 X" + c(-B9) + " F" + gF(p.fExt), "G0 Z" + c(p.zAp), ...arrRough(p, "od", zRough, B8, p.fExt), "X" + c(B10 - B8), "G1 Z" + c(-(p.zAp - prol))];
+      "X" + c(B7 - p.dext), "Z" + c(-p.zAp), "G1 X" + c(-B9) + " F" + gF(p.fExt), "G0 Z" + c(p.zAp), ...odSeq, "G1 Z" + c(-(p.zAp - prol))];
     for (let i = 1; i <= N; i++) L.push(";(INICIO PERFIL PEÇA " + i + ")", "G42 X" + c(E3) + " Z" + c(-E4), "Z" + c(-(p.h - 2 * cE)) + " ;(VALOR PARA ALTERAR NA ALTURA)", "X" + c(-E3) + " Z" + c(-E4), "; (FIM DO PERFIL PEÇA " + i + ")");
     // v5.21.16 (usuário 11/11): com bedame 2 o acabamento termina no MESMO Z do desbaste (fim da faixa do corte), sem degrau:
     // paralelo no fundo do chanfro = meio bedame + sobreposição → fim em −(N × B6 + sobreposição), 0,1 antes da peça seguinte

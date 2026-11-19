@@ -2340,6 +2340,7 @@ function generateCore(fromInput){
       if (want !== k && has) has.closest("div.wide").remove();
     }
   }
+  lines = puOnePass(lines);   // v5.82.0: PU com até 6 no Ø para tirar → só o acabamento
   if (type !== "psr102") lines = puRetracts(lines);   // v5.81.0: recuos do PU como no PSR 102 (o PSR 102 já sai assim do gerador)
   const fname = (type === "dual" || type === "pse127" || type === "psh131" || type === "iso" || type === "dhr" || type === "dpr" || type === "psh110" || type === "psh110t" || type === "psr101" || type === "psa108" || type === "psa108c" || type === "psa109" || type === "psg101" || type === "psg103" || type === "psg104" || type === "lip" || type === "pso" || type === "pse106" || type === "psh106" || type === "psh108" || type === "psh117" || type === "psh125" || type === "psh105" || type === "pse105" || type === "pse103" || type === "pse107" || type === "pse118" || type === "psh107" || type === "psh121" || type === "psh103" || type === "psr102" || type === "psr211" || type === "psr212" || type === "pse102r" || type === "pse120") ? pieceFile(p) + (buchaIsException(p) || (state.alterNum && p.bi !== "" && p.bo !== "") ? ` ${gen15(p.bi)}X${gen15(p.bo)}` : "") : `PSA108 ${gen15(p.dint)}X${gen15(p.dext)}X${gen15(p.h)} - ${xround(p.n,0)} pcs`;
   load(lines.join("\n"), fname);
@@ -2380,6 +2381,32 @@ function puRetracts(lines){
     prevCut = g1 && !g0; prevLine = t;
     return out;
   });
+}
+// v5.82.0 (usuário 19/11/2026: "se for tirar pouco material nos diâmetros, até 6 mm, coloca em apenas 1 passe"): programas estilo
+// Fast Seal em PU — em cada seção OUTSIDE / INSIDE, se o material a tirar no Ø for ≤ 6 (externo: Ø ext. da bucha − menor Ø do
+// acabamento; interno: maior Ø do acabamento − Ø int. da bucha; tarugo nunca), saem os passes de desbaste e fica só o FINISH.
+const PU_ONE_PASS = 6;
+function puOnePass(lines){
+  const L = lines.map(String), mat = L.find(l => /^;MATERIAL:/i.test(l)) || "", tb = /TUBE\s+([\d.]+)\/([\d.]+)/i.exec(mat);
+  if (!/\bPU\b/i.test(mat) || !tb) return lines;
+  const bi = Number(tb[1]), bo = Number(tb[2]), drop = new Set();
+  const heads = []; L.forEach((l, i) => { const h = /^;\(\s*([A-Z][A-Z0-9 ]*?)\s*\)\s*$/.exec(l.trim()); if (h && !/\*/.test(l)) heads.push([i, h[1]]); });
+  heads.forEach(([i, name], k) => {
+    if (name !== "OUTSIDE" && name !== "INSIDE") return;
+    const fin = heads.find(([j, n], kk) => kk > k && n === "FINISH"), nxt = heads.find(([j, n], kk) => kk > k && n !== "FINISH");
+    if (!fin || (nxt && nxt[0] < fin[0])) return;
+    const end = nxt ? nxt[0] : L.length, xs = [];
+    for (let j = fin[0] + 1; j < end; j++){ const t = L[j].replace(/;.*$/, "").trim(), x = /X(-?[\d.]+)/.exec(t), z = /Z(-?[\d.]+)/.exec(t);
+      if (/^G0?[123]\b/.test(t) && x && z && Number(z[1]) <= 0) xs.push(Number(x[1])); }
+    if (!xs.length) return;
+    const ext = name === "OUTSIDE", tira = ext ? bo - Math.min(...xs) : Math.max(...xs) - bi;
+    if (!(bi > 0 || ext) || !(tira <= PU_ONE_PASS + 1e-9)) return;
+    const t0 = L.findIndex((l, j) => j > i && /^T\d+D\d+/.test(l.trim()));   // depois da ferramenta (e dos ";" que vêm logo depois)
+    if (t0 < 0 || t0 > fin[0]) return;
+    let a = t0 + 1; while (a < fin[0] && /^;\s*$/.test(L[a].trim())) a++;
+    for (let j = a; j < fin[0]; j++) drop.add(j);
+  });
+  return drop.size ? L.filter((l, j) => !drop.has(j)) : lines;
 }
 // bucha digitada à mão só vira exceção ("NNNNNN BIxBO") quando é diferente da que o Simulador escolheria sozinho
 function autoBucha(p){

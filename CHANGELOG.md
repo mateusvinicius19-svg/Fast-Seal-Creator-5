@@ -6,6 +6,16 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.79.4 — PSA 108 e Ciclo SEM CHANFRO: ferramentas do PU e corte com a faca em PU / NBR (19/11/2026)
+- Em PU (usuário escolheu "gaxetas PU com faca"): externo T2D2, interno T4D14 (Ø < 11) / T1D45 (11 a 40) / T2D12 (> 40),
+  corte com a faca T5D5. Antes ficava T7D7 / T4D4 / T8D8 (PSA 108) ou T5D5 (SEM CHANFRO).
+- Usuário: "PU e NBR só se corta com a T5D5" → no PSA 108 em PU, NBR e Viton (padrão do NBR) o corte é a T5D5, também com
+  secção > 14,8 (antes ia para o bedame 2 T6D16 com G92 +1; agora G92 normal e espaço entre peças pelo campo do bedame).
+  NBR / Viton: externo e interno continuam T7D7 / T4D4.
+- PEAD, PTFE, POM, Celeron: iguais. PSA 108 C, PSG 101/103/104, PSA 109, Ciclo com chanfro e os outros perfis: iguais.
+- Teste: 133 casos (37 perfis + arruelas em PU/NBR/PEAD/PTFE em 4 tamanhos) geram programa; só mudaram PSA 108 e SEM CHANFRO
+  em PU/NBR.
+
 ## 5.79.3 — Ciclo arruelas SEM CHANFRO: interno já posiciona no Ø do 1º desbaste (19/11/2026)
 - Igual ao PSA 108 (5.79.2): a T4D4 ia em G0 até X(Ø int da peça) a Z3 com a bucha ainda fechada e só depois para o 1º desbaste.
   Agora (34 x 40 x 2,5, bucha 13 x 46): T4D4 → G0 X19.333 Z3 → G1 Z-6 F.1. Sem desbaste interno: como antes.

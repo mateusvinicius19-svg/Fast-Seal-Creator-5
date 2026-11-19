@@ -6,6 +6,12 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.80.2 — PSR 102: recuo da T3D3 não passa mais em G0 por cima do lábio (19/11/2026)
+- Usuário (120 x 138,6 x 10 x 18, PU, bucha 101 x 142): depois de facear o calcanhar (T3D3 em Z −8 até X129,73) o recuo era
+  `G0 X129.730 Z5.000` — rápido em Z rente ao lábio (0,4 do contorno). Agora: `G1 X129.730 Z-7.800` (sai 0,2 da face),
+  `G0 X139.600 Z-7.800` (acima do Ø ext. + 1) e `G0 X139.600 Z5.000`. G92 igual.
+- Só o PSR 102 muda. Teste no navegador (sem Node neste PC): 37 perfis geram programa; só o PSR 102 mudou.
+
 ## 5.80.1 — Desenho não duplica mais o PDF que já existe com sufixo (19/11/2026)
 - "Está duplicando os desenhos": a pasta já tinha "PSH 129 (235 X 245 X 7.9) 46359 - PU - PREPARACAO.pdf" (salvo pela impressão
   do navegador em 18/11) e o simulador, que só conferia o nome exato, gravou outro "… 46359.pdf". Agora ele acha

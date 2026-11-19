@@ -6,6 +6,19 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.79.0 — Faca aproxima no mínimo 10 mm acima da peça em TODOS os perfis (19/11/2026)
+- Pedido do usuário: a ferramenta de corte (faca T5D5, bedame T8D8 / T6D16) aproxima e recua no mínimo 10 (no Ø) acima do
+  maior Ø da peça (lábio incluído). Quando já ficava mais longe (bucha grande, parâmetro maior), continua como antes — nunca
+  chega mais perto do que chegava. Constante FACA_MIN = 10.
+- Gaxetas/raspadores estilo Fast Seal (PSE/PSH 103, 105, 106, 107, 108, 117, 118, 121, 125, PSR 211/212): era Ø bucha + 0,2
+  (ex.: 129,2) → maior Ø do contorno + 10 (ex.: 131,5). PSE 107 125x140x18: X150 → X151,5 (lábio em 141,5).
+- PSE 102 R, PSE 120 (e anéis), PSE 127, PSH 131, PSH 110 A/B, PSR 101, PSR 102, DUAL: idem.
+- Arruela ISO, PSE 108 (DP) e DHR: parâmetro "Corte: acima do Ø externo" vale no mínimo 10 (era 8).
+- PSA 108, PSA 108 C, PSA 109, PSG 101/103/104, Ciclo arruelas: recuo do corte no mínimo 10 (era 4). SEM CHANFRO: posição
+  do corte no mínimo 10 (era 8). Os passos do corte em G91 acompanham.
+- Já ficavam a 10 ou mais (iguais): PSH 129, PSE 125, PSO 109, PSH 110 intermediária.
+- Teste: 37 perfis + peças (44 casos) geram programa; só mudaram as linhas de aproximação/recuo da faca.
+
 ## 5.78.2 — PSE 107: faca aproxima 10 mm acima da peça (19/11/2026)
 - Corte (T5D5 / T8D8) do PSE 107: o X de aproximação e de recuo era Ø da bucha + 0,2 (ex.: X142.2, colado no lábio).
   Agora é Ø externo da peça + 10 (ex.: 125 x 140 x 18 → X150). Bucha maior que isso: continua Ø da bucha + 0,2. G92 igual.

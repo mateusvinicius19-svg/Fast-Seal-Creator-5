@@ -6,6 +6,14 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.75.0 — Carimbo com ASSINATURA preenchida; PSE 108 (DP) com material (19/11/2026)
+- Carimbo do desenho: "ASS." virou "ASSINATURA" por extenso e já sai com o nome de quem desenhou e de quem aprovou em letra
+  de assinatura (azul) — não precisa assinar à mão. Nome comprido diminui para caber na coluna.
+- PSE 108 (DP): campo novo "Material — só PSE 108 (DP)", com a mesma lista e ferramentas das arruelas (linha ;MATERIAL;
+  Celeron T2D54/T2D64/T6D16; T2D14 no interno abaixo de Ø14 em PTFE/POM/PEAD). O material vai também no desenho.
+  A Arruela ISO (mesmo gerador) continua igual: programa e desenho sem material, como antes.
+- Teste dos perfis: 35 perfis geram programa; nenhum mudou com os valores padrão.
+
 ## 5.74.0 — PSA 108: chanfro sugerido pela secção também (18/11/2026)
 - PSA 108 e PSA 108 C/ CORTE: chanfro sugerido (externo 45° e interno 30°) era só 10 % da altura e ficava grande na secção fina.
   Agora = o menor entre 10 % da altura e 15 % da secção, de 0,2 a 1 mm, arredondado em 0,1 (nunca maior que antes).

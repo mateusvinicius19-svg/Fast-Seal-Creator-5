@@ -5320,7 +5320,10 @@ function psr102Build(p){
   const lastIn = pin[pin.length - 1].p;
   L.push(`G0 X${f3(g.tip - 2)} Z${f3(lastIn[0] + 0.2)}`, `G0 X${f3(g.tip - 2)} Z5.000`, "");
   // ---- face do calcanhar (T3D3), como no Fast Seal ----
-  L.push(...sec("FACING"), "G0 Z70", "T3D3", ";", ";", `G0 X${f3(p.dext + 1)} Z${f3(-g.prot)}`, `G1 X${f3(g.lipf + 0.36)} Z${f3(-g.prot)} F0.120`, `G0 X${f3(g.lipf + 0.36)} Z5.000`, "");
+  // v5.80.2 (usuário 19/11/2026, 120x138,6x10x18): o recuo era G0 em Z direto por cima do lábio (0,4 do contorno) — agora sai 0,2 da
+  // face do calcanhar, sobe em X acima do Ø ext. e só então volta em Z
+  L.push(...sec("FACING"), "G0 Z70", "T3D3", ";", ";", `G0 X${f3(p.dext + 1)} Z${f3(-g.prot)}`, `G1 X${f3(g.lipf + 0.36)} Z${f3(-g.prot)} F0.120`,
+         `G1 X${f3(g.lipf + 0.36)} Z${f3(-g.prot + 0.2)}`, `G0 X${f3(p.dext + 1)} Z${f3(-g.prot + 0.2)}`, `G0 X${f3(p.dext + 1)} Z5.000`, "");
   // ---- corte (T5D5) ----
   const xc = Math.max(Math.min(tO + 0.2, p.dext + 4), p.dext + FACA_MIN), xe = g.calc - 1.2;
   L.push(...sec("CUTTING"), "G0 Z70", TL.cut, ";", ";", `G0 X${f3(xc)} Z3.000`, `G0 X${f3(xc)} Z${f3(-H)}`, `G1 X${f3(xe)} Z${f3(-H)} F${TL.fCut}`, `G0 X${f3(xc)} Z${f3(-H)}`, `G0 X${f3(xc)} Z15.000`, "", "");

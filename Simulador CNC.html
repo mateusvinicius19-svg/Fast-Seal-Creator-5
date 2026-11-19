@@ -5001,7 +5001,8 @@ function pseFscBuild(p, gOver){
   // PSE 102 R: degrau do anel de apoio com a T6D6, como nos programas PS05P do Fast Seal (desce na parede, Ø do degrau até a altura)
   if (g.ring) L.push(...sec("OUTSIDE HAMMER GROOVE"), "G0 Z70", "T6D6", ";", ";", `G0 X${f3(tO + 4)} Z3`, `G0 Z${f3(g.zS)}`, `G1 X${f3(g.dS)}`, `G1 Z${f3(-H)}`, `G0 X${f3(tO + 4)}`, "G0 Z3", "");
   // ---- corte (T5D5; Teflon T8D8) ----
-  const xc = tO + 0.2;
+  // v5.78.2 (usuário 19/11/2026): no PSE 107 a faca aproxima 10 mm acima da peça (Ø ext + 10 no X); bucha maior que isso: como antes
+  const xc = p.tipoGen === "pse107" ? Math.max(tO + 0.2, Number(p.dext) + 10) : tO + 0.2;
   L.push(...sec("CUTTING"), "G0 Z70", TL.cut, ";", ";", `G0 X${f3(xc)} Z3.000`, `G0 X${f3(xc)} Z${f3(-H)}`, `G1 X${f3(g.wiper ? g.tipIn - 0.1 : p.dint - 0.1)} Z${f3(-H)} F${TL.fCut}`,
          `G0 X${f3(xc)} Z${f3(-H)}`, `G0 X${f3(xc)} Z15.000`, "", "");
   const cutR = (xc - (g.wiper ? g.tipIn - 0.1 : p.dint - 0.1)) / 2;                       // quanto a faca corta no raio

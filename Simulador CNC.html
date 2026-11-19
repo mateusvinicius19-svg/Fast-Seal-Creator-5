@@ -4985,8 +4985,13 @@ function pseFscBuild(p, gOver){
   const vout = [-r, -r];
   const pout = tipPath(extendStart(g.outer, 1.0), r, "right", vout);
   const rOut = roughPasses(g.outerRough ? tipPath(extendStart(g.outerRough, 1.0), r, "right", vout) : pout, tO, "od", "0.160", Number(p.apR), Number(p.alR), r, deepAbove(p, tO));
+  // v5.78.1 (usuário 19/11/2026, PSE 107 125x140x18 bucha 112x142): bucha com pouco material acima do lábio → o desbaste externo
+  // ficava inteiro no Ø da bucha (X142, cortando nada) e passava a 0,27 do lábio. Só no PSE 107: se nenhum G1 do desbaste fica
+  // abaixo do Ø da bucha, o passe sai (o acabamento faz tudo). Com bucha maior o desbaste continua igual.
+  const semDesbE = p.tipoGen === "pse107" && rOut.length && !rOut.some(l => { const m = /^G1 X([\d.]+)/.exec(l); return m && +m[1] < tO - 1e-3; });
+  if (semDesbE) rOut.length = 0;
   L.push(...rOut);
-  L.push(";( FINISH )", `G0 X${f3(2 * pout[0].p[1])} Z3.000`, `G1 X${f3(2 * pout[0].p[1])} Z${f3(pout[0].p[0])}`, ...tipLines(pout, r, "0.130"));
+  L.push(";( FINISH )", `G0 X${f3(2 * pout[0].p[1])} Z3.000`, `G1 X${f3(2 * pout[0].p[1])} Z${f3(pout[0].p[0])}` + (semDesbE ? " F0.160" : ""), ...tipLines(pout, r, "0.130"));
   const lastOut = pout[pout.length - 1].p;
   L.push(`G0 X${f3(tO + 1)} Z${f3(lastOut[0] + 0.2)}`, `G0 X${f3(tO + 1)} Z5.000`, "");
   if (g.wiper) L.push(";( *********************** )", ";( OUTSIDE ANGLE HAMMER GROOVE   )", ";( *********************** )", "G0 Z70", "T6D6", ";", ";",

@@ -6,6 +6,18 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.81.0 — Itens em PU: recuos do externo +1 mm e do interno −1 mm (padrão do PSR 102) (19/11/2026)
+- Pedido do usuário: "nos itens em PU pode alterar para esse padrão externo e interno" (o do PSR 102, 5.80.4).
+- Programas no estilo Fast Seal (seções OUTSIDE / INSIDE) com material PU: o recuo em G0 depois de cada passe (desbaste reto,
+  contorno e acabamento) vai 1 mm (no Ø) mais para fora no externo e mais para dentro no interno, e o G0 de volta em Z acompanha.
+  Furo no tarugo: recuo X − 0,5 → X − 1,5. Ex. PSE 106 padrão: X129,4 → X130,4 · X130 → X131 · X95,6 → X94,6 · X96,5 → X95,5.
+- Mudam (em PU): PSE 102 R, 103, 105, 106, 107, 118, 120, 127; PSH 103, 105, 106, 107, 108, 110, 110 30°, 117, 121, 125, 131;
+  PSR 101, 211, 212; DUAL. PSR 102 já estava assim (sem mudança). Face, canal frontal, T6D6 e corte: iguais.
+- Não mudam: outros materiais (NBR, Viton, PTFE...) e os perfis no estilo planilha (arruelas, PSA/PSG, ISO, DH, DP, DHR, PSO),
+  que já saem do material em G1 antes do G0.
+- Teste no navegador (185 casos: 37 perfis × padrão/PU/NBR/outros): todos geram; só mudaram os X dos recuos em ±1; nenhum G0 de
+  recuo fica dentro da faixa do G1 anterior.
+
 ## 5.80.4 — PSR 102: recuos do externo +1 mm e do interno −1 mm (19/11/2026)
 - Pedido do usuário: "aumenta mais 1 mm no recuo do externo e menos 1 no interno" (no Ø). Ex. 120 x 138,6 x 10 x 18, bucha 101 x 142:
   - externo (T2D2): passes retos X136,4 → X137,4 e X130,4 → X131,4; contorno de desbaste X145,6 → X146,6; acabamento X143 → X144;

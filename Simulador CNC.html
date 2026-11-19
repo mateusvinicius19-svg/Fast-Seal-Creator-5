@@ -2340,6 +2340,7 @@ function generateCore(fromInput){
       if (want !== k && has) has.closest("div.wide").remove();
     }
   }
+  if (type !== "psr102") lines = puRetracts(lines);   // v5.81.0: recuos do PU como no PSR 102 (o PSR 102 já sai assim do gerador)
   const fname = (type === "dual" || type === "pse127" || type === "psh131" || type === "iso" || type === "dhr" || type === "dpr" || type === "psh110" || type === "psh110t" || type === "psr101" || type === "psa108" || type === "psa108c" || type === "psa109" || type === "psg101" || type === "psg103" || type === "psg104" || type === "lip" || type === "pso" || type === "pse106" || type === "psh106" || type === "psh108" || type === "psh117" || type === "psh125" || type === "psh105" || type === "pse105" || type === "pse103" || type === "pse107" || type === "pse118" || type === "psh107" || type === "psh121" || type === "psh103" || type === "psr102" || type === "psr211" || type === "psr212" || type === "pse102r" || type === "pse120") ? pieceFile(p) + (buchaIsException(p) || (state.alterNum && p.bi !== "" && p.bo !== "") ? ` ${gen15(p.bi)}X${gen15(p.bo)}` : "") : `PSA108 ${gen15(p.dint)}X${gen15(p.dext)}X${gen15(p.h)} - ${xround(p.n,0)} pcs`;
   load(lines.join("\n"), fname);
   if (!g.check(p)) try { $("genMsg").textContent += costTxt(pieceCost(lines.join("\n"), ["ciclo", "semch"].includes(type) ? xround(p.n, 0) : (isPSA(type) || type === "iso") ? cicloPcs(p) : 1)); } catch(e){}
@@ -2348,6 +2349,37 @@ function generateCore(fromInput){
   if (d16 && celD16 && secCorte <= 14.8 + 1e-9){ $("genMsg").textContent += ` · Celeron: corte com a T6D16 — bedame 2 nas peças, G92 +1 mm, desbaste e acabamento terminam no mesmo Z (sem passar para a peça seguinte).`; }
   if (celRpm) $("genMsg").textContent += ` · Celeron: corte com metade da rotação (S${celRpm[1]}; o resto em S${celRpm[0]}).`;
   if (d16 && !(celD16 && secCorte <= 14.8 + 1e-9)){ $("genMsg").textContent += ` · Secção ${fmtN(secCorte, 2)} > 14,8: corte com a T6D16 (bedame 2 mm) no lugar da T8D8 — G92 +1 mm${p.bedD16 ? ", bedame 2 nas peças" : ""}.`; }
+}
+// v5.81.0 (usuário 19/11/2026: "nos itens em PU pode alterar para esse padrão externo e interno" = o do PSR 102, 5.80.4):
+// programas no estilo Fast Seal (seções ;( OUTSIDE ) / ;( INSIDE )) com ;MATERIAL em PU — o 1º G0 depois de um corte (recuo) vai
+// 1 mm (no Ø) mais para fora no externo e mais para dentro no interno, e o G0 seguinte no mesmo X acompanha; no furo do tarugo o
+// recuo em G1 (X − 0,5) também vai 1 a mais para dentro. Só G90; arruelas/ISO/DH/DP (estilo planilha) não têm essas seções.
+function puRetracts(lines){
+  const L = lines.map(String), mat = L.find(l => /^;MATERIAL:/i.test(l)) || "";
+  if (!/\bPU\b/i.test(mat) || !L.some(l => /^;\(\s*(OUTSIDE|INSIDE)\s*\)/.test(l))) return lines;
+  const num = v => Number(v), X = l => { const m = /X(-?[\d.]+)/.exec(l); return m ? num(m[1]) : null; }, Zv = l => /Z-?[\d.]/.test(l);
+  const setX = (l, x) => l.replace(/X-?[\d.]+/, "X" + fx(x, 3));
+  let sec = "", abs = true, cx = null, prevCut = false, map = null, prevLine = "";
+  return L.map((l, i) => {
+    const t = l.replace(/;.*$/, "").trim(), hd = /^;\(\s*([A-Z][A-Z0-9 ]*?)\s*\)\s*$/.exec(l.trim());
+    if (hd && !/\*/.test(l)){ if (hd[1] !== "FINISH" && hd[1] !== "ROUGH") sec = hd[1]; prevCut = false; map = null; return l; }
+    if (!t) return l;
+    if (/\bG91\b/.test(t)) abs = false; if (/\bG90\b/.test(t)) abs = true;
+    const isPass = abs && (sec === "OUTSIDE" || sec === "INSIDE"), g0 = /^G0?0\b/.test(t), g1 = /^G0?[123]\b/.test(t) || (!g0 && /^[XZ]/.test(t) && prevCut);
+    let out = l;
+    if (/^T\d/.test(t)){ prevCut = false; map = null; cx = null; return l; }
+    if (isPass && g0){
+      const x = X(t);
+      if (prevCut && x !== null && cx !== null && Math.abs(x - cx) > 1e-9){ const nx = x + (x > cx ? 1 : -1); map = [x, nx]; out = setX(l, nx); }
+      else if (map && x !== null && Math.abs(x - map[0]) < 1e-9) out = setX(l, map[1]);
+      else map = null;
+    } else if (isPass && sec === "INSIDE" && /^G0?1\s+X-?[\d.]+\s*$/.test(t) && prevCut && cx !== null && X(t) < cx && /^G0?0\s+Z/.test((L[i + 1] || "").trim())){
+      out = setX(l, X(t) - 1);   // tarugo: G1 X(Ø − 0,5) → Ø − 1,5, depois G0 Z
+    }
+    const xo = X(out.replace(/;.*$/, "")); if (xo !== null && abs) cx = xo;
+    prevCut = g1 && !g0; prevLine = t;
+    return out;
+  });
 }
 // bucha digitada à mão só vira exceção ("NNNNNN BIxBO") quando é diferente da que o Simulador escolheria sozinho
 function autoBucha(p){

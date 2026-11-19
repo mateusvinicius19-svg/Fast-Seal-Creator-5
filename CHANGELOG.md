@@ -6,6 +6,14 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.80.1 — Desenho não duplica mais o PDF que já existe com sufixo (19/11/2026)
+- "Está duplicando os desenhos": a pasta já tinha "PSH 129 (235 X 245 X 7.9) 46359 - PU - PREPARACAO.pdf" (salvo pela impressão
+  do navegador em 18/11) e o simulador, que só conferia o nome exato, gravou outro "… 46359.pdf". Agora ele acha
+  "<nome> - ….pdf" na pasta, pergunta "Substituir?" e grava em cima DESSE arquivo (mesmo nome): um PDF só por desenho.
+  Salvar em lote (manter o que existe) também reconhece. Regravar com o código novo usa o mesmo arquivo.
+- No W: (últimos 10 dias) 23 pastas já estão com os dois PDFs; não foram mexidas.
+- Programas: nenhum perfil mudou (37 perfis geram programa e desenho).
+
 ## 5.80.0 — Material novo: PTFE+FV (Teflon + fibra de vidro) (19/11/2026)
 - Nas listas de material de todos os perfis (gaxetas, raspadores, arruelas, guias, DP, DH, PSE 120/102 R, PSH 110, DUAL...).
 - Mesmas regras do PTFE puro / +BR / +GR: ferramentas de Teflon (T7D7 / T4D4, T2D14 abaixo de Ø14, bedame T8D8), bucha

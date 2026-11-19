@@ -6,6 +6,14 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.80.0 — Material novo: PTFE+FV (Teflon + fibra de vidro) (19/11/2026)
+- Nas listas de material de todos os perfis (gaxetas, raspadores, arruelas, guias, DP, DH, PSE 120/102 R, PSH 110, DUAL...).
+- Mesmas regras do PTFE puro / +BR / +GR: ferramentas de Teflon (T7D7 / T4D4, T2D14 abaixo de Ø14, bedame T8D8), bucha
+  automática Ø int − 2 / Ø ext + 2, passe único saindo de bucha. Na linha ;MATERIAL sai "PTFE+FV". Texto livre "TEFLON + FV"
+  ou "fibra de vidro" em programas antigos é reconhecido como PTFE+FV.
+- Teste: 76 casos (37 perfis no padrão + cada lista de material) — padrão igual; em PTFE+FV cada perfil sai igual ao PTFE+GR
+  (só o nome do material muda).
+
 ## 5.79.4 — PSA 108 e Ciclo SEM CHANFRO: ferramentas do PU e corte com a faca em PU / NBR (19/11/2026)
 - Em PU (usuário escolheu "gaxetas PU com faca"): externo T2D2, interno T4D14 (Ø < 11) / T1D45 (11 a 40) / T2D12 (> 40),
   corte com a faca T5D5. Antes ficava T7D7 / T4D4 / T8D8 (PSA 108) ou T5D5 (SEM CHANFRO).

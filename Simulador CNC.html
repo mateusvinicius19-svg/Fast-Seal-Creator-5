@@ -1374,8 +1374,8 @@ GEN.psr212 = Object.assign({}, GEN.psr211, { name: "PSR 212",
     const base = GEN.psr211.check(p), g = psr211Geom(p), m = [];
     if (!(g.dS < g.extCalc - 2 * g.chc - 0.2)) m.push(`Ø do degrau (${fmtN(g.dS, 2)}) tem que ficar abaixo do Ø externo do corpo (${fmtN(g.extCalc, 2)}) menos os chanfros`);
     if (!(g.dS > g.rootOut + 2 * g.chc + 1)) m.push(`Ø do degrau (${fmtN(g.dS, 2)}) muito pequeno: encosta no raspador (raiz Ø${fmtN(g.rootOut, 2)})`);
-    if (!(g.zS < g.zO - g.lipLen - g.chc - 0.2)) m.push("degrau comprido demais: invade o lábio externo");
-    if (!(g.Ls > 2 * g.chc)) m.push("degrau curto demais para os chanfros");
+    if (!(g.zS < g.zO - g.lipLen - (g.cS ?? g.chc) - 0.2)) m.push("degrau comprido demais: invade o lábio externo");
+    if (!(g.Ls > (g.cS ?? g.chc) + g.chc)) m.push("degrau curto demais para os chanfros");
     const t = base ? base.replace(/^ATENÇÃO: /, "").replace(/\.$/, "") : "";
     const all = [t, ...m].filter(Boolean);
     return all.length ? "ATENÇÃO: " + all.join("; ") + "." : "";
@@ -1758,22 +1758,24 @@ function psr211Geom(p){
   // v5.50.3 (usuário 16/11/2026): no PSR 212 a T2D2 faz o chanfro da aresta do degrau e segue no Ø de baixo do chanfro até o 45° de trás
   // v5.52.1 (usuário 16/11/2026): no desbaste do degrau a T2D2 continua o 45° do chanfro até 0,2 mm (raio) acima do Ø do degrau e segue
   // reto até o 45° de trás — tira o material do degrau antes da T6D6; na peça o chanfro fica chc (a T6D6 corta a parede e o Ø depois).
-  const rS = STEP ? R(dS) + 0.2 : 0, zBig = zS + g.chc - (R(g.extCalc) - rS), zMeet = -Hb - (R(xoB) - rS);
+  // v5.83.0 (usuário 19/11/2026: "diminui a proporção do chanfro na altura menor"): chanfro da aresta do degrau = metade do chc (mín. 0,2, de 0,05 em 0,05)
+  const cS = STEP ? Math.max(0.2, Math.round(g.chc / 2 * 20) / 20) : g.chc;
+  const rS = STEP ? R(dS) + 0.2 : 0, zBig = zS + cS - (R(g.extCalc) - rS), zMeet = -Hb - (R(xoB) - rS);
   const big = STEP && rS < R(g.extCalc) - g.chc - 1e-6 && rS < R(xoB) && zMeet > -Hb - k45 + 1e-6 && zBig > zMeet + 1e-6;
-  const stepPts = !STEP ? [g.outer[3]] : big ? [[zS + g.chc, R(g.extCalc)], [zBig, rS], [zMeet, rS]] : [[zS + g.chc, R(g.extCalc)], [zS, R(g.extCalc) - g.chc], [-Hb, R(xoB)]];
+  const stepPts = !STEP ? [g.outer[3]] : big ? [[zS + cS, R(g.extCalc)], [zBig, rS], [zMeet, rS]] : [[zS + cS, R(g.extCalc)], [zS, R(g.extCalc) - cS], [-Hb, R(xoB)]];
   const outer = [...g.outer.slice(0, 3), ...stepPts, ...(STEP ? [] : [[-Hb, R(xoB)]]), [-Hb - k45, R(xoB) - k45], [-Ht - 0.5, R(xoB) - k45]];   // o resto fica para a T6D6
   const inner = [...g.inner.slice(0, 3), [-Ht + rampL, R(g.intCalc)], ...(cT > 0 ? [[-Ht + cTz, R(tipIn)], [-Ht, R(tipIn) + cT]] : [[-Ht, R(tipIn)]]), [-Ht - 0.5, R(tipIn) + cT + 0.5 * cTk]];   // sem chanfro: rampa até a ponta e segue reto
   // v5.72.1 (usuário 18/11/2026): PSR 211 e PSR 212 (os da T6D6) — desbaste e acabamento externos sempre pelo menos 2 mm além da peça
   // (o campo "bed" vinha com 1, o da arruela, e parava em altura + 1); bedame maior que 2 continua valendo
   const bedT = Math.max(2, Number(p.bed) || 0);
   const outerRough = [...outer.slice(0, -1), [-Ht - bedT + (Number(p.rn) || 0.4), outer[outer.length - 1][1]]];   // + raio da ponta: a ferramenta para em Z −(altura + 2)   // desbaste e acabamento externos: altura + bedame de 2 mm
-  return Object.assign({}, g, { H: Ht, Hb, prot, tth, tipIn, tipOut, rootOut, wAng, cT, cTz, rampL, outer: outerRough, outerRough, inner, wiper: true, hHead: Hb, step: STEP, dS, Ls, zS, xoBack: xoStep, xoBody: xoB });
+  return Object.assign({}, g, { H: Ht, Hb, prot, tth, tipIn, tipOut, rootOut, wAng, cT, cTz, rampL, outer: outerRough, outerRough, inner, wiper: true, hHead: Hb, step: STEP, dS, Ls, zS, cS, xoBack: xoStep, xoBody: xoB });
 }
 // PSR 212 (v5.50.3, usuário 16/11/2026): T6D6 na parte de trás — o chanfro da aresta já foi feito pela T2D2 (fica no Ø xa);
 // a lâmina (canto da frente) desce a parede, faz o Ø do degrau, o chanfro de trás e o raspador a 65°. "pt" passes: cada passe
 // segue o mesmo caminho mais raso (cada ponto desce 1/n da sua profundidade), o último é o acabamento.
 function psr212Back(g, H, tO, pt, f3){
-  const xa = g.extCalc - 2 * g.chc, n = Math.max(1, Math.min(10, Math.round(Number(pt)) || 1)), L = [];
+  const xa = g.extCalc - 2 * (g.cS ?? g.chc), n = Math.max(1, Math.min(10, Math.round(Number(pt)) || 1)), L = [];
   const pts = [[g.dS, g.zS], [g.dS, -g.Hb + g.chc], [g.xoBack, -g.Hb], [g.rootOut, -g.Hb], [g.tipOut, -H]];
   for (let k = 1; k <= n; k++){
     const xs = pts.map(([x, z]) => [Math.min(xa, xa - (xa - x) * k / n), z]);   // cada ponto desce k/n da sua profundidade: nunca passa do acabamento
@@ -2075,7 +2077,7 @@ function psr211Profile(p){
   const arc = []; const a0 = Math.atan2(g.Tout[1] - g.Cg[1], g.Tout[0] - cz), a1 = Math.atan2(g.Tin[1] - g.Cg[1], g.Tin[0] - cz);
   const span = ((a1 - a0) < 0 ? a1 - a0 + 2 * Math.PI : a1 - a0);
   for (let k = 0; k <= 16; k++){ const a = a0 + span * k / 16; arc.push([cz + c * Math.cos(a), g.Cg[1] + c * Math.sin(a)]); }
-  return [[g.zO, R(g.xo1)], [g.zO - g.chO, R(g.extAp)], [g.zO - g.lipLen, R(g.extCalc)], ...(g.step ? [[g.zS + g.chc, R(g.extCalc)], [g.zS, R(g.extCalc) - g.chc], [g.zS, R(g.dS)], [-g.Hb + g.chc, R(g.dS)]] : [[-g.Hb + g.chc, R(g.extCalc)]]), [-g.Hb, R(g.xoBack)],
+  return [[g.zO, R(g.xo1)], [g.zO - g.chO, R(g.extAp)], [g.zO - g.lipLen, R(g.extCalc)], ...(g.step ? [[g.zS + (g.cS ?? g.chc), R(g.extCalc)], [g.zS, R(g.extCalc) - (g.cS ?? g.chc)], [g.zS, R(g.dS)], [-g.Hb + g.chc, R(g.dS)]] : [[-g.Hb + g.chc, R(g.extCalc)]]), [-g.Hb, R(g.xoBack)],
           [-g.Hb, R(g.rootOut)], [-H, R(g.tipOut)], ...(g.cT > 0 ? [[-H, R(g.tipIn) + g.cT], [-H + g.cTz, R(g.tipIn)]] : [[-H, R(g.tipIn)]]), [-H + g.rampL, R(g.intCalc)],
           [g.zI - g.lipLen, R(g.intCalc)], [g.zI - g.chI, R(g.intAp)], [g.zI, R(g.xi1)], [g.zI, R(g.xgIn)], ...arc.reverse(), [g.zO, R(g.xgOut)], [g.zO, R(g.xo1)]].map(([z, r]) => [-H - z, r]);
 }
@@ -5198,6 +5200,69 @@ function tolMk(base, sS, iS, small = 9){
   return `${esc(base)}<tspan dx="3" dy="-4.5" style="font-size:${small}px">${a}</tspan><tspan dx="-${(a.length * small * 0.56).toFixed(1)}" dy="9.5" style="font-size:${small}px">${b}</tspan><tspan dy="-5" style="font-size:1px"> </tspan>`;
 }
 // PSE 106: duas vistas ampliadas no padrão dos desenhos salvos (DIÂMETROS e SECÇÃO), canal à direita
+// v5.83.0 (usuário 19/11/2026: "atualiza o padrão de cotas e desenho que falamos mais cedo" — o aprovado no VEDADOR 75x95x26):
+// PSR 212 em VISTA FRONTAL + CORTE A-A (todos os Ø, com as tolerâncias de antes; trás à esquerda, frente/canal à direita = Z0) +
+// SECÇÃO (ampliada) só com o contorno, as alturas a partir da face (lábio, altura menor, corpo, altura total), as do interno em
+// cota corrida, profundidade e abertura do canal e a secção. Sem chanfros, raios nem ângulos.
+function psr212StdViews(p, PT){
+  const G = pseG(p), H = G.H, f = v => fv3(Math.round(v * 100) / 100), poly = profileOf(p).map(([z, r]) => [-z, r]);
+  const tl = (base, t) => t ? tolMk(base, String(t), String(-t)) : esc(base), tm = (base, t) => t ? tolMk(base, "0", String(-t)) : esc(base);
+  const rmax = Math.max(...poly.map(q => q[1])), rmin = Math.min(...poly.map(q => q[1])), A = z => -z;   // a = distância da trás (0) até a face (H)
+  const arr = (x1, y1, x2, y2) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="d" marker-start="url(#a)" marker-end="url(#a)"/>`;
+  const ext = (x1, y1, x2, y2) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="e"/>`;
+  const dimH = (x1, x2, y, txt, ty) => arr(x1, y, x2, y) + `<text x="${(x1 + x2) / 2}" y="${ty ?? y - 5}" class="t" text-anchor="middle">${txt}</text>`;
+  const dimV = (x, y1, y2, txt, dx = -5) => { const tx = x + dx, ty = (y1 + y2) / 2; return arr(x, y1, x, y2) + `<text x="${tx}" y="${ty}" class="t" text-anchor="middle" transform="rotate(-90 ${tx} ${ty})">${txt}</text>`; };
+  const Htxt = (tolNum(p.thS) !== null || tolNum(p.thI) !== null) ? tolMk(f(H), p.thS, p.thI) : tm(f(H), Math.min(G.tol.sec, 0.4));
+  let g = "";
+  // ---------- VISTA FRONTAL + CORTE A-A ----------
+  { const sc = (PT ? 300 : 250) / (2 * rmax), cx = PT ? 210 : 175, cy = PT ? 238 : 270, ox2 = PT ? 540 : 410, sc2 = Math.min(sc, (PT ? 180 : 140) / H);
+    const ring = r => `M${cx - r},${cy}A${r},${r} 0 1 0 ${cx + r},${cy}A${r},${r} 0 1 0 ${cx - r},${cy}Z`;
+    g += `<path d="${ring(rmax * sc)}${ring(rmin * sc)}" class="p" fill-rule="evenodd"/>`;
+    [G.extCalc, G.dS, G.intCalc].forEach(d => { g += `<circle cx="${cx}" cy="${cy}" r="${d / 2 * sc}" class="e" style="fill:none"/>`; });
+    g += `<line x1="${cx - rmax * sc - 12}" y1="${cy}" x2="${cx + rmax * sc + 12}" y2="${cy}" class="ax"/><line x1="${cx}" y1="${cy - rmax * sc - 12}" x2="${cx}" y2="${cy + rmax * sc + 12}" class="ax"/>`;
+    const yA = cy - rmax * sc - 22, yA2 = cy + rmax * sc + 22;
+    g += `<line x1="${cx}" y1="${yA}" x2="${cx}" y2="${yA + 10}" class="p"/><line x1="${cx}" y1="${yA2 - 10}" x2="${cx}" y2="${yA2}" class="p"/>`;
+    g += `<line x1="${cx}" y1="${yA}" x2="${cx + 16}" y2="${yA}" class="p" marker-end="url(#a)"/><line x1="${cx}" y1="${yA2}" x2="${cx + 16}" y2="${yA2}" class="p" marker-end="url(#a)"/>`;
+    g += `<text x="${cx + 22}" y="${yA + 4}" class="t">A</text><text x="${cx + 22}" y="${yA2 + 4}" class="t">A</text><text x="${cx}" y="${yA2 + 26}" class="vt" text-anchor="middle">VISTA FRONTAL</text>`;
+    const X2 = a => ox2 + (a - H / 2) * sc2, Y2 = r => cy - r * sc;
+    const half = sg => `<path d="${poly.map(([a, r], i) => `${i ? "L" : "M"}${X2(a).toFixed(2)},${Y2(sg * r).toFixed(2)}`).join("")}Z" class="p"/>`;
+    g += half(1) + half(-1) + `<line x1="${X2(0) - 10}" y1="${cy}" x2="${X2(H) + 10}" y2="${cy}" class="ax"/>`;
+    const edge = (d, side) => { const a = poly.filter(q => Math.abs(2 * q[1] - d) < 2e-3).map(q => q[0]); return a.length ? (side < 0 ? Math.min(...a) : Math.max(...a)) : (side < 0 ? 0 : H); };
+    // trás (esquerda): ponta do raspador, raiz, calcanhar int., degrau, Ø ext. · frente (direita): lábio int., canal, lábio ext.
+    const back = [[G.tipIn, tl("Ø " + f(G.tipIn), G.tol.A)], [G.tipOut, "Ø " + f(G.tipOut)], [G.intCalc, G.fi ? tl("Ø " + f(G.intCalc), G.tol.B) : tolMk("Ø " + f(G.intCalc), p.tiS, p.tiI)],
+                  [G.rootOut, "Ø " + f(G.rootOut)], [G.dS, "Ø " + f(G.dS)], [G.extCalc, G.fe ? tl("Ø " + f(G.extCalc), G.tol.C) : tolMk("Ø " + f(G.extCalc), p.teS, p.teI)]];
+    const front = [[G.intAp, tl("Ø " + f(G.intAp), G.tol.A)], [G.xgIn, "Ø " + f(G.xgIn)], [G.xgOut, "Ø " + f(G.xgOut)], [G.extAp, tl("Ø " + f(G.extAp), G.tol.D)]];
+    for (const [sd, list] of [[-1, back], [1, front]]) list.forEach(([d, txt], k) => {
+      const xe = X2(edge(d, sd)), xx = sd < 0 ? X2(0) - 22 * (k + 1) : X2(H) + 24 * (k + 1), r = d / 2;
+      g += ext(xe + sd * 3, Y2(r), xx + sd * 5, Y2(r)) + ext(xe + sd * 3, Y2(-r), xx + sd * 5, Y2(-r)) + dimV(xx, Y2(r), Y2(-r), txt); });
+    g += ext(X2(0), Y2(rmax) - 4, X2(0), Y2(rmax) - 26) + ext(X2(H), Y2(rmax) - 4, X2(H), Y2(rmax) - 26) + dimH(X2(0), X2(H), Y2(rmax) - 20, Htxt);
+    g += `<text x="${ox2}" y="${yA2 + 26}" class="vt" text-anchor="middle">CORTE A-A</text>`; }
+  // ---------- SECÇÃO (ampliada) ----------
+  { const bx0 = PT ? 170 : 650, bx1 = PT ? 560 : 950, by0 = PT ? 560 : 170, by1 = PT ? 715 : 390, Hh = rmax - rmin;
+    const s = Math.min((bx1 - bx0) / H, (by1 - by0) / Hh, 60), ox = (bx0 + bx1) / 2 - H * s / 2, oy = (by0 + by1) / 2 + Hh * s / 2;
+    const X = a => ox + a * s, Y = r => oy - (r - rmin) * s, yT = Y(rmax), yB = Y(rmin);
+    g += `<path d="${poly.map(([a, r], i) => `${i ? "L" : "M"}${X(a).toFixed(2)},${Y(r).toFixed(2)}`).join("")}Z" class="p"/>`;
+    // alturas a partir da face (direita): lábio, altura menor (parede do degrau), corpo, altura total
+    const rTopAt = a => Math.max(...poly.filter(q => Math.abs(q[0] - a) < 0.051).map(q => q[1]).concat(rmin));
+    const hs = [[H - A(G.zO - G.lipLen), f(G.lipLen)], [H - A(G.zS), "altura menor " + f(-G.zS)], [H - G.Hb, tm("corpo " + f(G.Hb), Math.min(G.tol.sec, 0.4))], [0, Htxt]];
+    hs.forEach(([a, txt], k) => { const y = yT - 18 - 16 * k; g += ext(X(a), Y(rTopAt(a)) - 4, X(a), y - 6) + dimH(X(a), X(H), y, txt); });
+    g += ext(X(H), Y(rTopAt(H)) - 4, X(H), yT - 18 - 16 * (hs.length - 1) - 6);
+    // interno embaixo, em cota corrida a partir da trás: rampa da ponta, reto do calcanhar, até a face
+    const zi = [0, G.rampL, H - A(G.zI - G.lipLen), H].filter((v, i, a) => !i || v - a[i - 1] > 0.05), yd = yB + 26;
+    const rBotAt = a => Math.min(...poly.filter(q => Math.abs(q[0] - a) < 0.051).map(q => q[1]).concat(rmax));
+    zi.forEach(a => { g += ext(X(a), Y(rBotAt(a)) + 4, X(a), yd + 6); });
+    for (let i = 1; i < zi.length; i++) g += dimH(X(zi[i - 1]), X(zi[i]), yd, f(zi[i] - zi[i - 1]), yd + 14);
+    // canal: profundidade a partir da face e abertura na face
+    const zBot = H + G.Cg[0] - G.Rg;   // fundo do canal (centro do raio − R), em a
+    const yc = Y((G.xgIn + G.xgOut) / 4);
+    g += arr(X(zBot), yc, X(H), yc) + `<text x="${(X(zBot) + X(H)) / 2}" y="${yc - 4}" class="t" text-anchor="middle">${f(H - zBot)}</text>`;
+    const xo = X(H) + 22; g += ext(X(H) + 4, Y(G.xgOut / 2), xo + 6, Y(G.xgOut / 2)) + ext(X(H) + 4, Y(G.xgIn / 2), xo + 6, Y(G.xgIn / 2)) + dimV(xo, Y(G.xgOut / 2), Y(G.xgIn / 2), f((G.xgOut - G.xgIn) / 2), 14);
+    // secção: calcanhar ext. → ponta int. (como antes), com a tolerância
+    const xs = X(H) + 66; g += ext(X(H - A(G.zO - G.lipLen)) + 4, Y(G.extCalc / 2), xs + 6, Y(G.extCalc / 2)) + ext(X(0) + 4, Y(G.tipIn / 2), xs + 6, Y(G.tipIn / 2)) +
+      dimV(xs, Y(G.extCalc / 2), Y(G.tipIn / 2), "Secção " + f((G.extCalc - G.tipIn) / 2), 14);
+    g += `<text x="${X(H / 2)}" y="${yd + 40}" class="vt" text-anchor="middle">SECÇÃO (ampliada)</text>`; }
+  return g;
+}
 function pseViewsSVG(p, PT){
   const G = pseG(p), H = p.h, prof = profileOf(p);
   const f = v => fmtN(v, 2), tl = (base, t, sc) => (sc && secTolOv(p, base)) || (t ? tolMk(base, String(t), String(-t)) : esc(base)), tm = (base, t, sc) => (sc && secTolOv(p, base)) || (t ? tolMk(base, "0", String(-t)) : esc(base));
@@ -5867,7 +5932,7 @@ function drawingSVGCore(p){ // PSE 120 (usuário 16/11/2026): UM desenho só par
   const ext = (x1, y1, x2, y2) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="e"/>`;
   let g = "";
 
-  if (p.tipoGen === "custom") g += p.customViews(p, PT); else if (p.tipoGen === "dual") g += dualViewsSVG(p, PT); else if (S15_TYPES.includes(p.tipoGen)) g += s15ViewsSVG(p, PT); else if (p.tipoGen === "psr102") g += psrViewsSVG(p, PT); else if (p.tipoGen === "psr101") g += psr101ViewsSVG(p, PT); else if (p.tipoGen === "pse120" && !p.ringA) g += pse120ViewsSVG(p, PT); else if (["pse106","psh106","psh108","psh117","psh105","pse105","pse107","psh107","psh103","pse103","pse118","psh121","psh125","psr211","psr212","pse102r"].includes(p.tipoGen) && !p.ringA) g += pseViewsSVG(p, PT); else {
+  if (p.tipoGen === "custom") g += p.customViews(p, PT); else if (p.tipoGen === "psr212" && !p.ringA) g += psr212StdViews(p, PT); else if (p.tipoGen === "dual") g += dualViewsSVG(p, PT); else if (S15_TYPES.includes(p.tipoGen)) g += s15ViewsSVG(p, PT); else if (p.tipoGen === "psr102") g += psrViewsSVG(p, PT); else if (p.tipoGen === "psr101") g += psr101ViewsSVG(p, PT); else if (p.tipoGen === "pse120" && !p.ringA) g += pse120ViewsSVG(p, PT); else if (["pse106","psh106","psh108","psh117","psh105","pse105","pse107","psh107","psh103","pse103","pse118","psh121","psh125","psr211","psr212","pse102r"].includes(p.tipoGen) && !p.ringA) g += pseViewsSVG(p, PT); else {
   // ---- CORTE A-A ----
   const ox = PT ? 190 : 200, oy = PT ? 300 : 255, s = Math.min((PT ? 300 : 340) / p.dext, 130 / Math.max(h, 1));
   const X = z => ox + (-z) * s, Y = r => oy - r * s;

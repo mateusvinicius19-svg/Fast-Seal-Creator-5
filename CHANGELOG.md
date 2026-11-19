@@ -6,6 +6,16 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.83.0 — PSR 212: chanfro menor na altura menor + desenho no padrão novo de cotas (19/11/2026)
+- Pedido do usuário: "diminui a proporção do chanfro na altura menor e atualiza o padrão de cotas e desenho que falamos mais cedo".
+- Chanfro da aresta do degrau (na altura menor): metade do chanfro do perfil (mín. 0,2, de 0,05 em 0,05). Ex. 40 x 48 x 5,5 x 7:
+  0,5 → 0,25 x 45° (T2D2 começa o chanfro em Z −3,95 em vez de −3,7; T6D6 entra em X48,5). Os outros chanfros iguais.
+- Desenho do PSR 212 no padrão aprovado no VEDADOR 75 x 95 x 26: VISTA FRONTAL + CORTE A-A com todos os Ø (trás à esquerda, frente/
+  canal à direita = Z0; tolerâncias como antes) e SECÇÃO (ampliada) só com o contorno, as alturas a partir da face (lábio, altura
+  menor, corpo, altura total), o interno em cota corrida (rampa, calcanhar, lábio), profundidade e abertura do canal e a secção.
+  Sem chanfros, raios nem ângulos.
+- Só o PSR 212 muda (programa e desenho). Teste no navegador (148 casos): todos geram; só o PSR 212 mudou.
+
 ## 5.82.2 — PSR 212: "Altura menor" medida da face (19/11/2026)
 - Usuário: "essa é a altura menor em relação à face". O campo passa a ser **"Altura menor — da face até o degrau (vazio = corpo −
   0,3 × corpo)"** (chave nova `hm`, para não ler errado valores antigos salvos): parede do degrau em Z = −(altura menor) e comprimento

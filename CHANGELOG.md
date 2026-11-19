@@ -6,6 +6,16 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.82.0 — Itens em PU: até 6 mm no Ø para tirar = 1 passe só (19/11/2026)
+- Pedido do usuário: "se for tirar pouco material nos diâmetros, até 6 mm, coloca em apenas 1 passe".
+- Programas estilo Fast Seal (seções OUTSIDE / INSIDE) em PU: em cada lado, se o material a tirar no Ø for ≤ 6, saem os passes
+  de desbaste e fica só o acabamento (FINISH). Externo: Ø ext. da bucha − menor Ø do acabamento externo; interno: maior Ø do
+  acabamento interno − Ø int. da bucha (tarugo nunca). Ex.: PSE 106 padrão (bucha 96 x 129), interno 101,7 − 96 = 5,7 → só o
+  acabamento; o externo (129 − 98,5... tira mais de 6) continua com desbaste.
+- Com as medidas padrão mudam: PSE 103, 105, 106, 107; PSH 131; PSR 101, 211, 212; DUAL. Com bucha apertada também PSE 120, 127.
+  Outros materiais e os perfis estilo planilha (arruelas, ISO, DH, DP...): iguais. G92 igual.
+- Teste no navegador (148 casos: 37 perfis padrão / NBR / bucha apertada): todos geram; nas mudanças só saíram linhas de desbaste.
+
 ## 5.81.0 — Itens em PU: recuos do externo +1 mm e do interno −1 mm (padrão do PSR 102) (19/11/2026)
 - Pedido do usuário: "nos itens em PU pode alterar para esse padrão externo e interno" (o do PSR 102, 5.80.4).
 - Programas no estilo Fast Seal (seções OUTSIDE / INSIDE) com material PU: o recuo em G0 depois de cada passe (desbaste reto,

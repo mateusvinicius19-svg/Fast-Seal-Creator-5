@@ -1367,8 +1367,8 @@ GEN.psr211 = Object.assign({}, GEN.psh105, { name: "PSR 211",
   build(p){ return pseFscBuild(p, psr211Geom(p)); } });
 // PSR 212 (usuário 16/11/2026): PSR 211 com degrau no externo, atrás do corpo (foto do catálogo)
 GEN.psr212 = Object.assign({}, GEN.psr211, { name: "PSR 212",
-  // v5.82.1 (usuário 19/11/2026): "Comprimento do degrau" virou "Altura menor" e é a 1ª altura a preencher (mesmo valor: degrau a partir da trás do corpo)
-  main: [...GEN.psr211.main.slice(0, 2), ["hs","Altura menor — degrau, a partir da trás do corpo (vazio = 0,3 × corpo)",""], ...GEN.psr211.main.slice(2, 4), ["ds","Ø do degrau externo (vazio = Ø ext. − 0,6 × secção)",""],["pt","Passes da T6D6 na parte de trás — degrau + raspador (vazio = 1)",""], ...GEN.psr211.main.slice(4)],
+  // v5.82.1 (usuário 19/11/2026): "Comprimento do degrau" virou "Altura menor" e é a 1ª altura a preencher · v5.82.2: medida DA FACE até a parede do degrau (chave hm; Ls = corpo − hm)
+  main: [...GEN.psr211.main.slice(0, 2), ["hm","Altura menor — da face até o degrau (vazio = corpo − 0,3 × corpo)",""], ...GEN.psr211.main.slice(2, 4), ["ds","Ø do degrau externo (vazio = Ø ext. − 0,6 × secção)",""],["pt","Passes da T6D6 na parte de trás — degrau + raspador (vazio = 1)",""], ...GEN.psr211.main.slice(4)],
   params: [...GEN.psr211.params.map(f => [f[0], f[1].replace("PSR 211", "PSR 212"), f[2]])],   // v5.73.2: sem o campo do chanfro da ponta (PSR 211 e PSR 212 sem esse chanfro)
   check(p){
     const base = GEN.psr211.check(p), g = psr211Geom(p), m = [];
@@ -1752,7 +1752,7 @@ function psr211Geom(p){
   const rampL = opt(p.rampa) ?? xround(Math.min(Math.max(1.24 * prot, rampMin), Ht + g.zI - g.lipLen - 0.3), 2);
   // PSR 212: degrau no externo, atrás do corpo — Ø do degrau dS de Z −(corpo − Ls) até a trás do corpo (chanfro chc nas duas arestas).
   // A T2D2 faz o externo igual ao PSR 211 (não corta parede virada para trás); o degrau é feito pela T6D6 (lâmina), junto com o raspador.
-  const STEP = p.tipoGen === "psr212", dS = STEP ? (opt(p.ds) ?? xround(g.extCalc - 0.6 * g.sec, 1)) : null, Ls = STEP ? (opt(p.hs) ?? xround(0.3 * Hb, 1)) : 0, zS = -Hb + Ls;
+  const STEP = p.tipoGen === "psr212", dS = STEP ? (opt(p.ds) ?? xround(g.extCalc - 0.6 * g.sec, 1)) : null, Ls = STEP ? (opt(p.hm) !== null ? Hb - opt(p.hm) : (opt(p.hs) ?? xround(0.3 * Hb, 1))) : 0, zS = -Hb + Ls;   // v5.82.2: hm = altura menor, da face até o degrau
   const xoB = g.xoBack, k45 = Math.max(0.2, Math.min(prot + 0.5, R(xoB) - R(rootOut) - 0.3));
   const xoStep = STEP ? dS - (2 * g.chc + 1) * g.chc / (g.chc + 0.5) : xoB;   // Ø na trás do corpo depois do chanfro da aresta do degrau
   // v5.50.3 (usuário 16/11/2026): no PSR 212 a T2D2 faz o chanfro da aresta do degrau e segue no Ø de baixo do chanfro até o 45° de trás

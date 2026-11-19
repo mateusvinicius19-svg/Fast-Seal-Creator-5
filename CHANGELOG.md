@@ -6,6 +6,14 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.82.2 — PSR 212: "Altura menor" medida da face (19/11/2026)
+- Usuário: "essa é a altura menor em relação à face". O campo passa a ser **"Altura menor — da face até o degrau (vazio = corpo −
+  0,3 × corpo)"** (chave nova `hm`, para não ler errado valores antigos salvos): parede do degrau em Z = −(altura menor) e comprimento
+  do degrau atrás = corpo − altura menor. Ex.: corpo 6,5 e altura menor 3,5 → T6D6 desce em Z −3,5 (igual ao antigo comprimento 3).
+- Vazio: igual a antes (degrau 0,3 × corpo). Altura menor maior que o corpo: aviso "degrau curto demais".
+- Desenho: a cota do degrau continua o comprimento atrás do corpo. Só o PSR 212.
+- Teste no navegador (148 casos): todos geram; nenhum programa mudou com o campo vazio.
+
 ## 5.82.1 — PSR 212: campo "Altura menor" como a 1ª altura (19/11/2026)
 - Pedido do usuário: o campo "Comprimento do degrau em Z, a partir da trás do corpo" passa a se chamar **"Altura menor — degrau,
   a partir da trás do corpo (vazio = 0,3 × corpo)"** e fica logo depois dos diâmetros, antes de "Altura do corpo".

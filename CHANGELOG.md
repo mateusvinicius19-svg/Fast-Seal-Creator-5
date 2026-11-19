@@ -6,6 +6,11 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.83.3 — PSR 212: Ø do calcanhar interno dentro do corte A-A (19/11/2026)
+- Usuário: "joga essa cota central dentro do desenho" (Ø40,54 no 40 x 48). A cota do Ø do calcanhar interno (com a tolerância)
+  passa a ficar dentro do corte A-A, atravessando o furo no meio do trecho reto do calcanhar; as outras cotas de trás ficam mais juntas.
+- Só o desenho do PSR 212; programas iguais (148 casos); desenho de todos os perfis gera (retrato e paisagem).
+
 ## 5.83.2 — PSR 212: alturas do desenho sem encavalar (19/11/2026)
 - Usuário: "arruma essas da altura, está uma em cima da outra". As 4 cotas de altura da secção ampliada (lábio, altura menor, corpo,
   total) ficavam a 16 px uma da outra e a tolerância (0 / −0,2) batia na linha de cima; agora 26 px entre elas.

@@ -6,6 +6,14 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.77.0 — PSE 108 (DP): campos de BUCHA (19/11/2026)
+- Campos novos "Bucha Ø interno" e "Bucha Ø externo" (só DP). Vazio = automática como nas arruelas (PU pela tabela de buchas;
+  Teflon Ø int − 2 / Ø ext + 2); o campo mostra a sugestão.
+- Com bucha: linha ;BUCHA, faceamento do maior Ø ext + sobra até o menor Ø int − sobra, rotação pelo maior Ø e desbaste
+  (máx. 8 no Ø, acabamento 2) no externo e no interno até o fim do acabamento em Z. Teflon saindo de bucha: passe único.
+- Ex.: DP 60 x 67 x 7 em PU com bucha 50 x 80 → face X84 a X46, desbaste externo X74,5 e X69, interno X58, até Z-8.
+- Arruela ISO e os outros perfis: iguais (teste dos 35 perfis sem mudança no padrão).
+
 ## 5.76.2 — PSH 129 (DH): T2D2 volta em G0 antes do desbaste (19/11/2026)
 - Na 5.76.0 o PU passou a facear com a T3D3 e trocar para a T2D2 em Z100; o 1º passe do desbaste externo (ex.: G01 Z-5 F0.15)
   descia em G1 desde o Z100. Agora, depois da troca, vai em G0 até X(Ø ext + sobra) Z3 e só então desbasta.

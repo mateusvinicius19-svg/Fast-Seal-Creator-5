@@ -6,6 +6,28 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.78.0 — Perfis novos PSE 127 e PSH 131 na main (19/11/2026)
+- PSE 127 (Fast Seal PS15P, pistão: lábio raiado por fora, canal raiado por dentro) e PSH 131 (RS15P, haste: espelhado).
+- Regras dos programas do W: — ponta no meio da altura R 0,21 × secção; aperto do lábio 0,1 × secção + 0,28 no Ø; queda até a face
+  0,1 × secção + 0,19; lado do canal Ø + 0,35 %, chanfros 0,3 × 45°; canal 0,5 × H de largura, 0,12 × secção de profundidade.
+  Tudo em Parâmetros fixos. PSE 127 85x95x8,5 confere com o 029919 no lábio (X95.741 Z-4.413 R1.450).
+- 18/11/2026: CONFERIDO NO FAST SEAL (aba V do PSE127 = PS15P e do RS15P, 40 tamanhos; diferença máx. 0,04 mm). Regras novas:
+  calcanhar, ponta do lábio, lado do canal (±0,3 % + 0,013 × secção), canal 0,569 × altura, profundidade pela altura da peça (< 8)
+  ou pela secção (≥ 8). Campo novo "Medidas do alojamento?" (Sim = altura menor como o METAL DIM do FSC: 8,5 → 8,19).
+  Desenho como o do Fast Seal (PDFs 46216 e 46322): faixa reta ao lado do canal, chanfro 0,3 × 45°, ângulo do lábio (79° no
+  108,03x116,3x7,2, tangente ao raio da ponta), na SECÇÃO a profundidade do canal e o lábio até o fundo; tolerância da altura ±0,1
+  abaixo de 6 e ±0,2 de 6 para cima (como no FSC); com medida de peça (alojamento = Não) só para menos: 0 / −0,1 ou 0 / −0,2.
+  Cotagem pela NBR 10126 / ISO 129 (pedido do usuário): DIÂMETROS só com os 4 Ø e o H — Ø do lábio e do calcanhar do lado do
+  lábio, Ø do lado do canal e do fundo do lado do canal, nenhuma linha atravessando a peça, a menor perto da peça e o H por fora;
+  largura do canal, faixa, chanfro e ângulo só na SECÇÃO (cota uma vez só); profundidade do canal dentro do canal e sem a cota
+  lábio–fundo (cadeia fechada).
+  Espessura das linhas pela NBR 8403 (só PSE 127 / PSH 131): contorno da peça 0,6 mm, linhas de cota e de chamada 0,25 mm.
+  Cotas pela NBR 10126: tolerância com as mesmas casas da cota (H 8,19 ±0,20; 0/−0,20) e cotas paralelas a 10 mm da peça e
+  7 mm entre si (mm de papel).
+  Tabelas em `Claude contexto/fsc-ps15p-rs15p-medidas.md`. Continua com ATENÇÃO "perfil novo em teste". Os outros 34 perfis iguais.
+- roughPasses: arco com raio próprio (it.R); os outros perfis não mudam (34 iguais).
+- Liberado na main em 19/11/2026 (aprovado pelo usuário), junto com tudo da 5.72 à 5.77.
+
 ## 5.77.1 — Ciclo arruelas SEM CHANFRO: sem a volta em rápido abaixo da bucha depois do desbaste (19/11/2026)
 - Mesmo problema corrigido no PSA 108 (5.76.1): depois do desbaste externo o programa ia em G0 até X(Ø int − 2,7) e subia
   de novo em G91 até o Ø ext. Agora o desbaste termina direto no Ø ext (ex.: 101,6 x 114,14 bucha 91 x 125: G0 X114.14).

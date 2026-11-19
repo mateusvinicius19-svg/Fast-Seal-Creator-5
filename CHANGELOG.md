@@ -6,6 +6,13 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.78.1 — PSE 107: sem o desbaste externo que só raspava o lábio (19/11/2026)
+- PSE 107 125 x 140 x 18 com bucha 112 x 142: o desbaste externo ficava inteiro em X142 (o Ø da bucha, sem cortar nada) e passava
+  a 0,27 mm (no raio) da ponta do lábio (X141,455). Agora, quando o desbaste externo não corta nada abaixo do Ø da bucha, ele sai
+  do programa; o acabamento já começa com F0.160. G92 igual.
+- Só o PSE 107 (pedido do usuário). Com bucha maior (ex.: 150) o desbaste continua igual; PSE 106, 118 e os outros perfis iguais.
+- Teste dos perfis: 37 perfis geram programa; nenhum mudou no padrão.
+
 ## 5.78.0 — Perfis novos PSE 127 e PSH 131 na main (19/11/2026)
 - PSE 127 (Fast Seal PS15P, pistão: lábio raiado por fora, canal raiado por dentro) e PSH 131 (RS15P, haste: espelhado).
 - Regras dos programas do W: — ponta no meio da altura R 0,21 × secção; aperto do lábio 0,1 × secção + 0,28 no Ø; queda até a face

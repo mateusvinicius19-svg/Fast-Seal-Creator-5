@@ -1230,7 +1230,9 @@ const GEN = {
       const c = p.ch, X = v => fx(v, 3);
       const rpt = (p.rpt === "" || p.rpt === null || isNaN(p.rpt)) ? "0" : gen15(p.rpt);
       const bu = lipBucha(p, g), zR = -(p.h + p.prolT + p.parT);
-      const tFace = p.tFace || "", tExt = p.tExt, tInt = p.tInt;   // v5.76.0: PU faceia com a T3D3 e troca para o externo
+      // v5.76.0: PU faceia com a T3D3 e troca para o externo. v5.76.2: depois da troca a T2D2 volta em G0 ao Z de entrada
+      // (o 1º passe do desbaste descia em G1 desde o Z100)
+      const tFace = p.tFace || "", tExt = p.tExt, tInt = p.tInt;
       const roughOD = [], roughID = [];
       for (const x of roughLevels(bu.bo, g.Dext, 1)) roughOD.push("G00 X" + X(x), "G01 Z" + X(zR) + " F" + X(p.fExt), "G01 X" + X(x + 1), "G00 Z" + X(p.zEnt));
       for (const x of lipIdLevels(bu.bi, p.dint)) roughID.push("G00 X" + X(x) + " Z" + X(p.zEnt), "G01 Z" + X(zR) + " F" + X(p.fInt), "G01 X" + X(x - 1), "G00 Z" + X(p.zEnt));
@@ -1239,7 +1241,7 @@ const GEN = {
         "G90","G95","G54","G97 S" + gen15((p.rpm === "" || p.rpm === undefined || isNaN(p.rpm)) ? rpmLookup(Math.max(g.Dext, bu.bo), RPM_TABLE) : p.rpm) + " M3","N10","G0 Z100",
         tFace ? tFace + " ;(FACE)" : tExt + " ;(EXTERNO FACE)",
         "G00 X" + X(Math.max(g.Dext, bu.bo) + p.sobra) + " Z" + X(p.zAp), "G01 Z0.000 F" + X(p.fExt), "G01 X" + X(Math.min(p.dint, bu.bi) - p.sobra) + " F" + X(p.fExt),
-        "G00 Z" + X(p.zEnt), ...(tFace ? ["G00 Z" + X(p.zSeg), tExt + " ;(EXTERNO)"] : []), ...(roughOD.length ? ["; (DESBASTE EXTERNO - MAX. 8 NO DIAMETRO, ACABAMENTO 2)", ...roughOD] : []), "G00 X" + X(g.Dext - 2*c - 2*p.prolF),
+        "G00 Z" + X(p.zEnt), ...(tFace ? ["G00 Z" + X(p.zSeg), tExt + " ;(EXTERNO)", "G00 X" + X(Math.max(g.Dext, bu.bo) + p.sobra) + " Z" + X(p.zEnt)] : []), ...(roughOD.length ? ["; (DESBASTE EXTERNO - MAX. 8 NO DIAMETRO, ACABAMENTO 2)", ...roughOD] : []), "G00 X" + X(g.Dext - 2*c - 2*p.prolF),
         "G42 G01 Z" + X(p.prolF) + " F" + X(p.fExt), "G01 X" + X(g.Dext) + " Z" + X(-c), "G01 Z" + X(-(p.h - c)),
         "G01 X" + X(g.Dext - 2*c - 2*p.prolT) + " Z" + X(-(p.h + p.prolT)), "G01 Z" + X(-(p.h + p.prolT + p.parT)),
         "G01 X" + X(g.Dext + p.recE), "G40 G00 Z" + X(p.zEnt), "G00 Z" + X(p.zSeg),

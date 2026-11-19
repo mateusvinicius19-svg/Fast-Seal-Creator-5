@@ -1848,10 +1848,10 @@ function pse102rRingBuild(p){ return fscRingBuild(p, pse102rGeom(p), { hdr: "PSE
 function ringMatKey(p){
   const v = String(p.matR || "PTFE").trim().toUpperCase();
   if (ARR_MAT[v]) return v;
-  return /PTFE|TEFLON/.test(v) ? (/BR/.test(v) ? "PTFEBR" : /GR/.test(v) ? "PTFEGR" : "PTFE") : /PEAD|NYLON/.test(v) ? "NYLON" : /POM/.test(v) ? "POM" : /CELERON/.test(v) ? "CELERON"
+  return /PTFE|TEFLON/.test(v) ? (/BR/.test(v) ? "PTFEBR" : /GR/.test(v) ? "PTFEGR" : /FV|VIDRO/.test(v) ? "PTFEFV" : "PTFE") : /PEAD|NYLON/.test(v) ? "NYLON" : /POM/.test(v) ? "POM" : /CELERON/.test(v) ? "CELERON"
        : /VITON|FKM/.test(v) ? "VITON" : /NBR|BORRACHA/.test(v) ? "NBR" : /\bPU\b/.test(v) ? "PU" : "PTFE";
 }
-function ringMatLabel(p){ return ({ PTFE: "PTFE", PTFEBR: "PTFE+BR", PTFEGR: "PTFE+GR", NYLON: "PEAD", POM: "POM", PU: "PU", NBR: "NBR", VITON: "VITON", CELERON: "CELERON" })[ringMatKey(p)]; }
+function ringMatLabel(p){ return ({ PTFE: "PTFE", PTFEBR: "PTFE+BR", PTFEGR: "PTFE+GR", PTFEFV: "PTFE+FV", NYLON: "PEAD", POM: "POM", PU: "PU", NBR: "NBR", VITON: "VITON", CELERON: "CELERON" })[ringMatKey(p)]; }
 function ringOpts(p){ return p.tipoGen === "pse120" ? { g: pse120Geom(p), o: { hdr: "PSE120-A", desc: "PSE 120 - ANEL DE APOIO (A) - 2 POR CONJUNTO", c: 0.2, cF: 0.2, zBI: 0.2 } }
                                                     : { g: pse102rGeom(p), o: { hdr: "PSE102R-A", desc: "PSE 102 R - ANEL DE APOIO (A)" } }; }
 function ringChamf(p, g, o){
@@ -1886,7 +1886,7 @@ function fscRingBuild(p, g, o){
   }
   const tI = bi, tO = bo, S = (p.S === "" || isNaN(p.S)) ? rpmLookup(Math.max(g.ringO, tO), RPM_TABLE) : p.S;
   // ferramentas pelo material, como nas arruelas (ARR_MAT): externo / interno / corte (vazio = T8D8); T4D4 no mínimo Ø14
-  const am = N120 ? ARR_MAT[mk] : null, TL = !N120 ? fscTools(q, "T7D7", "T4D4") : { ext: am[1], int: p.tInt || (["PTFE", "PTFEBR", "PTFEGR", "POM", "NYLON"].includes(mk) && g.ringI < T4D4_MIN ? "T2D14" : am[2]), cut: am[3] || "T8D8", fCut: "0.100" };
+  const am = N120 ? ARR_MAT[mk] : null, TL = !N120 ? fscTools(q, "T7D7", "T4D4") : { ext: am[1], int: p.tInt || (["PTFE", "PTFEBR", "PTFEGR", "PTFEFV", "POM", "NYLON"].includes(mk) && g.ringI < T4D4_MIN ? "T2D14" : am[2]), cut: am[3] || "T8D8", fCut: "0.100" };
   const now = new Date(), pad = n => String(n).padStart(2, "0");
   const date = `${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()} @ ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
   const sec = name => [";( *********************** )", ";( " + name.padEnd(24, " ").slice(0, 24) + ")", ";( *********************** )"];
@@ -2139,9 +2139,10 @@ function applyAloj(p){
   p[k] = xround(H0 - red, 2); p.alojDone = true; p.alojK = k; p.alojH0 = H0;   // altura do alojamento guardada: vai no NOME do desenho (cadastro); o desenho usa a final
   return `Alojamento: altura ${fmtN(H0, 2)} → ${fmtN(p[k], 2)} (−${fmtN(red, 2)})`;
 }
-const GAX_MAT = [["PU", "PU"], ["NBR", "NBR / borracha"], ["VITON", "Viton (FKM) · mesmo padrão do NBR"], ["PTFE PURO", "PTFE puro (Teflon)"], ["PTFE+BR", "PTFE+BR (mesmas ferram. do PTFE puro)"], ["PTFE+GR", "PTFE+GR (grafite · mesmas ferram. do PTFE puro)"]];   // valor = texto da linha ;MATERIAL (PTFE: isTeflon)
+// v5.80.0 (usuário 19/11/2026): material novo PTFE+FV (Teflon + fibra de vidro) — mesmas regras do PTFE puro / +BR / +GR em todas as listas
+const GAX_MAT = [["PU", "PU"], ["NBR", "NBR / borracha"], ["VITON", "Viton (FKM) · mesmo padrão do NBR"], ["PTFE PURO", "PTFE puro (Teflon)"], ["PTFE+BR", "PTFE+BR (mesmas ferram. do PTFE puro)"], ["PTFE+GR", "PTFE+GR (grafite · mesmas ferram. do PTFE puro)"], ["PTFE+FV", "PTFE+FV (Teflon + fibra de vidro · mesmas ferram. do PTFE puro)"]];   // valor = texto da linha ;MATERIAL (PTFE: isTeflon)
 // material salvo antes como texto livre (ex.: "TEFLON", "nbr") → opção da lista; vazio/desconhecido = PU
-function matFromText(v){ const m = String(v || "").toUpperCase().trim(); return /VITON|FKM/.test(m) ? "VITON" : /NBR|BORRACHA/.test(m) ? "NBR" : /\+\s*BR/.test(m) ? "PTFE+BR" : /\+\s*GR/.test(m) ? "PTFE+GR" : /PTFE|TEFLON/.test(m) ? "PTFE PURO" : "PU"; }
+function matFromText(v){ const m = String(v || "").toUpperCase().trim(); return /VITON|FKM/.test(m) ? "VITON" : /NBR|BORRACHA/.test(m) ? "NBR" : /\+\s*BR/.test(m) ? "PTFE+BR" : /\+\s*GR/.test(m) ? "PTFE+GR" : /\+\s*FV|VIDRO/.test(m) ? "PTFE+FV" : /PTFE|TEFLON/.test(m) ? "PTFE PURO" : "PU"; }
 function fieldHTML([k, label, def], wide){
   if (k === "aloj") return `<label>${label}<select data-k="aloj" class="orient" style="width:100%"><option value="N"${def !== "S" ? " selected" : ""}>Não · medidas da peça</option><option value="S"${def === "S" ? " selected" : ""}>${S15_TYPES.includes($("genType").value) ? "Sim · altura menor como o Fast Seal (8,5 → 8,19)" : ALOJ_RASP[$("genType").value] ? "Sim · altura menor −4 % (0,3 a 1 mm)" : "Sim · altura −10 % (máx. 1 mm até 20; máx. 2 mm acima)"}</option></select></label>`;
   if (k === "sec" && $("genType").value === "pso") return `<label>${label}<input data-k="sec" type="text" inputmode="decimal" list="psoSecList" value="${String(def).replace(".", ",")}" placeholder="1,78 · 2,62 · 3,53 · 5,33 · 6,99 · 8,4 ou outra"><datalist id="psoSecList">${[1.78, 2.62, 3.53, 5.33, 6.99, 8.4].map(v => `<option value="${String(v).replace(".", ",")}">Parker ±${String(parkerTol(50, v).wTol).replace(".", ",")}</option>`).join("")}</datalist></label>`;   // PSO 109: secção livre, 5 padrão Parker sugeridas
@@ -2384,7 +2385,7 @@ function roughLevels(from, finish, dir){   // dir +1 = externo (desce), -1 = int
 // passes retos em G90 até zEnd; termina onde estava (xBack, Z zAp) para o G91 seguinte continuar valendo
 // v5.9.0 (usuário 10/11/2026): Teflon (PTFE puro e PTFE+BR) — bucha bem próxima da medida: externo e interno num passe só (o de acabamento)
 const arrPU = p => (p.matA || "PU") === "PU";
-const arrTeflon = p => p.matA === "PTFE" || p.matA === "PTFEBR" || p.matA === "PTFEGR";
+const arrTeflon = p => p.matA === "PTFE" || p.matA === "PTFEBR" || p.matA === "PTFEGR" || p.matA === "PTFEFV";
 const arrTeflonPasse = p => arrTeflon(p) && buchaOf(p).bi > 0;   // passe único: Teflon saindo de bucha, não de tarugo
 // v5.9.3 (usuário 10/11): Teflon saindo de TARUGO — interno: 1º passe em Ø16 e depois passes de no máximo 8 no Ø até Ø int − 2 (acabamento 2)
 function tarugoTeflonLevels(dint){
@@ -2424,7 +2425,7 @@ function arrRough(p, mode, zEnd, xBack, feed){
 // bucha da arruela: digitada, ou (PU) a mais leve da lista que serve — tubo antes de tarugo; NBR e outros: só digitada
 // v5.9.4 (usuário 10/11): Teflon (PTFE puro e PTFE+BR) sugere bucha com 2 mm de sobremetal nos 2 diâmetros: Ø int − 2 × Ø ext + 2
 function arrBuchaAuto(p){
-  if (p.matA === "PTFE" || p.matA === "PTFEBR" || p.matA === "PTFEGR") return (p.dint > 2 && p.dext > p.dint) ? [+(p.dint - 2).toFixed(3), +(p.dext + 2).toFixed(3)] : null;
+  if (p.matA === "PTFE" || p.matA === "PTFEBR" || p.matA === "PTFEGR" || p.matA === "PTFEFV") return (p.dint > 2 && p.dext > p.dint) ? [+(p.dint - 2).toFixed(3), +(p.dext + 2).toFixed(3)] : null;
   if ((p.matA || "PU") !== "PU") return null;
   const fit = buchasList().filter(([a, b]) => a <= p.dint - BUCHA_FOLGA + 1e-9 && b >= p.dext + BUCHA_FOLGA - 1e-9);
   return fit.sort((x, y) => buchaRank(...x) - buchaRank(...y))[0] || null;   // a mais barata por mm (tabela PU 27/01/25)
@@ -2597,13 +2598,13 @@ function buchaOf(p){
   if (a) return { bi: ok(p.bi) ? p.bi : a[0], bo: ok(p.bo) ? p.bo : a[1], txt: gen15(ok(p.bi) ? p.bi : a[0]) + "X" + gen15(ok(p.bo) ? p.bo : a[1]), auto: true };
   return { bi: p.dint, bo: p.dext, txt: "----", auto: false };
 }
-const ARR_MAT = { PU: ["PU", "T7D7", "T4D4", "", true], NBR: ["NBR / borracha", "T7D7", "T4D4", "", true], VITON: ["Viton (FKM)", "T7D7", "T4D4", "", true], PTFE: ["PTFE puro (Teflon)", "T7D7", "T4D4", "", true], PTFEBR: ["PTFE+BR (mesmas ferram. do PTFE puro)", "T7D7", "T4D4", "", true], PTFEGR: ["PTFE+GR (grafite · mesmas ferram. do PTFE puro)", "T7D7", "T4D4", "", true], POM: ["POM (poliacetal)", "T7D7", "T4D4", "", true],
+const ARR_MAT = { PU: ["PU", "T7D7", "T4D4", "", true], NBR: ["NBR / borracha", "T7D7", "T4D4", "", true], VITON: ["Viton (FKM)", "T7D7", "T4D4", "", true], PTFE: ["PTFE puro (Teflon)", "T7D7", "T4D4", "", true], PTFEBR: ["PTFE+BR (mesmas ferram. do PTFE puro)", "T7D7", "T4D4", "", true], PTFEGR: ["PTFE+GR (grafite · mesmas ferram. do PTFE puro)", "T7D7", "T4D4", "", true], PTFEFV: ["PTFE+FV (Teflon + fibra de vidro · mesmas ferram. do PTFE puro)", "T7D7", "T4D4", "", true], POM: ["POM (poliacetal)", "T7D7", "T4D4", "", true],
                   NYLON: ["Nylon / PEAD", "T7D7", "T4D4", "", true], CELERON: ["Celeron (T2D54 · T2D64 · T6D16)", "T2D54", "T2D64", "T6D16", true] };
 // v5.21.18 (usuário 12/11/2026): PTFE puro, PTFE+BR, POM e PEAD — a T4D4 faz no mínimo Ø14; abaixo de Ø14 o interno é a T2D14
 const T4D4_MIN = 14;
 function applyArrMat(L, p){
   let [lab, e, i, c, comp] = ARR_MAT[p.matA] || ARR_MAT.PU;
-  if (["PTFE", "PTFEBR", "PTFEGR", "POM", "NYLON"].includes(p.matA) && Number(p.dint) < T4D4_MIN) i = "T2D14";   // v5.21.18
+  if (["PTFE", "PTFEBR", "PTFEGR", "PTFEFV", "POM", "NYLON"].includes(p.matA) && Number(p.dint) < T4D4_MIN) i = "T2D14";   // v5.21.18
   let out = L.map(s => {
     if (p.matA === "CELERON" && /^;T\d+D\d+ \((EXTERNO|INTERNO|BEDAME|CORTE)\)/.test(s)) return ";" + ({EXTERNO: e, INTERNO: i}[s.match(/\((\w+)\)/)[1]] || c) + " " + s.match(/\(\w+\)/)[0];
     s = s.replace(/\bT7D7\b/g, e).replace(/\bT4D4\b/g, i);
@@ -2770,7 +2771,7 @@ for (const k of ["psa108", "semch"]){
 // PU: externo T2D2, interno T4D14 (< 11) / T1D45 (11 a 40) / T2D12 (> 40), corte T5D5 F0.22 · NBR/Viton: T7D7 / T4D4 / T5D5 ·
 // PTFE, +BR, +GR: T7D7 / T4D4 (T2D14 < 14) / bedame T8D8. POM, PEAD e Celeron: como nas arruelas. Ferramenta trocada à mão
 // nos parâmetros (diferente do padrão T7D7 / T4D4 / T8D8) continua valendo.
-const DP_GAX_MAT = { PU: "PU", NBR: "NBR", VITON: "VITON", PTFE: "PTFE PURO", PTFEBR: "PTFE+BR", PTFEGR: "PTFE+GR" };
+const DP_GAX_MAT = { PU: "PU", NBR: "NBR", VITON: "VITON", PTFE: "PTFE PURO", PTFEBR: "PTFE+BR", PTFEGR: "PTFE+GR", PTFEFV: "PTFE+FV" };
 function dpGaxTools(p){
   const mat = DP_GAX_MAT[p.matA || "PU"]; if (!mat) return p;
   const T = fscTools({ mat, dint: p.dint }, "T2D2", p.dint < 11 ? "T4D14" : p.dint < 40 ? "T1D45" : "T2D12"), q = Object.assign({}, p);
@@ -4686,7 +4687,7 @@ function buchasAll(){ let x = [], h = []; try { x = JSON.parse(localStorage.getI
 // escolha: entre as buchas que servem (Ø int ≤ lábio int. − 1 e Ø ext ≥ lábio ext. + 1), a de menor área da secção (mais leve/barata); empate = parede mais fina
 // v5.20.0 (usuário 11/11/2026): Teflon (PTFE puro e PTFE+BR) em QUALQUER perfil → bucha sugerida com 2 mm de sobremetal
 // no interno e no externo, a partir dos Ø extremos da peça: Ø int − 2 × Ø ext + 2 (como já era nas arruelas desde a 5.9.4)
-function teflonBucha(p, dMin, dMax){ const tf = isTeflon(p) || p.matA === "PTFE" || p.matA === "PTFEBR" || p.matA === "PTFEGR"; return tf && dMax > dMin && dMin > 2 ? [+(dMin - 2).toFixed(3), +(dMax + 2).toFixed(3)] : null; }
+function teflonBucha(p, dMin, dMax){ const tf = isTeflon(p) || p.matA === "PTFE" || p.matA === "PTFEBR" || p.matA === "PTFEGR" || p.matA === "PTFEFV"; return tf && dMax > dMin && dMin > 2 ? [+(dMin - 2).toFixed(3), +(dMax + 2).toFixed(3)] : null; }
 function buchaPick(intAp, extAp){ let best = null, bC = Infinity; for (const [a, b] of buchasList()){ if (!(a <= intAp - BUCHA_FOLGA + 1e-9 && b >= extAp + BUCHA_FOLGA - 1e-9)) continue; const C = buchaRank(a, b); if (C < bC - 1e-9 || (Math.abs(C - bC) < 1e-9 && b * b - a * a < best[1] * best[1] - best[0] * best[0])){ best = [a, b]; bC = C; } } return best; }
 function buchasList(){ const { base, extra } = buchasAll(), m = new Map(); [...base, ...extra].forEach(([a, b]) => m.set(a + "/" + b, [Number(a), Number(b)])); return [...m.values()].sort((u, v) => u[0] - v[0] || u[1] - v[1]); }function pse106Geom(p){
   const opt = v => (v === "" || v === null || v === undefined || isNaN(v)) ? null : Number(v);
@@ -4911,7 +4912,7 @@ function roughPasses(path, stock, mode, feed, apRad, allowRad, rn, above){
 }
 // Ferramentas por material (usuário 06/11/2026): TEFLON / PTFE puro → face T3D3, externo T7D7, interno T4D4, corte T8D8
 // (corte F0.100 e G92 = 15 + H + 1,25, como nos programas PSR 102 em PTFE 020537/020765/021029). PU e demais: T2D2 / T1D45-T2D12 / T5D5.
-function isTeflon(p){ const m = String(p.mat || "").toUpperCase().trim(); return /TEFLON/.test(m) || /^PTFE\s*(PURO|\+\s*BR(ONZE)?|\+\s*GR(AFITE)?)?$/.test(m); }   // PTFE+GR (grafite) também (usuário 17/11/2026)   // PTFE+BR usa as mesmas do PTFE puro (usuário 07/11/2026)
+function isTeflon(p){ const m = String(p.mat || "").toUpperCase().trim(); return /TEFLON/.test(m) || /^PTFE\s*(PURO|\+\s*BR(ONZE)?|\+\s*GR(AFITE)?|\+\s*FV)?$/.test(m); }   // PTFE+GR (grafite) também (usuário 17/11/2026)   // PTFE+BR usa as mesmas do PTFE puro (usuário 07/11/2026)
 // PU (usuário 09/11/2026, todos os perfis): sobremetal externo > 10 no Ø (bucha ext − Ø ext) → passes acima do Ø ext vão 1 mm a mais em Z (sem mudar o G92)
 function isPU(mat){ return !isTeflon({ mat }) && /\bPU\b/i.test(String(mat || "PU")); }
 function deepAbove(p, tO){ return isPU(p.mat) && tO - p.dext > 10 ? { x: Number(p.dext), dz: 1 } : null; }

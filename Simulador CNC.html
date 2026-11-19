@@ -1003,6 +1003,10 @@ function rpmLookup(d, table){ let r = table[0][1]; for (const [dmin, rpm] of tab
 const RPM_TABLE = [[0,2600],[50,2000],[100,1500],[150,1200],[200,800],[300,500]];
 const TAN = a => Math.tan(a * Math.PI / 180);
 
+// v5.79.0 (usuário 19/11/2026): "a faca precisa de 10 mm no mínimo, a aproxima em todos" — em TODOS os perfis a ferramenta de
+// corte (faca T5D5, bedame T8D8/T6D16) aproxima e recua no mínimo 10 acima (no Ø) do maior Ø da peça; se já ficava mais longe
+// (bucha grande, parâmetro maior), continua como antes. Nunca chega mais perto do que chegava.
+const FACA_MIN = 10;
 const GEN = {
   iso: {
     name: "Programa Arruela ISO",
@@ -1026,7 +1030,7 @@ const GEN = {
         15: p.dint + 2*p.chI*k + 2*p.prolF*k, 16: p.prolF, 17: p.dint, 18: -p.chI, 19: -(p.h - p.chI),
         20: p.dint + 2*p.chI*k + 2*p.prolT*k, 21: -(p.h + p.prolT), 22: -(p.h + p.prolT + p.parT), 23: p.dint - p.recI,
         24: p.zAp, 26: p.zSeg, 27: p.fExt, 28: p.fInt, 29: 0, 30: -p.h - p.cDZ, 31: p.dint - p.cPass, 32: p.fBed,
-        33: p.dext + p.cPos, 34: p.zEnt
+        33: p.dext + Math.max(p.cPos, FACA_MIN), 34: p.zEnt
       };
       const c = n => fx(C[n], 3), X = v => fx(v, 3);
       const rpt = (p.rpt === "" || p.rpt === null || isNaN(p.rpt)) ? "0" : gen15(p.rpt);
@@ -1082,7 +1086,7 @@ const GEN = {
     build(p){
       const N = Math.max(1, Math.min(10, xround(p.n, 0)));
       const prol = (p.bed - p.sobrep) / 2;
-      const B3 = rounddown3(2 * (p.ch + prol) * TAN(p.ang)), B4 = p.ch + prol, B6 = p.h + 2*prol;
+      const B3 = rounddown3(2 * (p.ch + prol) * TAN(p.ang)), B4 = p.ch + prol, B6 = p.h + 2*prol, kF = Math.max(p.recE, FACA_MIN);   // faca: no mínimo 10 acima
       const B7 = Math.max(p.dext, buchaOf(p).bo) + p.recE, B8 = Math.min(p.dint, buchaOf(p).bi) - p.xAb, B9 = B7 - B8, B10 = p.dext - B3;
       const S = (p.S === "" || isNaN(p.S)) ? rpmLookup(Math.max(p.dext, buchaOf(p).bo), RPM_TABLE) : p.S;
       const C = { 16: B7 - p.dext, 17: -p.zAp, 18: -B9, 19: p.zAp, 20: B10 - B8, 21: -(p.zAp - prol), 22: B3, 23: -B3, 24: -B4,
@@ -1100,8 +1104,8 @@ const GEN = {
       for (let i = 1; i <= N; i++) L.push(";(INICIO PERFIL PEÇA " + i + ")", "G42 X" + c(22) + " Z" + c(24), "Z" + c(25) + " ;(VALOR PARA ALTERAR NA ALTURA)", "X" + c(23) + " Z" + c(24), "; (FIM DO PERFIL PEÇA " + i + ")");
       L.push("G1 Z" + c(26), "X" + c(27), "G90", "G0 G40 Z" + c(19), "Z" + c(36), "T4D4", "G0 X" + c(29) + " Z" + c(19), ...arrRough(p, "id", -(N * B6 + p.par), p.dint, p.fInt).slice(0, -1), "G91", "X" + c(22), "G1 Z" + c(21) + " F" + gF(p.fInt));
       for (let i = 1; i <= N; i++) L.push("; (INICIO DO PERFIL PEÇA " + i + ")", "G41 X" + c(23) + " Z" + c(24), "Z" + c(25) + " ;(VALOR PARA ALTERAR NA ALTURA)", "X" + c(22) + " Z" + c(24), "; (FIM DO PERFIL PEÇA " + i + ")");
-      L.push("G1 Z" + c(26), "X" + c(30), "G90", "G0 G40 Z" + c(19), "Z" + c(37), "T8D8", "G0 X" + c(28) + " Z" + c(19), "G91", "X" + c(27));
-      for (let i = 1; i <= N; i++) L.push("; (CORTE PEÇA " + i + ")", "Z" + c(i === 1 ? 31 : 32) + " ;(VALOR PARA ALTERAR NA ALTURA)", "G1 X" + g3(-(p.dext + p.recE - (p.dint - p.xAb))) + " F" + gF(p.fCor), "G0 X" + g3(p.dext + p.recE - (p.dint - p.xAb)));
+      L.push("G1 Z" + c(26), "X" + c(30), "G90", "G0 G40 Z" + c(19), "Z" + c(37), "T8D8", "G0 X" + c(28) + " Z" + c(19), "G91", "X" + g3(kF));
+      for (let i = 1; i <= N; i++) L.push("; (CORTE PEÇA " + i + ")", "Z" + c(i === 1 ? 31 : 32) + " ;(VALOR PARA ALTERAR NA ALTURA)", "G1 X" + g3(-(p.dext + kF - (p.dint - p.xAb))) + " F" + gF(p.fCor), "G0 X" + g3(p.dext + kF - (p.dint - p.xAb)));
       L.push("G90", "G92 Z" + c(34), "N20 G00 Z" + c(38), "(RPT N10,N20)N" + gen15(p.n0), "G54",
         p.n0 === 0 ? "G00 X" + gen15(p.dext + p.afX) + " Z" + c(39) : "G00 Z" + c(39), "M05", "M30");
       return L;
@@ -1121,7 +1125,7 @@ const GEN = {
     build(p){
       const N = Math.max(1, Math.min(25, xround(p.n, 0)));
       const B6 = p.h, B7 = Math.max(p.dext, buchaOf(p).bo) + p.recE, B8 = Math.min(p.dint, buchaOf(p).bi) - p.xAb, B9 = B7 - B8, B10 = p.dext;
-      const posC2 = p.posC, B34 = p.dext + p.posC - (p.dint - p.xAb);   // corte no padrão (bucha só no faceamento)
+      const posC2 = Math.max(p.posC, FACA_MIN), B34 = p.dext + posC2 - (p.dint - p.xAb);   // corte no padrão (bucha só no faceamento)
       const S = (p.S === "" || isNaN(p.S)) ? rpmLookup(Math.max(p.dext, buchaOf(p).bo), RPM_TABLE) : p.S;
       const C = { 16: B7 - p.dext, 17: -p.zAp, 18: -B9, 19: p.zAp, 20: B10 - B8, 21: -p.zAp, 26: -p.h, 27: -p.folga, 28: p.recE,
                   29: p.dext, 30: p.dint, 31: -p.recI, 32: -(p.zAp + p.h), 33: -B6, 35: posC2, 36: -B34, 37: B34,
@@ -1182,9 +1186,9 @@ const GEN = {
         "G1 Z" + X(zD) + " ; (ALTURA DO ANEL + FACEADO + DESBASTE)",
         "X" + X(Math.max(p.dint - 5, ti.min)) + " ; (ABAIXO DO DIAMETRO INTERNO DA PECA)", "G0 G40 Z3", "Z100",
         "T5D5 ; (FACA) PECA 1",
-        "G0 X" + X(bu.bo + 5) + " Z3 ; (5 MM ACIMA DA BUCHA)",
+        "G0 X" + X(Math.max(bu.bo + 5, De + FACA_MIN)) + " Z3 ; (" + (bu.bo + 5 >= De + FACA_MIN ? "5 MM ACIMA DA BUCHA" : "10 MM ACIMA DA PECA") + ")",
         "Z" + X(zB) + " ; (ALTURA DA PECA + FACEADO)",
-        "G1 X" + X(p.dint) + " F" + gF(p.fFaca), "G0 X" + X(bu.bo + 5),
+        "G1 X" + X(p.dint) + " F" + gF(p.fFaca), "G0 X" + X(Math.max(bu.bo + 5, De + FACA_MIN)),
         "G92 Z" + gen15(p.g92), "N20 G0 Z100", "(RPT N10,N20)N" + (n - 1), "G54", "G0 Z250", "M05", "M30");
       { const iI = document.querySelector("#genBox [data-k=bi]"), iO = document.querySelector("#genBox [data-k=bo]"), a = (b => [b.bi, b.bo])(psoBucha(Object.assign({}, p, { bi: "", bo: "" })));
         if (iI) iI.placeholder = a ? "automática: " + a[0] : "digite"; if (iO) iO.placeholder = a ? "automática: " + a[1] : "digite"; }
@@ -1257,8 +1261,8 @@ const GEN = {
         "G01 X" + X(g.Dback + 2*p.prolT*TAN(p.ab)) + " Z" + X(-(p.h + p.prolT)), "G01 Z" + X(-(p.h + p.prolT + p.parT)),
         "G01 X" + X(p.dint - p.recI), "G40 G00 Z" + X(p.zAp), "G00 Z" + X(p.zSeg),
         p.tBed + " ;(BEDAME 1)",
-        "G00 X" + X(Math.max(g.Dext, bu.bo) + p.cPos) + " Z" + X(p.zAp), "G00 Z" + X(-p.h - p.cDZ),
-        "G01 X" + X(p.dint - p.cPass) + " F" + X(p.fBed), "G00 X" + X(Math.max(g.Dext, bu.bo) + p.cPos),
+        "G00 X" + X(Math.max(Math.max(g.Dext, bu.bo) + p.cPos, g.Dext + FACA_MIN)) + " Z" + X(p.zAp), "G00 Z" + X(-p.h - p.cDZ),
+        "G01 X" + X(p.dint - p.cPass) + " F" + X(p.fBed), "G00 X" + X(Math.max(Math.max(g.Dext, bu.bo) + p.cPos, g.Dext + FACA_MIN)),
         "G92 Z" + fx(p.g92, 2), "N20 G00 Z100",
         "(RPT N10,N20)N" + rpt + ";=(N IGUAL A NUMERO DE REPETIÇOES)",
         "G54", "G00 Z" + fx(p.zFim, 0), "M05", "M30"
@@ -1446,7 +1450,7 @@ GEN.dhr = { name: "PSH 138 (DHR)",
       15: p.dint + 2*G.rF + 2*p.prolF*G.tb, 16: p.prolF, 17: p.dint, 18: -G.zF, 19: -(p.h - G.zB),
       20: p.dint + 2*G.rB + 2*p.prolT*G.tb, 21: -(p.h + p.prolT), 22: -(p.h + p.prolT + p.parT), 23: p.dint - p.recI,
       24: p.zAp, 26: p.zSeg, 27: p.fExt, 28: p.fInt, 29: 0, 30: -p.h - p.cDZ, 31: p.dint - p.cPass, 32: p.fBed,
-      33: p.dext + p.cPos, 34: p.zEnt
+      33: p.dext + Math.max(p.cPos, FACA_MIN), 34: p.zEnt
     };
     const c = n => fx(C[n], 3);
     const rpt = (p.rpt === "" || p.rpt === null || isNaN(p.rpt)) ? "0" : gen15(p.rpt);
@@ -1521,8 +1525,8 @@ GEN.dpr = { name: "PSE 125 (DPR)",
       "G01 X" + X(g.Dint + 2*c + 2*p.prolT*g.tb) + " Z" + X(-(p.h + p.prolT)), "G01 Z" + X(-(p.h + p.prolT + p.parT)),
       "G01 X" + X(g.Dint - p.recI), "G40 G00 Z" + X(p.zAp), "G00 Z" + X(p.zSeg),
       p.tBed + " ;(BEDAME 1)",
-      "G00 X" + X(Math.max(p.dext, bu.bo) + p.cPos) + " Z" + X(p.zAp), "G00 Z" + X(-p.h - p.cDZ),
-      "G01 X" + X(g.Dint - p.cPass) + " F" + X(p.fBed), "G00 X" + X(Math.max(p.dext, bu.bo) + p.cPos),
+      "G00 X" + X(Math.max(Math.max(p.dext, bu.bo) + p.cPos, p.dext + FACA_MIN)) + " Z" + X(p.zAp), "G00 Z" + X(-p.h - p.cDZ),
+      "G01 X" + X(g.Dint - p.cPass) + " F" + X(p.fBed), "G00 X" + X(Math.max(Math.max(p.dext, bu.bo) + p.cPos, p.dext + FACA_MIN)),
       "G92 Z" + fx(p.g92, 2), "N20 G00 Z100",
       "(RPT N10,N20)N" + rpt + ";=(N IGUAL A NUMERO DE REPETIÇOES)",
       "G54", "G00 Z" + fx(p.zFim, 0), "M05", "M30"
@@ -1712,7 +1716,7 @@ GEN.psr101 = { name: "PSR 101",
     L.push(";( FINISH )", `G0 X${f3(2 * pin[0].p[1])} Z3.000`, `G1 X${f3(2 * pin[0].p[1])} Z${f3(pin[0].p[0])}`, ...tipLines(pin, r, "0.150"));
     const li = pin[pin.length - 1].p, xr = Math.max(0, g.d - g.ap - 2); L.push(`G0 X${f3(xr)} Z${f3(li[0] + 0.2)}`, `G0 X${f3(xr)} Z5.000`, "");
     // ---- corte (como nos PSR101-P: até um pouco abaixo do furo de trás) ----
-    const xc = Math.min(tO + 0.2, g.D + 4), xe = g.d + g.bB - 1.3;
+    const xc = Math.max(Math.min(tO + 0.2, g.D + 4), g.D + FACA_MIN), xe = g.d + g.bB - 1.3;
     L.push(...sec("CUTTING"), "G0 Z70", TL.cut, ";", ";", `G0 X${f3(xc)} Z3.000`, `G0 X${f3(xc)} Z${f3(-H)}`, `G1 X${f3(xe)} Z${f3(-H)} F${TL.fCut}`, `G0 X${f3(xc)} Z${f3(-H)}`, `G0 X${f3(xc)} Z15.000`, "", "");
     const g92 = 15 + progMaxZ(L) + 0.15;
     const rpt = (p.rpt === "" || p.rpt === undefined || isNaN(p.rpt)) ? "0" : gen15(p.rpt);
@@ -1905,7 +1909,7 @@ function fscRingBuild(p, g, o){
   const lastOut = pout[pout.length - 1].p;
   L0.push(`G0 X${f3(tO + 1)} Z${f3(lastOut[0] + 0.2)}`, `G0 X${f3(tO + 1)} Z5.000`, "");
   // corte (T8D8) na largura do anel
-  const xc = tO + 1.5, xe = g.ringI - 1.6;
+  const xc = Math.max(tO + 1.5, g.ringO + FACA_MIN), xe = g.ringI - 1.6;
   L0.push(...sec("CUTTING"), "G0 Z70", TL.cut, ";", ";", `G0 X${f3(xc)} Z3.000`, `G0 X${f3(xc)} Z${f3(-L)}`, `G1 X${f3(xe)} Z${f3(-L)} F${TL.fCut}`,
           `G0 X${f3(xc)} Z${f3(-L)}`, `G0 X${f3(xc)} Z15.000`, "", "");
   const g92 = 15 + progMaxZ(L0) + 0.15, rpt = (p.rpt === "" || isNaN(p.rpt)) ? "0" : gen15(p.rpt);
@@ -1981,7 +1985,7 @@ function pse120Build(p){
   L.push(`G0 X${f3(g.d - 2)} Z${f3(lastIn[0] + 0.2)}`, `G0 X${f3(g.d - 2)} Z5.000`, "");
   // assento de trás com a T6D6 (a T2D2 não corta a face do lábio virada para trás), como nos programas: desce na face e vai até a altura
   L.push(...sec("OUTSIDE 2"), "G0 Z70", "T6D6", ";", ";", `G0 X${f3(tO + 4)} Z3`, `G0 Z${f3(g.zc - g.R)}`, `G1 X${f3(g.seat)}`, `G1 Z${f3(-H)}`, `G0 X${f3(tO + 4)}`, "G0 Z3", "");
-  const xc = tO + 0.2;
+  const xc = Math.max(tO + 0.2, g.apex + FACA_MIN);
   L.push(...sec("CUTTING"), "G0 Z70", TL.cut, ";", ";", `G0 X${f3(xc)} Z3.000`, `G0 X${f3(xc)} Z${f3(-H)}`, `G1 X${f3(g.d - 1)} Z${f3(-H)} F${TL.fCut}`,
          `G0 X${f3(xc)} Z${f3(-H)}`, `G0 X${f3(xc)} Z15.000`, "", "");
   const g92 = 15 + progMaxZ(L) + 0.15, rpt = (p.rpt === "" || isNaN(p.rpt)) ? "0" : gen15(p.rpt);
@@ -2690,13 +2694,13 @@ GEN.psa108 = {
     for (let i = 1; i <= N; i++) L.push(";(INICIO PERFIL PEÇA " + i + ")", "G42 X" + c(E3) + " Z" + c(-E4), "Z" + c(-(p.h - 2 * cE)) + " ;(VALOR PARA ALTERAR NA ALTURA)", "X" + c(-E3) + " Z" + c(-E4), "; (FIM DO PERFIL PEÇA " + i + ")");
     // v5.21.16 (usuário 11/11): com bedame 2 o acabamento termina no MESMO Z do desbaste (fim da faixa do corte), sem degrau:
     // paralelo no fundo do chanfro = meio bedame + sobreposição → fim em −(N × B6 + sobreposição), 0,1 antes da peça seguinte
-    const parA = bed2f ? prol + p.sobrep : p.par;
+    const parA = bed2f ? prol + p.sobrep : p.par, kF = Math.max(p.recE, FACA_MIN);   // faca: no mínimo 10 acima
     const endE = ["G1 Z" + c(-parA), "X" + c(p.recE)], endI = ["G1 Z" + c(-parA), "X" + c(-p.recI)];   // acabamento: como sempre (5.21.14 desfez o trecho a mais)
     L.push(...endE, "G90", "G0 G40 Z" + c(p.zAp), "Z" + c(p.zExt), "T4D4", "G0 X" + c(p.dint) + " Z" + c(p.zAp), ...arrRough(p, "id", zRough, p.dint, p.fInt).slice(0, -1), "G91", "X" + c(I3), "G1 Z" + c(-(p.zAp - prol)) + " F" + gF(p.fInt));
     for (let i = 1; i <= N; i++){ if (i > 1 && IB !== I3) L.push("X" + c(I3 - IB) + " ;(AJUSTE DO CHANFRO DE TRAS NO MEIO DO BEDAME)");
       L.push("; (INICIO DO PERFIL PEÇA " + i + ")", "G41 X" + c(-I3) + " Z" + c(-I4), "Z" + c(-(p.h - 2 * cI)) + " ;(VALOR PARA ALTERAR NA ALTURA)", "X" + c(IB) + " Z" + c(-I4), "; (FIM DO PERFIL PEÇA " + i + ")"); }
-    L.push(...endI, "G90", "G0 G40 Z" + c(p.zAp), "Z" + c(p.zInt), "T8D8", "G0 X" + c(p.dext) + " Z" + c(p.zAp), "G91", "X" + c(p.recE));
-    for (let i = 1; i <= N; i++) L.push("; (CORTE PEÇA " + i + ")", "Z" + c(i === 1 ? -(p.zAp + p.h) : -B6) + " ;(VALOR PARA ALTERAR NA ALTURA)", "G1 X" + g3(-(p.dext + p.recE - (p.dint - p.xAb))) + " F" + gF(p.fCor), "G0 X" + g3(p.dext + p.recE - (p.dint - p.xAb)));
+    L.push(...endI, "G90", "G0 G40 Z" + c(p.zAp), "Z" + c(p.zInt), "T8D8", "G0 X" + c(p.dext) + " Z" + c(p.zAp), "G91", "X" + c(kF));
+    for (let i = 1; i <= N; i++) L.push("; (CORTE PEÇA " + i + ")", "Z" + c(i === 1 ? -(p.zAp + p.h) : -B6) + " ;(VALOR PARA ALTERAR NA ALTURA)", "G1 X" + g3(-(p.dext + kF - (p.dint - p.xAb))) + " F" + gF(p.fCor), "G0 X" + g3(p.dext + kF - (p.dint - p.xAb)));
     L.push("G90", "G92 Z" + c(p.g92), "N20 G00 Z" + c(p.zN20), "(RPT N10,N20)N" + gen15(p.n0), "G54",
       p.n0 === 0 ? "G00 X" + gen15(p.dext + p.afX) + " Z" + c(p.zFim) : "G00 Z" + c(p.zFim), "M05", "M30");
     return L;
@@ -3204,7 +3208,7 @@ GEN.psh110 = {
     Lp.push(";( FINISH )", `G0 X${f3(2 * pin[0].p[1])} Z3.000`, `G1 X${f3(2 * pin[0].p[1])} Z${f3(pin[0].p[0])}`, ...tipLines(pin, r, "0.140"));
     const li = pin[pin.length - 1].p; Lp.push(`G0 X${f3(Math.max(0, xMin - 2))} Z${f3(li[0] + 0.2)}`, `G0 X${f3(Math.max(0, xMin - 2))} Z5.000`, "");
     // ---- corte: na altura da peça (como nos programas VPA01B) ----
-    const xc = bo + 0.2, xEnd = k === "M" ? 2 * g.rm - g.pM - 1 : xMin - 0.1;   // intermediária: corta o paralelo inteiro
+    const xc = Math.max(bo + 0.2, xMax + FACA_MIN), xEnd = k === "M" ? 2 * g.rm - g.pM - 1 : xMin - 0.1;   // intermediária: corta o paralelo inteiro
     Lp.push(...sec("CUTTING"), "G0 Z70", tools.cut, ";", ";", `G0 X${f3(xc)} Z3.000`, `G0 X${f3(xc)} Z${f3(-L)}`, `G1 X${f3(xEnd)} Z${f3(-L)} F${tools.fCut}`, `G0 X${f3(xc)} Z${f3(-L)}`, `G0 X${f3(xc)} Z15.000`, "", "");
     const g92 = 15 + progMaxZ(Lp) + 0.15;
     const rpt = (p.rpt === "" || p.rpt === undefined || isNaN(p.rpt)) ? (k === "M" ? String(g.n - 1) : "0") : gen15(p.rpt);
@@ -3364,7 +3368,7 @@ GEN.psh110t = {
     Lp.push(";( FINISH )", `G0 X${f3(2 * pin[0].p[1])} Z3.000`, `G1 X${f3(2 * pin[0].p[1])} Z${f3(pin[0].p[0])}`, ...tipLines(pin, r, "0.140"));
     const li = pin[pin.length - 1].p; Lp.push(`G0 X${f3(Math.max(0, xMin - 2))} Z${f3(li[0] + 0.2)}`, `G0 X${f3(Math.max(0, xMin - 2))} Z5.000`, "");
     // ---- corte na altura da peça; intermediária: corta o paralelo inteiro (Ø médio − paralelo − 1, igual aos VPA02A30º) ----
-    const xc = bo + 0.2, xEnd = k === "M" ? 2 * g.rm - g.pM - 1 : xMin - 0.1;
+    const xc = Math.max(bo + 0.2, xMax + FACA_MIN), xEnd = k === "M" ? 2 * g.rm - g.pM - 1 : xMin - 0.1;
     Lp.push(...sec("CUTTING"), "G0 Z70", tools.cut, ";", ";", `G0 X${f3(xc)} Z3.000`, `G0 X${f3(xc)} Z${f3(-L)}`, `G1 X${f3(xEnd)} Z${f3(-L)} F${tools.fCut}`, `G0 X${f3(xc)} Z${f3(-L)}`, `G0 X${f3(xc)} Z15.000`, "", "");
     const g92 = 15 + progMaxZ(Lp) + 0.15;
     const rpt = (p.rpt === "" || p.rpt === undefined || isNaN(p.rpt)) ? (k === "M" ? String(g.n - 1) : "0") : gen15(p.rpt);
@@ -5002,7 +5006,7 @@ function pseFscBuild(p, gOver){
   if (g.ring) L.push(...sec("OUTSIDE HAMMER GROOVE"), "G0 Z70", "T6D6", ";", ";", `G0 X${f3(tO + 4)} Z3`, `G0 Z${f3(g.zS)}`, `G1 X${f3(g.dS)}`, `G1 Z${f3(-H)}`, `G0 X${f3(tO + 4)}`, "G0 Z3", "");
   // ---- corte (T5D5; Teflon T8D8) ----
   // v5.78.2 (usuário 19/11/2026): no PSE 107 a faca aproxima 10 mm acima da peça (Ø ext + 10 no X); bucha maior que isso: como antes
-  const xc = p.tipoGen === "pse107" ? Math.max(tO + 0.2, Number(p.dext) + 10) : tO + 0.2;
+  const xc = Math.max(tO + 0.2, Math.max(Number(p.dext), ...g.outer.map(q => 2 * q[1])) + FACA_MIN);
   L.push(...sec("CUTTING"), "G0 Z70", TL.cut, ";", ";", `G0 X${f3(xc)} Z3.000`, `G0 X${f3(xc)} Z${f3(-H)}`, `G1 X${f3(g.wiper ? g.tipIn - 0.1 : p.dint - 0.1)} Z${f3(-H)} F${TL.fCut}`,
          `G0 X${f3(xc)} Z${f3(-H)}`, `G0 X${f3(xc)} Z15.000`, "", "");
   const cutR = (xc - (g.wiper ? g.tipIn - 0.1 : p.dint - 0.1)) / 2;                       // quanto a faca corta no raio
@@ -5278,7 +5282,7 @@ function psr102Build(p){
   // ---- face do calcanhar (T3D3), como no Fast Seal ----
   L.push(...sec("FACING"), "G0 Z70", "T3D3", ";", ";", `G0 X${f3(p.dext + 1)} Z${f3(-g.prot)}`, `G1 X${f3(g.lipf + 0.36)} Z${f3(-g.prot)} F0.120`, `G0 X${f3(g.lipf + 0.36)} Z5.000`, "");
   // ---- corte (T5D5) ----
-  const xc = Math.min(tO + 0.2, p.dext + 4), xe = g.calc - 1.2;
+  const xc = Math.max(Math.min(tO + 0.2, p.dext + 4), p.dext + FACA_MIN), xe = g.calc - 1.2;
   L.push(...sec("CUTTING"), "G0 Z70", TL.cut, ";", ";", `G0 X${f3(xc)} Z3.000`, `G0 X${f3(xc)} Z${f3(-H)}`, `G1 X${f3(xe)} Z${f3(-H)} F${TL.fCut}`, `G0 X${f3(xc)} Z${f3(-H)}`, `G0 X${f3(xc)} Z15.000`, "", "");
   const g92 = 15 + progMaxZ(deepAbove(p, tO) ? L.filter(l => !l.includes(`Z${f3(zDeep)}`) && !l.includes(`Z${f3(zDeep + 0.2)}`)) : L) + 0.15;   // intervalo = Z mais fundo das ferramentas + 0,15 (sem o 1 mm extra dos passes de cima)
   const rpt = (p.rpt === "" || isNaN(p.rpt)) ? "0" : gen15(p.rpt);
@@ -5363,7 +5367,7 @@ function dualBuild(p){
   const lastIn = pin[pin.length - 1].p, xr = Math.max(0, Math.min(...pin.map(q => 2 * q.p[1])) - 2);
   L.push(`G0 X${f3(xr)} Z${f3(lastIn[0] + 0.2)}`, `G0 X${f3(xr)} Z5.000`, "");
   // ---- corte (T5D5) ----
-  const xc = Math.min(tO + 0.2, g.lipO + 4), xe = Math.max(0, g.lipI - 0.5);
+  const xc = Math.max(Math.min(tO + 0.2, g.lipO + 4), g.lipO + FACA_MIN), xe = Math.max(0, g.lipI - 0.5);
   L.push(...sec("CUTTING"), "G0 Z70", TL.cut, ";", ";", `G0 X${f3(xc)} Z3.000`, `G0 X${f3(xc)} Z${f3(-H)}`, `G1 X${f3(xe)} Z${f3(-H)} F${TL.fCut}`, `G0 X${f3(xc)} Z${f3(-H)}`, `G0 X${f3(xc)} Z15.000`, "", "");
   const extra = new Set(rough.extraZ || []);
   const g92 = 15 + progMaxZ(extra.size ? L.filter(l => ![...extra].some(z => l.includes(z))) : L) + 0.15;   // intervalo = Z mais fundo das ferramentas + 0,15
@@ -5564,7 +5568,7 @@ function s15Build(p){
   const xr = Math.max(0, Math.min(...pin.map(q => 2 * q.p[1])) - 2);
   L.push(`G0 X${f3(xr)} Z${f3(pin[pin.length - 1].p[0] + 0.2)}`, `G0 X${f3(xr)} Z5.000`, "");
   // ---- corte (T5D5) ----
-  const xc = Math.min(tO + 0.2, g.maxD + 4), xe = Math.max(0, g.minD - 1.4);
+  const xc = Math.max(Math.min(tO + 0.2, g.maxD + 4), g.maxD + FACA_MIN), xe = Math.max(0, g.minD - 1.4);
   L.push(...sec("CUTTING"), "G0 Z70", TL.cut, ";", ";", `G0 X${f3(xc)} Z3.000`, `G0 X${f3(xc)} Z${f3(-H)}`, `G1 X${f3(xe)} Z${f3(-H)} F${TL.fCut}`, `G0 X${f3(xc)} Z${f3(-H)}`, `G0 X${f3(xc)} Z15.000`, "", "");
   const extra = new Set(rough.extraZ || []);
   const g92 = 15 + progMaxZ(extra.size ? L.filter(l => ![...extra].some(z => l.includes(z))) : L) + 0.15;

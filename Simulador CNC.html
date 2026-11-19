@@ -5271,6 +5271,7 @@ function psrProfile(p){
           [-H, R(g.calc) + g.cE], [-H + g.cI, R(g.calc)], [-g.ramp, R(g.calc)], [0, R(g.tip)], [0, R(g.tipo)]].map(([z, r]) => [-H - z, r]);
 }
 function psr102Build(p){
+  // v5.80.4 (usuário 19/11/2026): recuos do externo 1 mm mais para fora e do interno 1 mm mais para dentro (no Ø)
   const g = psr102Geom(p), f3 = v => fx(v, 3), r = Number(p.rn) || 0.4, H = g.H;
   const tI = g.bi ?? 0, tO = g.bo ?? (p.dext + 5);
   const S = (p.S === "" || isNaN(p.S)) ? rpmLookup(Math.max(p.dext, tO), RPM_TABLE) : p.S;
@@ -5286,7 +5287,7 @@ function psr102Build(p){
   L.push(...sec("OUTSIDE"), "G0 Z70", TL.ext, ";", ";");
   const pout = tipPath(extendStart(g.outerProg, 1.0), r, "right", [-r, -r]);
   const step = 2 * (Number(p.apR) > 0 ? Number(p.apR) : 3), sh = 2 * (Number(p.alR) >= 0 ? Number(p.alR) : 2.5), zF = -g.prot + 0.2;
-  const pass = (x, z) => L.push(`G0 X${f3(x)} Z3.500`, `G1 X${f3(x)} Z3.000 F1.000`, `G1 X${f3(x)} Z${f3(z)} F0.160`, `G0 X${f3(x + 0.4)} Z${f3(z + 0.2)}`, `G0 X${f3(x + 0.4)} Z3.000`);
+  const pass = (x, z) => L.push(`G0 X${f3(x)} Z3.500`, `G1 X${f3(x)} Z3.000 F1.000`, `G1 X${f3(x)} Z${f3(z)} F0.160`, `G0 X${f3(x + 1.4)} Z${f3(z + 0.2)}`, `G0 X${f3(x + 1.4)} Z3.000`);
   let lvl = tO - step, clip = tO;
   // acima do Ø do calcanhar: passe até o fim da peça (Z do contorno), senão sobra o anel em volta do calcanhar com bucha grande (usuário 09/11: 189,2x202,8 bucha 173x219)
   const zDeep = pout[pout.length - 1].p[0] - (deepAbove(p, tO) ? 1 : 0);   // sobremetal externo > 10 no Ø: esses passes vão 1 mm a mais em Z (usuário 09/11)
@@ -5298,11 +5299,11 @@ function psr102Build(p){
   cp.slice(1).forEach((q, i) => L.push(`G1 X${f3(q[1])} Z${f3(q[0])}` + (i === 0 ? " F0.160" : "")));
   // v5.80.3 (usuário 19/11/2026): o contorno em G1 sobe acima da bucha (X143,6 no 120x138,6 bucha 142) e o recuo em G0 voltava em
   // X142,4 — abaixo do caminho do G1, colado na bucha. Recuo = maior X do contorno (ou da bucha) + 2
-  const xRc = Math.max(tO, ...cp.map(q => q[1])) + 2;
+  const xRc = Math.max(tO, ...cp.map(q => q[1])) + 3;   // v5.80.4: +1 a mais (usuário)
   L.push(`G0 X${f3(xRc)} Z${f3(cp[cp.length - 1][0] + 0.2)}`, `G0 X${f3(xRc)} Z3.000`);
   L.push(";( FINISH )", `G0 X${f3(2 * pout[0].p[1])} Z3.000`, `G1 X${f3(2 * pout[0].p[1])} Z${f3(pout[0].p[0])}`, ...tipLines(pout, r, "0.130"));
   const lastOut = pout[pout.length - 1].p;
-  L.push(`G0 X${f3(tO + 1)} Z${f3(lastOut[0] + 0.2)}`, `G0 X${f3(tO + 1)} Z5.000`, "");
+  L.push(`G0 X${f3(tO + 2)} Z${f3(lastOut[0] + 0.2)}`, `G0 X${f3(tO + 2)} Z5.000`, "");
   if (g.wiper) L.push(";( *********************** )", ";( OUTSIDE ANGLE HAMMER GROOVE   )", ";( *********************** )", "G0 Z70", "T6D6", ";", ";",
     `G0 X${f3(tO + 4)} Z3`, `G0 Z${f3(-g.Hb)}`, `G1 X${f3(g.rootOut)}`, `G1 X${f3(g.tipOut)} Z${f3(-H)}`, `G0 X${f3(tO + 4)}`, "G0 Z3");   // raspador a 65° com a T6D6
   // ---- interno ----
@@ -5315,13 +5316,14 @@ function psr102Build(p){
     let x = Math.min(13, Math.floor((p.dint - 1.5) * 2) / 2), first = true;
     if (x > 0 && tgt > 0) for (let gq = 0;; gq++){ loopGuard(gq, "furo no tarugo");
       const xp = Math.min(x, tgt);
-      L.push(`G0 X${gen15(xp)} Z3`, `G1 Z${gen15(zc)}` + (first ? " F0.150" : ""), `G1 X${gen15(xp - 0.5)}`, "G0 Z3"); first = false;
+      L.push(`G0 X${gen15(xp)} Z3`, `G1 Z${gen15(zc)}` + (first ? " F0.150" : ""), `G1 X${gen15(xp - 1.5)}`, "G0 Z3"); first = false;
       if (xp >= tgt) break; x = xp + (tgt - xp) / Math.ceil((tgt - xp) / 8 - 1e-9);
     }
-  } else L.push(...roughPasses(pin, tI, "id", "0.150", Number(p.apR), Number(p.alR), r));
+  } else L.push(...roughPasses(pin, tI, "id", "0.150", Number(p.apR), Number(p.alR), r)
+    .map(l => /^G0 X[\d.]+ Z(?!3\.500)/.test(l) ? l.replace(/X([\d.]+)/, (m, x) => "X" + f3(Number(x) - 1)) : l));   // v5.80.4: recuos do interno 1 mm a mais para dentro (usuário)
   L.push(";( FINISH )", `G0 X${f3(2 * pin[0].p[1])} Z3.000`, `G1 X${f3(2 * pin[0].p[1])} Z${f3(pin[0].p[0])}`, ...tipLines(pin, r, "0.150"));
   const lastIn = pin[pin.length - 1].p;
-  L.push(`G0 X${f3(g.tip - 2)} Z${f3(lastIn[0] + 0.2)}`, `G0 X${f3(g.tip - 2)} Z5.000`, "");
+  L.push(`G0 X${f3(g.tip - 3)} Z${f3(lastIn[0] + 0.2)}`, `G0 X${f3(g.tip - 3)} Z5.000`, "");
   // ---- face do calcanhar (T3D3), como no Fast Seal ----
   // v5.80.2 (usuário 19/11/2026, 120x138,6x10x18): o recuo era G0 em Z direto por cima do lábio (0,4 do contorno) — agora sai 0,2 da
   // face do calcanhar, sobe em X acima do Ø ext. e só então volta em Z

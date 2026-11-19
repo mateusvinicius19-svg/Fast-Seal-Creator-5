@@ -6,6 +6,11 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.79.2 — PSA 108: interno já posiciona no Ø do 1º desbaste (19/11/2026)
+- PSA 108 34 x 40 x 2,5 com bucha 13 x 46: a T4D4 ia em G0 até X34 Z3 (Ø int da peça, 3 mm acima da face, com a bucha ainda
+  fechada em 13) e só depois para X19.333. Agora: T4D4 → G0 X19.333 Z3 → desbaste. Perigoso em G0 tão perto da peça (usuário).
+- Só o PSA 108 com desbaste interno. PSA 108 C, PSG 101/103/104, PSA 109 e os outros perfis: iguais (teste dos 37 perfis).
+
 ## 5.79.1 — Desbaste que só andava no Ø da bucha sai em TODOS os perfis (19/11/2026)
 - O que foi feito no PSE 107 (5.78.1) agora vale para todos os perfis que usam o desbaste estilo Fast Seal, no externo e no
   interno: com bucha de pouco material, a passada de contorno ficava inteira no Ø da bucha (sem cortar nada), colada no

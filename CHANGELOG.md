@@ -6,6 +6,11 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.79.3 — Ciclo arruelas SEM CHANFRO: interno já posiciona no Ø do 1º desbaste (19/11/2026)
+- Igual ao PSA 108 (5.79.2): a T4D4 ia em G0 até X(Ø int da peça) a Z3 com a bucha ainda fechada e só depois para o 1º desbaste.
+  Agora (34 x 40 x 2,5, bucha 13 x 46): T4D4 → G0 X19.333 Z3 → G1 Z-6 F.1. Sem desbaste interno: como antes.
+- Só o SEM CHANFRO; os outros perfis iguais (teste dos 37 perfis).
+
 ## 5.79.2 — PSA 108: interno já posiciona no Ø do 1º desbaste (19/11/2026)
 - PSA 108 34 x 40 x 2,5 com bucha 13 x 46: a T4D4 ia em G0 até X34 Z3 (Ø int da peça, 3 mm acima da face, com a bucha ainda
   fechada em 13) e só depois para X19.333. Agora: T4D4 → G0 X19.333 Z3 → desbaste. Perigoso em G0 tão perto da peça (usuário).

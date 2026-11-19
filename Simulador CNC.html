@@ -1134,6 +1134,10 @@ const GEN = {
       // v5.77.1 (usuário 19/11/2026, "o mesmo problema que estava na PSA 108"): depois do desbaste externo voltava em rápido até
       // X(Ø int − xAb), abaixo da bucha, só para subir de novo em G91. Agora o desbaste termina direto no Ø ext. Sem desbaste: como antes.
       const rOD = arrRough(p, "od", -(N * p.h + p.folga), B10, p.fExt);
+      // v5.79.3 (usuário 19/11/2026): como no PSA 108 (5.79.2) — o interno ia em G0 até X(Ø int da peça) a Z3 com a bucha ainda
+      // fechada e só depois descia para o 1º desbaste. Agora já posiciona no Ø do 1º desbaste. Sem desbaste interno: como antes.
+      const rID = arrRough(p, "id", -(N * p.h + p.folga), p.dint, p.fInt).slice(0, -1); let xI0 = p.dint;
+      { const j = rID.findIndex(l => /^G0 X[\d.]+$/.test(l)); if (j >= 0){ xI0 = +rID[j].slice(4); rID.splice(j, 1); } }
       const odSeq = rOD.length ? rOD : [...arrRough(p, "od", -(N * p.h + p.folga), B8, p.fExt), "X" + c(20)];
       const name = p.nome ? p.nome : "%PSA 108 " + gen15(p.dint) + "X" + gen15(p.dext) + "X" + gen15(p.h) + " ,MX---,";
       const L = [name,
@@ -1144,7 +1148,7 @@ const GEN = {
         "T7D7; (EXTERNO) PECA 1", "G0 X" + c(29) + " Z" + c(19) + "; (DIAMETRO EXTERNO) PECA 1", "G91",
         "X" + c(16), "Z" + c(17), "G1 X" + c(18) + " F" + gF(p.fExt), "G0 Z" + c(19), ...odSeq, "G1 Z" + c(21)];
       for (let i = 1; i <= N; i++) L.push(";(INICIO PERFIL PEÇA " + i + ")", "Z" + c(26) + " ;(VALOR PARA ALTERAR NA ALTURA)", "; (FIM DO PERFIL PEÇA " + i + ")");
-      L.push("G1 Z" + c(27) + " ;(FOLGA EM Z)", "X" + c(28), "G90", "G0 G40 Z" + c(19), "Z" + c(40), "T4D4", "G0 X" + c(30) + " Z" + c(19), ...arrRough(p, "id", -(N * p.h + p.folga), p.dint, p.fInt).slice(0, -1), "G91", "G1 Z" + c(21) + " F" + gF(p.fInt));
+      L.push("G1 Z" + c(27) + " ;(FOLGA EM Z)", "X" + c(28), "G90", "G0 G40 Z" + c(19), "Z" + c(40), "T4D4", "G0 X" + g3(xI0) + " Z" + c(19), ...rID, "G91", "G1 Z" + c(21) + " F" + gF(p.fInt));
       for (let i = 1; i <= N; i++) L.push("; (INICIO DO PERFIL PEÇA " + i + ")", "Z" + c(26) + " ;(VALOR PARA ALTERAR NA ALTURA)", "; (FIM DO PERFIL PEÇA " + i + ")");
       L.push("G1 Z" + c(27) + " ;(FOLGA EM Z)", "X" + c(31), "G90", "G0 G40 Z" + c(19), "Z" + c(41), "T5D5", "G0 X" + c(29) + " Z" + c(19), "G91", "X" + c(35));
       for (let i = 1; i <= N; i++) L.push("; (CORTE PEÇA " + i + ")", "Z" + c(i === 1 ? 32 : 33) + " ;(VALOR PARA ALTERAR NA ALTURA)", "G1 X" + c(36) + " F" + gF(p.fCor), "G0 X" + c(37));

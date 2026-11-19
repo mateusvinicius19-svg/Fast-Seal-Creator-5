@@ -6,6 +6,11 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.76.2 — PSH 129 (DH): T2D2 volta em G0 antes do desbaste (19/11/2026)
+- Na 5.76.0 o PU passou a facear com a T3D3 e trocar para a T2D2 em Z100; o 1º passe do desbaste externo (ex.: G01 Z-5 F0.15)
+  descia em G1 desde o Z100. Agora, depois da troca, vai em G0 até X(Ø ext + sobra) Z3 e só então desbasta.
+- Só o PSH 129 em PU (com T3D3). Teste dos perfis: 35 perfis geram programa; só o PSH 129 mudou (1 linha a mais).
+
 ## 5.76.1 — PSA 108: sem a volta em rápido até X88.3 depois do desbaste (19/11/2026)
 - Programa 46341 (bucha 91 x 125): depois do desbaste externo o programa ia em G0 até X88.3 (Ø int da bucha − 2,7) e
   subia de novo com G91 X24.49 até o início do perfil. Agora o desbaste termina direto no início do perfil: G0 X112.79 / G91 / G1 Z-2.525.

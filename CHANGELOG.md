@@ -6,6 +6,11 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.78.2 — PSE 107: faca aproxima 10 mm acima da peça (19/11/2026)
+- Corte (T5D5 / T8D8) do PSE 107: o X de aproximação e de recuo era Ø da bucha + 0,2 (ex.: X142.2, colado no lábio).
+  Agora é Ø externo da peça + 10 (ex.: 125 x 140 x 18 → X150). Bucha maior que isso: continua Ø da bucha + 0,2. G92 igual.
+- Só o PSE 107 (pedido do usuário). Os outros perfis iguais (teste dos 37 perfis).
+
 ## 5.78.1 — PSE 107: sem o desbaste externo que só raspava o lábio (19/11/2026)
 - PSE 107 125 x 140 x 18 com bucha 112 x 142: o desbaste externo ficava inteiro em X142 (o Ø da bucha, sem cortar nada) e passava
   a 0,27 mm (no raio) da ponta do lábio (X141,455). Agora, quando o desbaste externo não corta nada abaixo do Ø da bucha, ele sai

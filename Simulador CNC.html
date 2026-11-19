@@ -1218,25 +1218,32 @@ const GEN = {
       { const iI = document.querySelector("#genBox [data-k=bi]"), iO = document.querySelector("#genBox [data-k=bo]"), pu = (p.matA || "PU") === "PU", a = pu ? buchaPick(p.dint, g.Dext) : null, dg = "digite (" + (ARR_MAT[p.matA] || ARR_MAT.PU)[0] + ")";
         if (iI) iI.placeholder = a ? "automática: " + a[0] : dg; if (iO) iO.placeholder = a ? "automática: " + a[1] : dg;
         const d = dhPadrao(Number(p.sec)); for (const k of ["h", "h2", "b"]){ const el = document.querySelector("#genBox [data-k=" + k + "]"); if (el && d) el.placeholder = "tabela: " + fmtN(d[k], 3); } }
-      return applyArrMat(this.buildRaw(p, g), p);   // material (usuário 09/11/2026): mesma lista e ferramentas das arruelas
+      // material (usuário 09/11/2026): lista das arruelas. v5.76.0 (usuário 19/11/2026: "no PSH 129 quando troca de material não está
+      // trocando as ferramentas"): ferramentas pela REGRA DAS GAXETAS, igual ao PSE 108 (DP) na 5.75.2 (dpGaxTools) — PU: externo T2D2,
+      // interno T4D14 / T1D45 / T2D12, corte T5D5 F0.22, e a face com a T3D3 · NBR/Viton: T7D7 / T4D4 / T5D5 · PTFE: T7D7 / T4D4 / T8D8
+      // · POM, PEAD e Celeron: como nas arruelas. Ferramenta trocada à mão nos parâmetros continua valendo.
+      const q = dpGaxTools(p); q.tFace = (p.matA || "PU") === "PU" && p.tExt === "T7D7" ? "T3D3" : "";
+      const L = applyArrMat(this.buildRaw(q, g), q);
+      return q.tBed === "T5D5" ? L.map(s => s.replace(/^T5D5 ;\(BEDAME 1\)/, "T5D5 ;(CORTE)")) : L;
     },
     buildRaw(p, g){
       const c = p.ch, X = v => fx(v, 3);
       const rpt = (p.rpt === "" || p.rpt === null || isNaN(p.rpt)) ? "0" : gen15(p.rpt);
       const bu = lipBucha(p, g), zR = -(p.h + p.prolT + p.parT);
+      const tFace = p.tFace || "", tExt = p.tExt, tInt = p.tInt;   // v5.76.0: PU faceia com a T3D3 e troca para o externo
       const roughOD = [], roughID = [];
       for (const x of roughLevels(bu.bo, g.Dext, 1)) roughOD.push("G00 X" + X(x), "G01 Z" + X(zR) + " F" + X(p.fExt), "G01 X" + X(x + 1), "G00 Z" + X(p.zEnt));
       for (const x of lipIdLevels(bu.bi, p.dint)) roughID.push("G00 X" + X(x) + " Z" + X(p.zEnt), "G01 Z" + X(zR) + " F" + X(p.fInt), "G01 X" + X(x - 1), "G00 Z" + X(p.zEnt));
       return [
         ";BUCHA " + bu.txt,
         "G90","G95","G54","G97 S" + gen15((p.rpm === "" || p.rpm === undefined || isNaN(p.rpm)) ? rpmLookup(Math.max(g.Dext, bu.bo), RPM_TABLE) : p.rpm) + " M3","N10","G0 Z100",
-        p.tExt + " ;(EXTERNO FACE)",
+        tFace ? tFace + " ;(FACE)" : tExt + " ;(EXTERNO FACE)",
         "G00 X" + X(Math.max(g.Dext, bu.bo) + p.sobra) + " Z" + X(p.zAp), "G01 Z0.000 F" + X(p.fExt), "G01 X" + X(Math.min(p.dint, bu.bi) - p.sobra) + " F" + X(p.fExt),
-        "G00 Z" + X(p.zEnt), ...(roughOD.length ? ["; (DESBASTE EXTERNO - MAX. 8 NO DIAMETRO, ACABAMENTO 2)", ...roughOD] : []), "G00 X" + X(g.Dext - 2*c - 2*p.prolF),
+        "G00 Z" + X(p.zEnt), ...(tFace ? ["G00 Z" + X(p.zSeg), tExt + " ;(EXTERNO)"] : []), ...(roughOD.length ? ["; (DESBASTE EXTERNO - MAX. 8 NO DIAMETRO, ACABAMENTO 2)", ...roughOD] : []), "G00 X" + X(g.Dext - 2*c - 2*p.prolF),
         "G42 G01 Z" + X(p.prolF) + " F" + X(p.fExt), "G01 X" + X(g.Dext) + " Z" + X(-c), "G01 Z" + X(-(p.h - c)),
         "G01 X" + X(g.Dext - 2*c - 2*p.prolT) + " Z" + X(-(p.h + p.prolT)), "G01 Z" + X(-(p.h + p.prolT + p.parT)),
         "G01 X" + X(g.Dext + p.recE), "G40 G00 Z" + X(p.zEnt), "G00 Z" + X(p.zSeg),
-        p.tInt + " ;(INTERNO - LABIO)",
+        tInt + " ;(INTERNO - LABIO)",
         ...(roughID.length ? ["; (DESBASTE INTERNO - MAX. 8 NO DIAMETRO, ACABAMENTO 2)", ...roughID] : []),
         "G00 X" + X(g.Dstep) + " Z" + X(p.zEnt), "G41 G01 Z" + X(p.prolF) + " F" + X(p.fInt),
         "G01 Z" + X(-p.b) + " ;(DEGRAU)", "G01 X" + X(p.dint) + " Z" + X(g.zLip) + " ;(FLANCO " + gen15(p.af) + " GRAUS)",

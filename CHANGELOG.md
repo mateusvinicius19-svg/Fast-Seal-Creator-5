@@ -6,6 +6,16 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.76.0 — PSH 129 (DH): ferramentas trocam com o material (regra das gaxetas, igual ao DP) (19/11/2026)
+- Antes o DH usava a regra das arruelas: só o Celeron trocava, o resto ficava com T7D7 / T4D4 / T8D8. Agora (usuário: "PU diferente"),
+  a mesma regra que o PSE 108 (DP) ganhou na 5.75.2:
+  - PU: face T3D3 · externo T2D2 · interno T4D14 (Ø < 11), T1D45 (11 a 40), T2D12 (> 40) · corte T5D5 F0.22
+  - NBR e Viton: T7D7 / T4D4 / corte T5D5 F0.22
+  - PTFE puro, PTFE+BR, PTFE+GR: T7D7 / T4D4 (T2D14 abaixo de Ø14) / bedame T8D8
+  - POM, PEAD e Celeron: como antes (Celeron T2D54 / T2D64 / T6D16)
+- Ferramenta trocada à mão nos parâmetros continua valendo. G92 / RPT iguais.
+- Teste dos perfis: 35 perfis geram programa; só o PSH 129 mudou.
+
 ## 5.75.2 — PSE 108 (DP): ferramentas trocam com o material (regra das gaxetas) (19/11/2026)
 - Antes o DP usava a regra das arruelas: quase todo material ficava com T7D7 / T4D4 / T8D8. Agora (usuário escolheu a regra das gaxetas):
   - PU: externo T2D2 · interno T4D14 (Ø < 11), T1D45 (11 a 40), T2D12 (> 40) · corte T5D5 F0.22

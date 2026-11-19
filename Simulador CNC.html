@@ -2710,8 +2710,23 @@ for (const k of ["ciclo", "semch", "psa108"]){
 }
 // v5.75.0 (usuário 19/11/2026): PSE 108 (DP) com MATERIAL em lista (mesma lista e ferramentas das arruelas: linha ;MATERIAL,
 // Celeron T2D54/T2D64/T6D16, T2D14 abaixo de Ø14). Só no DP — a Arruela ISO (mesmo GEN.iso) continua igual, sem material.
+// v5.75.2 (usuário 19/11/2026: "quando troca de material não está trocando as ferramentas"): DP com a REGRA DAS GAXETAS (fscTools)
+// PU: externo T2D2, interno T4D14 (< 11) / T1D45 (11 a 40) / T2D12 (> 40), corte T5D5 F0.22 · NBR/Viton: T7D7 / T4D4 / T5D5 ·
+// PTFE, +BR, +GR: T7D7 / T4D4 (T2D14 < 14) / bedame T8D8. POM, PEAD e Celeron: como nas arruelas. Ferramenta trocada à mão
+// nos parâmetros (diferente do padrão T7D7 / T4D4 / T8D8) continua valendo.
+const DP_GAX_MAT = { PU: "PU", NBR: "NBR", VITON: "VITON", PTFE: "PTFE PURO", PTFEBR: "PTFE+BR", PTFEGR: "PTFE+GR" };
+function dpGaxTools(p){
+  const mat = DP_GAX_MAT[p.matA || "PU"]; if (!mat) return p;
+  const T = fscTools({ mat, dint: p.dint }, "T2D2", p.dint < 11 ? "T4D14" : p.dint < 40 ? "T1D45" : "T2D12"), q = Object.assign({}, p);
+  if (q.tExt === "T7D7") q.tExt = T.ext;
+  if (q.tInt === "T4D4") q.tInt = T.int;
+  if (q.tBed === "T8D8" && T.cut !== "T8D8"){ q.tBed = T.cut; q.fBed = Number(T.fCut); }
+  return q;
+}
 { const b = GEN.iso.build, dp = p => String(p.tipoP || "") === "dp";
-  GEN.iso.build = function(p){ return dp(p) ? applyArrMat(b.call(this, p), p) : b.call(this, Object.assign({}, p, { matA: "" })); };
+  GEN.iso.build = function(p){ if (!dp(p)) return b.call(this, Object.assign({}, p, { matA: "" }));
+    const q = dpGaxTools(p), L = applyArrMat(b.call(this, q), q);
+    return q.tBed === "T5D5" ? L.map(s => s.replace(/^T5D5 ;\(BEDAME 1\)/, "T5D5 ;(CORTE)")) : L; };
   GEN.iso.main.push(["matA", "Material — só PSE 108 (DP)", "PU"]); }
 // v5.21.0 (usuário 11/11/2026): PSG 101 (GUIA) = cópia do PSA 108 com regras próprias:
 //  - guias são mais altas (padrão 9,7 mm);

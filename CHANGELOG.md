@@ -6,6 +6,14 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.80.4 — PSR 102: recuos do externo +1 mm e do interno −1 mm (19/11/2026)
+- Pedido do usuário: "aumenta mais 1 mm no recuo do externo e menos 1 no interno" (no Ø). Ex. 120 x 138,6 x 10 x 18, bucha 101 x 142:
+  - externo (T2D2): passes retos X136,4 → X137,4 e X130,4 → X131,4; contorno de desbaste X145,6 → X146,6; acabamento X143 → X144;
+  - interno (T2D12): passes X106,6 → X105,6 e X112,6 → X111,6; contorno X112,6 → X111,6; acabamento X117 → X116;
+    tarugo: recuo do furo X − 0,5 → X − 1,5.
+- Só o PSR 102 muda (os outros perfis que usam o mesmo desbaste continuam iguais). Teste no navegador: 37 perfis geram
+  programa; só o PSR 102 mudou.
+
 ## 5.80.3 — PSR 102: recuo do desbaste externo acima do caminho do G1 (19/11/2026)
 - Usuário (120 x 138,6 x 10 x 14/18, PU, bucha 142): "linha verde em G1, a pontilhada em G0 — isso não pode". O contorno de
   desbaste da T2D2 sobe em G1 até X143,6 em cima do calcanhar e o recuo em G0 voltava em X142,4 (abaixo do G1, colado na bucha).

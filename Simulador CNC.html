@@ -2696,7 +2696,12 @@ GEN.psa108 = {
     // paralelo no fundo do chanfro = meio bedame + sobreposição → fim em −(N × B6 + sobreposição), 0,1 antes da peça seguinte
     const parA = bed2f ? prol + p.sobrep : p.par, kF = Math.max(p.recE, FACA_MIN);   // faca: no mínimo 10 acima
     const endE = ["G1 Z" + c(-parA), "X" + c(p.recE)], endI = ["G1 Z" + c(-parA), "X" + c(-p.recI)];   // acabamento: como sempre (5.21.14 desfez o trecho a mais)
-    L.push(...endE, "G90", "G0 G40 Z" + c(p.zAp), "Z" + c(p.zExt), "T4D4", "G0 X" + c(p.dint) + " Z" + c(p.zAp), ...arrRough(p, "id", zRough, p.dint, p.fInt).slice(0, -1), "G91", "X" + c(I3), "G1 Z" + c(-(p.zAp - prol)) + " F" + gF(p.fInt));
+    // v5.79.2 (usuário 19/11/2026, PSA 108 34x40x2,5 bucha 13x46): o interno ia em G0 até X(Ø int da peça) a 3 mm da face, com a
+    // bucha ainda fechada (furo 13), e só depois descia para o 1º desbaste. Agora já posiciona no Ø do 1º desbaste. Só o PSA 108
+    // (os perfis que usam este build mandam soPSA108: false); sem desbaste interno, como antes.
+    let rID = arrRough(p, "id", zRough, p.dint, p.fInt).slice(0, -1), xI0 = p.dint;
+    if (p.soPSA108 !== false){ const j = rID.findIndex(l => /^G0 X[\d.]+$/.test(l)); if (j >= 0){ xI0 = +rID[j].slice(4); rID.splice(j, 1); } }
+    L.push(...endE, "G90", "G0 G40 Z" + c(p.zAp), "Z" + c(p.zExt), "T4D4", "G0 X" + c(xI0) + " Z" + c(p.zAp), ...rID, "G91", "X" + c(I3), "G1 Z" + c(-(p.zAp - prol)) + " F" + gF(p.fInt));
     for (let i = 1; i <= N; i++){ if (i > 1 && IB !== I3) L.push("X" + c(I3 - IB) + " ;(AJUSTE DO CHANFRO DE TRAS NO MEIO DO BEDAME)");
       L.push("; (INICIO DO PERFIL PEÇA " + i + ")", "G41 X" + c(-I3) + " Z" + c(-I4), "Z" + c(-(p.h - 2 * cI)) + " ;(VALOR PARA ALTERAR NA ALTURA)", "X" + c(IB) + " Z" + c(-I4), "; (FIM DO PERFIL PEÇA " + i + ")"); }
     L.push(...endI, "G90", "G0 G40 Z" + c(p.zAp), "Z" + c(p.zInt), "T8D8", "G0 X" + c(p.dext) + " Z" + c(p.zAp), "G91", "X" + c(kF));

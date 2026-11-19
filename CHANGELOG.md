@@ -6,6 +6,12 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.77.1 — Ciclo arruelas SEM CHANFRO: sem a volta em rápido abaixo da bucha depois do desbaste (19/11/2026)
+- Mesmo problema corrigido no PSA 108 (5.76.1): depois do desbaste externo o programa ia em G0 até X(Ø int − 2,7) e subia
+  de novo em G91 até o Ø ext. Agora o desbaste termina direto no Ø ext (ex.: 101,6 x 114,14 bucha 91 x 125: G0 X114.14).
+- O desbaste em Z já parava no mesmo Z do acabamento (folga) — não mudou. Sem desbaste: igual.
+- Teste dos perfis: 35 perfis geram programa; nenhum mudou no padrão; só os casos com desbaste externo do SEM CHANFRO.
+
 ## 5.77.0 — PSE 108 (DP): campos de BUCHA (19/11/2026)
 - Campos novos "Bucha Ø interno" e "Bucha Ø externo" (só DP). Vazio = automática como nas arruelas (PU pela tabela de buchas;
   Teflon Ø int − 2 / Ø ext + 2); o campo mostra a sugestão.

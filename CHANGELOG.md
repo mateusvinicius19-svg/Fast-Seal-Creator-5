@@ -6,6 +6,13 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.75.1 — PSA 108: desbaste não passa do fim do acabamento em Z (19/11/2026)
+- Programa 46341 (PSA 108 101,6 x 114,14 x 2, PEAD, bucha 91,6 x 120): o desbaste externo e o interno desciam até Z-3,55,
+  0,475 (o prolongamento) além do fim do acabamento (Z-3,075). No simulador parecia um 2º faceamento fora da peça.
+  Agora o desbaste para no mesmo Z do acabamento: −(N × altura com prolongamentos + paralelo − prolongamento).
+- Só o PSA 108. PSA 108 C/ CORTE, PSG 101/103/104 e PSA 109 (mesmo gerador) continuam iguais; com bedame 2 (Celeron), como antes.
+- Teste dos perfis: 35 perfis geram programa; só o PSA 108 mudou (só as linhas G1 Z do desbaste).
+
 ## 5.75.0 — Carimbo com ASSINATURA preenchida; PSE 108 (DP) com material (19/11/2026)
 - Carimbo do desenho: "ASS." virou "ASSINATURA" por extenso e já sai com o nome de quem desenhou e de quem aprovou em letra
   de assinatura (azul) — não precisa assinar à mão. Nome comprido diminui para caber na coluna.

@@ -6,6 +6,15 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.75.2 — PSE 108 (DP): ferramentas trocam com o material (regra das gaxetas) (19/11/2026)
+- Antes o DP usava a regra das arruelas: quase todo material ficava com T7D7 / T4D4 / T8D8. Agora (usuário escolheu a regra das gaxetas):
+  - PU: externo T2D2 · interno T4D14 (Ø < 11), T1D45 (11 a 40), T2D12 (> 40) · corte T5D5 F0.22
+  - NBR e Viton: T7D7 / T4D4 / corte T5D5 F0.22
+  - PTFE puro, PTFE+BR, PTFE+GR: T7D7 / T4D4 (T2D14 abaixo de Ø14) / bedame T8D8
+  - POM, PEAD e Celeron: como nas arruelas (Celeron T2D54 / T2D64 / T6D16)
+- Ferramenta trocada à mão nos parâmetros continua valendo. Arruela ISO continua igual.
+- Teste dos perfis: 35 perfis geram programa; nenhum mudou com os valores padrão.
+
 ## 5.75.1 — PSA 108: desbaste não passa do fim do acabamento em Z (19/11/2026)
 - Programa 46341 (PSA 108 101,6 x 114,14 x 2, PEAD, bucha 91,6 x 120): o desbaste externo e o interno desciam até Z-3,55,
   0,475 (o prolongamento) além do fim do acabamento (Z-3,075). No simulador parecia um 2º faceamento fora da peça.

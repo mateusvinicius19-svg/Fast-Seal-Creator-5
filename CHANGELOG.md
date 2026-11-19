@@ -6,6 +6,12 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.75.3 — PSA 108: sem a volta em rápido até X88.3 depois do desbaste (19/11/2026)
+- Programa 46341 (bucha 91 x 125): depois do desbaste externo o programa ia em G0 até X88.3 (Ø int da bucha − 2,7) e
+  subia de novo com G91 X24.49 até o início do perfil. Agora o desbaste termina direto no início do perfil: G0 X112.79 / G91 / G1 Z-2.525.
+- Só o PSA 108 com desbaste externo. Sem desbaste, PSA 108 C/ CORTE, PSG 101/103/104 e PSA 109: iguais.
+- Teste dos perfis: 35 perfis geram programa; nenhum mudou no padrão; só o caso 46341 mudou.
+
 ## 5.75.2 — PSE 108 (DP): ferramentas trocam com o material (regra das gaxetas) (19/11/2026)
 - Antes o DP usava a regra das arruelas: quase todo material ficava com T7D7 / T4D4 / T8D8. Agora (usuário escolheu a regra das gaxetas):
   - PU: externo T2D2 · interno T4D14 (Ø < 11), T1D45 (11 a 40), T2D12 (> 40) · corte T5D5 F0.22

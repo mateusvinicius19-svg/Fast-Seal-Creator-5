@@ -6,6 +6,11 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.83.2 — PSR 212: alturas do desenho sem encavalar (19/11/2026)
+- Usuário: "arruma essas da altura, está uma em cima da outra". As 4 cotas de altura da secção ampliada (lábio, altura menor, corpo,
+  total) ficavam a 16 px uma da outra e a tolerância (0 / −0,2) batia na linha de cima; agora 26 px entre elas.
+- Só o desenho do PSR 212; programas iguais. Teste no navegador: 148 programas iguais; desenho de todos os perfis gera (retrato e paisagem).
+
 ## 5.83.1 — PSR 212: desenho — só números nas alturas, secção total e secção de trás (19/11/2026)
 - Usuário: "tira essas escritas" → as alturas da secção ampliada saem só com o número (sem "corpo" e "altura menor").
 - "Preciso da secção total igual estava no padrão antigo": na frente, lábio ext. / abertura do canal / lábio int. em corrente e a

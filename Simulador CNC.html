@@ -5245,8 +5245,8 @@ function psr212StdViews(p, PT){
     // alturas a partir da face (direita): lábio, altura menor (parede do degrau), corpo, altura total
     const rTopAt = a => Math.max(...poly.filter(q => Math.abs(q[0] - a) < 0.051).map(q => q[1]).concat(rmin));
     const hs = [[H - A(G.zO - G.lipLen), f(G.lipLen)], [H - A(G.zS), f(-G.zS)], [H - G.Hb, tm(f(G.Hb), Math.min(G.tol.sec, 0.4))], [0, Htxt]];   // v5.83.1: só os números (usuário)
-    hs.forEach(([a, txt], k) => { const y = yT - 18 - 16 * k; g += ext(X(a), Y(rTopAt(a)) - 4, X(a), y - 6) + dimH(X(a), X(H), y, txt); });
-    g += ext(X(H), Y(rTopAt(H)) - 4, X(H), yT - 18 - 16 * (hs.length - 1) - 6);
+    hs.forEach(([a, txt], k) => { const y = yT - 18 - 26 * k; /* v5.83.2: 26 entre as linhas (a tolerância batia na de cima) */ g += ext(X(a), Y(rTopAt(a)) - 4, X(a), y - 6) + dimH(X(a), X(H), y, txt); });
+    g += ext(X(H), Y(rTopAt(H)) - 4, X(H), yT - 18 - 26 * (hs.length - 1) - 6);
     // interno embaixo, em cota corrida a partir da trás: rampa da ponta, reto do calcanhar, até a face
     const zi = [0, G.rampL, H - A(G.zI - G.lipLen), H].filter((v, i, a) => !i || v - a[i - 1] > 0.05), yd = yB + 26;
     const rBotAt = a => Math.min(...poly.filter(q => Math.abs(q[0] - a) < 0.051).map(q => q[1]).concat(rmax));

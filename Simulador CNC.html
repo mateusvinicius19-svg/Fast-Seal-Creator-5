@@ -2737,9 +2737,36 @@ function dpGaxTools(p){
 }
 { const b = GEN.iso.build, dp = p => String(p.tipoP || "") === "dp";
   GEN.iso.build = function(p){ if (!dp(p)) return b.call(this, Object.assign({}, p, { matA: "" }));
-    const q = dpGaxTools(p), L = applyArrMat(b.call(this, q), q);
+    const q = dpGaxTools(p), L = dpBucha(applyArrMat(b.call(this, q), q), q);
     return q.tBed === "T5D5" ? L.map(s => s.replace(/^T5D5 ;\(BEDAME 1\)/, "T5D5 ;(CORTE)")) : L; };
-  GEN.iso.main.push(["matA", "Material — só PSE 108 (DP)", "PU"]); }
+  GEN.iso.main.push(["matA", "Material — só PSE 108 (DP)", "PU"],
+    ["bi", "Bucha Ø interno — só DP (vazio = automática no PU e Teflon)", ""], ["bo", "Bucha Ø externo — só DP (vazio = automática no PU e Teflon)", ""]); }
+// v5.77.0 (usuário 19/11/2026: "preciso das opções de bucha"): PSE 108 (DP) com BUCHA, como as arruelas (buchaOf: digitada, ou
+// automática no PU pela tabela e no Teflon Ø int − 2 / Ø ext + 2). Com bucha: linha ;BUCHA, faceamento de (maior Ø ext + sobra)
+// até (menor Ø int − sobra), rotação pelo maior Ø, e desbaste (máx. 8 no Ø, acabamento 2) no externo e no interno até o fim do
+// acabamento em Z. Teflon saindo de bucha: passe único (sem desbaste), como nas arruelas. Sem bucha: programa igual ao de antes.
+function dpBucha(L, p){
+  const iI = document.querySelector("#genBox [data-k=bi]"), iO = document.querySelector("#genBox [data-k=bo]"), a = arrBuchaAuto(p);
+  if (iI) iI.placeholder = a ? "automática: " + a[0] : "vazio = sem bucha";
+  if (iO) iO.placeholder = a ? "automática: " + a[1] : "vazio = sem bucha";
+  const bu = buchaOf(p); if (bu.txt === "----") return L;
+  const X = v => fx(v, 3), out = L.slice(), N = isoN(p), bed = Number(p.bed) > 0 ? Number(p.bed) : 1;
+  const zR = -((N - 1) * (p.h + bed) + p.h + p.prolT + p.parT), D = Math.max(p.dext, bu.bo), d = Math.min(p.dint, bu.bi);
+  const iF = out.findIndex(s => /;\(EXTERNO FACE\)/.test(s));
+  out[iF + 1] = "G00 X" + X(D + p.sobra) + " Z" + X(p.zAp);
+  out[iF + 3] = "G01 X" + X(d - p.sobra) + " F" + X(p.fExt);
+  const ps = arrTeflonPasse(p), od = [], id = [];
+  if (!ps) for (const x of roughLevels(bu.bo, p.dext, 1)) od.push("G00 X" + X(x), "G01 Z" + X(zR) + " F" + X(p.fExt), "G01 X" + X(x + 1), "G00 Z" + X(p.zEnt));
+  const lvI = ps ? [] : (arrTeflon(p) && !(bu.bi > 0)) ? tarugoTeflonLevels(p.dint) : roughLevels(bu.bi, p.dint, -1);
+  for (const x of lvI) id.push("G00 X" + X(x) + " Z" + X(p.zEnt), "G01 Z" + X(zR) + " F" + X(p.fInt), "G01 X" + X(x - 1), "G00 Z" + X(p.zEnt));
+  if (od.length) out.splice(iF + 5, 0, "; (DESBASTE EXTERNO - MAX. 8 NO DIAMETRO, ACABAMENTO 2)", ...od);
+  const iN = out.findIndex(s => /;\(INTERNO\)/.test(s));
+  if (id.length) out.splice(iN + 1, 0, "; (DESBASTE INTERNO - MAX. 8 NO DIAMETRO, ACABAMENTO 2)", ...id);
+  const iS = out.findIndex(s => /^G97 S/.test(s));
+  if (iS >= 0 && (p.rpm === "" || p.rpm === undefined || isNaN(p.rpm))) out[iS] = "G97 S" + gen15(rpmLookup(D, RPM_TABLE)) + " M3";
+  out.unshift(";BUCHA " + bu.txt);
+  return out;
+}
 // v5.21.0 (usuário 11/11/2026): PSG 101 (GUIA) = cópia do PSA 108 com regras próprias:
 //  - guias são mais altas (padrão 9,7 mm);
 //  - POM e Celeron: usina 0,9 mm MAIOR nos 2 diâmetros (param. psgAcr) — o desenho continua com a medida nominal;

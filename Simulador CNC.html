@@ -5229,12 +5229,15 @@ function psr212StdViews(p, PT){
     g += half(1) + half(-1) + `<line x1="${X2(0) - 10}" y1="${cy}" x2="${X2(H) + 10}" y2="${cy}" class="ax"/>`;
     const edge = (d, side) => { const a = poly.filter(q => Math.abs(2 * q[1] - d) < 2e-3).map(q => q[0]); return a.length ? (side < 0 ? Math.min(...a) : Math.max(...a)) : (side < 0 ? 0 : H); };
     // trás (esquerda): ponta do raspador, raiz, calcanhar int., degrau, Ø ext. · frente (direita): lábio int., canal, lábio ext.
-    const back = [[G.tipIn, tl("Ø " + f(G.tipIn), G.tol.A)], [G.tipOut, "Ø " + f(G.tipOut)], [G.intCalc, G.fi ? tl("Ø " + f(G.intCalc), G.tol.B) : tolMk("Ø " + f(G.intCalc), p.tiS, p.tiI)],
+    const tIC = G.fi ? tl("Ø " + f(G.intCalc), G.tol.B) : tolMk("Ø " + f(G.intCalc), p.tiS, p.tiI);
+    const back = [[G.tipIn, tl("Ø " + f(G.tipIn), G.tol.A)], [G.tipOut, "Ø " + f(G.tipOut)],
                   [G.rootOut, "Ø " + f(G.rootOut)], [G.dS, "Ø " + f(G.dS)], [G.extCalc, G.fe ? tl("Ø " + f(G.extCalc), G.tol.C) : tolMk("Ø " + f(G.extCalc), p.teS, p.teI)]];
     const front = [[G.intAp, tl("Ø " + f(G.intAp), G.tol.A)], [G.xgIn, "Ø " + f(G.xgIn)], [G.xgOut, "Ø " + f(G.xgOut)], [G.extAp, tl("Ø " + f(G.extAp), G.tol.D)]];
     for (const [sd, list] of [[-1, back], [1, front]]) list.forEach(([d, txt], k) => {
       const xe = X2(edge(d, sd)), xx = sd < 0 ? X2(0) - 22 * (k + 1) : X2(H) + 24 * (k + 1), r = d / 2;
       g += ext(xe + sd * 3, Y2(r), xx + sd * 5, Y2(r)) + ext(xe + sd * 3, Y2(-r), xx + sd * 5, Y2(-r)) + dimV(xx, Y2(r), Y2(-r), txt); });
+    // v5.83.3 (usuário 19/11/2026): Ø do calcanhar interno DENTRO do corte — atravessa o furo no meio do trecho reto do calcanhar
+    { const am = (G.rampL + H - A(G.zI - G.lipLen)) / 2, xm = X2(am); g += dimV(xm, Y2(G.intCalc / 2), Y2(-G.intCalc / 2), tIC, -5); }
     g += ext(X2(0), Y2(rmax) - 4, X2(0), Y2(rmax) - 26) + ext(X2(H), Y2(rmax) - 4, X2(H), Y2(rmax) - 26) + dimH(X2(0), X2(H), Y2(rmax) - 20, Htxt);
     g += `<text x="${ox2}" y="${yA2 + 26}" class="vt" text-anchor="middle">CORTE A-A</text>`; }
   // ---------- SECÇÃO (ampliada) ----------

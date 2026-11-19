@@ -1367,7 +1367,8 @@ GEN.psr211 = Object.assign({}, GEN.psh105, { name: "PSR 211",
   build(p){ return pseFscBuild(p, psr211Geom(p)); } });
 // PSR 212 (usuário 16/11/2026): PSR 211 com degrau no externo, atrás do corpo (foto do catálogo)
 GEN.psr212 = Object.assign({}, GEN.psr211, { name: "PSR 212",
-  main: [...GEN.psr211.main.slice(0, 4), ["ds","Ø do degrau externo (vazio = Ø ext. − 0,6 × secção)",""],["hs","Comprimento do degrau em Z, a partir da trás do corpo (vazio = 0,3 × corpo)",""],["pt","Passes da T6D6 na parte de trás — degrau + raspador (vazio = 1)",""], ...GEN.psr211.main.slice(4)],
+  // v5.82.1 (usuário 19/11/2026): "Comprimento do degrau" virou "Altura menor" e é a 1ª altura a preencher (mesmo valor: degrau a partir da trás do corpo)
+  main: [...GEN.psr211.main.slice(0, 2), ["hs","Altura menor — degrau, a partir da trás do corpo (vazio = 0,3 × corpo)",""], ...GEN.psr211.main.slice(2, 4), ["ds","Ø do degrau externo (vazio = Ø ext. − 0,6 × secção)",""],["pt","Passes da T6D6 na parte de trás — degrau + raspador (vazio = 1)",""], ...GEN.psr211.main.slice(4)],
   params: [...GEN.psr211.params.map(f => [f[0], f[1].replace("PSR 211", "PSR 212"), f[2]])],   // v5.73.2: sem o campo do chanfro da ponta (PSR 211 e PSR 212 sem esse chanfro)
   check(p){
     const base = GEN.psr211.check(p), g = psr211Geom(p), m = [];

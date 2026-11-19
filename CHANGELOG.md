@@ -6,6 +6,12 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.82.1 — PSR 212: campo "Altura menor" como a 1ª altura (19/11/2026)
+- Pedido do usuário: o campo "Comprimento do degrau em Z, a partir da trás do corpo" passa a se chamar **"Altura menor — degrau,
+  a partir da trás do corpo (vazio = 0,3 × corpo)"** e fica logo depois dos diâmetros, antes de "Altura do corpo".
+- Mesmo valor e mesma conta de antes (chave `hs`): programa e desenho não mudam. Só o PSR 212.
+- Teste no navegador (148 casos): todos geram; nenhum programa mudou.
+
 ## 5.82.0 — Itens em PU: até 6 mm no Ø para tirar = 1 passe só (19/11/2026)
 - Pedido do usuário: "se for tirar pouco material nos diâmetros, até 6 mm, coloca em apenas 1 passe".
 - Programas estilo Fast Seal (seções OUTSIDE / INSIDE) em PU: em cada lado, se o material a tirar no Ø for ≤ 6, saem os passes

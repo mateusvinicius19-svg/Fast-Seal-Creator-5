@@ -5244,7 +5244,7 @@ function psr212StdViews(p, PT){
     g += `<path d="${poly.map(([a, r], i) => `${i ? "L" : "M"}${X(a).toFixed(2)},${Y(r).toFixed(2)}`).join("")}Z" class="p"/>`;
     // alturas a partir da face (direita): lábio, altura menor (parede do degrau), corpo, altura total
     const rTopAt = a => Math.max(...poly.filter(q => Math.abs(q[0] - a) < 0.051).map(q => q[1]).concat(rmin));
-    const hs = [[H - A(G.zO - G.lipLen), f(G.lipLen)], [H - A(G.zS), "altura menor " + f(-G.zS)], [H - G.Hb, tm("corpo " + f(G.Hb), Math.min(G.tol.sec, 0.4))], [0, Htxt]];
+    const hs = [[H - A(G.zO - G.lipLen), f(G.lipLen)], [H - A(G.zS), f(-G.zS)], [H - G.Hb, tm(f(G.Hb), Math.min(G.tol.sec, 0.4))], [0, Htxt]];   // v5.83.1: só os números (usuário)
     hs.forEach(([a, txt], k) => { const y = yT - 18 - 16 * k; g += ext(X(a), Y(rTopAt(a)) - 4, X(a), y - 6) + dimH(X(a), X(H), y, txt); });
     g += ext(X(H), Y(rTopAt(H)) - 4, X(H), yT - 18 - 16 * (hs.length - 1) - 6);
     // interno embaixo, em cota corrida a partir da trás: rampa da ponta, reto do calcanhar, até a face
@@ -5256,10 +5256,14 @@ function psr212StdViews(p, PT){
     const zBot = H + G.Cg[0] - G.Rg;   // fundo do canal (centro do raio − R), em a
     const yc = Y((G.xgIn + G.xgOut) / 4);
     g += arr(X(zBot), yc, X(H), yc) + `<text x="${(X(zBot) + X(H)) / 2}" y="${yc - 4}" class="t" text-anchor="middle">${f(H - zBot)}</text>`;
-    const xo = X(H) + 22; g += ext(X(H) + 4, Y(G.xgOut / 2), xo + 6, Y(G.xgOut / 2)) + ext(X(H) + 4, Y(G.xgIn / 2), xo + 6, Y(G.xgIn / 2)) + dimV(xo, Y(G.xgOut / 2), Y(G.xgIn / 2), f((G.xgOut - G.xgIn) / 2), 14);
-    // secção: calcanhar ext. → ponta int. (como antes), com a tolerância
-    const xs = X(H) + 66; g += ext(X(H - A(G.zO - G.lipLen)) + 4, Y(G.extCalc / 2), xs + 6, Y(G.extCalc / 2)) + ext(X(0) + 4, Y(G.tipIn / 2), xs + 6, Y(G.tipIn / 2)) +
-      dimV(xs, Y(G.extCalc / 2), Y(G.tipIn / 2), "Secção " + f((G.extCalc - G.tipIn) / 2), 14);
+    // v5.83.1 (usuário): na frente, como no padrão antigo — lábio ext. / abertura do canal / lábio int. em corrente + SECÇÃO TOTAL
+    // (lábio ext. → lábio int., com a tolerância); atrás, a secção do Ø do rebaixo (degrau) até a ponta do lábio interno (raspador)
+    const xo = X(H) + 22, xt = X(H) + 62, yEA = Y(G.extAp / 2), yIA = Y(G.intAp / 2), yGo = Y(G.xgOut / 2), yGi = Y(G.xgIn / 2);
+    g += ext(X(H - A(G.zO)) + 4, yGo, xo + 6, yGo) + ext(X(H - A(G.zI)) + 4, yGi, xo + 6, yGi) + ext(X(H - A(G.zO)) + 4, yEA, xt + 6, yEA) + ext(X(H - A(G.zI)) + 4, yIA, xt + 6, yIA);
+    g += dimV(xo, yEA, yGo, f((G.extAp - G.xgOut) / 2), 14) + dimV(xo, yGo, yGi, f((G.xgOut - G.xgIn) / 2), 14) + dimV(xo, yGi, yIA, f((G.xgIn - G.intAp) / 2), 14);
+    g += dimV(xt, yEA, yIA, tl(f((G.extAp - G.intAp) / 2), G.tol.sec), 14);
+    { const xb2 = X(0) - 26, yD = Y(G.dS / 2), yTi = Y(G.tipIn / 2);
+      g += ext(X(H - G.Hb) - 4, yD, xb2 - 6, yD) + ext(X(0) - 4, yTi, xb2 - 6, yTi) + dimV(xb2, yD, yTi, f((G.dS - G.tipIn) / 2)); }
     g += `<text x="${X(H / 2)}" y="${yd + 40}" class="vt" text-anchor="middle">SECÇÃO (ampliada)</text>`; }
   return g;
 }

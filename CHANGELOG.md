@@ -6,6 +6,14 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.83.1 — PSR 212: desenho — só números nas alturas, secção total e secção de trás (19/11/2026)
+- Usuário: "tira essas escritas" → as alturas da secção ampliada saem só com o número (sem "corpo" e "altura menor").
+- "Preciso da secção total igual estava no padrão antigo": na frente, lábio ext. / abertura do canal / lábio int. em corrente e a
+  secção total lábio ext. → lábio int. com a tolerância (40 x 48 x 5,5 x 7: 1,24 · 2,43 · 1,33 · 5 ±0,2).
+- "Atrás a secção do diâmetro rebaixo até a ponta do lábio interno": (Ø degrau − Ø ponta int.) / 2 (ex.: (45,6 − 39) / 2 = 3,3).
+  Saiu a cota "Secção 4,5" (calcanhar → ponta).
+- Só o desenho do PSR 212; programas iguais.
+
 ## 5.83.0 — PSR 212: chanfro menor na altura menor + desenho no padrão novo de cotas (19/11/2026)
 - Pedido do usuário: "diminui a proporção do chanfro na altura menor e atualiza o padrão de cotas e desenho que falamos mais cedo".
 - Chanfro da aresta do degrau (na altura menor): metade do chanfro do perfil (mín. 0,2, de 0,05 em 0,05). Ex. 40 x 48 x 5,5 x 7:

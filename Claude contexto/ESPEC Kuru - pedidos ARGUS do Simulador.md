@@ -27,6 +27,10 @@ pasta de rede. O Kuru, que já grava no ARGUS (Pargus, Atribuir, F9 Salvar no AR
 ```
 
 - `programa` pode vir vazio: aí grava só o Anexo 1.
+- `arquivoPrograma` (desde a v5.88.0, opcional): nome **real** do .PIT no Programas_CNC, ex.: `"046198 164X205.PIT"` ou
+  `"046203 9X30 CICLO 5 PÇ.PIT"`. Muitos programas levam a bucha ou o ciclo no nome, e procurar só `046198.PIT` dá
+  "arquivo Fagor não encontrado". Use este nome quando vier (começa com os 6 dígitos de `programa`); sem ele, `<programa>.PIT`.
+  O Código do programa gravado no ARGUS continua sendo só o número.
 - Subpasta `feitos\`: onde ficam os pedidos já aplicados. O script `Claude contexto\Rotina\pedidos_argus.ps1` já usa esse formato.
 - Desde a v5.7.0 a rotina (`gerar.ps1`) também grava pedidos nessa fila, no mesmo formato.
 
@@ -40,7 +44,7 @@ pasta de rede. O Kuru, que já grava no ARGUS (Pargus, Atribuir, F9 Salvar no AR
    - O JSON é válido e `item` só tem dígitos.
    - O item existe no ARGUS.
    - O arquivo `anexo1` existe.
-   - Se `programa` vier preenchido, o .PIT `W:\Parts\PartsSeals\PROJETOS\Programas_CNC\<programa>.PIT` existe. Se o programa ainda
+   - Se `programa` vier preenchido, o .PIT `W:\Parts\PartsSeals\PROJETOS\Programas_CNC\<arquivoPrograma ou programa.PIT>` existe. Se o programa ainda
      não estiver no banco de programas, registrar como o Atribuir faz, ou rodar a resincronização daquele número. Hoje o campo
      "Código do programa" recusa número novo com "Nenhum cadastro encontrado".
 4. **Gravar no cadastro**, com a mesma rotina do F9 Salvar no ARGUS:

@@ -76,7 +76,10 @@ function criarFila(opcoes) {
     if (!/^\d+$/.test(item)) return { erro: 'item "' + item + '" nao e numero' };
     if (typeof ped.anexo1 !== 'string' || !ped.anexo1.trim()) return { erro: 'anexo1 vazio' };
     const prog = semZero(ped.programa);
-    const pit = prog ? path.join(cfg.pastaProgramas, prog.padStart(6, '0') + '.PIT') : '';
+    // v5.88.0: "arquivoPrograma" = nome real do .PIT (ex.: "046198 164X205.PIT"); sem ele, NNNNNN.PIT
+    const n6 = prog.padStart(6, '0'), a = String(ped.arquivoPrograma || '').trim();
+    const nomePit = a.startsWith(n6) && /\.PIT$/i.test(a) && !/[\\/]/.test(a) ? a : n6 + '.PIT';
+    const pit = prog ? path.join(cfg.pastaProgramas, nomePit) : '';
     return { ped: Object.assign({}, ped, { item: item }), prog: prog, pit: pit };
   }
   function conferir(ped) {

@@ -6,6 +6,19 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.88.0 — Pedidos ARGUS que o Kuru recusava (20/11/2026)
+Visto no Kuru Nuvem > Projeto > Pedidos do Simulador: 80 pedidos, 48 em conflito e 22 com erro.
+- **PSE 102 R / PSE 120 (anel A) e PSH 110 (peças A/B):** o pedido apontava o PDF numa pasta com o "A" no fim
+  (`…46354A\…46354A.pdf`), mas o desenho é salvo na pasta sem o "A" (`…46354\…46354A.pdf`) → "PDF não encontrado".
+  Agora o pedido (e a mensagem "desenho: …") usa a pasta certa. Os 4 pedidos parados (46302–46305) foram corrigidos na fila
+  e voltaram para "pendente" (cópia antes da correção em `%LOCALAPPDATA%\FastSealCreator\backup-pedidos-20261120`).
+- **"Arquivo Fagor do programa não foi encontrado":** o programa tinha sufixo no nome (`046198 164X205.PIT`,
+  `046203 9X30 CICLO 5 PÇ.PIT`) e o Kuru procurava só `046198.PIT`. O pedido agora leva o nome real em
+  `"arquivoPrograma"`; se não existir programa com o número, o Simulador avisa na hora ("⚠ NÃO existe programa…").
+  Especificação (`Claude contexto/ESPEC Kuru…`) e módulo `Kuru - fila ARGUS/filaPedidosArgus.js` já leem o campo
+  (`node teste-fila.js` → TESTE OK, com o caso novo). **Falta quem mantém o Kuru ler `arquivoPrograma`** na versão dele.
+- Programas gerados: os 37 perfis iguais à 5.87.0 (testar-perfis).
+
 ## 5.87.0 — Proteção contra travamento com vários PCs + Kuru (20/11/2026)
 - Usuário (3 PCs com o Simulador + Kuru em modo automático): "travamento e instabilidade com todos acessados ao mesmo tempo".
   Teste com 4 servidores juntos no W: não mostrou lentidão; o risco real é o W: demorar ou sumir por alguns segundos.

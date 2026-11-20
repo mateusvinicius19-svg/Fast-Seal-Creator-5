@@ -6,6 +6,19 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.86.0 — Aviso de desenho/programa já existente + 📄 Documentos (POP-PS-001) na main (20/11/2026)
+- Usuário aprovou trazer para a main as branches de teste de 17/11/2026 (`teste/duplicados` e `claude/documentos`, ajustadas à 5.85.1).
+- **Já existe desenho com essas medidas** (pasta DESENHOS\<família>, folga 0,006; lista de cada família guardada 10 min):
+  - ao gerar: "⚠ JÁ EXISTE desenho com essas medidas: 46025 — confira antes de salvar um novo";
+  - ao salvar (programa novo): com número → OK salva um NOVO mesmo assim / Cancelar abre o existente no 🔎 Ver programa;
+    sem número (desenho antigo) → pede o número do ARGUS: o programa salva com ele e a pasta do desenho ganha o número
+    (servidor: `/fs/move` só renomeia dentro da mesma pasta de DESENHOS, nunca sobrescreve). Sem o servidor, avisa para renomear à mão.
+  - Mantidas as mensagens da 5.70.3 ("NÃO salvo: …") quando alguma pergunta é cancelada.
+- **📄 Documentos** na tela inicial: POP-PS-001 (PSA 108, PSG 101, PSH 106, PSE 106 e ciclos) embutido no Simulador + os arquivos
+  da pasta `Arruela Padronizada\Documentos` do W:, se houver. O POP tem as fotos das telas: o arquivo passa de 1,35 para 2,8 MB
+  (abertura medida +30 ms).
+- Testes: 37 perfis geram, nenhum programa mudou; com o W: real, PSH 106 100 x 120 x 12 avisou o desenho já existente sem nº.
+
 ## 5.85.1 — Teste dos perfis: uma base por porta (20/11/2026)
 - `testes\testar-perfis.ps1`: dois testes ligados ao mesmo tempo (ex.: `-Ref` diferente em outra `-Porta`) usavam o mesmo
   arquivo de base e um trocava a base do outro. Agora cada porta tem a sua (`base-8790.html`). Simulador e programas não mudam.

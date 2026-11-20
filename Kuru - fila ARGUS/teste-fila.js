@@ -66,6 +66,14 @@ const { criarFila } = require('./filaPedidosArgus.js');
   assert.strictEqual(r['46111_046198.json'], 'feito');
   assert.ok(Date.now() - t0 > 2000, 'o W: lento nao foi simulado');
   assert.ok(pior < 300, 'o Kuru travou ' + pior + ' ms esperando o W:');
+  // 6) v5.88.0: programa com sufixo no nome ("046300 50X70.PIT") vem em "arquivoPrograma"
+  fs.writeFileSync(path.join(progs, '046300 50X70.PIT'), 'x'); db['7'] = {};
+  ped('7_046300.json', { item: '7', programa: '046300', arquivoPrograma: '046300 50X70.PIT', anexo1: pdf });
+  ped('8_046300.json', { item: '7', programa: '046300', anexo1: pdf });   // sem o campo: procura 046300.PIT e nao acha
+  r = res(await f.varrer());
+  assert.strictEqual(r['7_046300.json'], 'feito');
+  assert.strictEqual(db['7'].programa, '46300');
+  assert.strictEqual(r['8_046300.json'], 'erro');
   fs.rmSync(raiz, { recursive: true, force: true });
   console.log('TESTE OK');
 })().catch(e => { console.error('TESTE FALHOU:', e.message); process.exit(1); });

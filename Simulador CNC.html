@@ -4086,7 +4086,7 @@ async function desDupCheck(p){
 }
 function desDir(forceNew, silent){ return pickDir("dirDesenhos", "desenhos", forceNew, silent, "DESENHOS"); }
 async function isDesenhosDir(dd){ for (const n of ["PSA 108", "PSE 106", "PSH 106"]) { try { await dd.getDirectoryHandle(n); return true; } catch(e){} } return false; }
-async function saveDrawingPdf(p, num, dd, keepIfExists){
+async function saveDrawingPdf(p, num, dd, keepIfExists, pitName){
   if (!dd) return " · PDF não salvo (clique em 📁 DESENHOS e salve de novo)";
   if (!(await isDesenhosDir(dd))) return ` · PDF NÃO salvo: a pasta escolhida em 📁 DESENHOS ("${dd.name}") não é a W:\\Parts\\PartsSeals\\PROJETOS\\DESENHOS — clique em 📁 DESENHOS e escolha a certa`;
   const fp = document.querySelector("#dwgFields input[data-d=prog]"); if (fp) fp.value = String(num);
@@ -4102,23 +4102,44 @@ async function saveDrawingPdf(p, num, dd, keepIfExists){
   if (await fileExists(sub, fn)){ if (keepIfExists) return " · desenho já existe (mantido)"; if (!confirm(`O desenho "${fn}" já existe. Substituir?`)) return " · PDF mantido"; }
   await writeFile(sub, fn, await drawingPdfBytes(p));
   let ped = "";
-  state.lastDrawing = { dd, p, num, pdf: `${DESENHOS_W}\\${desFam(p)}\\${nm}\\${fn}` };   // imprimir depois (pvPrint) também grava o pedido
-  try { ped = await pedidoArgus(dd, p, num, state.lastDrawing.pdf); } catch(e){ ped = " · pedido ARGUS NÃO gravado: " + e.message; }
-  return ` · desenho: DESENHOS\\${desFam(p)}\\${nm}\\${fn}${ped}`;
+  // v5.88.0: a PASTA é "fd" (sem o A/B da peça). Antes ia "nm" e o pedido do PSE 102 R/PSE 120 (anel A) e do PSH 110 (A/B)
+  // apontava para "…46354A\…46354A.pdf", pasta que não existe — o Kuru dava "PDF não encontrado".
+  state.lastDrawing = { dd, p, num, pit: pitName || "", pdf: `${DESENHOS_W}\\${desFam(p)}\\${fd}\\${fn}` };   // imprimir depois (pvPrint) também grava o pedido
+  try { ped = await pedidoArgus(dd, p, num, state.lastDrawing.pdf, pitName); } catch(e){ ped = " · pedido ARGUS NÃO gravado: " + e.message; }
+  return ` · desenho: DESENHOS\\${desFam(p)}\\${fd}\\${fn}${ped}`;
 }
 // v5.6.0 (usuário 10/11/2026): com o "Cód. interno (item)" preenchido, ao salvar o desenho grava um pedido em
 // DESENHOS\_PEDIDOS ARGUS\<item>_<programa>.json. O Claude (rotina / "processar pedidos ARGUS") abre o item no
 // Kuru > Pargus > Catálogo de Itens, põe o PDF no Anexo 1 e o programa no Código do programa e salva (F9).
 const DESENHOS_W = "W:\\Parts\\PartsSeals\\PROJETOS\\DESENHOS";
-async function pedidoArgus(dd, p, num, pdf){
+async function pedidoArgus(dd, p, num, pdf, pitName){
   const el = document.querySelector("#dwgFields [data-d=cod]"), cod = String(el ? el.value : "").trim();
   if (!cod) return " · sem Cód. interno: Anexo 1 do ARGUS não pedido";
   if (!/^\d+$/.test(cod)) return ` · Cód. interno "${cod}" não é número: pedido ARGUS não gravado`;
   const pd = await dd.getDirectoryHandle("_PEDIDOS ARGUS", { create: true });
   const prog = String(num || "").replace(/\D/g, "");
   const rec = { item: cod, programa: prog, anexo1: pdf, perfil: desFam(p), criado: new Date().toISOString(), status: "pendente" };
+  // v5.88.0 (Kuru 20/11/2026: "arquivo Fagor do programa não foi encontrado"): o programa costuma ter sufixo no nome
+  // ("046198 164X205.PIT", "046203 9X30 CICLO 5 PÇ.PIT") e o Kuru procurava só "046198.PIT". O pedido leva o nome real
+  // em "arquivoPrograma"; e, se não houver programa com esse número, avisa aqui em vez de o Kuru recusar depois.
+  let aviso = "";
+  if (prog){ const arq = await progArquivo(prog, pitName);
+    if (arq) rec.arquivoPrograma = arq;
+    else if (arq === "") aviso = ` · ⚠ NÃO existe programa ${prog.padStart(6, "0")} no Programas_CNC: salve o programa com esse número, senão o Kuru recusa o pedido`; }
   await writeFile(pd, `${cod}_${prog || "sem-programa"}.json`, new TextEncoder().encode(JSON.stringify(rec, null, 2)));
-  return ` · pedido ARGUS: item ${cod} (Anexo 1${prog ? " + programa " + prog : ""}) na fila`;
+  return ` · pedido ARGUS: item ${cod} (Anexo 1${prog ? " + programa " + prog : ""}) na fila${aviso}`;
+}
+// nome do .PIT do programa "prog" no Programas_CNC: o que acabou de ser salvo, "NNNNNN.PIT" ou "NNNNNN <sufixo>.PIT".
+// Devolve "" se não existe e null se não deu para conferir (sem servidor e sem a pasta escolhida).
+async function progArquivo(prog, pitName){
+  const n6 = String(prog).padStart(6, "0");
+  if (pitName && pitName.startsWith(n6)) return pitName;
+  let dir = null; try { dir = await progDir(false, true); } catch(e){}
+  if (!dir) return null;
+  try { if (await fileExists(dir, n6 + ".PIT")) return n6 + ".PIT"; } catch(e){ return null; }
+  if (!SRV) return null;   // sem o servidor, listar a pasta (~50 mil arquivos) pela rede demora demais
+  try { const L = []; for await (const [nm, h] of dir.entries(n6 + "*")) if (h.kind === "file" && /\.PIT$/i.test(nm) && /^\d{6}(\s|$|\.)/.test(nm) && nm.startsWith(n6)) L.push(nm);
+    L.sort((a, b) => a.length - b.length); return L[0] || ""; } catch(e){ return null; }
 }
 // próximo número livre: a pasta tem ~50 mil arquivos (listar tudo pela rede demora), então parte do último número
 // conhecido e só confere se NNNNNN.PIT já existe, avançando até achar um livre
@@ -4308,7 +4329,7 @@ async function saveProgram0(auto){
       } catch(e){ pdfMsg += ` · pasta NÃO renomeada (${e.message}): renomeie à mão "${R.from}" para "${to}"`; }
     }
     if (!auto && gp && DESENHO_TYPES.includes(gp.tipoGen)){   // alterar programa: o desenho do original continua valendo (não mexe)
-      try { pdfMsg = (await saveDrawingPdf(gp, base.match(/^\d+/) ? base.match(/^\d+/)[0] : base, dd, keepDes)) + pdfMsg; } catch(e){ pdfMsg = " · PDF não salvo: " + e.message + pdfMsg; }
+      try { pdfMsg = (await saveDrawingPdf(gp, base.match(/^\d+/) ? base.match(/^\d+/)[0] : base, dd, keepDes, pitName)) + pdfMsg; } catch(e){ pdfMsg = " · PDF não salvo: " + e.message + pdfMsg; }
     }
     try { const rec = histRecord(auto ? {} : (gp || {}), auto ? "" : (state.genType || ""), fagor, pitName, mcsName, pdfMsg); if (auto && state.alterRec) Object.assign(rec, state.alterRec); await histAppend(dir, rec); if (histOpen()) histLoadInline(false); } catch(e){ pdfMsg += " · histórico não gravado: " + e.message; }
     $("genMsg").textContent = `Salvo: ${pitName} (Programas_CNC) e ${mcsName} (MCS 500, convertido)${pdfMsg}.`; state.tolResetPending = true; /* v5.20.1: tolerâncias voltam ao padrão quando começar a peça seguinte (a impressão desta continua com as dela) */ $("genMsg").style.color = /NÃO salvo/.test(pdfMsg) ? "#b2221f" : "";
@@ -7198,7 +7219,7 @@ $("pvPrint").onclick = async () => { if (!state.genParams) return;
   const ld = state.lastDrawing && pieceFile(state.lastDrawing.p) === pieceFile(state.genParams) ? state.lastDrawing : null;   // só o desenho salvo DESTA peça
   // código mudou depois de salvar: regrava o PDF do desenho na pasta DESENHOS com o código novo
   if (ld && codEl && codEl.value.trim() !== codOld) try { const nm = desenhoFolderName(ld.p, ld.num), sub = await (await ld.dd.getDirectoryHandle(desFam(ld.p))).getDirectoryHandle(nm); await writeFile(sub, String(ld.pdf).split("\\").pop() || nm + ".pdf", await drawingPdfBytes(state.genParams)); } catch(e){ $("genMsg").textContent = "PDF NÃO regravado com o código novo: " + e.message; }   // código interno digitado só na hora de imprimir: grava o pedido do Anexo 1 do desenho já salvo
-  if (ld) try { const m = await pedidoArgus(ld.dd, ld.p, ld.num, ld.pdf); $("genMsg").textContent = "Impressão" + m + "."; } catch(e){ $("genMsg").textContent = "Pedido ARGUS NÃO gravado: " + e.message; }
+  if (ld) try { const m = await pedidoArgus(ld.dd, ld.p, ld.num, ld.pdf, ld.pit);$("genMsg").textContent = "Impressão" + m + "."; } catch(e){ $("genMsg").textContent = "Pedido ARGUS NÃO gravado: " + e.message; }
   updatePrintCss(); window.print(); };
 $("dwgSvg").onclick = () => { const p = state.genParams; saveBytes(new TextEncoder().encode(drawingSVG(p)), `${pieceFile(p)}.svg`, "image/svg+xml", "svg"); };
 $("dwgDxf").onclick = () => { const p = state.genParams; saveBytes(new TextEncoder().encode(dxfOf(p)), `${pieceFile(p)}.dxf`, "application/dxf", "dxf"); };

@@ -6,6 +6,10 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.85.1 — Teste dos perfis: uma base por porta (20/11/2026)
+- `testes\testar-perfis.ps1`: dois testes ligados ao mesmo tempo (ex.: `-Ref` diferente em outra `-Porta`) usavam o mesmo
+  arquivo de base e um trocava a base do outro. Agora cada porta tem a sua (`base-8790.html`). Simulador e programas não mudam.
+
 ## 5.85.0 — Servidor mais rápido para salvar e abrir + teste dos perfis neste PC (20/11/2026)
 - Pedido do usuário: "maior velocidade e desempenho e menos dúvida" (itens 1, 2 e 4 aprovados).
 - **Salvar mais rápido**: o próximo número livre não lista mais a pasta Programas_CNC inteira (~50 mil arquivos, ~5 s pelo

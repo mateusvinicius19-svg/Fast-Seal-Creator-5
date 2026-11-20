@@ -37,6 +37,9 @@ merge na main que mexa no `Simulador CNC.html`:
   antiga pode estar em uso pelo servidor), roda `Iniciar\abrir.ps1`, que copia o
   `Simulador CNC.html` para `W:\Parts\PartsSeals\PROJETOS\PROGRAMAÇÃO\PADRONIZAÇÃO\Arruela Padronizada`, religa o
   `Servidor Simulador.ps1` e abre `http://localhost:8765` (pastas fixas, não pede pasta). Log: `%LOCALAPPDATA%\FastSealCreator\log.txt`.
+- Servidor (5.87.0): o processo sem `-Filho` é o vigia que liga o servidor (`-Filho`) e o religa se cair (saída 0/2 = não religa);
+  o servidor atende até 16 pedidos ao mesmo tempo (RunspacePool). No Simulador todo acesso ao W: passa por `srvFetch`
+  (tempo-limite 20 s ler / 60 s gravar; erro com `srvFalha` não pode ser engolido como "não existe").
 - O usuário NÃO copia arquivos à mão: entregar = estar na `main`.
 - Usuário do Windows tem espaço no nome (`C:\Users\jsl sbo`, TEMP vira `C:\Users\JSLSBO~1\...`): nos scripts não use
   `$env:TEMP` com `Expand-Archive`; use pastas em `LocalApplicationData` e `[IO.Compression.ZipFile]`.

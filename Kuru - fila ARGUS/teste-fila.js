@@ -51,6 +51,21 @@ const { criarFila } = require('./filaPedidosArgus.js');
   // 4) Descartar move para feitos\ (nao apaga)
   f.descartar('2_sem-programa.json');
   assert.ok(fs.existsSync(path.join(q, 'feitos', '2_sem-programa.json')));
+
+  // 5) v5.87.0: W: lento (cada acesso demora 0,4 s) -> a varredura espera, mas o Kuru (o resto do programa) nao trava
+  ped('46111_046198.json', { item: '46110', programa: '046198', anexo1: pdf });
+  const fsp = fs.promises, orig = {};
+  for (const k of ['readdir', 'readFile', 'writeFile', 'stat', 'access', 'rename', 'unlink', 'mkdir']) {
+    orig[k] = fsp[k]; fsp[k] = (...a) => new Promise(ok => setTimeout(ok, 400)).then(() => orig[k].apply(fsp, a));
+  }
+  let pior = 0, ult = Date.now();
+  const tic = setInterval(() => { const t = Date.now(); pior = Math.max(pior, t - ult); ult = t; }, 20);
+  const t0 = Date.now();
+  r = res(await f.varrer());
+  clearInterval(tic); Object.assign(fsp, orig);
+  assert.strictEqual(r['46111_046198.json'], 'feito');
+  assert.ok(Date.now() - t0 > 2000, 'o W: lento nao foi simulado');
+  assert.ok(pior < 300, 'o Kuru travou ' + pior + ' ms esperando o W:');
   fs.rmSync(raiz, { recursive: true, force: true });
   console.log('TESTE OK');
 })().catch(e => { console.error('TESTE FALHOU:', e.message); process.exit(1); });

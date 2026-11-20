@@ -8,7 +8,9 @@
 #   powershell -ExecutionPolicy Bypass -File "Servidor Simulador.ps1"             -> roda agora (janela aberta; fechar = desliga)
 # Segurança: só dentro de PROJETOS, não apaga nada, recusa pedidos vindos de outros sites; sem -Rede só o próprio PC;
 # com -Rede, outro aparelho só entra com a senha (cookie gravado ao abrir o link /entrar?k=SENHA).
-param([switch]$Instalar, [switch]$Desinstalar, [switch]$Rede, [int]$Porta = 8765)
+# v5.87.0 (usuário 20/11/2026, 3 PCs + Kuru): atende vários pedidos ao mesmo tempo (um pedido preso no W: não segura os
+# outros) e se religa sozinho: o processo "vigia" liga o servidor (-Filho) e, se ele cair, liga de novo em 3 s.
+param([switch]$Instalar, [switch]$Desinstalar, [switch]$Rede, [int]$Porta = 8765, [switch]$Filho)
 $ErrorActionPreference = 'Stop'
 $ROOT = 'W:\Parts\PartsSeals\PROJETOS'
 $SIM  = Join-Path $ROOT 'PROGRAMAÇÃO\PADRONIZAÇÃO\Arruela Padronizada\Simulador CNC.html'
@@ -52,6 +54,28 @@ if ($Instalar) {
   "Instalado: liga junto com o Windows ($lnk). Atalho na area de trabalho: 'Simulador CNC (fixo)' -> http://localhost:$Porta/"; return
 }
 
+# ---- vigia (v5.87.0): liga o servidor de verdade (-Filho) na mesma janela e religa se ele cair ----
+# Saida 0 = desligado de proposito, 2 = porta ocupada (outro servidor ja esta ligado): nao religa.
+# Antes de religar espera 3 s e confere: se outro servidor ja responde (o "Abrir Simulador" ligou a versao nova) ou se
+# este arquivo sumiu (versao velha apagada pelo atualizador), para. 5 quedas seguidas em menos de 30 s = para.
+if (-not $Filho) {
+  $argF = "-NoProfile -ExecutionPolicy Bypass -File `"$me`" -Porta $Porta -Filho" + $(if ($Rede) { ' -Rede' } else { '' })
+  $rapidas = 0
+  while ($true) {
+    $t0 = Get-Date
+    $p = Start-Process powershell.exe -ArgumentList $argF -NoNewWindow -PassThru -Wait
+    if ($p.ExitCode -eq 0 -or $p.ExitCode -eq 2) { break }
+    if (((Get-Date) - $t0).TotalSeconds -lt 30) { $rapidas++ } else { $rapidas = 0 }
+    if ($rapidas -ge 5) { Write-Warning 'O servidor caiu 5 vezes seguidas: parei de religar. Abra o Simulador de novo pelo atalho.'; break }
+    Start-Sleep -Seconds 3
+    if (-not (Test-Path -LiteralPath $me)) { break }
+    $outro = $false; try { Invoke-WebRequest "http://localhost:$Porta/ping" -UseBasicParsing -TimeoutSec 2 | Out-Null; $outro = $true } catch {}
+    if ($outro) { break }
+    "$(Get-Date -Format 'dd/MM HH:mm:ss') servidor caiu (saida $($p.ExitCode)) - religando"
+  }
+  return
+}
+
 $enc = New-Object Text.UTF8Encoding $false
 function Send($ctx, [int]$code, [byte[]]$bytes, [string]$type) {
   $r = $ctx.Response; $r.StatusCode = $code; $r.ContentType = $type; $r.Headers['Cache-Control'] = 'no-store'
@@ -74,7 +98,6 @@ function Full([string]$rel) {
 # v5.85.0: a pagina sai da copia LOCAL (o "Simulador CNC.html" ao lado deste script, baixado pelo atualizador) e fica na memoria:
 # ler 1,3 MB do W: a cada abertura levava ~1,8 s. Se a do W: for MAIS NOVA (outro PC atualizou), serve a do W: como antes.
 $LOCAL = Join-Path $PSScriptRoot 'Simulador CNC.html'
-$simChave = ''; $simBytes = $null
 function SimArquivo {
   $loc = $null; $w = $null
   try { if ([IO.File]::Exists($LOCAL)) { $loc = New-Object IO.FileInfo $LOCAL } } catch {}
@@ -83,39 +106,37 @@ function SimArquivo {
   if ($loc) { return $loc }; return $w
 }
 
-$l = New-Object Net.HttpListener
-$l.Prefixes.Add($(if ($Rede) { "http://+:$Porta/" } else { "http://localhost:$Porta/" }))
-$KEY = if ($Rede) { Token } else { '' }
-try { $l.Start() } catch { Write-Warning "Nao consegui abrir a porta $Porta ($_). Outro servidor ja esta ligado?"; return }
-"Servidor do Simulador ligado: http://localhost:$Porta/$(if ($Rede) { '  + celular (veja Simulador no celular.txt)' })  (pasta $ROOT). Feche esta janela para desligar."
-while ($l.IsListening) {
-  $ctx = $l.GetContext()
+# Um pedido. v5.87.0: roda num dos ate 16 "atendentes" (RunspacePool): enquanto um espera o W:, os outros atendem.
+# $S = memoria compartilhada entre os atendentes (pagina guardada).
+function Atender($ctx) {
+  $ErrorActionPreference = 'Stop'
   try {
     $q = $ctx.Request; $path = $q.Url.AbsolutePath
     $site = $q.Headers['Sec-Fetch-Site']
     if ($q.IsLocal) {
-      if ($q.Url.Host -notin 'localhost', '127.0.0.1') { SendText $ctx 403 'host'; continue }   # contra DNS rebinding
+      if ($q.Url.Host -notin 'localhost', '127.0.0.1') { SendText $ctx 403 'host'; return }   # contra DNS rebinding
     } else {
       # outro aparelho (celular): so com a senha. /entrar?k=SENHA grava o cookie e abre o Simulador
       if ($path -eq '/entrar') {
         if ($KEY -and (Arg $ctx 'k') -eq $KEY) { $ctx.Response.Headers.Add('Set-Cookie', "simk=$KEY; Max-Age=31536000; Path=/; HttpOnly; SameSite=Strict"); $ctx.Response.Redirect('/'); $ctx.Response.Close() }
         else { SendText $ctx 403 'Senha errada. Use o link do arquivo "Simulador no celular.txt" da area de trabalho do PC.' }
-        continue
+        return
       }
       $ck = $q.Cookies['simk']
-      if (-not $KEY -or -not $ck -or $ck.Value -ne $KEY) { SendText $ctx 401 'Sem senha. Abra no celular o link do arquivo "Simulador no celular.txt" da area de trabalho do PC.'; continue }
+      if (-not $KEY -or -not $ck -or $ck.Value -ne $KEY) { SendText $ctx 401 'Sem senha. Abra no celular o link do arquivo "Simulador no celular.txt" da area de trabalho do PC.'; return }
     }
-    if ($path -eq '/ping') { $ctx.Response.Headers['Access-Control-Allow-Origin'] = '*'; SendText $ctx 200 '{"ok":true}' 'application/json'; continue }
+    if ($path -eq '/ping') { $ctx.Response.Headers['Access-Control-Allow-Origin'] = '*'; SendText $ctx 200 '{"ok":true}' 'application/json'; return }
     if ($path -eq '/' -or $path -eq '/index.html') {
       $sf = SimArquivo
-      if (-not $sf) { SendText $ctx 404 "Simulador nao encontrado: $SIM"; continue }
+      if (-not $sf) { SendText $ctx 404 "Simulador nao encontrado: $SIM"; return }
       $chave = "$($sf.FullName)|$($sf.LastWriteTimeUtc.Ticks)|$($sf.Length)"
-      if ($chave -ne $simChave) { $simBytes = [IO.File]::ReadAllBytes($sf.FullName); $simChave = $chave }
-      Send $ctx 200 $simBytes 'text/html; charset=utf-8'; continue
+      $g = $S['sim']
+      if (-not $g -or $g[0] -ne $chave) { $g = @($chave, [IO.File]::ReadAllBytes($sf.FullName)); $S['sim'] = $g }
+      Send $ctx 200 $g[1] 'text/html; charset=utf-8'; return
     }
-    if (-not $path.StartsWith('/fs/')) { SendText $ctx 404 'nao existe'; continue }
+    if (-not $path.StartsWith('/fs/')) { SendText $ctx 404 'nao existe'; return }
     # so o proprio Simulador (mesmo endereco); pedido de outro site -> recusa
-    if ($site -and $site -ne 'same-origin') { SendText $ctx 403 'origem recusada'; continue }
+    if ($site -and $site -ne 'same-origin') { SendText $ctx 403 'origem recusada'; return }
     $f = Full (Arg $ctx 'p'); $op = $path.Substring(4)
     switch ($op) {
       'stat' {
@@ -165,3 +186,43 @@ while ($l.IsListening) {
     }
   } catch { try { SendText $ctx 500 "$_" } catch {} }
 }
+
+$l = New-Object Net.HttpListener
+$l.Prefixes.Add($(if ($Rede) { "http://+:$Porta/" } else { "http://localhost:$Porta/" }))
+$KEY = if ($Rede) { Token } else { '' }
+try { $l.Start() } catch { Write-Warning "Nao consegui abrir a porta $Porta ($_). Outro servidor ja esta ligado?"; exit 2 }
+
+# atendentes: cada um recebe as funcoes e as variaveis acima
+$S = [hashtable]::Synchronized(@{})
+$iss = [Management.Automation.Runspaces.InitialSessionState]::CreateDefault()
+foreach ($n in 'Send', 'SendText', 'JStr', 'Arg', 'Full', 'SimArquivo', 'Atender') {
+  $iss.Commands.Add((New-Object Management.Automation.Runspaces.SessionStateFunctionEntry $n, (Get-Content "function:$n")))
+}
+foreach ($v in 'ROOT', 'SIM', 'LOCAL', 'KEY', 'enc', 'S') {
+  $iss.Variables.Add((New-Object Management.Automation.Runspaces.SessionStateVariableEntry $v, (Get-Variable $v -ValueOnly), ''))
+}
+$pool = [RunspaceFactory]::CreateRunspacePool(1, 16, $iss, $Host); $pool.Open()
+$fila = New-Object Collections.ArrayList
+function Limpar {   # devolve os atendentes que ja terminaram
+  for ($i = $fila.Count - 1; $i -ge 0; $i--) {
+    $j = $fila[$i]
+    if ($j.h.IsCompleted) { try { [void]$j.ps.EndInvoke($j.h) } catch {}; $j.ps.Dispose(); $fila.RemoveAt($i) }
+  }
+}
+
+"Servidor do Simulador ligado: http://localhost:$Porta/$(if ($Rede) { '  + celular (veja Simulador no celular.txt)' })  (pasta $ROOT). Feche esta janela para desligar."
+while ($l.IsListening) {
+  $t = $l.GetContextAsync()
+  while (-not $t.Wait(1000)) { Limpar }
+  $ctx = $t.Result
+  # /ping do proprio PC responde aqui mesmo (nao passa pelo W:): o "Abrir Simulador" e o aviso da tela sempre tem resposta
+  if ($ctx.Request.Url.AbsolutePath -eq '/ping' -and $ctx.Request.IsLocal -and $ctx.Request.Url.Host -in 'localhost', '127.0.0.1') {
+    try { $ctx.Response.Headers['Access-Control-Allow-Origin'] = '*'; SendText $ctx 200 '{"ok":true}' 'application/json' } catch {}
+    continue
+  }
+  $ps = [PowerShell]::Create(); $ps.RunspacePool = $pool
+  [void]$ps.AddCommand('Atender').AddArgument($ctx)
+  [void]$fila.Add(@{ ps = $ps; h = $ps.BeginInvoke() })
+  Limpar
+}
+exit 1

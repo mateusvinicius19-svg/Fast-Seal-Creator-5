@@ -20,7 +20,7 @@ if ($SemBase) { $Base = '' }
 elseif ($Base) { $Base = (Resolve-Path -LiteralPath $Base).Path; $baseNome = Split-Path -Leaf $Base }
 else {
   # base = "Simulador CNC.html" do -Ref (padrao origin/main), tirado do git sem mexer na pasta
-  $Base = Join-Path $dados 'base.html'; Remove-Item -LiteralPath $Base -ErrorAction SilentlyContinue
+  $Base = Join-Path $dados "base-$Porta.html"; Remove-Item -LiteralPath $Base -ErrorAction SilentlyContinue
   if (Get-Command git -ErrorAction SilentlyContinue) {
     if ($Ref -like 'origin/*') { Start-Process git -ArgumentList 'fetch', '-q', 'origin' -WorkingDirectory $raiz -NoNewWindow -Wait }
     $err = Join-Path $dados 'git-erro.txt'

@@ -6,6 +6,22 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.87.0 — Proteção contra travamento com vários PCs + Kuru (20/11/2026)
+- Usuário (3 PCs com o Simulador + Kuru em modo automático): "travamento e instabilidade com todos acessados ao mesmo tempo".
+  Teste com 4 servidores juntos no W: não mostrou lentidão; o risco real é o W: demorar ou sumir por alguns segundos.
+- **A. Servidor atende vários pedidos ao mesmo tempo** (`Servidor Simulador.ps1`, até 16 atendentes): um pedido preso no W:
+  não segura os outros. Medido: um "conferir pasta" no meio de 4 listas grandes levava 1,7 s → 0,02 s; com um pedido preso,
+  os outros respondem em 0,03–0,1 s. O `/ping` responde sem passar pelo W:.
+- **B. Tempo-limite com aviso claro** (Simulador): ler/procurar no W: espera no máximo 20 s, gravar 60 s. Passou disso →
+  "NÃO salvo: O W: não respondeu em 20 s… Nada foi gravado — tente de novo" (na gravação: "confira na pasta se gravou").
+  W: sem resposta não vira mais "arquivo não existe" (o "Substituir?" não é pulado) e não cai nas buscas de reserva.
+- **C. Servidor se religa sozinho**: o processo vigia liga o servidor e, se ele cair, liga de novo (~3 s). Não religa se o
+  "Abrir Simulador" desligou de propósito (outro servidor já responde), se a porta está ocupada ou se a versão foi apagada.
+  Na tela: faixa vermelha "Servidor do Simulador desligado — religando sozinho…" (confere a cada 20 s) que some quando volta.
+- **D. Kuru sem congelar** (`Kuru - fila ARGUS/filaPedidosArgus.js`): a varredura automática usa acesso ao W: que não trava
+  a janela do Kuru; avisa no log se esperar o W: mais de 10 min. Botões iguais. `teste-fila.js` ganhou o teste "W: lento".
+  **Quem mantém o Kuru precisa copiar o arquivo de novo** (o Kuru não baixa da main sozinho).
+- Nenhum programa muda: testados os 37 perfis (iguais à main 5.86.0).
 ## 5.86.0 — Aviso de desenho/programa já existente + 📄 Documentos (POP-PS-001) na main (20/11/2026)
 - Usuário aprovou trazer para a main as branches de teste de 17/11/2026 (`teste/duplicados` e `claude/documentos`, ajustadas à 5.85.1).
 - **Já existe desenho com essas medidas** (pasta DESENHOS\<família>, folga 0,006; lista de cada família guardada 10 min):

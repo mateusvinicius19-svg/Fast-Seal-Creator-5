@@ -197,6 +197,13 @@ PROGRAMA passa a mostrar o número gravado.
 | `intervaloMs` | `45000` | Varredura periódica (o `fs.watch` em pasta de rede falha às vezes) |
 | `esperaArquivoMs` | `2000` | Arquivo mais novo que isso espera (o Simulador pode estar escrevendo) |
 | `lockMaxMs` | `300000` | `.lock` mais velho que 5 min é sobra de travamento e é removido |
+| `presaMs` | `600000` | Varredura esperando o W: há mais de 10 min → avisa no log (não trava nada) |
+
+**v5.87.0 — W: lento não trava o Kuru:** a varredura automática (a cada 45 s e a cada pedido novo) acessa o W: sem
+bloquear (`fs.promises`). Se o W: ficar lento ou sumir, só a fila espera; a janela do Kuru continua respondendo, e a fila
+segue sozinha quando o W: voltar. Os botões (`listar`, `reprocessar`, `descartar`, `conferir`) continuam iguais.
+**Quem já instalou a versão anterior:** copie de novo o `filaPedidosArgus.js` inteiro e rode `node teste-fila.js`
+(tem que dar **TESTE OK**; agora ele também confere que um W: lento não trava).
 | `estacao`, `log`, `auditoria` | — | Nome do PC, função de log e função de auditoria (antes/depois) |
 
 ---

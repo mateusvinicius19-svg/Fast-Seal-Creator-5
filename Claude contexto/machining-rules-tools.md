@@ -18,7 +18,7 @@ metadata:
 - RULE: never enter the piece/stock in G0 — any move below Z0 (or into a region that may still have material, even through the bore) must be G1 with feed; G0 only in air (Z>0) or for retracts along already-cleared paths.
 - RULE: always machine front to back (cut moving −Z); never cut moving +Z. Back plunges: go in through the bore at min Ø, G1 up in X at the angle-line Z, then cut −Z to the finish end.
 - RULE for every piece: roughing Z must reach at least the finish end Z (including plunge/"cavando" passes entering from the back).
-- Retracts: never G0 back along a diameter just machined — retract ≥2 above the pass max Ø (OD) / ≥1 below the pass min Ø (ID) before G0 Z. Internal tool T1D51 (and D45) works at min Ø21. Groove plunging ("cavando"): only 2 passes, 1 rough + 1 finish. Facing with T3D3. Roughing max 8 in Ø per pass, finish 2; <5 to remove → single pass. Internal tool by Ø int: <11 T4D14, 11–40 T1D45, >40 T2D12.
+- Retracts: never G0 back along a diameter just machined — retract ≥2 above the pass max Ø (OD) / ≥1 below the pass min Ø (ID) before G0 Z. Internal tool T1D51 (and D45) works at min Ø21. Groove plunging ("cavando"): only 2 passes, 1 rough + 1 finish. Facing with T3D3. Roughing max 8 in Ø per pass, finish 2; <5 to remove → single pass. Internal tool by the SMALLEST Ø it works (1st rough pass / bucha bore / finish), NOT the final Ø int (v5.84.0, see end): <11 T4D14, 11–40 T1D45 (PU only), ≥40 T2D12.
 - MCS 500 save target is the real folder Programas_CNC\MCS 500 (the "MCS 500 - Atalho" .lnk points to it); Explorer sorted by date desc hides folders at the bottom.
 
 **Why:** user corrections on 2026-11-06 while testing the Simulador. **How to apply:** keep these in the Simulador generators and any hand-written program. See [[cnc-program-release-process]], [[feedback-fsc-derived-rules]].
@@ -52,3 +52,16 @@ metadata:
 - Celeron: chanfro externo a 30° (medida em Z, 30° com o eixo), em vez de 45°.
 - Celeron (todas as arruelas/guias): corte com a T6D16 → bedame 2 nas peças e G92 +1 (como secção > 14,8); desbaste vai até o fim da faixa do corte (N×B6 + sobreposição), 0,1 antes da peça seguinte; acabamento termina no mesmo Z (paralelo = meio bedame + sobreposição, no fundo do chanfro, sem degrau): nada passa para a peça seguinte. Vale também para secção > 14,8.
 - 17/11/2026 (usuário): material PTFE+GR (grafite) = mesmas ferramentas/regras do PTFE puro e PTFE+BR (isTeflon, ARR_MAT PTFEGR, GAX_MAT, ringMatKey, gerar.ps1).
+
+## Ferramenta pelo menor Ø e recuos do G0 — usuário 19/11/2026 (v5.84.0, tirado de 45.598 programas de Programas_CNC)
+- Ferramenta INTERNA pelo MENOR Ø que ela trabalha (1º passe de desbaste / furo da bucha / acabamento), não pelo Ø final.
+  PU: T4D14 < Ø11 · T1D45 de 11 até 40 (só PU, mínimo 11) · T2D12 ≥ 40 (nos programas a T2D12 chega a Ø39,1–39,2).
+  PTFE/+BR/+GR/+FV, POM, PEAD: T4D4 ≥ Ø14, abaixo a D14 (T2D14). (Nos programas reais em PTFE a T4D4 aparece até Ø11–13 no
+  tarugo — ficou a regra do usuário de 12/11, mínimo 14.) Externa não depende do Ø (T2D2 no PU desde Ø8, T7D7 nos outros).
+- Recuo do G0 depois de cada passe = folga MÍNIMA no Ø, por ferramenta/material/faixa do Ø do passe (<11 · 11–21 · 21–30 · 30–40 · ≥40):
+  T2D2 2 · 2 · 2,5 · 2,5 · 3 | T7D7 1,5 (≥40 fora do PU 2) | T1D45 – · 2,5 · 3 · 3 · 3 | T2D12 3,5 (≥40) | T4D4 2 (≥40 fora do PU 2,5).
+  Medianas dos recuos corrigidos à mão (os 0,4 do Fast Seal ficaram de fora). Recuo maior que já sai fica.
+  Interno nunca abaixo do Ø mínimo da ferramenta (T2D12 39, T1D45 11, D14 3,5); tarugo: no máximo 1,5 abaixo do menor passe.
+- D14 (T4D14 / T2D14 = mesmo corretor "INTERNO AFIADO"): barra inteiriça fina → recuo EXATO de 1 no Ø (0,5 em furo pequeno).
+  O Simulador usa T4D14 no PU e T2D14 no PTFE/POM/PEAD; nos programas reais a D14 aparece quase sempre na T4 (PTFE: 75 × 5) —
+  perguntar ao usuário antes de trocar.

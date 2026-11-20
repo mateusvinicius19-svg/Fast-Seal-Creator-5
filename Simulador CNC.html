@@ -1291,7 +1291,7 @@ const GEN = {
     params: [["apR","Desbaste ext./int.: quanto tirar por passada (no raio, mm)",3],["alR","Acabamento ext./int.: sobremetal deixado (no raio, mm)",3],
              ["apC","Canal: quanto aprofundar por passada (mm)",3],["alC","Canal: sobremetal deixado para o acabamento (mm)",1],
              ["rn","Raio da ponta das ferramentas (mm)",0.4],
-             ["tInt","Ferramenta interna (vazio = T1D45 até Ø40, senão T2D12)",""],["S","Rotação S (vazio = tabela pelo Ø ext.)",""],
+             ["tInt","Ferramenta interna (vazio = pelo menor Ø trabalhado: T4D14 abaixo de Ø11, T1D45 até Ø40, senão T2D12)",""],["S","Rotação S (vazio = tabela pelo Ø ext.)",""],
              ["g92a","G92: parte fixa do extra (mm)",0.768],["g92b","G92: acréscimo por mm de corte no raio",0.0265],
              ["ai","Aperto interno (vazio = Tolerâncias Gaxetas)",""],["ae","Aperto externo (vazio = tabela)",""],
              ["fe","Folga externa – só PSE (vazio = tabela C)",""],["fi","Folga interna – só PSH (vazio = tabela B)",""],["chc","Chanfro do calcanhar (vazio = tabela)",""],
@@ -1415,7 +1415,7 @@ GEN.pse120 = { name: "PSE 120",
          ["rpt","Nº de repetições RPT (vazio = 0)",""],["mat","Material","PU"],["matR","Material do anel (peça A)","PTFE"],
          ["bi","Bucha Ø interno (vazio = automática)",""],["bo","Bucha Ø externo (vazio = automática)",""]],
   params: [["apR","Desbaste ext./int.: quanto tirar por passada (no raio, mm)",3],["alR","Acabamento ext./int.: sobremetal deixado (no raio, mm)",3],
-           ["rn","Raio da ponta das ferramentas (mm)",0.4],["tInt","Ferramenta interna (vazio = T1D45 até Ø40, senão T2D12)",""],["S","Rotação S (vazio = tabela pelo Ø ext.)",""],
+           ["rn","Raio da ponta das ferramentas (mm)",0.4],["tInt","Ferramenta interna (vazio = pelo menor Ø trabalhado: T4D14 abaixo de Ø11, T1D45 até Ø40, senão T2D12)",""],["S","Rotação S (vazio = tabela pelo Ø ext.)",""],
            ["ae","Aperto do lábio no Ø (vazio = 0,9 até Ø40 · 1,1 até Ø100 · 1,5 acima)",""],["chI","Chanfro interno, frente 45° e trás 30° (vazio = 0,08 × secção, mín. 0,3)",""],
            ["cA","Anel (peça A): chanfros 45° do externo (vazio = 0,2)",""],["cAF","Anel (peça A): chanfro 45° do interno na frente (vazio = 0,2)",""],["cAI","Anel (peça A): chanfro interno de trás a 30°, em Z (vazio = 0,2)",""]],
   build(p){ return pse120Build(p); },
@@ -1552,7 +1552,7 @@ GEN.psr102 = { name: "PSR 102",
   main: [["dint","Diâmetro interno – haste (mm)",180],["dext","Diâmetro externo (mm)",192],["hh","Altura do calcanhar (mm)",7],["h","Altura total (mm)",10],
          ["rpt","Nº de repetições RPT (vazio = 0)",""],["mat","Material","PU"],["bi","Bucha Ø interno (vazio = automática)",""],["bo","Bucha Ø externo (vazio = automática)",""]],
   params: [["apR","Desbaste: quanto tirar por passada (no raio, mm)",3],["alR","Sobremetal deixado para o acabamento (no raio, mm)",2.5],["rn","Raio da ponta das ferramentas (mm)",0.4],
-           ["tInt","Ferramenta interna (vazio = T1D45 até Ø40, senão T2D12)",""],["S","Rotação S (vazio = tabela pelo Ø ext.)",""],
+           ["tInt","Ferramenta interna (vazio = pelo menor Ø trabalhado: T4D14 abaixo de Ø11, T1D45 até Ø40, senão T2D12)",""],["S","Rotação S (vazio = tabela pelo Ø ext.)",""],
            ["g92a","G92: parte fixa do extra (mm)",0.768],["g92b","G92: acréscimo por mm de corte no raio",0.0265],
            ["fi","Folga do calcanhar interno (vazio = 1,0)",""],["ai","Aperto da ponta no Ø (vazio = 1,0 até Ø150, 2,0 acima)",""],
            ["tL","Espessura da ponta do lábio (vazio = 0,2 × secção)",""],["lipF","Ø do lábio na face do calcanhar (vazio = calcanhar + 0,9 × secção)",""],
@@ -1687,7 +1687,7 @@ GEN.psr101 = { name: "PSR 101",
          ["r1CP","Chanfro 45° no canto do degrau, lado do lábio (vazio = 0,3 / 0,4 / 0,5 pela secção)",""],
          ["rpt","Nº de repetições RPT (vazio = 0)",""],["mat","Material","PU"],["bi","Bucha Ø interno (vazio = automática)",""],["bo","Bucha Ø externo (vazio = automática)",""]],
   params: [["apR","Desbaste: quanto tirar por passada (no raio, mm)",3],["alR","Sobremetal deixado para o acabamento (no raio, mm)",1.5],["rn","Raio da ponta das ferramentas (mm)",0.4],
-           ["tInt","Ferramenta interna (vazio = T1D45 até Ø40, senão T2D12)",""],["S","Rotação S (vazio = tabela pelo Ø ext.)",""],
+           ["tInt","Ferramenta interna (vazio = pelo menor Ø trabalhado: T4D14 abaixo de Ø11, T1D45 até Ø40, senão T2D12)",""],["S","Rotação S (vazio = tabela pelo Ø ext.)",""],
            ["r1Ap","Aperto da ponta no Ø (vazio = 1,1 / 1,4 / 1,8 pela secção)",""],["r1ZT","Ponta do lábio: distância da face (vazio = 0,25)",""],["r1St","Degrau: quanto menor que o Ø alojamento (vazio = 2 / 3 / 4 pela secção)",""],
            ["r1LipE","Lábio no degrau: Ø − haste (vazio = secção, ou seja Ø médio)",""],["r1E0","Aresta de fora do lábio na face: Ø − haste (vazio = 0,45)",""],
            ["r1BR","Fim da rampa interna: Ø − haste (vazio = igual ao furo: furo reto)",""],["r1BB","Furo atrás: Ø − haste (vazio = 1,0)",""],
@@ -2312,6 +2312,7 @@ function generateCore(fromInput){
     else if (bi && !bed2 && bi.readOnly){ bi.value = bi.dataset.prev || "1"; bi.readOnly = false; bi.title = ""; p.bed = Number(String(bi.value).replace(",", ".")) || 1; } }
   if (bed2 && "bed" in p && !["psr211","psr212"].includes(type)){ p.bedOrig = p.bed; p.bed = 2; p.bedD16 = true; }
   let lines = g.build(p), d16 = false;
+  const toolTxt = (() => { const r = intToolByMin(g, p, lines, type); lines = r.lines; return r.txt; })();   // v5.84.0: interno pelo MENOR Ø trabalhado
   if (bed2 && (celD16 || lines.some(l => /\bT8D8\b/.test(String(l))))){
     d16 = true;
     lines = lines.map(l => { l = String(l).replace(/\bT8D8\b/g, "T6D16").replace(/NOSEW 1(\s)/, "NOSEW 2$1");
@@ -2332,7 +2333,7 @@ function generateCore(fromInput){
       celRpm = [S, half];
     }
   }
-  $("genMsg").textContent = (g.check(p) ? g.check(p) + " AVISE O RESPONSÁVEL antes de usar este programa." : `${g.name}: ${lines.length} linhas geradas.`) + (alojTxt ? " · " + alojTxt : "");   // v5.48.1 (usuário): avisos pedem para avisar o responsável
+  $("genMsg").textContent = (g.check(p) ? g.check(p) + " AVISE O RESPONSÁVEL antes de usar este programa." : `${g.name}: ${lines.length} linhas geradas.`) + (alojTxt ? " · " + alojTxt : "") + (toolTxt ? " · " + toolTxt : "");   // v5.48.1 (usuário): avisos pedem para avisar o responsável
   $("genMsg").style.color = g.check(p) ? "#a2231d" : ""; state.lastWarn = g.check(p) || "";   // v5.48.2: vai para a faixa do topo
   state.genType = type; state.genParams = p; saveForm();
   { // bloco do alojamento: DP (PSE 108, O-ring por dentro) e DH (PSH 129, O-ring por fora)
@@ -2345,6 +2346,7 @@ function generateCore(fromInput){
   }
   lines = puOnePass(lines);   // v5.82.0: PU com até 6 no Ø para tirar → só o acabamento
   if (type !== "psr102") lines = puRetracts(lines);   // v5.81.0: recuos do PU como no PSR 102 (o PSR 102 já sai assim do gerador)
+  lines = retractRules(lines, type);   // v5.84.0: + folga mínima por ferramenta, material e faixa de Ø (D14: exata)
   const fname = (type === "dual" || type === "pse127" || type === "psh131" || type === "iso" || type === "dhr" || type === "dpr" || type === "psh110" || type === "psh110t" || type === "psr101" || type === "psa108" || type === "psa108c" || type === "psa109" || type === "psg101" || type === "psg103" || type === "psg104" || type === "lip" || type === "pso" || type === "pse106" || type === "psh106" || type === "psh108" || type === "psh117" || type === "psh125" || type === "psh105" || type === "pse105" || type === "pse103" || type === "pse107" || type === "pse118" || type === "psh107" || type === "psh121" || type === "psh103" || type === "psr102" || type === "psr211" || type === "psr212" || type === "pse102r" || type === "pse120") ? pieceFile(p) + (buchaIsException(p) || (state.alterNum && p.bi !== "" && p.bo !== "") ? ` ${gen15(p.bi)}X${gen15(p.bo)}` : "") : `PSA108 ${gen15(p.dint)}X${gen15(p.dext)}X${gen15(p.h)} - ${xround(p.n,0)} pcs`;
   load(lines.join("\n"), fname);
   if (!g.check(p)) try { $("genMsg").textContent += costTxt(pieceCost(lines.join("\n"), ["ciclo", "semch"].includes(type) ? xround(p.n, 0) : (isPSA(type) || type === "iso") ? cicloPcs(p) : 1)); } catch(e){}
@@ -2410,6 +2412,117 @@ function puOnePass(lines){
     for (let j = a; j < fin[0]; j++) drop.add(j);
   });
   return drop.size ? L.filter((l, j) => !drop.has(j)) : lines;
+}
+// v5.84.0 (usuário 19/11/2026, regras tiradas dos ~45 mil programas de Programas_CNC):
+// (1) a ferramenta INTERNA vai pelo MENOR Ø que ela trabalha (1º passe de desbaste / furo da bucha / acabamento), não pelo Ø
+//     final da peça. PU: T4D14 abaixo de Ø11 · T1D45 de 11 até 40 (só PU, mínimo Ø11) · T2D12 a partir de 40.
+//     PTFE / +BR / +GR / +FV, POM e PEAD: T4D4 a partir de Ø14, abaixo a D14 (T2D14). Externa: não muda pelo Ø (T2D2 no PU
+//     desde Ø8, T7D7 nos outros). Ferramenta digitada no campo continua valendo.
+// (2) recuo do G0 depois de cada passe = folga no Ø, por ferramenta, material e faixa do Ø do passe (menor Ø no interno, maior
+//     no externo): medianas dos recuos corrigidos à mão nos programas (os 0,4 do Fast Seal ficaram de fora). A folga é o
+//     MÍNIMO (recuo maior que o gerador já faz, ex. bucha + 2, fica). O interno nunca recua abaixo do Ø mínimo da ferramenta
+//     (T2D12 Ø39, T1D45 Ø11, D14 Ø3,5 = furo mínimo da barra R0,2) e, no tarugo, não passa de 1,5 abaixo do menor passe.
+// (3) D14 (T4D14 no PU, T2D14 no PTFE/POM/PEAD — mesmo corretor D14 "INTERNO AFIADO"): barra inteiriça fina, recuo de só 1 no Ø
+//     (0,5 nos furos pequenos, preso no Ø3,5), como nos programas corrigidos à mão.
+const INT_TOOL_MIN = { T4D14: 3.5, T2D14: 3.5, T1D45: 11, T2D12: 39, T4D4: 12 };
+//                    faixa do Ø do passe:  <11  11–21 21–30 30–40  ≥40       (_X = fora do PU)
+const FOLGA_RECUO = { T2D2:  [2,   2,    2.5,  2.5,   3],
+                      T7D7:  [1.5, 1.5,  1.5,  1.5,   1.5], T7D7_X: [1.5, 1.5, 1.5, 1.5, 2],
+                      T4D14: [1,   1,    1,    1,     1],   T2D14:  [1,   1,   1,   1,   1],   // D14: bem fina, folga pequena
+                      T1D45: [1,   2.5,  3,    3,     3],
+                      T2D12: [1,   1,    1,    1,     3.5],   // abaixo de 40 fica presa no Ø mínimo (39)
+                      T4D4:  [2,   2,    2,    2,     2],   T4D4_X: [2,   2,   2,   2,   2.5] };
+function folgaRecuo(tool, pu, x){
+  const t = (!pu && FOLGA_RECUO[tool + "_X"]) || FOLGA_RECUO[tool]; if (!t) return null;
+  return t[x < 11 ? 0 : x < 21 ? 1 : x < 30 ? 2 : x < 40 ? 3 : 4];
+}
+const PU_INT_TOOLS = ["T4D14", "T1D45", "T2D12"], PTFE_INT_TOOLS = ["T4D4", "T2D14"];
+function puIntTool(min){ return min < 11 ? "T4D14" : min < 40 ? "T1D45" : "T2D12"; }
+// blocos de ferramenta interna do programa: { tool, min (menor Ø cortado, G1 com Z < 0), a (linha do T), b (fim), fsc (dentro de ;( INSIDE )) }
+function intToolBlocks(lines, cand){
+  const L = lines.map(String), out = [], fscProg = L.some(l => /^;\(\s*INSIDE\s*\)/.test(l)); let sec = "", abs = true, cur = null, cz = null;
+  L.forEach((l, i) => {
+    const hd = /^;\(\s*([A-Z][A-Z0-9 ]*?)\s*\)\s*$/.exec(l.trim());
+    if (hd && !/\*/.test(l)){ if (hd[1] !== "FINISH" && hd[1] !== "ROUGH" && fscProg){ sec = hd[1]; if (cur){ cur.b = i; cur = null; } } return; }
+    const t = l.replace(/;.*$/, "").replace(/\(.*?\)/g, "").trim(); if (!t) return;
+    if (/\bG91\b/.test(t)) abs = false; if (/\bG90\b/.test(t)) abs = true;
+    const tm = /^T(\d+)D(\d+)\b/.exec(t);
+    if (tm){ if (cur) cur.b = i; cur = null; const tool = `T${tm[1]}D${tm[2]}`;
+      if (cand.includes(tool) && (!fscProg || sec === "INSIDE")){ cur = { tool, min: Infinity, a: i, b: L.length, fsc: fscProg }; out.push(cur); } return; }
+    const x = /X(-?[\d.]+)/.exec(t), z = /Z(-?[\d.]+)/.exec(t); if (z) cz = Number(z[1]);
+    if (cur && abs && /^G0?[123]\b/.test(t) && x && cz !== null && cz < -0.05) cur.min = Math.min(cur.min, Number(x[1]));
+  });
+  return out.filter(b => isFinite(b.min));
+}
+function intToolByMin(g, p, lines, type){
+  const typed = String(p.tInt || "").trim().toUpperCase(), auto = !typed || (type === "iso" && typed === "T4D4");
+  if (!auto) return { lines, txt: "" };
+  const ptfe = isTeflon(p) || ["PTFE", "PTFEBR", "PTFEGR", "PTFEFV", "POM", "NYLON"].includes(p.matA);
+  const want = b => PU_INT_TOOLS.includes(b.tool) ? puIntTool(b.min) : ptfe ? (b.min < T4D4_MIN ? "T2D14" : "T4D4") : b.tool;
+  const cand = ptfe ? PU_INT_TOOLS.concat(PTFE_INT_TOOLS) : PU_INT_TOOLS;
+  const scan = L => intToolBlocks(puOnePass(L), cand);   // mede como vai sair (depois do "PU até 6 no Ø = só acabamento")
+  let bl = scan(lines), bad = bl.filter(b => want(b) !== b.tool);
+  if (!bad.length) return { lines, txt: "" };
+  const msg = [], fmin = b => fmtN(b.min, 2);
+  // estilo Fast Seal (;( INSIDE )): gera de novo com a ferramenta certa — a geometria (30° pelas costas, alcance da T2D12) depende dela
+  const fb = bad.find(b => b.fsc);
+  if (fb){
+    const w = want(fb), L2 = g.build(Object.assign({}, p, { tInt: w })), b2 = scan(L2).find(b => b.fsc);
+    if (b2 && b2.tool === w && want(b2) === w){ lines = L2; msg.push(`interno ${w} (menor Ø trabalhado ${fmtN(b2.min, 2)}; antes ${fb.tool})`); }
+    else msg.push(`ATENÇÃO: o interno ${fb.tool} trabalha até Ø${fmin(fb)} — pela regra do menor Ø seria a ${w}; confira`);
+    bl = scan(lines); bad = bl.filter(b => want(b) !== b.tool && !b.fsc);
+  }
+  // estilo planilha (arruelas, DP): só troca o código da ferramenta (passes retos, não dependem dela)
+  if (bad.some(b => !b.fsc)){
+    const L = lines.map(String);
+    for (const b of bad.filter(b => !b.fsc)){
+      const w = want(b), re = new RegExp("\\b" + b.tool + "\\b", "g");
+      for (let i = b.a; i < b.b; i++) L[i] = L[i].replace(re, w);
+      for (let i = 0; i < L.length; i++) if (new RegExp("^;" + b.tool + " \\(INTERNO").test(L[i])) L[i] = L[i].replace(re, w);
+      msg.push(`interno ${w} (menor Ø trabalhado ${fmin(b)}; antes ${b.tool})`);
+    }
+    lines = L;
+  }
+  return { lines, txt: msg.join(" · ") };
+}
+// recuos do G0 pela tabela FOLGA_RECUO, nas seções ;( OUTSIDE ) / ;( INSIDE ) (estilo Fast Seal). O 1º G0 depois de um corte que
+// muda o X é o recuo: vai para (menor Ø do passe − folga) no interno / (maior Ø do passe + folga) no externo, e os G0 seguintes no
+// mesmo X acompanham. Ferramenta fora da tabela não muda. Roda depois do puRetracts (PU +1, 5.81.0).
+const D14_TOOLS = ["T4D14", "T2D14"];
+function retractRules(lines, type){
+  const L = lines.map(String), matL = L.find(l => /^;MATERIAL:/i.test(l)) || "";
+  if (!L.some(l => /^;\(\s*(OUTSIDE|INSIDE)\s*\)/.test(l))) return lines;
+  const mat = matL.replace(/^;MATERIAL:\s*/i, ""), pu = isPU(mat), tb = /TUBE\s+([\d.]+)\/([\d.]+)/i.exec(matL), tarugo = !!tb && Number(tb[1]) === 0;
+  const insMin = tarugo ? Math.min(...intToolBlocks(L, Object.keys(INT_TOOL_MIN).concat(["T4D81", "T1D51"])).map(b => b.min)) : -Infinity;
+  const X = l => { const m = /X(-?[\d.]+)/.exec(l); return m ? Number(m[1]) : null; }, setX = (l, x) => l.replace(/X-?[\d.]+/, "X" + fx(x, 3));
+  let sec = "", tool = "", abs = true, cx = null, prevCut = false, pass = null, map = null;
+  return L.map((l, i) => {
+    const t = l.replace(/;.*$/, "").trim(), hd = /^;\(\s*([A-Z][A-Z0-9 ]*?)\s*\)\s*$/.exec(l.trim());
+    if (hd && !/\*/.test(l)){ if (hd[1] !== "FINISH" && hd[1] !== "ROUGH") sec = hd[1]; prevCut = false; map = null; return l; }
+    if (!t) return l;
+    if (/\bG91\b/.test(t)) abs = false; if (/\bG90\b/.test(t)) abs = true;
+    const tm = /^T(\d+)D(\d+)\b/.exec(t); if (tm){ tool = `T${tm[1]}D${tm[2]}`; prevCut = false; map = null; cx = null; pass = null; return l; }
+    const ins = sec === "INSIDE", on = abs && (ins || sec === "OUTSIDE");
+    const g0 = /^G0?0\b/.test(t), g1 = /^G0?[123]\b/.test(t) || (!g0 && /^[XZ]/.test(t) && prevCut);
+    let out = l;
+    if (on && g0){
+      const x = X(t), f = pass ? folgaRecuo(tool, pu, ins ? pass.min : pass.max) : null;
+      if (prevCut && x !== null && cx !== null && Math.abs(x - cx) > 1e-9 && f !== null && (ins ? x < cx : x > cx)){
+        let nx = ins ? pass.min - f : pass.max + f;
+        if (ins){ const lim = Math.max(INT_TOOL_MIN[tool] ?? -Infinity, insMin - 1.5); nx = Math.min(Math.max(nx, lim), pass.min - 0.1); }
+        // a folga é o MÍNIMO: recuo maior que já vinha (bucha + 2, +1 do PU 5.81.0) fica. D14: exato (barra fina, 1 no Ø)
+        nx = Number(fx(D14_TOOLS.includes(tool) ? nx : ins ? Math.min(x, nx) : Math.max(x, nx), 3));
+        map = [x, nx]; out = setX(l, nx);
+      }
+      else if (map && x !== null && Math.abs(x - map[0]) < 1e-9) out = setX(l, map[1]);
+      else map = null;
+    }
+    if (on && g1 && !g0){ const x = X(t); if (!prevCut) pass = { min: cx ?? Infinity, max: cx ?? -Infinity };   // o ponto de partida do passe também conta
+      if (x !== null){ pass.min = Math.min(pass.min, x); pass.max = Math.max(pass.max, x); } }
+    const xo = X(out.replace(/;.*$/, "")); if (xo !== null && abs) cx = xo;
+    prevCut = g1 && !g0;
+    return out;
+  });
 }
 // bucha digitada à mão só vira exceção ("NNNNNN BIxBO") quando é diferente da que o Simulador escolheria sozinho
 function autoBucha(p){
@@ -4404,10 +4517,10 @@ const FERR = [
   { c: "T7D17", tipo: "ext", nome: "Externo sem costas (D7 afiada)", uso: "Externo que mergulha em canais em V", mat: "—", obs: "É a D7 afiada sem as costas." },
   { c: "T4D4", tipo: "int", nome: "Interno", uso: "Arruelas; gaxetas em PTFE, NBR e Viton; PSO 109 com Ø interno < 21", mat: "PU (arruelas), NBR, Viton, PTFE, POM, Nylon", min: 14, raio: 0.4, pastilha: "DCGT 070204", obs: "Suporte igual ao H200 (da T1D1), mas com pastilha DCGT 070204 (rômbica 55°, R0,4): faz no MÁXIMO 30° nas costas (usuário, 11/11/2026) — chanfro interno do calcanhar sempre a 30°. PSO 109: \"D4 afiada\"." },
   { c: "T2D14", tipo: "int", nome: "Interno pequeno (PTFE/POM/PEAD)", uso: "Interno das arruelas e gaxetas em PTFE puro, PTFE+BR, POM e PEAD com Ø interno < 14 (abaixo do mínimo da T4D4)", mat: "PTFE, PTFE+BR, PTFE+GR, POM, Nylon/PEAD", obs: "Usuário, 12/11/2026: a T4D4 faz no mínimo Ø14 nesses materiais; abaixo de 14 passa a ser a T2D14." },
-  { c: "T4D14", tipo: "int", nome: "Interno pequeno", uso: "Interno das gaxetas em PU com Ø interno < 11", mat: "PU", pastilha: "barra inteiriça (2 opções)", obs: "Duas opções de barra (fotos do usuário, 11/11/2026): R0,3 com cota 4,9 e R0,2 com cota 3,5 (a cota da foto é o Ø mínimo do furo — confirmar). Furos menores: a de R0,2." },
-  { c: "T1D45", tipo: "int", nome: "Interno médio", uso: "Interno das gaxetas em PU com Ø interno de 11 a 40", mat: "PU", min: 11, raio: 0.4, pastilha: "DCGT 070204", obs: "Igual à T4D4 (usuário, 11/11/2026): suporte igual ao H200 com pastilha DCGT 070204 (rômbica 55°, R0,4) — faz no MÁXIMO 30° nas costas; chanfro interno do calcanhar sempre a 30°." },
+  { c: "T4D14", tipo: "int", nome: "Interno pequeno", uso: "Interno em PU quando o MENOR Ø trabalhado (desbaste / furo da bucha) é < 11", mat: "PU", pastilha: "barra inteiriça (2 opções)", obs: "Duas opções de barra (fotos do usuário, 11/11/2026): R0,3 com cota 4,9 e R0,2 com cota 3,5 (a cota da foto é o Ø mínimo do furo — confirmar). Furos menores: a de R0,2." },
+  { c: "T1D45", tipo: "int", nome: "Interno médio", uso: "Interno em PU quando o MENOR Ø trabalhado (desbaste / furo da bucha) vai de 11 a 40 — só PU", mat: "PU", min: 11, raio: 0.4, pastilha: "DCGT 070204", obs: "Igual à T4D4 (usuário, 11/11/2026): suporte igual ao H200 com pastilha DCGT 070204 (rômbica 55°, R0,4) — faz no MÁXIMO 30° nas costas; chanfro interno do calcanhar sempre a 30°." },
   { c: "T1D1", tipo: "int", nome: "Interno H200 (VCGT)", uso: "Ainda não usada pelos geradores do Simulador", mat: "—", raio: 0.4, pastilha: "VCGT 110304", obs: "Suporte H200 com pastilha VCGT 110304 (rômbica 35°, R0,4) (foto do usuário, 11/11/2026). Posição T1 — confirmar." },
-  { c: "T2D12", tipo: "int", nome: "Interno grande", uso: "Interno das gaxetas em PU com Ø interno > 40", mat: "PU", min: 40, raio: 0.4, obs: "Suporte H100 na posição T2, o MESMO da T2D2: lado de CIMA = D12 (interno), lado de DENTRO = D2 (externo). Pastilha rômbica 35° (tipo V) R0,4, como na foto do suporte (usuário, 11/11/2026)." },
+  { c: "T2D12", tipo: "int", nome: "Interno grande", uso: "Interno em PU quando o MENOR Ø trabalhado (desbaste / furo da bucha) é ≥ 40", mat: "PU", min: 40, raio: 0.4, obs: "Suporte H100 na posição T2, o MESMO da T2D2: lado de CIMA = D12 (interno), lado de DENTRO = D2 (externo). Pastilha rômbica 35° (tipo V) R0,4, como na foto do suporte (usuário, 11/11/2026)." },
   { c: "T1D51", tipo: "int", nome: "Interno sem costas (D12 afiada)", uso: "PSO 109 (O-ring usinado) com Ø interno de 21 a 28", mat: "PU", min: 21, obs: "É a D12 afiada sem as costas." },
   { c: "T1D11", tipo: "int", nome: "Interno PSO", uso: "PSO 109 (O-ring usinado) com Ø interno ≥ 28", mat: "PU", min: 21, obs: "" },
   { c: "T5D5", tipo: "corte", nome: "Corte (lâmina H1111)", uso: "CUTTING das gaxetas, raspadores e arruelas", mat: "PU, NBR, Viton, POM", pastilha: "lâmina H1111", obs: "Lâmina de corte tipo faca, ponta fina, código H1111 (foto do usuário, 11/11/2026). Avanço F0,220. G92 = 15 + H + 0,768 + 0,0265 × corte radial (PSHPSE106)." },
@@ -5559,7 +5672,7 @@ GEN.dual = { name: "DUAL SEAL",
   main: [["dint","Diâmetro interno – haste (mm)",100],["dext","Diâmetro externo – alojamento (mm)",110],["h","Altura (mm)",8],["med","Medidas","A"],
          ["rpt","Nº de repetições RPT (vazio = 0)",""],["mat","Material","PU"],["bi","Bucha Ø interno (vazio = automática)",""],["bo","Bucha Ø externo (vazio = automática)",""]],
   params: [["apR","Desbaste: quanto tirar por passada (no raio, mm)",3],["alR","Sobremetal deixado para o acabamento (no raio, mm)",1.5],["rn","Raio da ponta das ferramentas (mm)",0.4],
-           ["tInt","Ferramenta interna (vazio = T4D14 abaixo de Ø11, T1D45 até Ø40, senão T2D12)",""],["S","Rotação S (vazio = tabela pelo Ø ext.)",""],
+           ["tInt","Ferramenta interna (vazio = pelo menor Ø trabalhado: T4D14 abaixo de Ø11, T1D45 até Ø40, senão T2D12)",""],["S","Rotação S (vazio = tabela pelo Ø ext.)",""],
            ["dl","Altura dos lábios no raio (vazio = 0,1 × secção + 0,23)",""]],
   build(p){ return dualBuild(p); },
   check(p){
@@ -5757,7 +5870,7 @@ function s15Build(p){
   return L;
 }
 const S15_PARAMS = [["apR","Desbaste: quanto tirar por passada (no raio, mm)",3],["alR","Sobremetal deixado para o acabamento (no raio, mm)",1.5],["rn","Raio da ponta das ferramentas (mm)",0.4],
-  ["tInt","Ferramenta interna (vazio = T4D14 abaixo de Ø11, T1D45 até Ø40, senão T2D12)",""],["S","Rotação S (vazio = tabela pelo Ø ext.)",""],
+  ["tInt","Ferramenta interna (vazio = pelo menor Ø trabalhado: T4D14 abaixo de Ø11, T1D45 até Ø40, senão T2D12)",""],["S","Rotação S (vazio = tabela pelo Ø ext.)",""],
   ["s15Ap","Lábio: aperto no Ø (vazio = como o Fast Seal)",""],["s15Dr","Lábio: queda até a face no raio (vazio = como o Fast Seal)",""],["s15Rt","Lábio: raio da ponta (vazio = 0,21 × secção)",""],
   ["s15Ag","Lado do canal: aperto em % do Ø (vazio = como o Fast Seal, ±0,3 % + 0,013 × secção)",""],["s15Ch","Lado do canal: chanfros 45° (vazio = 0,3)",""],
   ["s15Wg","Canal: largura (vazio = 0,569 × altura da peça)",""],["s15Pg","Canal: profundidade no raio (vazio = como o Fast Seal)",""]];

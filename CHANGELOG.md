@@ -6,6 +6,25 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.84.0 — Ferramenta interna pelo menor Ø trabalhado e recuos do G0 por tabela (19/11/2026)
+- Pedido do usuário: tirar dos programas de `Programas_CNC` (45.598 programas Fagor; época atual 025000–045999) as regras de
+  ferramenta e de recuo, com prioridade abaixo de Ø40, e aplicar no Simulador.
+- **Ferramenta interna pelo MENOR Ø que ela trabalha** (1º passe de desbaste / furo da bucha / acabamento), não pelo Ø final:
+  PU T4D14 abaixo de Ø11 · T1D45 de 11 até 40 (só PU) · T2D12 a partir de 40 (nos programas: T2D12 só com menor Ø ≥ ~39;
+  T1D45 de 11 a 39; T4D14 abaixo de ~10). PTFE/+BR/+GR/+FV, POM e PEAD: T4D4 a partir de Ø14, abaixo a D14 (T2D14).
+  Externa não muda pelo Ø (T2D2 no PU desde Ø8). Ex.: PSA 108 40x60 bucha 32 → T1D45 (menor Ø 37); gaxeta 12x20 → T4D14
+  (1º passe Ø8,5); 42x54 bucha 32 → T1D45; tarugo → T1D45 (1º passe Ø12,5). Campo "Ferramenta interna" digitado continua valendo.
+  Gaxetas (estilo Fast Seal): gera de novo com a ferramenta certa (30° pelas costas / alcance mudam com ela). Arruelas e DP: troca
+  o código. PSH 110 (ferramenta fixa no gerador): só aviso de ATENÇÃO quando não bate.
+- **Recuos do G0 depois de cada passe**: folga mínima no Ø por ferramenta, material e faixa do Ø do passe (<11 · 11–21 · 21–30 ·
+  30–40 · ≥40), pelas medianas dos recuos corrigidos à mão: T2D2 2 · 2 · 2,5 · 2,5 · 3; T7D7 1,5 (≥40 fora do PU: 2); T1D45
+  2,5 · 3 · 3 · 3; T2D12 3,5 (≥40); T4D4 2 (≥40 fora do PU: 2,5). Recuo maior que já saía (bucha + 2, +1 do PU da 5.81.0) fica.
+  Interno nunca abaixo do Ø mínimo da ferramenta (T2D12 39, T1D45 11, D14 3,5) nem, no tarugo, 1,5 abaixo do menor passe.
+- **D14** (T4D14 no PU / T2D14 no PTFE, POM, PEAD — mesmo corretor "INTERNO AFIADO"): barra fina, recuo EXATO de 1 no Ø
+  (0,5 nos furos pequenos, preso no Ø3,5), como nos programas corrigidos (moda 1, depois 0,5).
+- Testes no navegador: os 37 perfis geram; 1032 casos (22 perfis × 12 medidas de Ø6 a Ø48 × PU/PTFE × bucha/tarugo) sem erro;
+  1346 recuos mudados, nenhum ficou menor que antes (fora a D14).
+
 ## 5.83.3 — PSR 212: Ø do calcanhar interno dentro do corte A-A (19/11/2026)
 - Usuário: "joga essa cota central dentro do desenho" (Ø40,54 no 40 x 48). A cota do Ø do calcanhar interno (com a tolerância)
   passa a ficar dentro do corte A-A, atravessando o furo no meio do trecho reto do calcanhar; as outras cotas de trás ficam mais juntas.

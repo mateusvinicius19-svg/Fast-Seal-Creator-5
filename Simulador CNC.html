@@ -3927,7 +3927,9 @@ function srvDir(path, name){
       if (!o.create) throw srvErr("NotFoundError", sub(n)); const r = await fetch(srvUrl("mkdir", sub(n)), { method: "POST" }); if (!r.ok) throw new Error(await r.text()); return srvDir(sub(n), n); },
     async getFileHandle(n, o = {}){ const k = await srvStat(sub(n)); if (k === "file") return srvFile(sub(n), n); if (k) throw srvErr("TypeMismatchError", sub(n));
       if (!o.create) throw srvErr("NotFoundError", sub(n)); return srvFile(sub(n), n); },
-    async *entries(){ const r = await fetch(srvUrl("list", path)); if (!r.ok) throw srvErr("NotFoundError", path);
+    // v5.85.0: entries("046*") = o servidor só devolve os nomes que batem (Programas_CNC tem ~50 mil: lista toda ~5 s, filtrada ~0,02 s).
+    // Pode vir a mais (nome curto 8.3 do Windows, servidor antigo sem filtro): quem chama sempre confere o nome. Pasta do navegador ignora o filtro.
+    async *entries(pat){ const r = await fetch(srvUrl("list", path) + (pat ? "&f=" + encodeURIComponent(pat) : "")); if (!r.ok) throw srvErr("NotFoundError", path);
       for (const e of await r.json()) yield [e.n, e.k === "d" ? srvDir(sub(e.n), e.n) : srvFile(sub(e.n), e.n)]; },
     async *values(){ for await (const [, h] of this.entries()) yield h; } };
 }
@@ -4021,6 +4023,10 @@ const PROG_SEED = 46007;   // último programa visto no Programas_CNC (06/11/202
 async function nextFreeProg(dir){
   let n = PROG_SEED; try { n = Math.max(n, +localStorage.getItem("ps_lastProg") || 0); } catch(e){}
   // pelo servidor: a lista da pasta vem de uma vez, então também conta "046140 CICLO 5 PÇ.PIT", "037512 53X91.PIT" etc.
+  // v5.85.0: pelo servidor, primeiro só os milhares de n+1 e n+1000 ("046*" e "047*"): cobre os próximos 1000 números sem listar os ~50 mil
+  if (SRV) try { const used = new Set(), mil = k => String(k).padStart(6, "0").slice(0, 3);
+    for (const pat of new Set([mil(n + 1), mil(n + 1000)])) for await (const [nm] of dir.entries(pat + "*")){ const m = /^(\d{6})/.exec(nm); if (m) used.add(m[1]); }
+    for (let i = 1; i <= 1000; i++){ const nm = String(n + i).padStart(6, "0"); if (!used.has(nm)) return nm; } } catch(e){}
   if (SRV) try { const used = new Set(); for await (const [nm] of dir.entries()){ const m = /^(\d{6})/.exec(nm); if (m) used.add(m[1]); }
     for (let i = 0; i < 5000; i++){ n++; const nm = String(n).padStart(6, "0"); if (!used.has(nm)) return nm; } } catch(e){}
   for (let i = 0; i < 500; i++){ n++; const nm = String(n).padStart(6, "0"); if (!(await fileExists(dir, nm + ".PIT"))) return nm; }
@@ -4326,7 +4332,7 @@ async function altFind(dir, num, progress){
   for (const n of cand) { try { ok.push({ name: n, fh: await dir.getFileHandle(n) }); } catch(e){} }
   if (!ok.length){   // não está na lista guardada (programa novo): lê a pasta (~50 mil arquivos, pode demorar)
     if (progress) progress(`Procurando ${num} *.PIT no Programas_CNC…`);
-    let i = 0; for await (const [n, h] of dir.entries()){ if (h.kind === "file" && re.test(n)) ok.push({ name: n, fh: h }); if (++i % 5000 === 0 && progress) progress(`Procurando ${num} *.PIT no Programas_CNC… ${i} arquivos`); }
+    let i = 0; for await (const [n, h] of dir.entries(num + "*")){ if (h.kind === "file" && re.test(n)) ok.push({ name: n, fh: h }); if (++i % 5000 === 0 && progress) progress(`Procurando ${num} *.PIT no Programas_CNC… ${i} arquivos`); }
   }
   if (!ok.length) return null;
   const sem = ok.filter(o => !/CICLO/i.test(o.name)); if (sem.length) ok = sem;

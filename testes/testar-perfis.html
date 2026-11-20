@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Teste dos perfis</title>
+<!-- v5.85.0: o mesmo teste do testar-perfis.js, rodando no navegador deste PC (sem node/Playwright).
+     Abrir pelo testes\testar-perfis.ps1 (ele serve /novo.html = Simulador desta pasta e /base.html = main do GitHub). -->
+<style>
+:root{--ink:#1d232c;--muted:#5b6472;--line:#d9dde3;--ok:#1f7a45;--bad:#b2221f;--warn:#9a6700;--bg:#fff;--soft:#f6f7f9}
+@media (prefers-color-scheme:dark){:root{--ink:#e6e8eb;--muted:#9aa3ae;--line:#323842;--ok:#4cc38a;--bad:#ff6b66;--warn:#e3b341;--bg:#16191d;--soft:#1f2329}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 "Segoe UI",Arial,sans-serif}
+main{max-width:980px;margin:0 auto;padding:20px 16px 60px}
+h1{font-size:20px;margin:0 0 4px}
+.sub{color:var(--muted);margin:0 0 16px}
+.res{border:1.5px solid var(--line);border-radius:8px;padding:12px 14px;margin:0 0 16px;font-size:16px;font-weight:600;background:var(--soft)}
+.res.ok{border-color:var(--ok);color:var(--ok)} .res.bad{border-color:var(--bad);color:var(--bad)}
+.res small{display:block;font-weight:400;color:var(--ink);font-size:14px;margin-top:4px}
+button{font:inherit;padding:6px 14px;border-radius:6px;border:1px solid var(--line);background:var(--soft);color:var(--ink);cursor:pointer}
+table{border-collapse:collapse;width:100%;margin-top:12px}
+th,td{border-bottom:1px solid var(--line);padding:5px 8px;text-align:left;vertical-align:top}
+th{color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.4px}
+td.n{text-align:right;font-variant-numeric:tabular-nums}
+.ok{color:var(--ok)} .bad{color:var(--bad);font-weight:600} .mud{color:var(--warn);font-weight:600}
+.msg{color:var(--muted);font-size:12px;word-break:break-word}
+details{margin-top:6px} pre{white-space:pre-wrap;font-size:12px;background:var(--soft);padding:8px;border-radius:6px;max-height:320px;overflow:auto}
+iframe{position:fixed;left:-3000px;top:0;width:1500px;height:900px;border:0}
+</style></head><body><main>
+<h1>Teste dos perfis</h1>
+<p class="sub" id="sub">Gera o programa e o desenho de todos os perfis com os valores padrão.</p>
+<div class="res" id="res">Rodando…</div>
+<button id="again">Rodar de novo</button> <button id="dl" disabled>Baixar resultado (.json)</button>
+<table><thead><tr><th>Perfil</th><th>Linhas</th><th>Situação</th><th>Programa</th><th>Mensagem</th></tr></thead><tbody id="tb"></tbody></table>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const limpa = s => String(s || "").replace(/;DATE OF FILE:.*$/m, "");
+let ultimo = null;
+
+// roda TODO o teste de uma versão do Simulador num iframe escondido (mesmo endereço → acesso às variáveis dele por eval)
+async function rodar(url, prog){
+  try { localStorage.clear(); sessionStorage.clear(); } catch(e){}
+  const fr = document.createElement("iframe"); document.body.appendChild(fr);
+  const errs = [];
+  await new Promise((ok, falha) => { fr.onload = ok; fr.onerror = falha; fr.src = url + "?t=" + Date.now(); });
+  const w = fr.contentWindow;
+  w.alert = () => {}; w.confirm = () => false; w.prompt = () => null; w.print = () => {}; w.open = () => null;
+  w.addEventListener("error", e => errs.push(e.message)); w.addEventListener("unhandledrejection", e => errs.push(String(e.reason && e.reason.message || e.reason)));
+  await sleep(300);
+  const ev = s => w.eval(s);
+  const tipos = ev(`[...document.querySelectorAll("#genType option")].map(o => o.value)`);
+  const semImagem = ev(`(() => { const g = new Set(PROF_GROUPS.flatMap(x => x[1])); return [...document.querySelectorAll("#genType option")].map(o => o.value).filter(v => !g.has(v)); })()`);
+  const um = ev(`(t) => {
+      const sel = document.getElementById("genType"); sel.value = t; sel.dispatchEvent(new Event("change"));
+      state.src = ""; const gm = document.getElementById("genMsg"); gm.textContent = "";
+      try { generate(true); } catch (e) { return { erro: String(e && e.message || e) }; }
+      const ban = document.getElementById("errBanner");
+      let des = "";
+      try { if (typeof DESENHO_TYPES !== "undefined" && DESENHO_TYPES.includes(t) && document.getElementById("btnDraw").offsetParent) { document.getElementById("btnDraw").click(); } } catch (e) { des = String(e && e.message || e); }
+      const ban2 = document.getElementById("errBanner");
+      return { msg: gm.textContent, faixa: ban ? ban.textContent : "", faixaDes: ban2 && ban2 !== ban ? ban2.textContent : "", des, prog: state.src || "" };
+    }`);
+  const res = {}, linhas = {};
+  for (const t of semImagem) linhas[t] = { t, falha: true, msg: 'não aparece na janela "Escolha o perfil" (falta em PROF_GROUPS)', n: 0 };
+  for (let i = 0; i < tipos.length; i++){
+    const t = tipos[i]; errs.length = 0; prog && prog(i, tipos.length, t);
+    const r = um(t);
+    await sleep(0);
+    try { w.document.dispatchEvent(new w.KeyboardEvent("keydown", { key: "Escape", bubbles: true })); ev(`document.querySelectorAll(".modal,#printView,#dwgView").forEach(x => x.style && (x.style.display = "none"))`); } catch(e){}
+    const n = r.prog ? r.prog.split("\n").length : 0;
+    const vermelho = /^⚠ Erro/.test(r.faixa || "") || /^⚠ Erro/.test(r.faixaDes || "");
+    const ruim = !!(r.erro || /Preencha|ERRO/.test(r.msg || "") || /Falta preencher/.test(r.faixa || "") || vermelho || r.des || errs.length || !n);
+    res[t] = r.prog || "";
+    const msg = (r.erro || r.des || errs.join("; ") || r.msg || (ruim ? r.faixa || r.faixaDes : "") || "").slice(0, 160);
+    linhas[t] = { t, n, falha: ruim || !!(linhas[t] && linhas[t].falha), msg: linhas[t] && linhas[t].falha ? linhas[t].msg + (msg ? " · " + msg : "") : msg };
+  }
+  fr.remove();
+  return { tipos, semImagem, res, linhas };
+}
+
+function mostra(novo, base, baseNome){
+  const tb = $("tb"); tb.innerHTML = "";
+  const falhas = Object.values(novo.linhas).filter(l => l.falha).map(l => l.t);
+  const mudou = base ? novo.tipos.filter(t => limpa(base.res[t]) !== limpa(novo.res[t])) : [];
+  const novos = base ? novo.tipos.filter(t => !base.tipos.includes(t)) : [];
+  const sumiu = base ? base.tipos.filter(t => !novo.tipos.includes(t)) : [];
+  for (const t of Object.keys(novo.linhas)){
+    const l = novo.linhas[t], tr = document.createElement("tr");
+    const prog = !base ? "—" : novos.includes(t) ? '<span class="mud">perfil novo</span>' : mudou.includes(t) ? '<span class="mud">MUDOU</span>' : '<span class="ok">igual</span>';
+    tr.innerHTML = `<td>${t}</td><td class="n">${l.n}</td><td class="${l.falha ? "bad" : "ok"}">${l.falha ? "FALHOU" : "ok"}</td><td>${prog}</td><td class="msg"></td>`;
+    tr.lastChild.textContent = l.msg || "";
+    if (base && mudou.includes(t) && !novos.includes(t)){
+      const d = document.createElement("details"), s = document.createElement("summary"), pre = document.createElement("pre");
+      s.textContent = "ver diferença"; pre.textContent = diff(limpa(base.res[t]), limpa(novo.res[t]));
+      d.append(s, pre); tr.lastChild.append(d);
+    }
+    tb.append(tr);
+  }
+  const r = $("res");
+  const l1 = falhas.length ? `${falhas.length} perfil(is) com problema: ${falhas.join(", ")}` : `Todos os ${novo.tipos.length} perfis geraram programa.`;
+  const l2 = !base ? "Sem base para comparar (só a versão nova foi testada)."
+    : (mudou.length ? `Programa mudou (em relação a ${baseNome}): ${mudou.join(", ")}` : `Nenhum programa mudou em relação a ${baseNome}.`)
+      + (sumiu.length ? ` · Sumiram do menu: ${sumiu.join(", ")}` : "");
+  r.className = "res " + (falhas.length || sumiu.length ? "bad" : "ok");
+  r.innerHTML = ""; r.append(l1); const sm = document.createElement("small"); sm.textContent = l2; r.append(sm);
+  return { resumo: l1 + "\n" + l2, falhas, mudou, novos, sumiu, total: novo.tipos.length };
+}
+
+// diferença linha a linha (só as linhas que mudaram, com o nº da linha)
+function diff(a, b){
+  const A = a.split("\n"), B = b.split("\n"), out = [];
+  const n = Math.max(A.length, B.length);
+  for (let i = 0; i < n && out.length < 80; i++) if (A[i] !== B[i]) out.push(`${i + 1}: - ${A[i] ?? ""}\n${i + 1}: + ${B[i] ?? ""}`);
+  return out.join("\n") || "(só mudou o fim das linhas)";
+}
+
+async function tudo(){
+  $("again").disabled = true; $("dl").disabled = true; $("res").className = "res"; $("tb").innerHTML = "";
+  let info = { base: null }; try { info = await (await fetch("/info")).json(); } catch(e){}
+  $("sub").textContent = "Novo = Simulador CNC.html desta pasta" + (info.base ? ` · Base = ${info.base}` : " · sem base");
+  const t0 = performance.now();
+  try {
+    const base = info.base ? await rodar("/base.html", (i, n, t) => $("res").textContent = `Base: ${i + 1}/${n} ${t}…`) : null;
+    const novo = await rodar("/novo.html", (i, n, t) => $("res").textContent = `Novo: ${i + 1}/${n} ${t}…`);
+    const s = mostra(novo, base, info.base);
+    s.segundos = Math.round((performance.now() - t0) / 100) / 10;
+    ultimo = { ...s, base: info.base, programas: novo.res, linhas: novo.linhas };
+    window.RESULTADO = ultimo;
+    $("dl").disabled = false;
+    try { await fetch("/resultado", { method: "POST", body: JSON.stringify(ultimo) }); } catch(e){}
+  } catch(e){ $("res").className = "res bad"; $("res").textContent = "O teste parou: " + (e && e.message || e); window.RESULTADO = { erro: String(e && e.message || e) }; }
+  $("again").disabled = false;
+}
+$("again").onclick = tudo;
+$("dl").onclick = () => { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([JSON.stringify(ultimo, null, 1)], { type: "application/json" })); a.download = "resultado-perfis.json"; a.click(); };
+tudo();
+</script>
+</body></html>

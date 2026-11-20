@@ -6,6 +6,22 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.85.0 — Servidor mais rápido para salvar e abrir + teste dos perfis neste PC (20/11/2026)
+- Pedido do usuário: "maior velocidade e desempenho e menos dúvida" (itens 1, 2 e 4 aprovados).
+- **Salvar mais rápido**: o próximo número livre não lista mais a pasta Programas_CNC inteira (~50 mil arquivos, ~5 s pelo
+  servidor). O servidor aceita filtro (`/fs/list?...&f=046*`) e o Simulador pede só os milhares do próximo número ("046*" e
+  "047*": ~0,04 s). O "Alterar programa", quando não acha na lista guardada, também procura só "NNNNNN*". A lista inteira
+  (Ver programa) ficou ~4x mais rápida (4,8 s → 1,3 s): o JSON é montado sem chamar função por arquivo. Mesmo número de antes
+  (conferido: 046051 pelos dois jeitos).
+- **Abrir mais rápido**: o servidor entrega a página da cópia local (o `Simulador CNC.html` ao lado do servidor, baixado pelo
+  atualizador) e guarda na memória; só lê de novo se o arquivo mudar. Se a cópia do W: for mais nova (outro PC atualizou),
+  serve a do W:, como antes. 1ª abertura 0,8 s → 0,08 s; funciona mesmo com o W: lento.
+- **Teste dos perfis neste PC** (sem node/Playwright): `powershell -ExecutionPolicy Bypass -File testes\testar-perfis.ps1`
+  abre `testes/testar-perfis.html`, que gera programa e desenho dos perfis na versão desta pasta e na main do GitHub e mostra
+  quem falhou, quem mudou e a diferença linha a linha (~5 s). Opções: `-Ref <branch/commit>`, `-Base arquivo.html`, `-SemBase`.
+- Programas não mudam: teste novo x main — "Todos os 37 perfis geraram programa. Nenhum programa mudou".
+- Branch `teste/ferramentas` (5.70.0 de teste) apagada do GitHub: substituída pela 5.84.0.
+
 ## 5.84.0 — Ferramenta interna pelo menor Ø trabalhado e recuos do G0 por tabela (19/11/2026)
 - Pedido do usuário: tirar dos programas de `Programas_CNC` (45.598 programas Fagor; época atual 025000–045999) as regras de
   ferramenta e de recuo, com prioridade abaixo de Ø40, e aplicar no Simulador.

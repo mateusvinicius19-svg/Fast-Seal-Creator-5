@@ -71,6 +71,18 @@ function Full([string]$rel) {
   return $f
 }
 
+# v5.85.0: a pagina sai da copia LOCAL (o "Simulador CNC.html" ao lado deste script, baixado pelo atualizador) e fica na memoria:
+# ler 1,3 MB do W: a cada abertura levava ~1,8 s. Se a do W: for MAIS NOVA (outro PC atualizou), serve a do W: como antes.
+$LOCAL = Join-Path $PSScriptRoot 'Simulador CNC.html'
+$simChave = ''; $simBytes = $null
+function SimArquivo {
+  $loc = $null; $w = $null
+  try { if ([IO.File]::Exists($LOCAL)) { $loc = New-Object IO.FileInfo $LOCAL } } catch {}
+  try { if ([IO.File]::Exists($SIM)) { $w = New-Object IO.FileInfo $SIM } } catch {}
+  if ($loc -and $w) { if ($w.LastWriteTimeUtc -gt $loc.LastWriteTimeUtc.AddSeconds(2)) { return $w } else { return $loc } }
+  if ($loc) { return $loc }; return $w
+}
+
 $l = New-Object Net.HttpListener
 $l.Prefixes.Add($(if ($Rede) { "http://+:$Porta/" } else { "http://localhost:$Porta/" }))
 $KEY = if ($Rede) { Token } else { '' }
@@ -95,8 +107,11 @@ while ($l.IsListening) {
     }
     if ($path -eq '/ping') { $ctx.Response.Headers['Access-Control-Allow-Origin'] = '*'; SendText $ctx 200 '{"ok":true}' 'application/json'; continue }
     if ($path -eq '/' -or $path -eq '/index.html') {
-      if (-not (Test-Path -LiteralPath $SIM)) { SendText $ctx 404 "Simulador nao encontrado: $SIM"; continue }
-      Send $ctx 200 ([IO.File]::ReadAllBytes($SIM)) 'text/html; charset=utf-8'; continue
+      $sf = SimArquivo
+      if (-not $sf) { SendText $ctx 404 "Simulador nao encontrado: $SIM"; continue }
+      $chave = "$($sf.FullName)|$($sf.LastWriteTimeUtc.Ticks)|$($sf.Length)"
+      if ($chave -ne $simChave) { $simBytes = [IO.File]::ReadAllBytes($sf.FullName); $simChave = $chave }
+      Send $ctx 200 $simBytes 'text/html; charset=utf-8'; continue
     }
     if (-not $path.StartsWith('/fs/')) { SendText $ctx 404 'nao existe'; continue }
     # so o proprio Simulador (mesmo endereco); pedido de outro site -> recusa
@@ -110,10 +125,15 @@ while ($l.IsListening) {
       }
       'list' {
         if (-not [IO.Directory]::Exists($f)) { SendText $ctx 404 'pasta nao existe'; break }
+        # v5.85.0: &f=046* -> so os nomes que batem (o Windows filtra: Programas_CNC tem ~50 mil, lista toda levava ~5 s).
+        # Monta o JSON sem chamar funcao por item (era o que deixava lento).
+        $pat = Arg $ctx 'f'; if (-not $pat) { $pat = '*' }
+        if ($pat.IndexOfAny([char[]]'\/:') -ge 0 -or $pat.Contains('..')) { SendText $ctx 400 'filtro invalido'; break }
         $sb = New-Object Text.StringBuilder; [void]$sb.Append('['); $first = $true
-        foreach ($e in (New-Object IO.DirectoryInfo $f).EnumerateFileSystemInfos()) {
-          if (-not $first) { [void]$sb.Append(',') }; $first = $false
-          [void]$sb.Append('{"n":').Append((JStr $e.Name)).Append(',"k":"').Append($(if ($e -is [IO.DirectoryInfo]) { 'd' } else { 'f' })).Append('"}')
+        foreach ($e in (New-Object IO.DirectoryInfo $f).EnumerateFileSystemInfos($pat)) {
+          if ($first) { $first = $false } else { [void]$sb.Append(',') }
+          $k = 'f'; if ($e -is [IO.DirectoryInfo]) { $k = 'd' }
+          [void]$sb.Append('{"n":"').Append($e.Name.Replace('\', '\\').Replace('"', '\"')).Append('","k":"').Append($k).Append('"}')
         }
         [void]$sb.Append(']'); SendText $ctx 200 $sb.ToString() 'application/json'
       }

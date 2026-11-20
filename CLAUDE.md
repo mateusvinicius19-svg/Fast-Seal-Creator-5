@@ -25,6 +25,9 @@ merge na main que mexa no `Simulador CNC.html`:
 2. Depois da mudança: `node testes/testar-perfis.js --comparar <scratchpad>/base.json` — tem que dar "Todos os N perfis
    geraram programa" e só podem mudar os perfis pedidos.
 3. Mexeu no desenho do 3D (`rev3D*`)? `node testes/testar-3d.js` tem que dar ok.
+- Sem node/Playwright (PC do usuário): `powershell -ExecutionPolicy Bypass -File testes\testar-perfis.ps1` compara a pasta com a
+  `origin/main` no navegador (`-Ref`/`-Base` para outra base; `-SemAbrir` + config `testar-perfis` do launch.json para o navegador
+  do app; resultado em `%LOCALAPPDATA%\FastSealCreator\teste\resultado.txt`). Vale o mesmo critério dos itens 1 e 2.
 - Perfil novo: entra no `<select id="genType">` **e** no `PROF_GROUPS` (a janela por imagem; o select fica escondido).
 - Campo opcional: escreva "vazio = …" no texto do campo (vira opcional sozinho) e trate o vazio no gerador com `opt()`.
 

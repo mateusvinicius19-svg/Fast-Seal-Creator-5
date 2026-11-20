@@ -152,6 +152,15 @@ while ($l.IsListening) {
         if ($q.HttpMethod -ne 'POST') { SendText $ctx 405 'use POST'; break }
         [IO.Directory]::CreateDirectory($f) | Out-Null; SendText $ctx 200 'ok'
       }
+      'move' {   # v5.71 (usuario 17/11/2026): so RENOMEAR dentro da mesma pasta de DESENHOS (pasta do desenho ganha o numero do programa); nunca sobrescreve
+        if ($q.HttpMethod -ne 'POST') { SendText $ctx 405 'use POST'; break }
+        $to = Full (Arg $ctx 'to'); $des = Join-Path $ROOT 'DESENHOS'
+        if (-not $f.StartsWith($des + [IO.Path]::DirectorySeparatorChar, 'OrdinalIgnoreCase')) { SendText $ctx 403 'so dentro de DESENHOS'; break }
+        if ([IO.Path]::GetDirectoryName($f) -ne [IO.Path]::GetDirectoryName($to)) { SendText $ctx 403 'so renomear na mesma pasta'; break }
+        if ([IO.Directory]::Exists($to) -or [IO.File]::Exists($to)) { SendText $ctx 409 'ja existe'; break }
+        if ([IO.Directory]::Exists($f)) { [IO.Directory]::Move($f, $to) } elseif ([IO.File]::Exists($f)) { [IO.File]::Move($f, $to) } else { SendText $ctx 404 'nao existe'; break }
+        SendText $ctx 200 'ok'
+      }
       default { SendText $ctx 404 'nao existe' }
     }
   } catch { try { SendText $ctx 500 "$_" } catch {} }

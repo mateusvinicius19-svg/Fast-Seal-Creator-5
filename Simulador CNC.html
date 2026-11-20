@@ -2336,6 +2336,7 @@ function generateCore(fromInput){
   $("genMsg").textContent = (g.check(p) ? g.check(p) + " AVISE O RESPONSÁVEL antes de usar este programa." : `${g.name}: ${lines.length} linhas geradas.`) + (alojTxt ? " · " + alojTxt : "") + (toolTxt ? " · " + toolTxt : "");   // v5.48.1 (usuário): avisos pedem para avisar o responsável
   $("genMsg").style.color = g.check(p) ? "#a2231d" : ""; state.lastWarn = g.check(p) || "";   // v5.48.2: vai para a faixa do topo
   state.genType = type; state.genParams = p; saveForm();
+  if (!state.alterNum) desDupCheck(p);   // já existe desenho com essas medidas? (pasta DESENHOS)
   { // bloco do alojamento: DP (PSE 108, O-ring por dentro) e DH (PSH 129, O-ring por fora)
     const want = type === "iso" && String(p.tipoP || "") === "dp" ? "dp" : type === "lip" ? "dh" : null;   // DP: só PSE 108 escolhido (não o automático)
     for (const k of ["dp", "dh"]){
@@ -3981,6 +3982,39 @@ function desenhoFolderName(p, num){
   const n = v => String(+Number(v).toFixed(3)), dims = p.tipoGen === "pso" ? [p.sec, p.dint] : p.tipoGen === "psr101" ? [p.dint, p.dext, p.h1, p.h2, p.h] : p.tipoGen === "psr102" ? [p.dint, p.dext, a("hh"), p.h] : ["psr211","psr212"].includes(p.tipoGen) ? [p.dint, p.dext, a("hb"), p.h] : [p.dint, p.dext, a("h")];
   return `${desBase(p)} (${dims.map(n).join(" X ")}) ${String(num).replace(/^0+(?=\d)/, "")}`.replace(/\s+$/, "");
 }
+// ---- Programa já existente pela pasta DESENHOS (usuário 17/11/2026) ----
+// Tudo que tem desenho fica em DESENHOS\<família>\<PERFIL> (a X b X c) NNNNN: o mesmo nome que o Simulador monta
+// (desenhoFolderName). Ao gerar, procura na pasta da família um desenho com as MESMAS medidas (folga 0,006) e avisa;
+// ao salvar, pergunta antes de criar número novo. Lista de cada família fica guardada 10 min (a rede é lenta).
+const desListCache = {};
+async function desFamList(fam){
+  const c = desListCache[fam]; if (c && Date.now() - c.t < 600000) return c.names;
+  const dd = await desDir(false, true); if (!dd) return null;
+  let fh; try { fh = await dd.getDirectoryHandle(fam); } catch(e){ desListCache[fam] = { t: Date.now(), names: [] }; return []; }
+  const names = []; for await (const [n, h] of fh.entries()) if (h.kind === "directory") names.push(n);
+  desListCache[fam] = { t: Date.now(), names }; return names;
+}
+function desParse(name){   // "PSH 106 (100 X 120 X 12) 46025" → { base, dims, num }
+  const m = /^(.*?)\s*\(([^)]*)\)\s*(\d{3,6})?/.exec(name); if (!m) return null;
+  const dims = m[2].split(/\s*[xX]\s*/).map(v => Number(String(v).replace(",", "."))); if (dims.some(v => !isFinite(v))) return null;
+  return { base: m[1].trim().toUpperCase(), dims, num: m[3] || "" };
+}
+async function desDupes(p){
+  if (!p || !DESENHO_TYPES.includes(p.tipoGen)) return [];
+  const want = desParse(desenhoFolderName(p, "")); if (!want) return [];
+  const names = await desFamList(desFam(p)); if (!names) return null;   // sem acesso à pasta DESENHOS: não confere
+  return names.map(n => ({ n, d: desParse(n) })).filter(x => x.d && x.d.base === want.base && x.d.dims.length === want.dims.length && x.d.dims.every((v, i) => Math.abs(v - want.dims[i]) < 0.006)).map(x => ({ name: x.n, num: x.d.num }));
+}
+async function srvMove(rel, toRel){ const r = await fetch(`${SRV}/fs/move?p=${encodeURIComponent(rel)}&to=${encodeURIComponent(toRel)}`, { method: "POST" }); if (!r.ok) throw new Error(await r.text()); }
+async function desDupCheck(p){
+  state.dupList = []; let L = null;
+  try { L = await desDupes(p); } catch(e){ L = null; }
+  if (state.genParams !== p || !L || !L.length) return;
+  state.dupList = L;
+  const nums = L.map(x => x.num || "desenho sem nº de programa").join(", ");
+  $("genMsg").textContent += ` · ⚠ JÁ EXISTE desenho com essas medidas: ${nums} — confira antes de salvar um novo`;
+  $("genMsg").style.color = "#a2231d";
+}
 function desDir(forceNew, silent){ return pickDir("dirDesenhos", "desenhos", forceNew, silent, "DESENHOS"); }
 async function isDesenhosDir(dd){ for (const n of ["PSA 108", "PSE 106", "PSH 106"]) { try { await dd.getDirectoryHandle(n); return true; } catch(e){} } return false; }
 async function saveDrawingPdf(p, num, dd, keepIfExists){
@@ -4139,15 +4173,27 @@ async function saveProgram(auto){
   }
   // sufixo da bucha quando ela foi digitada à mão (exceção: não sobrescreve o programa padrão)
   const suf = (state.fileName || "").match(/ (\d+(?:\.\d+)?X\d+(?:\.\d+)?)$/i);
-  let sug = "";
+  let sug = "", forcedNum = null; state.dupRename = null;
   if (state.alterNum) sug = state.alterNum;   // Alterar programa: mesmo número + sufixo da bucha
   else if (dir){ $("genMsg").textContent = "Procurando o próximo número livre…"; $("genMsg").style.color = ""; sug = await nextFreeProg(dir); }
   // PSH 110 (usuário 13/11/2026): o meio salva com o número normal; macho e fêmea com o MESMO número + A / B (030249, 030249A, 030249B)
   const p110 = !auto && state.genParams && (state.genParams.tipoGen === "psh110" || state.genParams.tipoGen === "psh110t") ? psh110Piece(state.genParams) : !auto && state.genParams && ["pse102r","pse120"].includes(state.genParams.tipoGen) ? (pse102rPiece(state.genParams) === "A" ? "A" : "M") : "", k110 = state.genParams && state.genParams.tipoGen === "psh110t" ? "ps_psh110tNum" : state.genParams && state.genParams.tipoGen === "pse102r" ? "ps_pse102rNum" : state.genParams && state.genParams.tipoGen === "pse120" ? "ps_pse120Num" : "ps_psh110Num";   // PSH 110 30°: número próprio
   if (p110 === "A" || p110 === "B"){ try { const k = localStorage.getItem(k110); if (k) sug = k; } catch(e){} }
-  const num = auto ? sug : prompt("Número do programa" + (state.alterNum ? " (alterando " + sug + ")" : sug ? " (próximo livre: " + sug + ")" : " (ex.: 046004)") + (suf ? ` — bucha especial: vai salvar como "número ${suf[1]}"` : "") + ":", sug);
   // v5.70.3 (usuário 18/11/2026): pergunta cancelada não deixa mais "Procurando o próximo número livre…" na tela — diz por que não salvou
   const parar = t => { $("genMsg").textContent = "NÃO salvo: " + t; $("genMsg").style.color = "#b2221f"; };
+  // já existe desenho com as mesmas medidas (pasta DESENHOS): pergunta antes de criar número novo (usuário 17/11/2026)
+  if (!auto && !state.alterNum && !p110 || p110 === "M"){ let L = null; try { L = await desDupes(state.genParams); } catch(e){}
+    if (L && L.length){ const ex = L.find(x => x.num);
+      if (ex){
+        if (!confirm(`JÁ EXISTE desenho com essas medidas:\n\n${L.map(x => "• " + x.name).join("\n")}\n\nOK = salvar um programa NOVO mesmo assim\nCancelar = não salvar e abrir o ${ex.num} existente`)){
+          parar(`já existe o programa ${ex.num} com essas medidas (abrindo em 🔎 Ver programa).`);
+          $("btnVer").click(); setTimeout(() => { const v = $("verNum"); if (v){ v.value = ex.num; $("verForm").requestSubmit(); } }, 50); return; }
+      } else {
+        // desenho antigo SEM número (usuário 17/11/2026): o nº vem do ARGUS; o programa salva com ele e a MESMA pasta ganha o número
+        const n = prompt(`Já existe o desenho "${L[0].name}" SEM número de programa.\n\nDigite o número do programa (pegue no ARGUS): o programa salva com esse número e a pasta do desenho ganha o número (o desenho que está lá fica).\n\nCancelar = salvar como programa NOVO`, "");
+        if (n !== null && /^\d{1,6}$/.test(n.trim())){ state.dupRename = { fam: desFam(state.genParams), from: L[0].name }; forcedNum = n.trim(); }
+      } } }
+  const num = auto ? sug : forcedNum !== null ? forcedNum : prompt("Número do programa" + (state.alterNum ? " (alterando " + sug + ")" : sug ? " (próximo livre: " + sug + ")" : " (ex.: 046004)") + (suf ? ` — bucha especial: vai salvar como "número ${suf[1]}"` : "") + ":", sug);
   if (num === null) return parar("número do programa cancelado. Se a janela do número nem apareceu, aperte F5 e salve de novo.");
   if (!auto && !askCod()) return parar("Cód. interno cancelado. Para salvar sem código, deixe em branco e clique em OK.");
   if (!auto && state.genParams && DESENHO_TYPES.includes(state.genParams.tipoGen) && !askDes()) return parar("\"Quem desenhou?\" cancelado.");
@@ -4180,8 +4226,18 @@ async function saveProgram(auto){
     if (p110) { const m = /^(\d+)/.exec(base); if (m) try { localStorage.setItem(k110, m[1]); } catch(e){} }   // macho/fêmea sugerem o mesmo número do conjunto
     let pdfMsg = "";
     const gp = state.genParams;
+    let keepDes = !!suf;
+    if (!auto && gp && state.dupRename){   // pasta antiga sem número ganha o número (só pelo servidor do Fast.bat)
+      const R = state.dupRename, nn = (base.match(/^\d+/) || [base])[0], to = desenhoFolderName(gp, nn); state.dupRename = null;
+      if (!SRV) pdfMsg += ` · renomeie à mão a pasta "${R.from}" para "${to}" (DESENHOS\\${R.fam})`;
+      else if (to !== R.from) try {
+        await srvMove(`DESENHOS/${R.fam}/${R.from}`, `DESENHOS/${R.fam}/${to}`);
+        try { await srvMove(`DESENHOS/${R.fam}/${to}/${R.from}.pdf`, `DESENHOS/${R.fam}/${to}/${to}.pdf`); } catch(e){}
+        pdfMsg += ` · pasta do desenho renomeada: ${to}`; keepDes = true; delete desListCache[R.fam];
+      } catch(e){ pdfMsg += ` · pasta NÃO renomeada (${e.message}): renomeie à mão "${R.from}" para "${to}"`; }
+    }
     if (!auto && gp && DESENHO_TYPES.includes(gp.tipoGen)){   // alterar programa: o desenho do original continua valendo (não mexe)
-      try { pdfMsg = await saveDrawingPdf(gp, base.match(/^\d+/) ? base.match(/^\d+/)[0] : base, dd, !!suf); } catch(e){ pdfMsg = " · PDF não salvo: " + e.message; }
+      try { pdfMsg = (await saveDrawingPdf(gp, base.match(/^\d+/) ? base.match(/^\d+/)[0] : base, dd, keepDes)) + pdfMsg; } catch(e){ pdfMsg = " · PDF não salvo: " + e.message + pdfMsg; }
     }
     try { const rec = histRecord(auto ? {} : (gp || {}), auto ? "" : (state.genType || ""), fagor, pitName, mcsName, pdfMsg); if (auto && state.alterRec) Object.assign(rec, state.alterRec); await histAppend(dir, rec); if (histOpen()) histLoadInline(false); } catch(e){ pdfMsg += " · histórico não gravado: " + e.message; }
     $("genMsg").textContent = `Salvo: ${pitName} (Programas_CNC) e ${mcsName} (MCS 500, convertido)${pdfMsg}.`; state.tolResetPending = true; /* v5.20.1: tolerâncias voltam ao padrão quando começar a peça seguinte (a impressão desta continua com as dela) */ $("genMsg").style.color = /NÃO salvo/.test(pdfMsg) ? "#b2221f" : "";

@@ -7,7 +7,7 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
 ## 5.85.1 — Teste dos perfis: uma base por porta (20/11/2026)
-- `testes	estar-perfis.ps1`: dois testes ligados ao mesmo tempo (ex.: `-Ref` diferente em outra `-Porta`) usavam o mesmo
+- `testes\testar-perfis.ps1`: dois testes ligados ao mesmo tempo (ex.: `-Ref` diferente em outra `-Porta`) usavam o mesmo
   arquivo de base e um trocava a base do outro. Agora cada porta tem a sua (`base-8790.html`). Simulador e programas não mudam.
 
 ## 5.85.0 — Servidor mais rápido para salvar e abrir + teste dos perfis neste PC (20/11/2026)

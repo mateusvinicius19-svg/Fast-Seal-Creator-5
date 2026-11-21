@@ -6,6 +6,13 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.91.0 — Regra da faca em PU também nos perfis antigos (21/11/2026)
+- A regra da 5.89.0/5.90.0 (PU com sobremetal externo > 10 no Ø) agora vale também no **DH PSH 129, PSE 125 DPR, PSH 110, PSO 109
+  e PSA 108**: passes de desbaste acima do Ø ext **+1 mm** em Z (> 15: **+2 mm**) e o corte (faca T5D5; no DPR o bedame) entra e
+  recua a **10 mm acima da peça**, não mais pela bucha. No PSH 110 a saída do acabamento externo também fica a 10 mm da peça.
+- O intervalo (G92) não muda. PSA 108: a faca já entrava a 10 mm, só o desbaste muda (PSA 108 C, PSA 109, PSG e ciclos iguais).
+- NBR/outros materiais e PU com pouco sobremetal: iguais. PSH 110 30° não mudou.
+
 ## 5.90.0 — PU com sobremetal grande: saída do acabamento externo a 10 mm da peça (20/11/2026)
 - Depois do acabamento externo (último passe da T2D2), a ferramenta subia em G0 até a bucha + 1/+2 (no PSR 211 PU bucha 40 acima:
   X154,5). Como o desbaste já tirou o material de cima, agora sobe só até **10 mm acima da peça** (maior Ø + 10; ex. X124,5) e volta em Z.

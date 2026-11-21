@@ -6,6 +6,14 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.94.0 — Cadastro de ferramentas: lâminas confirmadas pelo usuário (21/11/2026)
+Só a biblioteca 🧰 Ferramentas (nenhum programa muda).
+- **T8D8:** lâmina WNT 3002.1,0.13.L WPU7620 (1 mm) — saiu o "H1002".
+- **T6D16:** lâmina MGMN 200 G H01 (2 mm, neutra) no suporte MGEHL 2020-2 — saiu o "H1002".
+- **T6D6** e **T4D14:** afiadas fora de padrão (sem código de catálogo) — saiu o "H1000" da T6D6.
+- **T4D74 / T4D84 (bedame 0,8):** suporte MB-E16-34-09R e pastilha MB-09R080-04-14L 1025.
+- Suportes, pastilhas e lâminas: saíram os itens H1002 e H1000 (códigos que não existem).
+
 ## 5.93.0 — Cadastro de ferramentas: dados que faltavam (21/11/2026)
 Só a biblioteca 🧰 Ferramentas (os geradores não leem esses campos; nenhum programa muda).
 - Suportes e pastilhas dos .txt do W: (Suportes.txt, Pastilhas Para usinagem.txt, TABELA DE CODIGOS FERRAMENTAS.txt):

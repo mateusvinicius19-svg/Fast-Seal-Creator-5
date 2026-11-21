@@ -6,6 +6,14 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.93.0 — Cadastro de ferramentas: dados que faltavam (21/11/2026)
+Só a biblioteca 🧰 Ferramentas (os geradores não leem esses campos; nenhum programa muda).
+- Suportes e pastilhas dos .txt do W: (Suportes.txt, Pastilhas Para usinagem.txt, TABELA DE CODIGOS FERRAMENTAS.txt):
+  T1D1, T4D4, T1D45, T7D7, T7D17, T6D16, T8D8, T6D26, T6D36, T2D13, T7D37.
+- Ø mínimo pela regra do interno (5.92.0): D14 Ø4, D81 Ø10, D45 Ø12, D4 Ø15; D81 também na T2 (T2D81) e textos de uso
+  da D14, D45 e D81 com a regra nova. Externos/internos de aço (D37, D44, D47, D51) com material "Aço".
+- Ficaram para o usuário confirmar: lâmina da T8D8 e da T6D16 (txt × H1002), pastilha da T4D14, suporte do bedame 0,8 (D74/D84).
+
 ## 5.92.0 — Ferramenta do interno pela tabela nova e faca no PTFE fino (21/11/2026)
 Regra do usuário (pelo MENOR Ø que a ferramenta trabalha):
 - **PU:** D14 (T4D14) abaixo de Ø10 · **D81 (T4D81)** de 10 a 12 · D45 (T1D45) de 12 a 40 · D12 (T2D12) de 40 para cima.

@@ -6,6 +6,16 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.92.0 — Ferramenta do interno pela tabela nova e faca no PTFE fino (21/11/2026)
+Regra do usuário (pelo MENOR Ø que a ferramenta trabalha):
+- **PU:** D14 (T4D14) abaixo de Ø10 · **D81 (T4D81)** de 10 a 12 · D45 (T1D45) de 12 a 40 · D12 (T2D12) de 40 para cima.
+- **PTFE, POM, PEAD, NBR e Viton:** D14 (T2D14) abaixo de Ø10 · **D81 (T2D81)** de 10 a 12 · D14 de 12 a 15 · D4 (T4D4) de 15 para cima.
+- A D81 só faz interno **reto**: com chanfro, ângulo ou perfil no interno, de 10 a 12 fica a D14.
+- Mudou: D45 no PU começa em Ø12 (era 11); D4 começa em Ø15 (era 14); NBR e Viton passam a seguir a coluna do PTFE (antes sempre D4);
+  D14 faz a partir de Ø4 (era 3,5). Nas arruelas sem desbaste interno (bucha justa) a regra agora também vale.
+- **Corte:** PTFE (puro, +BR, +GR, +FV) com secção de 1 a 3 mm corta com a **faca T5D5 F0.22** (antes bedame T8D8).
+- Exemplos padrão dos 37 perfis: iguais.
+
 ## 5.91.0 — Regra da faca em PU também nos perfis antigos (21/11/2026)
 - A regra da 5.89.0/5.90.0 (PU com sobremetal externo > 10 no Ø) agora vale também no **DH PSH 129, PSE 125 DPR, PSH 110, PSO 109
   e PSA 108**: passes de desbaste acima do Ø ext **+1 mm** em Z (> 15: **+2 mm**) e o corte (faca T5D5; no DPR o bedame) entra e

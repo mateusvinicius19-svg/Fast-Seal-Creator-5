@@ -6,6 +6,17 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.89.0 — PU com sobremetal grande: passes +2 mm e faca/T6 a 10 mm da peça (20/11/2026)
+Regra do usuário (todos os perfis em PU com faca):
+- **Sobremetal externo > 15 mm no Ø** (bucha ext − Ø ext): os passes de desbaste acima do Ø ext vão **2 mm** a mais em Z
+  (de 10 a 15 continua +1 mm, regra de 09/11). O suporte da faca não pega no material que sobra. O intervalo (G92) não muda.
+- **T5 (faca) e T6** entram e recuam a **10 mm acima da peça** (maior Ø + 10 no X), não mais pela bucha, quando a regra acima vale
+  (PU com sobremetal > 10). Perfis: PSE/PSH do padrão Fast Seal (PSE 102 R, 103, 105, 106, 107, PSH 106, 107, 117…), PSR 211/212,
+  PSE 120 e PSR 102. PSR 101 e DUAL já entravam assim.
+- PSR 101 e PSE 120: o milímetro a mais dos passes de cima deixou de entrar no G92 (como já era nos outros perfis).
+- Sem mudança: perfis que não são PU, PU com sobremetal até 10 mm e os modelos antigos (PSH 129 DH, PSE 125 DPR, PSH 110, PSO 109,
+  PSA 108, arruelas e anel).
+
 ## 5.88.0 — Pedidos ARGUS que o Kuru recusava (20/11/2026)
 Visto no Kuru Nuvem > Projeto > Pedidos do Simulador: 80 pedidos, 48 em conflito e 22 com erro.
 - **PSE 102 R / PSE 120 (anel A) e PSH 110 (peças A/B):** o pedido apontava o PDF numa pasta com o "A" no fim

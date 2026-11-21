@@ -1714,7 +1714,7 @@ GEN.psr101 = { name: "PSR 101",
     const rough101 = roughPasses(pout, tO, "od", "0.160", Number(p.apR), Number(p.alR), r, deepAbove(p, tO));
     L.push(...rough101);
     L.push(";( FINISH )", `G0 X${f3(2 * pout[0].p[1])} Z3.000`, `G1 X${f3(2 * pout[0].p[1])} Z${f3(pout[0].p[0])}`, ...tipLines(pout, r, "0.130"));
-    const lo = pout[pout.length - 1].p; L.push(`G0 X${f3(tO + 1)} Z${f3(lo[0] + 0.2)}`, `G0 X${f3(tO + 1)} Z5.000`, "");
+    const lo = pout[pout.length - 1].p, xS = puAcimaPeca(p, tO, g.D, tO + 1); L.push(`G0 X${f3(xS)} Z${f3(lo[0] + 0.2)}`, `G0 X${f3(xS)} Z5.000`, "");   // v5.90.0: PU com sobremetal grande, sai do acabamento só até 10 acima da peça
     // ---- interno ----
     L.push(...sec("INSIDE"), "G0 Z70", TL.int, ";", ";");
     const pin = tipPath(extendStart(dd(g.inner.filter((q, k) => k !== 4)), 0.8), r, "left", [-r, r]);
@@ -1983,7 +1983,7 @@ function pse120Build(p){
   L.push(...sec("OUTSIDE"), "G0 Z70", TL.ext, ";", ";", ...rough120);
   const P = q => `X${f3(2 * q[1])} Z${f3(q[0])}`;
   L.push(";( FINISH )", `G0 X${f3(2 * finish[0][1])} Z3.000`, `G1 ${P(finish[0])}`, `G1 ${P(finish[1])} F0.130`, `G1 ${P(finish[2])}`, `G1 ${P(finish[3])}`,
-         `G3 ${P(finish[4])} R${f3(Rr)}`, ...finish.slice(5).map(q => `G1 ${P(q)}`), `G0 X${f3(tO + 1)} Z${f3(finish[finish.length - 1][0] + 0.2)}`, `G0 X${f3(tO + 1)} Z5.000`, "");
+         `G3 ${P(finish[4])} R${f3(Rr)}`, ...finish.slice(5).map(q => `G1 ${P(q)}`), `G0 X${f3(puAcimaPeca(p, tO, g.apex, tO + 1))} Z${f3(finish[finish.length - 1][0] + 0.2)}`, `G0 X${f3(puAcimaPeca(p, tO, g.apex, tO + 1))} Z5.000`, "");   // v5.90.0: PU com sobremetal grande, sai do acabamento só até 10 acima da peça
   // interno: chanfro 45° na frente, reto, chanfro 30° com o eixo atrás (continua 0,5 além da altura e segue reto)
   const ri = g.d / 2, inner = [[0, ri + g.chI], [-g.chI, ri], [-H + g.chI, ri], [-H - 0.5, ri + (g.chI + 0.5) * g.T30], [-H - 1, ri + (g.chI + 0.5) * g.T30]];
   const pin = tipPath(extendStart(inner, 1.0), r, "left", [-r, r]);
@@ -5372,9 +5372,9 @@ function pseFscBuild(p, gOver){
   const semDesbE = !!rOut.semCorte;
   L.push(...rOut);
   L.push(";( FINISH )", `G0 X${f3(2 * pout[0].p[1])} Z3.000`, `G1 X${f3(2 * pout[0].p[1])} Z${f3(pout[0].p[0])}` + (semDesbE ? " F0.160" : ""), ...tipLines(pout, r, "0.130"));
-  const lastOut = pout[pout.length - 1].p;
-  L.push(`G0 X${f3(tO + 1)} Z${f3(lastOut[0] + 0.2)}`, `G0 X${f3(tO + 1)} Z5.000`, "");
-  const dMaxE = Math.max(Number(p.dext), ...g.outer.map(q => 2 * q[1])), xT6 = puAcimaPeca(p, tO, dMaxE, tO + 4);   // v5.89.0: PU com sobremetal grande, T6 a 10 acima da peça
+  const lastOut = pout[pout.length - 1].p, dMaxE = Math.max(Number(p.dext), ...g.outer.map(q => 2 * q[1])), xS = puAcimaPeca(p, tO, dMaxE, tO + 1);
+  L.push(`G0 X${f3(xS)} Z${f3(lastOut[0] + 0.2)}`, `G0 X${f3(xS)} Z5.000`, "");   // v5.90.0: PU com sobremetal grande, sai do acabamento só até 10 acima da peça
+  const xT6 = puAcimaPeca(p, tO, dMaxE, tO + 4);   // v5.89.0: PU com sobremetal grande, T6 a 10 acima da peça
   if (g.wiper) L.push(";( *********************** )", ";( OUTSIDE ANGLE HAMMER GROOVE   )", ";( *********************** )", "G0 Z70", "T6D6", ";", ";",
     `G0 X${f3(xT6)} Z3`, ...(g.step   // PSR 212: a lâmina (canto da frente) faz o chanfro da aresta, a parede e o Ø do degrau, o chanfro de trás e segue para o raspador
       ? psr212Back(g, H, xT6, p.pt, f3)
@@ -5710,7 +5710,8 @@ function psr102Build(p){
   L.push(`G0 X${f3(xRc)} Z${f3(cp[cp.length - 1][0] + 0.2)}`, `G0 X${f3(xRc)} Z3.000`);
   L.push(";( FINISH )", `G0 X${f3(2 * pout[0].p[1])} Z3.000`, `G1 X${f3(2 * pout[0].p[1])} Z${f3(pout[0].p[0])}`, ...tipLines(pout, r, "0.130"));
   const lastOut = pout[pout.length - 1].p;
-  L.push(`G0 X${f3(tO + 2)} Z${f3(lastOut[0] + 0.2)}`, `G0 X${f3(tO + 2)} Z5.000`, "");
+  const xS = puAcimaPeca(p, tO, p.dext, tO + 2);
+  L.push(`G0 X${f3(xS)} Z${f3(lastOut[0] + 0.2)}`, `G0 X${f3(xS)} Z5.000`, "");   // v5.90.0: PU com sobremetal grande, sai do acabamento só até 10 acima da peça
   if (g.wiper) L.push(";( *********************** )", ";( OUTSIDE ANGLE HAMMER GROOVE   )", ";( *********************** )", "G0 Z70", "T6D6", ";", ";",
     `G0 X${f3(puAcimaPeca(p, tO, p.dext, tO + 4))} Z3`, `G0 Z${f3(-g.Hb)}`, `G1 X${f3(g.rootOut)}`, `G1 X${f3(g.tipOut)} Z${f3(-H)}`, `G0 X${f3(puAcimaPeca(p, tO, p.dext, tO + 4))}`, "G0 Z3");   // raspador a 65° com a T6D6 (v5.89.0: PU com sobremetal grande, a 10 acima da peça)
   // ---- interno ----
@@ -5803,8 +5804,8 @@ function dualBuild(p){
   const above = deepAbove(p, tO), rough = roughPasses(pout, tO, "od", "0.160", Number(p.apR), Number(p.alR), r, above);
   L.push(...rough);
   L.push(";( FINISH )", `G0 X${f3(2 * pout[0].p[1])} Z3.000`, `G1 X${f3(2 * pout[0].p[1])} Z${f3(pout[0].p[0])}`, ...tipLines(pout, r, "0.130"));
-  const lastOut = pout[pout.length - 1].p;
-  L.push(`G0 X${f3(tO + 1)} Z${f3(lastOut[0] + 0.2)}`, `G0 X${f3(tO + 1)} Z5.000`, "");
+  const lastOut = pout[pout.length - 1].p, xS = puAcimaPeca(p, tO, g.lipO, tO + 1);
+  L.push(`G0 X${f3(xS)} Z${f3(lastOut[0] + 0.2)}`, `G0 X${f3(xS)} Z5.000`, "");   // v5.90.0: PU com sobremetal grande, sai do acabamento só até 10 acima da peça
   // ---- interno ----
   L.push(...sec("INSIDE"), "G0 Z70", tInt, ";", ";");
   const pin = tipPath(extendStart(g.inner, 1.25), r, "left", [-r, r]);
@@ -6005,7 +6006,8 @@ function s15Build(p){
   const pout = s15Path(g.outer, r, 1, [-r, -r], 1.25);
   const rough = roughPasses(pout, tO, "od", "0.160", Number(p.apR), Number(p.alR), r, deepAbove(p, tO));
   L.push(...rough, ";( FINISH )", `G0 X${f3(2 * pout[0].p[1])} Z3.000`, `G1 X${f3(2 * pout[0].p[1])} Z${f3(pout[0].p[0])}`, ...s15Lines(pout, "0.130"));
-  L.push(`G0 X${f3(tO + 1)} Z${f3(pout[pout.length - 1].p[0] + 0.2)}`, `G0 X${f3(tO + 1)} Z5.000`, "");
+  const xS = puAcimaPeca(p, tO, g.maxD, tO + 1);
+  L.push(`G0 X${f3(xS)} Z${f3(pout[pout.length - 1].p[0] + 0.2)}`, `G0 X${f3(xS)} Z5.000`, "");   // v5.90.0: PU com sobremetal grande, sai do acabamento só até 10 acima da peça
   // ---- interno ----
   L.push(...sec("INSIDE"), "G0 Z70", tInt, ";", ";");
   const pin = s15Path(g.inner, r, -1, [-r, r], 1.25);

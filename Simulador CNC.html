@@ -1711,7 +1711,8 @@ GEN.psr101 = { name: "PSR 101",
     L.push(...sec("OUTSIDE"), "G0 Z70", TL.ext, ";", ";");
     const dd = a => a.filter((q, i) => !i || Math.hypot(q[0] - a[i - 1][0], q[1] - a[i - 1][1]) > 1e-6);   // v5.47.7: chanfro 0 = canto vivo (ponto repetido travava o percurso)
     const pout = tipPath(extendStart(dd(g.outer.filter((q, k) => k !== 8)), 1.4), r, "right", [-r, -r]);   // sem o ponto do meio do chanfro de trás (alinhado)
-    L.push(...roughPasses(pout, tO, "od", "0.160", Number(p.apR), Number(p.alR), r, deepAbove(p, tO)));
+    const rough101 = roughPasses(pout, tO, "od", "0.160", Number(p.apR), Number(p.alR), r, deepAbove(p, tO));
+    L.push(...rough101);
     L.push(";( FINISH )", `G0 X${f3(2 * pout[0].p[1])} Z3.000`, `G1 X${f3(2 * pout[0].p[1])} Z${f3(pout[0].p[0])}`, ...tipLines(pout, r, "0.130"));
     const lo = pout[pout.length - 1].p; L.push(`G0 X${f3(tO + 1)} Z${f3(lo[0] + 0.2)}`, `G0 X${f3(tO + 1)} Z5.000`, "");
     // ---- interno ----
@@ -1723,7 +1724,7 @@ GEN.psr101 = { name: "PSR 101",
     // ---- corte (como nos PSR101-P: até um pouco abaixo do furo de trás) ----
     const xc = Math.max(Math.min(tO + 0.2, g.D + 4), g.D + FACA_MIN), xe = g.d + g.bB - 1.3;
     L.push(...sec("CUTTING"), "G0 Z70", TL.cut, ";", ";", `G0 X${f3(xc)} Z3.000`, `G0 X${f3(xc)} Z${f3(-H)}`, `G1 X${f3(xe)} Z${f3(-H)} F${TL.fCut}`, `G0 X${f3(xc)} Z${f3(-H)}`, `G0 X${f3(xc)} Z15.000`, "", "");
-    const g92 = 15 + progMaxZ(L) + 0.15;
+    const g92 = 15 + progMaxZ(rough101.extraZ.length ? L.filter(l => !rough101.extraZ.some(z => l.includes(z))) : L) + 0.15;   // v5.89.0: o extra dos passes de cima não conta
     const rpt = (p.rpt === "" || p.rpt === undefined || isNaN(p.rpt)) ? "0" : gen15(p.rpt);
     L.push(`G92 Z${f3(g92)}`, "N20 G00 Z100", `(RPT N10,N20)N${rpt}`, "G54", "G00 X250 Z250", "M05", "M30");
     return L;
@@ -1774,17 +1775,17 @@ function psr211Geom(p){
 // PSR 212 (v5.50.3, usuário 16/11/2026): T6D6 na parte de trás — o chanfro da aresta já foi feito pela T2D2 (fica no Ø xa);
 // a lâmina (canto da frente) desce a parede, faz o Ø do degrau, o chanfro de trás e o raspador a 65°. "pt" passes: cada passe
 // segue o mesmo caminho mais raso (cada ponto desce 1/n da sua profundidade), o último é o acabamento.
-function psr212Back(g, H, tO, pt, f3){
+function psr212Back(g, H, xT6, pt, f3){
   const xa = g.extCalc - 2 * (g.cS ?? g.chc), n = Math.max(1, Math.min(10, Math.round(Number(pt)) || 1)), L = [];
   const pts = [[g.dS, g.zS], [g.dS, -g.Hb + g.chc], [g.xoBack, -g.Hb], [g.rootOut, -g.Hb], [g.tipOut, -H]];
   for (let k = 1; k <= n; k++){
     const xs = pts.map(([x, z]) => [Math.min(xa, xa - (xa - x) * k / n), z]);   // cada ponto desce k/n da sua profundidade: nunca passa do acabamento
-    if (k > 1) L.push(`G0 X${f3(tO + 4)}`);
+    if (k > 1) L.push(`G0 X${f3(xT6)}`);
     if (n > 1) L.push(`;( PASSE ${k}/${n} )`);
     L.push(`G0 Z${f3(g.zS)}`, `G1 X${f3(xa + 1)}`, `G1 X${f3(xs[0][0])}`);
     for (let i = 1; i < xs.length; i++) L.push(`G1 X${f3(xs[i][0])} Z${f3(xs[i][1])}`);
   }
-  L.push(`G0 X${f3(tO + 4)}`);
+  L.push(`G0 X${f3(xT6)}`);
   return L;
 }
 // ---- PSE 102 R (base Fast Seal PS05P), usuário 16/11/2026: U de pistão (PSE: interno sem folga) com o lábio externo recuado e um
@@ -1978,7 +1979,8 @@ function pse120Build(p){
   const zPar = zEnd + 0.6, backs = zHit > zPar ? [[zHit, g.s + r], [zEnd, g.s + r]] : [[zPar, T2c[1] - (T2c[0] - zPar)], [zEnd, T2c[1] - (T2c[0] - zPar)]];
   const tip = q => [q[0] - r, q[1] - r];
   const finish = [...cen, T2c, ...backs].map(tip), rough = [...cen, ...arcPts, ...backs].map(q => ({ t: "L", p: tip(q) }));
-  L.push(...sec("OUTSIDE"), "G0 Z70", TL.ext, ";", ";", ...roughPasses(rough, tO, "od", "0.160", Number(p.apR), Number(p.alR), r, deepAbove(p, tO)));
+  const rough120 = roughPasses(rough, tO, "od", "0.160", Number(p.apR), Number(p.alR), r, deepAbove(p, tO));
+  L.push(...sec("OUTSIDE"), "G0 Z70", TL.ext, ";", ";", ...rough120);
   const P = q => `X${f3(2 * q[1])} Z${f3(q[0])}`;
   L.push(";( FINISH )", `G0 X${f3(2 * finish[0][1])} Z3.000`, `G1 ${P(finish[0])}`, `G1 ${P(finish[1])} F0.130`, `G1 ${P(finish[2])}`, `G1 ${P(finish[3])}`,
          `G3 ${P(finish[4])} R${f3(Rr)}`, ...finish.slice(5).map(q => `G1 ${P(q)}`), `G0 X${f3(tO + 1)} Z${f3(finish[finish.length - 1][0] + 0.2)}`, `G0 X${f3(tO + 1)} Z5.000`, "");
@@ -1991,11 +1993,12 @@ function pse120Build(p){
   const lastIn = pin[pin.length - 1].p;
   L.push(`G0 X${f3(g.d - 2)} Z${f3(lastIn[0] + 0.2)}`, `G0 X${f3(g.d - 2)} Z5.000`, "");
   // assento de trás com a T6D6 (a T2D2 não corta a face do lábio virada para trás), como nos programas: desce na face e vai até a altura
-  L.push(...sec("OUTSIDE 2"), "G0 Z70", "T6D6", ";", ";", `G0 X${f3(tO + 4)} Z3`, `G0 Z${f3(g.zc - g.R)}`, `G1 X${f3(g.seat)}`, `G1 Z${f3(-H)}`, `G0 X${f3(tO + 4)}`, "G0 Z3", "");
-  const xc = Math.max(tO + 0.2, g.apex + FACA_MIN);
+  const xT6 = puAcimaPeca(p, tO, g.apex, tO + 4);   // v5.89.0: PU com sobremetal grande, T6 e faca a 10 acima da peça
+  L.push(...sec("OUTSIDE 2"), "G0 Z70", "T6D6", ";", ";", `G0 X${f3(xT6)} Z3`, `G0 Z${f3(g.zc - g.R)}`, `G1 X${f3(g.seat)}`, `G1 Z${f3(-H)}`, `G0 X${f3(xT6)}`, "G0 Z3", "");
+  const xc = puAcimaPeca(p, tO, g.apex, Math.max(tO + 0.2, g.apex + FACA_MIN));
   L.push(...sec("CUTTING"), "G0 Z70", TL.cut, ";", ";", `G0 X${f3(xc)} Z3.000`, `G0 X${f3(xc)} Z${f3(-H)}`, `G1 X${f3(g.d - 1)} Z${f3(-H)} F${TL.fCut}`,
          `G0 X${f3(xc)} Z${f3(-H)}`, `G0 X${f3(xc)} Z15.000`, "", "");
-  const g92 = 15 + progMaxZ(L) + 0.15, rpt = (p.rpt === "" || isNaN(p.rpt)) ? "0" : gen15(p.rpt);
+  const g92 = 15 + progMaxZ(rough120.extraZ.length ? L.filter(l => !rough120.extraZ.some(z => l.includes(z))) : L) + 0.15, rpt = (p.rpt === "" || isNaN(p.rpt)) ? "0" : gen15(p.rpt);   // v5.89.0: o extra dos passes de cima não conta no intervalo
   L.push(`G92 Z${f3(g92)}`, "N20 G00 Z100", `(RPT N10,N20)N${rpt}`, "G54", "G00 X250 Z250", "M05", "M30");
   return L;
 }
@@ -5249,7 +5252,11 @@ function roughPasses(path, stock, mode, feed, apRad, allowRad, rn, above){
 function isTeflon(p){ const m = String(p.mat || "").toUpperCase().trim(); return /TEFLON/.test(m) || /^PTFE\s*(PURO|\+\s*BR(ONZE)?|\+\s*GR(AFITE)?|\+\s*FV)?$/.test(m); }   // PTFE+GR (grafite) também (usuário 17/11/2026)   // PTFE+BR usa as mesmas do PTFE puro (usuário 07/11/2026)
 // PU (usuário 09/11/2026, todos os perfis): sobremetal externo > 10 no Ø (bucha ext − Ø ext) → passes acima do Ø ext vão 1 mm a mais em Z (sem mudar o G92)
 function isPU(mat){ return !isTeflon({ mat }) && /\bPU\b/i.test(String(mat || "PU")); }
-function deepAbove(p, tO){ return isPU(p.mat) && tO - p.dext > 10 ? { x: Number(p.dext), dz: 1 } : null; }
+// v5.89.0 (usuário 20/11/2026): sobremetal externo > 15 no Ø → esses passes vão 2 mm a mais em Z (o suporte da faca não pega no material que sobra)
+function deepAbove(p, tO){ const s = tO - p.dext; return isPU(p.mat) && s > 10 ? { x: Number(p.dext), dz: s > 15 ? 2 : 1 } : null; }
+// v5.89.0 (usuário 20/11/2026): PU com faca — com os passes de cima mais fundos (deepAbove), a T5 (faca) e a T6 entram/recuam a 10 mm
+// acima da PEÇA (maior Ø + 10 no X), não mais pela bucha. Sem deepAbove: como antes (devolve o X de sempre).
+function puAcimaPeca(p, tO, dMax, xAntes){ return deepAbove(p, tO) ? dMax + FACA_MIN : xAntes; }
 // v5.14.0 (usuário 11/11/2026): VITON (FKM) usa o mesmo padrão do NBR (ferramentas, bucha digitada)
 function isBorracha(mat){ return /NBR|BORRACHA|VITON|FKM/i.test(String(mat || "")); }
 function fscTools(p, ext, intDef){
@@ -5367,15 +5374,16 @@ function pseFscBuild(p, gOver){
   L.push(";( FINISH )", `G0 X${f3(2 * pout[0].p[1])} Z3.000`, `G1 X${f3(2 * pout[0].p[1])} Z${f3(pout[0].p[0])}` + (semDesbE ? " F0.160" : ""), ...tipLines(pout, r, "0.130"));
   const lastOut = pout[pout.length - 1].p;
   L.push(`G0 X${f3(tO + 1)} Z${f3(lastOut[0] + 0.2)}`, `G0 X${f3(tO + 1)} Z5.000`, "");
+  const dMaxE = Math.max(Number(p.dext), ...g.outer.map(q => 2 * q[1])), xT6 = puAcimaPeca(p, tO, dMaxE, tO + 4);   // v5.89.0: PU com sobremetal grande, T6 a 10 acima da peça
   if (g.wiper) L.push(";( *********************** )", ";( OUTSIDE ANGLE HAMMER GROOVE   )", ";( *********************** )", "G0 Z70", "T6D6", ";", ";",
-    `G0 X${f3(tO + 4)} Z3`, ...(g.step   // PSR 212: a lâmina (canto da frente) faz o chanfro da aresta, a parede e o Ø do degrau, o chanfro de trás e segue para o raspador
-      ? psr212Back(g, H, tO, p.pt, f3)
-      : [`G0 Z${f3(-g.Hb)}`, `G1 X${f3(g.rootOut)}`, `G1 X${f3(g.tipOut)} Z${f3(-H)}`, `G0 X${f3(tO + 4)}`]), "G0 Z3");   // raspador a 65° com a T6D6
+    `G0 X${f3(xT6)} Z3`, ...(g.step   // PSR 212: a lâmina (canto da frente) faz o chanfro da aresta, a parede e o Ø do degrau, o chanfro de trás e segue para o raspador
+      ? psr212Back(g, H, xT6, p.pt, f3)
+      : [`G0 Z${f3(-g.Hb)}`, `G1 X${f3(g.rootOut)}`, `G1 X${f3(g.tipOut)} Z${f3(-H)}`, `G0 X${f3(xT6)}`]), "G0 Z3");   // raspador a 65° com a T6D6
   // PSE 102 R: degrau do anel de apoio com a T6D6, como nos programas PS05P do Fast Seal (desce na parede, Ø do degrau até a altura)
-  if (g.ring) L.push(...sec("OUTSIDE HAMMER GROOVE"), "G0 Z70", "T6D6", ";", ";", `G0 X${f3(tO + 4)} Z3`, `G0 Z${f3(g.zS)}`, `G1 X${f3(g.dS)}`, `G1 Z${f3(-H)}`, `G0 X${f3(tO + 4)}`, "G0 Z3", "");
+  if (g.ring) L.push(...sec("OUTSIDE HAMMER GROOVE"), "G0 Z70", "T6D6", ";", ";", `G0 X${f3(xT6)} Z3`, `G0 Z${f3(g.zS)}`, `G1 X${f3(g.dS)}`, `G1 Z${f3(-H)}`, `G0 X${f3(xT6)}`, "G0 Z3", "");
   // ---- corte (T5D5; Teflon T8D8) ----
   // v5.78.2 (usuário 19/11/2026): no PSE 107 a faca aproxima 10 mm acima da peça (Ø ext + 10 no X); bucha maior que isso: como antes
-  const xc = Math.max(tO + 0.2, Math.max(Number(p.dext), ...g.outer.map(q => 2 * q[1])) + FACA_MIN);
+  const xc = puAcimaPeca(p, tO, dMaxE, Math.max(tO + 0.2, dMaxE + FACA_MIN));   // v5.89.0: PU com sobremetal grande, faca a 10 acima da peça
   L.push(...sec("CUTTING"), "G0 Z70", TL.cut, ";", ";", `G0 X${f3(xc)} Z3.000`, `G0 X${f3(xc)} Z${f3(-H)}`, `G1 X${f3(g.wiper ? g.tipIn - 0.1 : p.dint - 0.1)} Z${f3(-H)} F${TL.fCut}`,
          `G0 X${f3(xc)} Z${f3(-H)}`, `G0 X${f3(xc)} Z15.000`, "", "");
   const cutR = (xc - (g.wiper ? g.tipIn - 0.1 : p.dint - 0.1)) / 2;                       // quanto a faca corta no raio
@@ -5689,7 +5697,7 @@ function psr102Build(p){
   const pass = (x, z) => L.push(`G0 X${f3(x)} Z3.500`, `G1 X${f3(x)} Z3.000 F1.000`, `G1 X${f3(x)} Z${f3(z)} F0.160`, `G0 X${f3(x + 1.4)} Z${f3(z + 0.2)}`, `G0 X${f3(x + 1.4)} Z3.000`);
   let lvl = tO - step, clip = tO;
   // acima do Ø do calcanhar: passe até o fim da peça (Z do contorno), senão sobra o anel em volta do calcanhar com bucha grande (usuário 09/11: 189,2x202,8 bucha 173x219)
-  const zDeep = pout[pout.length - 1].p[0] - (deepAbove(p, tO) ? 1 : 0);   // sobremetal externo > 10 no Ø: esses passes vão 1 mm a mais em Z (usuário 09/11)
+  const zDeep = pout[pout.length - 1].p[0] - (deepAbove(p, tO)?.dz || 0);   // sobremetal externo > 10 no Ø: esses passes vão 1 mm a mais em Z (usuário 09/11); > 15: 2 mm (v5.89.0)
   while (lvl > p.dext + 0.2){ pass(lvl, zDeep); clip = lvl; lvl -= step; }
   const zAt = x => -g.prot * (x - sh - g.tipo) / (g.lipf - g.tipo);
   while (lvl > g.tipo + sh + 0.2){ pass(lvl, Math.min(Math.max(zAt(lvl), zF), 0.5)); clip = lvl; lvl -= step; }
@@ -5704,7 +5712,7 @@ function psr102Build(p){
   const lastOut = pout[pout.length - 1].p;
   L.push(`G0 X${f3(tO + 2)} Z${f3(lastOut[0] + 0.2)}`, `G0 X${f3(tO + 2)} Z5.000`, "");
   if (g.wiper) L.push(";( *********************** )", ";( OUTSIDE ANGLE HAMMER GROOVE   )", ";( *********************** )", "G0 Z70", "T6D6", ";", ";",
-    `G0 X${f3(tO + 4)} Z3`, `G0 Z${f3(-g.Hb)}`, `G1 X${f3(g.rootOut)}`, `G1 X${f3(g.tipOut)} Z${f3(-H)}`, `G0 X${f3(tO + 4)}`, "G0 Z3");   // raspador a 65° com a T6D6
+    `G0 X${f3(puAcimaPeca(p, tO, p.dext, tO + 4))} Z3`, `G0 Z${f3(-g.Hb)}`, `G1 X${f3(g.rootOut)}`, `G1 X${f3(g.tipOut)} Z${f3(-H)}`, `G0 X${f3(puAcimaPeca(p, tO, p.dext, tO + 4))}`, "G0 Z3");   // raspador a 65° com a T6D6 (v5.89.0: PU com sobremetal grande, a 10 acima da peça)
   // ---- interno ----
   L.push(...sec("INSIDE"), "G0 Z70", tInt, ";", ";");
   const pin = tipPath(extendStart(g.inner, 1.0), r, "left", [-r, r]);

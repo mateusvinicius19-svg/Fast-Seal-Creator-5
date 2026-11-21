@@ -6,6 +6,11 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.90.0 — PU com sobremetal grande: saída do acabamento externo a 10 mm da peça (20/11/2026)
+- Depois do acabamento externo (último passe da T2D2), a ferramenta subia em G0 até a bucha + 1/+2 (no PSR 211 PU bucha 40 acima:
+  X154,5). Como o desbaste já tirou o material de cima, agora sobe só até **10 mm acima da peça** (maior Ø + 10; ex. X124,5) e volta em Z.
+- Só quando vale a regra da 5.89.0 (PU com sobremetal externo > 10 no Ø), nos mesmos perfis. Os outros casos não mudam.
+
 ## 5.89.0 — PU com sobremetal grande: passes +2 mm e faca/T6 a 10 mm da peça (20/11/2026)
 Regra do usuário (todos os perfis em PU com faca):
 - **Sobremetal externo > 15 mm no Ø** (bucha ext − Ø ext): os passes de desbaste acima do Ø ext vão **2 mm** a mais em Z

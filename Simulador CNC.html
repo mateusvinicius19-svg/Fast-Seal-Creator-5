@@ -2331,6 +2331,18 @@ function generateCore(fromInput){
       return /^\s*G92\s*Z-?[\d.]+/i.test(l) ? l.replace(/(G92\s*Z)(-?[\d.]+)/i, (m, a, v) => a + (Number(v) + 1).toFixed((v.split(".")[1] || "").length || 1)) : l; });
     p.cutD16 = true;
   } else if (p.bedD16){ p.bed = p.bedOrig; delete p.bedD16; }
+  // v5.92.0 (usuário 20-21/11/2026): PTFE (puro, +BR, +GR, +FV) com secção de 1 a 3 mm corta com a FACA T5D5 F0.22, não com o
+  // bedame T8D8 (as linhas do corte trocam a ferramenta e o avanço; o resto do programa não muda)
+  const tefFaca = !d16 && (isTeflon(p) || ["PTFE", "PTFEBR", "PTFEGR", "PTFEFV"].includes(p.matA)) && secCorte >= 1 - 1e-9 && secCorte <= 3 + 1e-9
+    && lines.some(l => /^\s*T8D8\b/.test(String(l)));
+  if (tefFaca){
+    let cut = false;
+    lines = lines.map(l => { l = String(l); const t = l.trim();
+      if (/^T\d+D\d+\b/.test(t)) cut = /^T8D8\b/.test(t); if (/^G92\b/.test(t)) cut = false;
+      if (/^;T8D8 \(BEDAME\)/.test(t)) return l.replace(/;T8D8 \(BEDAME\)/, ";T5D5 (FACA)");
+      l = l.replace(/\bT8D8\b/g, "T5D5").replace(/^(\s*T5D5\s*;)\s*\(BEDAME 1\)/, "$1(CORTE)");
+      return cut ? l.replace(/F(\d*)\.(\d+)/g, (m, a, b) => "F" + (a === "" ? ".22" : fx(0.22, Math.max(2, b.length)))) : l; });
+  }
   // v5.59.0 (usuário 16/11/2026): Celeron corta com METADE da rotação → G97 S/2 logo depois de chamar a ferramenta de corte e
   // volta à rotação do início antes do G92 (o RPT volta para o N10, que fica depois do G97 do começo).
   let celRpm = null;
@@ -2437,7 +2449,8 @@ function puOnePass(lines){
 //     (T2D12 Ø39, T1D45 Ø11, D14 Ø3,5 = furo mínimo da barra R0,2) e, no tarugo, não passa de 1,5 abaixo do menor passe.
 // (3) D14 (T4D14 no PU, T2D14 no PTFE/POM/PEAD — mesmo corretor D14 "INTERNO AFIADO"): barra inteiriça fina, recuo de só 1 no Ø
 //     (0,5 nos furos pequenos, preso no Ø3,5), como nos programas corrigidos à mão.
-const INT_TOOL_MIN = { T4D14: 3.5, T2D14: 3.5, T1D45: 11, T2D12: 39, T4D4: 12 };
+// v5.92.0 (usuário 20-21/11/2026): Ø mínimo de cada ferramenta de interno — D14 Ø4, D81 Ø10, D45 Ø12, D4 Ø15 (D12: 39, como antes)
+const INT_TOOL_MIN = { T4D14: 4, T2D14: 4, T4D81: 10, T2D81: 10, T1D45: 12, T2D12: 39, T4D4: 15 };
 //                    faixa do Ø do passe:  <11  11–21 21–30 30–40  ≥40       (_X = fora do PU)
 const FOLGA_RECUO = { T2D2:  [2,   2,    2.5,  2.5,   3],
                       T7D7:  [1.5, 1.5,  1.5,  1.5,   1.5], T7D7_X: [1.5, 1.5, 1.5, 1.5, 2],
@@ -2449,11 +2462,17 @@ function folgaRecuo(tool, pu, x){
   const t = (!pu && FOLGA_RECUO[tool + "_X"]) || FOLGA_RECUO[tool]; if (!t) return null;
   return t[x < 11 ? 0 : x < 21 ? 1 : x < 30 ? 2 : x < 40 ? 3 : 4];
 }
-const PU_INT_TOOLS = ["T4D14", "T1D45", "T2D12"], PTFE_INT_TOOLS = ["T4D4", "T2D14"];
-function puIntTool(min){ return min < 11 ? "T4D14" : min < 40 ? "T1D45" : "T2D12"; }
+// v5.92.0 (usuário 20-21/11/2026) — regra do interno pelo MENOR Ø trabalhado:
+//   PU:                         D14 (T4D14) < 10 · D81 (T4D81) 10–12 · D45 (T1D45) 12–40 · D12 (T2D12) ≥ 40
+//   PTFE, POM, PEAD, NBR, Viton: D14 (T2D14) < 10 · D81 (T2D81) 10–12 · D14 (T2D14) 12–15 · D4 (T4D4) ≥ 15
+//   A D81 só faz interno RETO: com chanfro/ângulo/perfil no interno, de 10 a 12 fica a D14.
+const PU_INT_TOOLS = ["T4D14", "T4D81", "T1D45", "T2D12"], PTFE_INT_TOOLS = ["T4D4", "T2D14", "T2D81"];
+function puIntTool(min, reto){ return min < 10 ? "T4D14" : min < 12 ? (reto ? "T4D81" : "T4D14") : min < 40 ? "T1D45" : "T2D12"; }
+function outIntTool(min, reto){ return min < 10 ? "T2D14" : min < 12 ? (reto ? "T2D81" : "T2D14") : min < T4D4_MIN ? "T2D14" : "T4D4"; }
 // blocos de ferramenta interna do programa: { tool, min (menor Ø cortado, G1 com Z < 0), a (linha do T), b (fim), fsc (dentro de ;( INSIDE )) }
-function intToolBlocks(lines, cand){
+function intToolBlocks(lines, cand, g91){
   const L = lines.map(String), out = [], fscProg = L.some(l => /^;\(\s*INSIDE\s*\)/.test(l)); let sec = "", abs = true, cur = null, cz = null;
+  let px = null, pz = null, mov = 0;   // v5.92.0: posição/movimento só para saber se o interno é RETO
   L.forEach((l, i) => {
     const hd = /^;\(\s*([A-Z][A-Z0-9 ]*?)\s*\)\s*$/.exec(l.trim());
     if (hd && !/\*/.test(l)){ if (hd[1] !== "FINISH" && hd[1] !== "ROUGH" && fscProg){ sec = hd[1]; if (cur){ cur.b = i; cur = null; } } return; }
@@ -2461,19 +2480,32 @@ function intToolBlocks(lines, cand){
     if (/\bG91\b/.test(t)) abs = false; if (/\bG90\b/.test(t)) abs = true;
     const tm = /^T(\d+)D(\d+)\b/.exec(t);
     if (tm){ if (cur) cur.b = i; cur = null; const tool = `T${tm[1]}D${tm[2]}`;
-      if (cand.includes(tool) && (!fscProg || sec === "INSIDE")){ cur = { tool, min: Infinity, a: i, b: L.length, fsc: fscProg }; out.push(cur); } return; }
+      if (cand.includes(tool) && (!fscProg || sec === "INSIDE")){ cur = { tool, min: Infinity, a: i, b: L.length, fsc: fscProg, reto: true }; out.push(cur); } return; }
     const x = /X(-?[\d.]+)/.exec(t), z = /Z(-?[\d.]+)/.exec(t); if (z) cz = Number(z[1]);
+    // v5.92.0 (usuário 21/11/2026): interno RETO = nenhum corte (G1/G2/G3) muda X e Z juntos dentro da peça (chanfro, ângulo, raio,
+    // perfil). Só no reto pode a D81; com ângulo fica a D14.
+    for (const gm of t.match(/\bG0?[0-3]\b/g) || []) mov = Number(gm.slice(-1));
+    const nx = x ? (abs ? Number(x[1]) : (px ?? 0) + Number(x[1])) : px, nz = z ? (abs ? Number(z[1]) : (pz ?? 0) + Number(z[1])) : pz;
+    if (cur && mov > 0 && (x || z) && Math.min(pz ?? 0, nz ?? 0) < -0.05
+        && (mov > 1 || (px !== null && pz !== null && Math.abs(nx - px) > 1e-6 && Math.abs(nz - pz) > 1e-6))) cur.reto = false;
+    // (só movimentos que andam em Z: o "X−4" do fim é o recuo para dentro do furo, não conta)
+    if (cur && mov > 0 && nx !== null && nz !== null && nz < -0.05 && pz !== null && Math.abs(nz - pz) > 1e-6) cur.minR = Math.min(cur.minR ?? Infinity, nx, px ?? Infinity);
+    px = nx; pz = nz;
     if (cur && abs && /^G0?[123]\b/.test(t) && x && cz !== null && cz < -0.05) cur.min = Math.min(cur.min, Number(x[1]));
   });
+  // v5.92.0: arruela sem desbaste interno (bucha justa) — o interno é todo em G91; com "g91" o menor Ø vem da posição real (G91 somado)
+  if (g91) for (const b of out) if (!isFinite(b.min) && isFinite(b.minR ?? Infinity)) b.min = Number(fx(b.minR, 3));
   return out.filter(b => isFinite(b.min));
 }
 function intToolByMin(g, p, lines, type){
   const typed = String(p.tInt || "").trim().toUpperCase(), auto = !typed || (type === "iso" && typed === "T4D4");
   if (!auto) return { lines, txt: "" };
   const ptfe = isTeflon(p) || ["PTFE", "PTFEBR", "PTFEGR", "PTFEFV", "POM", "NYLON"].includes(p.matA);
-  const want = b => PU_INT_TOOLS.includes(b.tool) ? puIntTool(b.min) : ptfe ? (b.min < T4D4_MIN ? "T2D14" : "T4D4") : b.tool;
-  const cand = ptfe ? PU_INT_TOOLS.concat(PTFE_INT_TOOLS) : PU_INT_TOOLS;
-  const scan = L => intToolBlocks(puOnePass(L), cand);   // mede como vai sair (depois do "PU até 6 no Ø = só acabamento")
+  // v5.92.0: NBR e Viton seguem a coluna do PTFE (usuário 21/11/2026)
+  const outro = ptfe || isBorracha(p.mat) || ["NBR", "VITON"].includes(p.matA);
+  const want = b => PU_INT_TOOLS.includes(b.tool) ? puIntTool(b.min, b.reto) : outro ? outIntTool(b.min, b.reto) : b.tool;
+  const cand = outro ? PU_INT_TOOLS.concat(PTFE_INT_TOOLS) : PU_INT_TOOLS;
+  const scan = L => intToolBlocks(puOnePass(L), cand, true);   // mede como vai sair (depois do "PU até 6 no Ø = só acabamento")
   let bl = scan(lines), bad = bl.filter(b => want(b) !== b.tool);
   if (!bad.length) return { lines, txt: "" };
   const msg = [], fmin = b => fmtN(b.min, 2);
@@ -2790,7 +2822,7 @@ function buchaOf(p){
 const ARR_MAT = { PU: ["PU", "T7D7", "T4D4", "", true], NBR: ["NBR / borracha", "T7D7", "T4D4", "", true], VITON: ["Viton (FKM)", "T7D7", "T4D4", "", true], PTFE: ["PTFE puro (Teflon)", "T7D7", "T4D4", "", true], PTFEBR: ["PTFE+BR (mesmas ferram. do PTFE puro)", "T7D7", "T4D4", "", true], PTFEGR: ["PTFE+GR (grafite · mesmas ferram. do PTFE puro)", "T7D7", "T4D4", "", true], PTFEFV: ["PTFE+FV (Teflon + fibra de vidro · mesmas ferram. do PTFE puro)", "T7D7", "T4D4", "", true], POM: ["POM (poliacetal)", "T7D7", "T4D4", "", true],
                   NYLON: ["Nylon / PEAD", "T7D7", "T4D4", "", true], CELERON: ["Celeron (T2D54 · T2D64 · T6D16)", "T2D54", "T2D64", "T6D16", true] };
 // v5.21.18 (usuário 12/11/2026): PTFE puro, PTFE+BR, POM e PEAD — a T4D4 faz no mínimo Ø14; abaixo de Ø14 o interno é a T2D14
-const T4D4_MIN = 14;
+const T4D4_MIN = 15;   // v5.92.0 (usuário 20/11/2026): a D4 faz a partir de Ø15 (era 14)
 function applyArrMat(L, p){
   let [lab, e, i, c, comp] = ARR_MAT[p.matA] || ARR_MAT.PU;
   if (["PTFE", "PTFEBR", "PTFEGR", "PTFEFV", "POM", "NYLON"].includes(p.matA) && Number(p.dint) < T4D4_MIN) i = "T2D14";   // v5.21.18

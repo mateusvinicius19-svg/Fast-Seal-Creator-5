@@ -1176,7 +1176,10 @@ const GEN = {
         "G0 X" + X(bu.bo + 5) + " Z3 ; (DIAMETRO 5 MM ACIMA DO DIAMETRO EXTERNO DA BUCHA)",
         "G1 Z-0.2 F" + gF(p.fFace) + " ; (Z-0.2 FACEADO)",
         "G1 X" + X(bu.bi - 5) + " ; (DIAMETRO 5 MM ABAIXO DO DIAMETRO INTERNO DA BUCHA)", "G0 Z3"];
-      for (const x of roughLevels(bu.bo, De, 1)) L.push("G0 X" + X(x), "G1 Z" + X(zD), "G1 X" + X(x + 2), "G0 Z3");
+      // v5.91.0 (usuário 21/11/2026): PU (o PSO é sempre PU) com sobremetal externo > 10 no Ø — passes acima do Ø ext +1 mm em Z
+      // (> 15: +2) e a faca entra/recua a 10 mm acima da peça (De + 10), não mais pela bucha. G92 é o do campo, não muda.
+      const dA = deepAbove({ mat: "PU", dext: De }, bu.bo), xF = dA ? De + FACA_MIN : Math.max(bu.bo + 5, De + FACA_MIN);
+      for (const x of roughLevels(bu.bo, De, 1)) L.push("G0 X" + X(x), "G1 Z" + X(zD - (dA && x > De ? dA.dz : 0)), "G1 X" + X(x + 2), "G0 Z3");
       L.push("G0 X" + X(Dc - p.folga) + " ; (VALOR DO MEIO DO ORING - FOLGA)", "G1 Z0",
         "G42 X" + X(Dc) + " Z" + X(zA) + " ; (VALOR DO CENTRO DO ORING)",
         "G3 X" + X(Dc) + " Z" + X(zB) + " R" + R.toFixed(2) + " ; (ALTURA DO ANEL + FACEADO)",
@@ -1190,9 +1193,9 @@ const GEN = {
         "G1 Z" + X(zD) + " ; (ALTURA DO ANEL + FACEADO + DESBASTE)",
         "X" + X(Math.max(p.dint - 5, ti.min)) + " ; (ABAIXO DO DIAMETRO INTERNO DA PECA)", "G0 G40 Z3", "Z100",
         "T5D5 ; (FACA) PECA 1",
-        "G0 X" + X(Math.max(bu.bo + 5, De + FACA_MIN)) + " Z3 ; (" + (bu.bo + 5 >= De + FACA_MIN ? "5 MM ACIMA DA BUCHA" : "10 MM ACIMA DA PECA") + ")",
+        "G0 X" + X(xF) + " Z3 ; (" + (!dA && bu.bo + 5 >= De + FACA_MIN ? "5 MM ACIMA DA BUCHA" : "10 MM ACIMA DA PECA") + ")",
         "Z" + X(zB) + " ; (ALTURA DA PECA + FACEADO)",
-        "G1 X" + X(p.dint) + " F" + gF(p.fFaca), "G0 X" + X(Math.max(bu.bo + 5, De + FACA_MIN)),
+        "G1 X" + X(p.dint) + " F" + gF(p.fFaca), "G0 X" + X(xF),
         "G92 Z" + gen15(p.g92), "N20 G0 Z100", "(RPT N10,N20)N" + (n - 1), "G54", "G0 Z250", "M05", "M30");
       { const iI = document.querySelector("#genBox [data-k=bi]"), iO = document.querySelector("#genBox [data-k=bo]"), a = (b => [b.bi, b.bo])(psoBucha(Object.assign({}, p, { bi: "", bo: "" })));
         if (iI) iI.placeholder = a ? "automática: " + a[0] : "digite"; if (iO) iO.placeholder = a ? "automática: " + a[1] : "digite"; }
@@ -1246,7 +1249,10 @@ const GEN = {
       // (o 1º passe do desbaste descia em G1 desde o Z100)
       const tFace = p.tFace || "", tExt = p.tExt, tInt = p.tInt;
       const roughOD = [], roughID = [];
-      for (const x of roughLevels(bu.bo, g.Dext, 1)) roughOD.push("G00 X" + X(x), "G01 Z" + X(zR) + " F" + X(p.fExt), "G01 X" + X(x + 1), "G00 Z" + X(p.zEnt));
+      // v5.91.0 (usuário 21/11/2026): PU com sobremetal externo > 10 no Ø — passes acima do Ø ext +1 mm em Z (> 15: +2) e o
+      // corte (faca) entra/recua a 10 mm acima da peça, não mais pela bucha. G92 é o do campo, não muda.
+      const dA = deepAbove({ mat: p.matA || "PU", dext: g.Dext }, bu.bo), xCut = dA ? g.Dext + FACA_MIN : Math.max(Math.max(g.Dext, bu.bo) + p.cPos, g.Dext + FACA_MIN);
+      for (const x of roughLevels(bu.bo, g.Dext, 1)) roughOD.push("G00 X" + X(x), "G01 Z" + X(zR - (dA && x > g.Dext ? dA.dz : 0)) + " F" + X(p.fExt), "G01 X" + X(x + 1), "G00 Z" + X(p.zEnt));
       for (const x of lipIdLevels(bu.bi, p.dint)) roughID.push("G00 X" + X(x) + " Z" + X(p.zEnt), "G01 Z" + X(zR) + " F" + X(p.fInt), "G01 X" + X(x - 1), "G00 Z" + X(p.zEnt));
       return [
         ";BUCHA " + bu.txt,
@@ -1265,8 +1271,8 @@ const GEN = {
         "G01 X" + X(g.Dback + 2*p.prolT*TAN(p.ab)) + " Z" + X(-(p.h + p.prolT)), "G01 Z" + X(-(p.h + p.prolT + p.parT)),
         "G01 X" + X(p.dint - p.recI), "G40 G00 Z" + X(p.zAp), "G00 Z" + X(p.zSeg),
         p.tBed + " ;(BEDAME 1)",
-        "G00 X" + X(Math.max(Math.max(g.Dext, bu.bo) + p.cPos, g.Dext + FACA_MIN)) + " Z" + X(p.zAp), "G00 Z" + X(-p.h - p.cDZ),
-        "G01 X" + X(p.dint - p.cPass) + " F" + X(p.fBed), "G00 X" + X(Math.max(Math.max(g.Dext, bu.bo) + p.cPos, g.Dext + FACA_MIN)),
+        "G00 X" + X(xCut) + " Z" + X(p.zAp), "G00 Z" + X(-p.h - p.cDZ),
+        "G01 X" + X(p.dint - p.cPass) + " F" + X(p.fBed), "G00 X" + X(xCut),
         "G92 Z" + fx(p.g92, 2), "N20 G00 Z100",
         "(RPT N10,N20)N" + rpt + ";=(N IGUAL A NUMERO DE REPETIÇOES)",
         "G54", "G00 Z" + fx(p.zFim, 0), "M05", "M30"
@@ -1510,7 +1516,10 @@ GEN.dpr = { name: "PSE 125 (DPR)",
     const bu = lipBucha(Object.assign({}, p, { dint: g.Dint }), { Dext: p.dext }), zR = -(p.h + p.prolT + p.parT);
     { const d = dhPadrao(Number(p.sec)); for (const k of ["h", "h2", "b"]){ const el = document.querySelector("#genBox [data-k=" + k + "]"); if (el && d) el.placeholder = "tabela: " + fmtN(d[k], 3); } }
     const roughOD = [], roughID = [];
-    for (const x of roughLevels(bu.bo, p.dext, 1)) roughOD.push("G00 X" + X(x), "G01 Z" + X(zR) + " F" + X(p.fExt), "G01 X" + X(x + 1), "G00 Z" + X(p.zEnt));
+    // v5.91.0 (usuário 21/11/2026): PU com sobremetal externo > 10 no Ø — passes acima do Ø ext +1 mm em Z (> 15: +2) e o
+    // corte entra/recua a 10 mm acima da peça, não mais pela bucha. G92 é o do campo, não muda.
+    const dA = deepAbove({ mat: p.matA || "PU", dext: Number(p.dext) }, bu.bo), xCut = dA ? Number(p.dext) + FACA_MIN : Math.max(Math.max(p.dext, bu.bo) + p.cPos, p.dext + FACA_MIN);
+    for (const x of roughLevels(bu.bo, p.dext, 1)) roughOD.push("G00 X" + X(x), "G01 Z" + X(zR - (dA && x > p.dext ? dA.dz : 0)) + " F" + X(p.fExt), "G01 X" + X(x + 1), "G00 Z" + X(p.zEnt));
     for (const x of lipIdLevels(bu.bi, g.Dint)) roughID.push("G00 X" + X(x) + " Z" + X(p.zEnt), "G01 Z" + X(zR) + " F" + X(p.fInt), "G01 X" + X(x - 1), "G00 Z" + X(p.zEnt));
     const L = [
       ";BUCHA " + bu.txt,
@@ -1530,8 +1539,8 @@ GEN.dpr = { name: "PSE 125 (DPR)",
       "G01 X" + X(g.Dint + 2*c + 2*p.prolT*g.tb) + " Z" + X(-(p.h + p.prolT)), "G01 Z" + X(-(p.h + p.prolT + p.parT)),
       "G01 X" + X(g.Dint - p.recI), "G40 G00 Z" + X(p.zAp), "G00 Z" + X(p.zSeg),
       p.tBed + " ;(BEDAME 1)",
-      "G00 X" + X(Math.max(Math.max(p.dext, bu.bo) + p.cPos, p.dext + FACA_MIN)) + " Z" + X(p.zAp), "G00 Z" + X(-p.h - p.cDZ),
-      "G01 X" + X(g.Dint - p.cPass) + " F" + X(p.fBed), "G00 X" + X(Math.max(Math.max(p.dext, bu.bo) + p.cPos, p.dext + FACA_MIN)),
+      "G00 X" + X(xCut) + " Z" + X(p.zAp), "G00 Z" + X(-p.h - p.cDZ),
+      "G01 X" + X(g.Dint - p.cPass) + " F" + X(p.fBed), "G00 X" + X(xCut),
       "G92 Z" + fx(p.g92, 2), "N20 G00 Z100",
       "(RPT N10,N20)N" + rpt + ";=(N IGUAL A NUMERO DE REPETIÇOES)",
       "G54", "G00 Z" + fx(p.zFim, 0), "M05", "M30"
@@ -2574,7 +2583,8 @@ function tarugoTeflonLevels(dint){
   for (let k = 1; k <= n; k++) out.push(+(first + (last - first) * k / n).toFixed(3));
   return out;
 }
-function arrRough(p, mode, zEnd, xBack, feed){
+function arrRough(p, mode, zEnd, xBack, feed, dzAcima){
+  // v5.91.0 (usuário 21/11/2026): dzAcima = mm a mais em Z no desbaste externo (passes acima do Ø ext; só o PSA 108 em PU manda)
   // v5.9.2 (usuário 10/11): só quando sai de BUCHA (tubo); de TARUGO (Ø int. 0) desbasta normal
   if (arrTeflonPasse(p)) return [];
   const b = buchaOf(p); if (b.txt === "----") return [];
@@ -2596,7 +2606,7 @@ function arrRough(p, mode, zEnd, xBack, feed){
   let first = true;
   for (let s = 1; s <= k; s++){
     if (k > 1) L.push("; (ETAPA " + s + " - ATE Z" + g3(-D * s / k) + ")");
-    lv.forEach(x => { L.push("G0 X" + gen15(x), "G1 Z" + g3(-D * s / k) + (first ? " F" + gF(feed) : ""), "G1 X" + gen15(x + (mode === "od" ? 1 : -1)), "G0 Z" + g3(p.zAp)); first = false; });
+    lv.forEach(x => { L.push("G0 X" + gen15(x), "G1 Z" + g3(-D * s / k - (mode === "od" && s === k && dzAcima > 0 && x > p.dext ? dzAcima : 0)) + (first ? " F" + gF(feed) : ""), "G1 X" + gen15(x + (mode === "od" ? 1 : -1)), "G0 Z" + g3(p.zAp)); first = false; });
   }
   L.push("G0 X" + g3(xBack), "G91");
   return L;
@@ -2867,7 +2877,10 @@ GEN.psa108 = {
     // v5.76.1 (usuário 19/11/2026, 46341): depois do desbaste externo o PSA 108 voltava em rápido até X(Ø int − xAb) (X88.3, abaixo da
     // bucha) só para subir de novo em G91 até o início do perfil. Agora o desbaste termina direto no Ø do início do perfil (B10).
     // Só o PSA 108 (os perfis que usam este build mandam soPSA108: false); sem desbaste, como antes.
-    const rOD = p.soPSA108 === false ? [] : arrRough(p, "od", zRough, B10, p.fExt);
+    // v5.91.0 (usuário 21/11/2026): PU com sobremetal externo > 10 no Ø — passes acima do Ø ext +1 mm em Z (> 15: +2), igual aos
+    // perfis novos (deepAbove). A faca já entra a 10 mm da peça (kF). Só o PSA 108 (soPSA108 !== false); G92 é o do campo, não muda.
+    const dzA = (deepAbove({ mat: p.matA, dext: p.dext }, buchaOf(p).bo) || {}).dz || 0;
+    const rOD = p.soPSA108 === false ? [] : arrRough(p, "od", zRough, B10, p.fExt, dzA);
     const odSeq = rOD.length ? rOD : [...arrRough(p, "od", zRough, B8, p.fExt), "X" + g3(B10 - B8)];
     const c = g3, name = p.nome ? p.nome : `%PSA108 ${fx3(p.dint)}/${fx3(p.dext)}/${fx3(p.h)},MX,`;
     const L = [name,
@@ -3347,14 +3360,15 @@ function psh110Clamp(pts, rl, sg){
 }
 // desbaste da intermediária: retas + passadas de contorno escalonadas na parte de trás (sobremetal al + j·ap, do maior para o menor),
 // para não tirar o V de trás de uma vez só (usuário 13/11/2026)
-function psh110Rough(path, stock, mode, feed, ap, al, rn){
+function psh110Rough(path, stock, mode, feed, ap, al, rn, above){
   ap = ap > 0 ? ap : 3; al = al >= 0 ? al : 1.5;
   const od = mode === "od", sg = od ? 1 : -1, xs = path.map(it => 2 * it.p[1]);
   const peak = od ? Math.max(...xs) : Math.min(...xs), deep = od ? Math.min(...xs) : Math.max(...xs);
   const prof = Math.abs(peak - deep) / 2, J = Math.max(0, Math.ceil((prof - al) / ap - 1e-9) - 1);
-  const L = []; let stk = stock;
+  const L = []; L.extraZ = []; let stk = stock;
   for (let j = J; j >= 0; j--){
-    const sh = al + j * ap, Lj = roughPasses(path, stk, mode, feed, ap, sh, rn);
+    const sh = al + j * ap, Lj = roughPasses(path, stk, mode, feed, ap, sh, rn, above);   // v5.91.0: above = deepAbove (PU)
+    L.extraZ.push(...Lj.extraZ);
     if (j > 0) Lj.unshift(`; (DESBASTE DA PARTE DE TRAS - SOBREMETAL ${fx(sh, 2)})`);   // passadas extras (sobremetal maior); j = 0 é a normal
     L.push(...Lj);
     // próximo: começa do nível da última reta desta chamada (as retas não repetem)
@@ -3411,9 +3425,12 @@ GEN.psh110 = {
       if (tools.int === "T2D12" && psh110Depth(C.inner, -1) > PSH110_LIM + 1e-9) cIn = psh110Clamp(C.inner, C.inner[0][1] + PSH110_LIM / 2, -1);
     }
     const pout = tipPath(extendStart(cOut, 1.0), r, "right", [-r, -r]);
-    const rOut = k === "M" ? psh110Rough(pout, bo, "od", "0.160", Number(p.apR), Number(p.alR), r) : roughPasses(pout, bo, "od", "0.160", Number(p.apR), Number(p.alR), r);
+    // v5.91.0 (usuário 21/11/2026): PU com sobremetal externo > 10 no Ø — passes acima do Ø ext +1 mm em Z (> 15: +2); a faca e a
+    // saída do acabamento externo ficam a 10 mm acima da peça (maior Ø + 10), não mais pela bucha; o extra não conta no G92.
+    const dA = deepAbove({ mat, dext: g.D }, bo);
+    const rOut = k === "M" ? psh110Rough(pout, bo, "od", "0.160", Number(p.apR), Number(p.alR), r, dA) : roughPasses(pout, bo, "od", "0.160", Number(p.apR), Number(p.alR), r, dA);
     Lp.push(...rOut, ";( FINISH )", `G0 X${f3(2 * pout[0].p[1])} Z3.000`, `G1 X${f3(2 * pout[0].p[1])} Z${f3(pout[0].p[0])}`, ...tipLines(pout, r, "0.130"));
-    const lo = pout[pout.length - 1].p; Lp.push(`G0 X${f3(bo + 1)} Z${f3(lo[0] + 0.2)}`, `G0 X${f3(bo + 1)} Z5.000`, "");
+    const lo = pout[pout.length - 1].p, xS = dA ? xMax + FACA_MIN : bo + 1; Lp.push(`G0 X${f3(xS)} Z${f3(lo[0] + 0.2)}`, `G0 X${f3(xS)} Z5.000`, "");
     // ---- interno ----
     Lp.push(...sec("INSIDE"), "G0 Z70", tools.int, ";", ";");
     const pin = tipPath(extendStart(cIn, 1.0), r, "left", [-r, r]);
@@ -3421,9 +3438,9 @@ GEN.psh110 = {
     Lp.push(";( FINISH )", `G0 X${f3(2 * pin[0].p[1])} Z3.000`, `G1 X${f3(2 * pin[0].p[1])} Z${f3(pin[0].p[0])}`, ...tipLines(pin, r, "0.140"));
     const li = pin[pin.length - 1].p; Lp.push(`G0 X${f3(Math.max(0, xMin - 2))} Z${f3(li[0] + 0.2)}`, `G0 X${f3(Math.max(0, xMin - 2))} Z5.000`, "");
     // ---- corte: na altura da peça (como nos programas VPA01B) ----
-    const xc = Math.max(bo + 0.2, xMax + FACA_MIN), xEnd = k === "M" ? 2 * g.rm - g.pM - 1 : xMin - 0.1;   // intermediária: corta o paralelo inteiro
+    const xc = dA ? xMax + FACA_MIN : Math.max(bo + 0.2, xMax + FACA_MIN), xEnd = k === "M" ? 2 * g.rm - g.pM - 1 : xMin - 0.1;   // intermediária: corta o paralelo inteiro
     Lp.push(...sec("CUTTING"), "G0 Z70", tools.cut, ";", ";", `G0 X${f3(xc)} Z3.000`, `G0 X${f3(xc)} Z${f3(-L)}`, `G1 X${f3(xEnd)} Z${f3(-L)} F${tools.fCut}`, `G0 X${f3(xc)} Z${f3(-L)}`, `G0 X${f3(xc)} Z15.000`, "", "");
-    const g92 = 15 + progMaxZ(Lp) + 0.15;
+    const g92 = 15 + progMaxZ(rOut.extraZ.length ? Lp.filter(l => !rOut.extraZ.some(z => l.includes(z))) : Lp) + 0.15;   // v5.91.0: o extra dos passes de cima não conta
     const rpt = (p.rpt === "" || p.rpt === undefined || isNaN(p.rpt)) ? (k === "M" ? String(g.n - 1) : "0") : gen15(p.rpt);
     Lp.push(`G92 Z${f3(g92)}`, "N20 G00 Z100", `(RPT N10,N20)N${rpt}`, "G54", "G00 X250 Z250", "M05", "M30");
     return Lp;

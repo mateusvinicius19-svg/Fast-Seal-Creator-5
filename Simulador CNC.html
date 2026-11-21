@@ -4829,6 +4829,21 @@ FERR.forEach(f => { const n = FERR_CORR_NOME[f.c] || FERR_CORR_NOME[f.alt]; if (
   ["T7D27","canal","Bedame frontal 1,8","BDM FRONTAL 1.8"], ["T7D37","ext","Externo aço (TNMG)","EXTERNO AÇO TNMG"], ["T7D47","ext","Externo aço (WNMG)","EXTERNO AÇO WNMG"],
   ["T8D28","ranhura","Bedame T para retentor","BDM T PARA RETENTOR","Zero: canto superior direito."], ["T8D98","outro","Suporte de rosca externa","SUPORTE ROSCA EXTERNA CNC"]
 ].forEach(([c, tipo, nome, corr, obs, alt]) => { if (!FERR.some(f => f.c === c || f.alt === c)) FERR.push({ c, ...(alt ? { alt } : {}), tipo, nome, corr, uso: "Ainda não usada pelos geradores do Simulador", mat: "—", obs: obs || "" }); });
+// v5.93.0 (usuário 21/11/2026): dados que faltavam no cadastro — suportes e pastilhas dos .txt do W: (Suportes.txt, Pastilhas Para usinagem.txt,
+// TABELA DE CODIGOS FERRAMENTAS.txt) e Ø mínimo pelas regras do interno (5.92.0). Só a biblioteca: os geradores não leem esses campos.
+[ ["T1D1", { sup: "S16 R SVUCL 11", pastilha: "VCGT 110304-AK" }],
+  ["T4D4", { sup: "S10K-SDUCR 07", pastilha: "DCGT 070204-AK", min: 15 }],
+  ["T1D45", { pastilha: "DCGT 070204-AK", min: 12, uso: "Interno em PU quando o MENOR Ø trabalhado vai de 12 a 40 — só PU" }],
+  ["T4D14", { min: 4, uso: "Interno em PU quando o MENOR Ø trabalhado é < 10 (e de 10 a 12 quando o interno tem chanfro)" }],
+  ["T2D14", { corr: "INTERNO AFIADO", min: 4, uso: "Interno em PTFE, POM, PEAD, NBR e Viton com o MENOR Ø trabalhado < 10, de 10 a 12 com chanfro, e de 12 a 15" }],
+  ["T4D81", { alt: "T2D81", min: 10, mat: "PU na T4 · PTFE, POM, PEAD, NBR e Viton na T2", uso: "Interno RETO (sem chanfro / ângulo) com o MENOR Ø trabalhado de 10 a 12" }],
+  ["T7D7", { sup: "SVJBL 2020 K16", pastilha: "VCGT 160404 AK (ou Iscar VCGT 331 IC20 / Ceratizit VCGT 160404FN 25P)", raio: 0.4 }],
+  ["T7D17", { sup: "SVJBL 2020 K16", pastilha: "VCGT 160404 AK (afiada sem as costas)" }],
+  ["T6D16", { sup: "MGEHL 2020-2" }], ["T8D8", { sup: "3000-20X125L (WNT)" }],
+  ["T6D26", { sup: "MGEHL 2020-2", pastilha: "MRM 200 M NC3120" }], ["T6D36", { sup: "DGTL 20 B 3D40", pastilha: "DGL 31020 KLP" }],
+  ["T2D13", { sup: "MGIVL-2016-2" }], ["T7D37", { pastilha: "TNMG 160404RN F50", mat: "Aço" }],
+  ["T7D47", { mat: "Aço" }], ["T4D44", { mat: "Aço" }], ["T2D51", { mat: "Aço" }]
+].forEach(([c, o]) => { const f = FERR.find(x => x.c === c); if (f) Object.assign(f, o); });
 const ferrOrd = f => { const m = f.c.match(/^T(\d+)D(\d+)$/); return m ? Number(m[2]) * 1000 + Number(m[1]) : 1e9; };   // em ordem de D (fixo), depois T
 const FERR_BASE = FERR.map(f => ({ ...f }));
 const ITENS_TIPOS = { suporte: "Suporte", pastilha: "Pastilha / inserto", lamina: "Lâmina / bedame", outro: "Outro" };

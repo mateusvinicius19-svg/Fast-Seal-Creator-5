@@ -6,6 +6,12 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.96.0 — Abrir o Simulador sem ~130 consultas ao W: (22/11/2026)
+Nenhum programa muda (teste dos 37 perfis: todos geram, nenhum mudou).
+- Ao abrir, o Simulador procurava no W: a foto de cada ferramenta da biblioteca, uma por uma (2 consultas por ferramenta,
+  ~130 no total, todas "não existe" — enchiam o console de erros 404). Agora lista a pasta `FERRAMENTAS SIMULADOR` uma vez
+  e só lê as fotos que existem: 2 consultas, ~0,15 s em vez de ~3 s de tráfego no W:. As imagens do desenho saem iguais.
+
 ## 5.95.0 — Abrir Simulador mais rápido (22/11/2026)
 A janela preta do "Abrir Simulador" demorava ~13 s neste PC. Causa: o DNS da rede `partsseals` (172.16.99.32) não
 responde nomes da internet; cada nome novo esperava ~11 s até o Windows tentar o DNS do Wi-Fi, e o github.com só fica

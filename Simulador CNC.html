@@ -4784,7 +4784,11 @@ function ferrRaster(code, src){ return new Promise(ok => { const im = new Image(
     if (/^data:image\/svg/.test(src) || !im.naturalWidth) x.drawImage(im, 0, 0, W, H);
     else { const k = Math.min(W / im.naturalWidth, H / im.naturalHeight); x.drawImage(im, (W - im.naturalWidth * k) / 2, (H - im.naturalHeight * k) / 2, im.naturalWidth * k, im.naturalHeight * k); }
     FERR_PNG[code] = c.toDataURL("image/png"); } catch(e){} ok(); }; im.onerror = () => ok(); im.src = src; }); }
-async function ferrPrep(){ for (const f of FERR){ let src = null; try { src = await ferrFotoGet(f.c); } catch(e){} src = src || FERR_FOTO[f.c]; if (src){ await ferrRaster(f.c, src); if (f.alt) FERR_PNG[f.alt] = FERR_PNG[f.c]; } } try { rerenderDrawing(); } catch(e){} }
+// v5.96.0: lista a pasta das fotos UMA vez e só lê as que existem (antes eram 2 consultas ao W: por ferramenta, ~130 a cada abertura)
+async function ferrPrep(){
+  let tem = null; try { const d = await ferrDir(false, true); if (d){ tem = new Set(); for await (const [n, h] of d.entries()) if (h.kind === "file") tem.add(n.toUpperCase()); } } catch(e){ tem = null; }
+  const local = c => { try { const u = localStorage.getItem("ps_ferrFoto_" + c); if (u) return FERR_URL[c] = u; } catch(e){} return null; };
+  for (const f of FERR){ let src = null; try { src = (tem && !tem.has((f.c + ".png").toUpperCase())) ? local(f.c) : await ferrFotoGet(f.c); } catch(e){} src = src || FERR_FOTO[f.c]; if (src){ await ferrRaster(f.c, src); if (f.alt) FERR_PNG[f.alt] = FERR_PNG[f.c]; } } try { rerenderDrawing(); } catch(e){} }
 setTimeout(() => { ferrLoad().then(ferrPrep).catch(() => {}); }, 1200);
 function ferrCard(f){
   const tD = f.c.match(/^T(\d+)D(\d+)$/), foto = FERR_FOTO[f.c];

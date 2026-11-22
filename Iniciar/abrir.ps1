@@ -18,20 +18,33 @@ try {
   if ($dest) {
     $alvo = Join-Path $dest 'Simulador CNC.html'
     $novo = (Get-FileHash -LiteralPath $html).Hash
-    $velho = if (Test-Path -LiteralPath $alvo) { (Get-FileHash -LiteralPath $alvo).Hash } else { '' }
+    # v5.95.0: nao le o arquivo inteiro do W: (1 s ou mais pela rede) quando tamanho e data batem com a ultima copia/conferencia
+    $marca = Join-Path ([Environment]::GetFolderPath('LocalApplicationData')) 'FastSealCreator\copia-w.txt'
+    $fw = Get-Item -LiteralPath $alvo -ErrorAction SilentlyContinue
+    $sinal = if ($fw) { "$($fw.Length)|$($fw.LastWriteTimeUtc.Ticks)" } else { '' }
+    $lembra = if (Test-Path -LiteralPath $marca) { (Get-Content -LiteralPath $marca -Raw).Trim() } else { '' }
+    if ($fw -and $lembra -eq "$novo|$sinal") { $velho = $novo }
+    else { $velho = if ($fw) { (Get-FileHash -LiteralPath $alvo).Hash } else { '' } }
     if ($novo -ne $velho) { Copy-Item -LiteralPath $html -Destination $alvo -Force; Write-Host "Simulador atualizado no W: ($alvo)" }
     else { Write-Host 'O W: ja esta com a versao mais nova.' }
+    try { $fw = Get-Item -LiteralPath $alvo; Set-Content -LiteralPath $marca "$novo|$($fw.Length)|$($fw.LastWriteTimeUtc.Ticks)" } catch {}
   } else { Write-Host 'Pasta Arruela Padronizada nao encontrada no W: (nao copiei).' -ForegroundColor Yellow }
 } catch { Write-Host "Nao consegui copiar para o W: $($_.Exception.Message)" -ForegroundColor Yellow }
 
 # 2) servidor: desliga o que estiver rodando (guarda o -Rede do celular, se tinha) e liga o desta versao
-$rede = $false
-Get-CimInstance Win32_Process -Filter "Name='powershell.exe'" | Where-Object { $_.CommandLine -like '*Servidor Simulador.ps1*' -and $_.CommandLine -notlike '*-Instalar*' -and $_.ProcessId -ne $PID } |
-  ForEach-Object { if ($_.CommandLine -like '*-Rede*') { $rede = $true }; Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
-Start-Sleep -Milliseconds 600
+# v5.95.0: se o que esta rodando ja e o servidor DESTA versao e responde, deixa ligado (religar custava ~2 s)
 $url = "http://localhost:$Port"
 $ok = $false
-if ((Test-Path -LiteralPath $srv) -and $alvo) {
+$rodando = @(Get-CimInstance Win32_Process -Filter "Name='powershell.exe'" | Where-Object { $_.CommandLine -like '*Servidor Simulador.ps1*' -and $_.CommandLine -notlike '*-Instalar*' -and $_.ProcessId -ne $PID })
+if ($alvo -and $rodando.Count -and -not ($rodando | Where-Object { $_.CommandLine -notlike "*$srv*" })) {
+  try { Invoke-WebRequest "$url/ping" -UseBasicParsing -TimeoutSec 2 | Out-Null; $ok = $true } catch {}
+}
+$rede = $false
+if (-not $ok) {
+  $rodando | ForEach-Object { if ($_.CommandLine -like '*-Rede*') { $rede = $true }; Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
+  if ($rodando.Count) { Start-Sleep -Milliseconds 600 }
+}
+if (-not $ok -and (Test-Path -LiteralPath $srv) -and $alvo) {
   $args2 = "-NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File `"$srv`" -Porta $Port" + $(if ($rede) { ' -Rede' } else { '' })
   Start-Process powershell.exe -WindowStyle Hidden -WorkingDirectory ([Environment]::GetFolderPath('LocalApplicationData')) -ArgumentList $args2
   for ($i = 0; $i -lt 40 -and -not $ok; $i++) {

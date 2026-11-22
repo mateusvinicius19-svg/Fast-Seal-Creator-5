@@ -6,6 +6,17 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.95.0 — Abrir Simulador mais rápido (22/11/2026)
+A janela preta do "Abrir Simulador" demorava ~13 s neste PC. Causa: o DNS da rede `partsseals` (172.16.99.32) não
+responde nomes da internet; cada nome novo esperava ~11 s até o Windows tentar o DNS do Wi-Fi, e o github.com só fica
+guardado 60 s — quase toda abertura pagava essa espera. Agora ~1,5 s (DNS já respondido) e ~4 s (DNS frio).
+- `atualizar.ps1`: pergunta o DNS antes (prazo de 3 s); se não responder, abre a versão já baixada na hora e baixa a nova
+  escondido, por trás (`-SoBaixar`), para a próxima abertura. Todo pedido ao GitHub tem prazo. Sem versão baixada no PC, espera.
+- `atualizar.ps1`: não espera mais 2 s no fim quando não há versão antiga para apagar.
+- `abrir.ps1`: se o servidor que está rodando já é desta versão e responde, não religa (economiza ~2 s).
+- `abrir.ps1`: não lê o Simulador inteiro do W: para comparar quando o tamanho e a data batem com a última cópia (~1 s).
+- O log (`log.txt`) mostra quanto tempo a consulta ao GitHub levou.
+
 ## 5.94.0 — Cadastro de ferramentas: lâminas confirmadas pelo usuário (21/11/2026)
 Só a biblioteca 🧰 Ferramentas (nenhum programa muda).
 - **T8D8:** lâmina WNT 3002.1,0.13.L WPU7620 (1 mm) — saiu o "H1002".

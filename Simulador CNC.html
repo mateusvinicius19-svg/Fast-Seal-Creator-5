@@ -3120,10 +3120,12 @@ GEN.psg103 = {
     m.splice(m.findIndex(f => f[0] === "h") + 1, 0, ["dReb", "Ø do rebaixo interno (mm)", 54], ["hReb", "Altura do rebaixo (mm)", 4], ["chR", "Chanfro 45° do degrau do rebaixo (vazio = sugestão, 0 = sem)", ""]);
     if (!m.some(f => f[0] === "corte")) m.splice(m.findIndex(f => f[0] === "angC") + 1, 0, ["corte", "Corte da guia", "S"]);   // v5.72.0: o PSG 101 já traz o campo
     return m; })(),
-  params: [...GEN.psa108.params, ["psgAcr", "POM / Celeron: usinar maior nos diâmetros (mm)", 0.9]],   // com as etapas em Z (só o PSG 101 é contínuo)
+  params: [...GEN.psa108.params, ["psgAcr", "POM / Celeron: usinar maior nos diâmetros (mm)", 0.9]],   // desbaste em Z contínuo (v5.96.9), como o PSG 101
   build(p){
+    // v5.96.9 (usuário 23/11/2026: "o desbaste está em duas etapas, lembra da regra que precisa ser contínuo"): PSG 103 com o
+    // desbaste em Z contínuo como o PSG 101 (cada Ø vai de uma vez até o fim). Só o PSG 103; PSA 109 e PSG 104 continuam iguais.
     const a = psgAcr(p), dR = p.dReb + a, hR = p.hReb;
-    const q = Object.assign({}, p, { tipoGen: "psa108", soPSA108: false, zCont: false, n: 1, dint: p.dint + a, dext: p.dext + a, angE: psgAngE(p) });
+    const q = Object.assign({}, p, { tipoGen: "psa108", soPSA108: false, zCont: true, n: 1, dint: p.dint + a, dext: p.dext + a, angE: psgAngE(p) });
     if (p.chE === "" || p.chE === undefined) q.chE = psg103ChSug(p);
     if (p.chI === "" || p.chI === undefined) q.chI = psg103ChSug(p);
     const L = GEN.psa108.build(q), cI = q.chI;

@@ -10,7 +10,7 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 Simulador não muda (só arquivos novos em `Programas avulsos`).
 - Secção tirada do STL do Inventor; frente = face do Ø50,8, uma operação, bucha 31 x 62. T3D3 face, T4D4 interno (rebaixo
   Ø47 x 4), T7D7 externo Ø50,8, bedame T8D8 faz o degrau Ø48, o cone, o chanfro de trás e o corte. Gravados no W:
-  `046399.PIT`, `MCS 500ĳ99.txt` e o PDF na pasta do desenho.
+  `046399.PIT`, `MCS 500\46399.txt` e o PDF na pasta do desenho.
 
 ## 5.96.1 — PSE 108 (DP): material volta a trocar as ferramentas depois de salvar (23/11/2026)
 Nenhum programa padrão muda (teste dos 37 perfis: todos geram, nenhum mudou).

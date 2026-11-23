@@ -1,4 +1,6 @@
-# VEDADOR (33 X 50.8 X 24) — programa 46399 (PEAD, bucha 31 x 62, 1 operação)
+# VEDADOR (33 X 50.8 X 24) — programa 46399, cód. interno 46245 (PEAD, bucha 31 x 62, 1 operação)
+
+Cadastro ARGUS: item **46245** — pedido `DESENHOS\_PEDIDOS ARGUSĲ45_046399.json` (Anexo 1 = PDF, Código do programa = 046399), 23/11/2026.
 
 Secção tirada do STL do Inventor (`W:\...\DESENHOS\VEDADOR\VEDADOR (33 X 50.8 X 24) 46399\`), **Z0 = face do Ø50,8**
 (usuário 23/11/2026: frente = lado Ø50,8, uma operação só):

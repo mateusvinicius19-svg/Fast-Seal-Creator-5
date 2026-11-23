@@ -6,6 +6,11 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.96.8 — PSG 103: cota da secção menor (parede do rebaixo) no detalhe B (23/11/2026)
+Nenhum programa muda (teste dos 37 perfis: todos geram, nenhum programa mudou; só o desenho do PSG 103 mudou).
+- Usuário: "preciso de cota nessa secção menor". O detalhe B do PSG 103 ganha a cota da parede do rebaixo
+  ((Ø ext − Ø rebaixo) / 2, ex.: 181 x 200 x 12 com rebaixo Ø194 → 3), ao lado da secção total.
+
 ## 5.96.7 — VEDADOR 46399: desenho no cadastro 46245 (23/11/2026)
 Simulador não muda (só `Programas avulsos`).
 - PDF regravado com COD INTERNO 46245 e pedido `_PEDIDOS ARGUS\46245_046399.json` (Anexo 1 + programa 046399) na fila do Kuru.

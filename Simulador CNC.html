@@ -6411,6 +6411,10 @@ function drawingSVGCore(p){ // PSE 120 (usuário 16/11/2026): UM desenho só par
     g += ext(xR, dyI + 4, xR, yh + 6) + ext(dzb, yR + 4, dzb, yh + 6) + dimH(xR, dzb, yh, fv3(p.hReb));
     { const cR = psgChR(p); if (cR > 0) g += call(DX(-h + p.hReb + cR / 2), DY(ri + cR / 2), dzb + 16, dyI - 8, `${fmtN(cR, 2)} x 45°`); }
     g += `<text x="${xR - 8}" y="${yh + 4}" class="tn" text-anchor="end">rebaixo Ø ${fmtN(p.dReb, 2)}</text>`;
+    // v5.96.8 (usuário 23/11/2026: "preciso de cota nessa secção menor"): parede do rebaixo (Ø ext − Ø rebaixo) / 2, entre as
+    // chamadas de chanfro da direita e a cota da secção total
+    const xs = dzb + 96;
+    g += ext(dzb + 4, yR, xs + 6, yR) + dimV(xs, dyE, yR, f2((p.dext - p.dReb) / 2));
   }
 
   // ---- VISTA FRONTAL ----

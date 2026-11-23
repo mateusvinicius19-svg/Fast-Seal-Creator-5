@@ -3349,7 +3349,10 @@ function psh110Geom(p){
   const noseL = Math.max(0, ((D - 0.15 * S) / 2 - rm) - a);                                 // bico da base (mesma conta do psh110Contours)
   const eA = Math.min(noseL, dM - a), eM = Math.min(vlen, dM - pM / 2), eB = Math.min(vlen, dF - pM / 2);
   const L = (H + eA + (n - 1) * eM + eB) / (n + 2);
-  return { d, D, H, n, S, rm, dM, dF, L, a, c, pM, iM: 0.064 * S + 0.07, sh, vlen, eA, eM, eB };
+  // v5.97.2 (usuário 23/11/2026: "estou achando muito pouco o aperto, coloca no mínimo 0,5 em relação ao diâmetro nominal"):
+  // aperto da intermediária (lábio da frente: Ø alojamento + iM / Ø haste − iM) no mínimo 0,5 no Ø (era 0,064·S + 0,07 = 0,31 no S 3,8)
+  const iM = Math.max(0.5, 0.064 * S + 0.07);
+  return { d, D, H, n, S, rm, dM, dF, L, a, c, pM, iM, sh, vlen, eA, eM, eB };
 }
 // nomes das peças (usuário 13/11/2026): intermediária = a do meio; base = ângulo grande (ponta em V) na face; tampa = canal (entalhe) frontal
 const PSH110_PECAS = { M: "INTERMEDIÁRIA (-3)", A: "BASE (A, -1)", B: "TAMPA (B, -2)" };

@@ -6,6 +6,12 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.97.2 — PSH 110: aperto da intermediária no mínimo 0,5 no Ø (23/11/2026)
+Teste dos 37 perfis: todos geram; com os valores padrão nenhum programa mudou (no padrão o aperto já passa de 0,5).
+- Usuário: "estou achando muito pouco o aperto, coloca no mínimo 0,5 em relação ao diâmetro nominal". Lábios da frente da
+  intermediária: Ø alojamento + aperto / Ø haste − aperto, aperto = maior entre 0,5 e 0,064·S + 0,07.
+  Ex.: 36,35 x 44: Ø44,31 / Ø36,04 → Ø44,50 / Ø35,85. Base, tampa e PSH 110 30° não mudam.
+
 ## 5.97.1 — PSH 110 (chevron): entalhe da intermediária do tamanho do V — as peças encaixam (23/11/2026)
 Teste dos 37 perfis (PSH 110 nas 3 peças): todos geram; só o PSH 110 mudou (o PSH 110 30° não muda).
 - Usuário: "parece que uma peça está bastante dentro da outra no encaixe, elas precisam se encaixar" / "o canal parece mais raso".

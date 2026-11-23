@@ -22,10 +22,12 @@ window.prog46399 = function(){
   L.push(...sec("FACING DOWNWARD"), "G0 Z100", "T3D3", `G0 X${f3(xf0)} Z0.690`, `G1 X${f3(xf0)} Z0.000`, ";( FINISH )", `G1 X${f3(xf1)} Z0.000 F0.150`, `G0 X${f3(xf1)} Z0.690`, "");
   // ---- interno (T4D4, PEAD Ø33 ≥ 15): passe reto Ø32,6 até passar o corte, rebaixo Ø47 x 4 em passes de 2 no raio, acabamento ----
   L.push(...sec("INSIDE"), "G0 Z70", "T4D4", ";", ";");
-  const zR = -4 + 0.2, xs = [D_INT - 0.4];
-  for (let x = D_INT - 0.4 + 4; x < 47 - 0.4 - 1e-9; x += 4) xs.push(x);
-  xs.forEach((x, i) => L.push(`G0 X${f3(x)} Z3.000`, `G1 X${f3(x)} Z${f3(i ? zR : ZO)} F0.140`, `G1 X${f3(x - 1)}`, `G0 X${f3(x - 1)} Z3.000`));
-  const pin = tipPath(extendStart([[0, 23.5], [-4, 23.5], [-4, 16.5], [ZO, 16.5]], 1.0), r, "left", [-r, r]);
+  // v3 (usuário 23/11/2026: "deixa pelo menos 1 mm para tirar no acabamento e a parte de trás não precisa sair fora da peça"):
+  // desbaste deixa 1 no Ø para o acabamento; atrás vai só até Z −24,5 (o furo Ø33 passa 0,5 da face de trás para o corte soltar)
+  const SOB = 1, ZI = -(H + 0.5), zR = -4 + 0.2, xs = [D_INT - SOB];
+  for (let x = D_INT - SOB + 4; x < 47 - SOB - 1e-9; x += 4) xs.push(x);
+  xs.forEach((x, i) => L.push(`G0 X${f3(x)} Z3.000`, `G1 X${f3(x)} Z${f3(i ? zR : ZI)} F0.140`, `G1 X${f3(x - 1)}`, `G0 X${f3(x - 1)} Z3.000`));
+  const pin = tipPath(extendStart([[0, 23.5], [-4, 23.5], [-4, 16.5], [ZI + r, 16.5]], 1.0), r, "left", [-r, r]);
   L.push(";( FINISH )", `G0 X${f3(2 * pin[0].p[1])} Z3.000`, `G1 X${f3(2 * pin[0].p[1])} Z${f3(pin[0].p[0])}`, ...tipLines(pin, r, "0.120"));
   const li = pin[pin.length - 1].p;
   L.push(`G0 X${f3(D_INT - 2)} Z${f3(li[0] + 0.2)}`, `G0 X${f3(D_INT - 2)} Z5.000`, "");
@@ -33,11 +35,11 @@ window.prog46399 = function(){
   //      a T7D7, o bedame faz só o paralelo nas costas"): chanfro da frente, Ø50,8, desce para o Ø48 numa rampa com a inclinação
   //      do cone (a parede reta em Z −7 fica para o bedame), Ø48, cone, chanfro de trás e segue o chanfro até passar o corte ----
   const kC = 7 / 4, zRampa = -7 - 1.4 * kC;                                   // rampa Ø50,8 → Ø48 como o cone (≈ 29,7°): até Z −9,45
-  const outer = [[0, 24.4], [-1, 25.4], [-7, 25.4], [zRampa, 24], [-16, 24], [-23, 20], [-H, 19], [ZE + 0.3, 19 - BED + 0.3]];   // segue o chanfro 0,7 além do corte (G92 = 40,55)
+  const outer = [[0, 24.4], [-1, 25.4], [-7, 25.4], [zRampa, 24], [-16, 24], [-23, 20], [-H, 19]];   // termina no fim do chanfro de trás (não segue para fora da peça)
   L.push(...sec("OUTSIDE"), "G0 Z70", "T7D7", ";", ";");
   const pout = tipPath(extendStart(outer, 1.0), r, "right", [-r, -r]);
-  const xr = pout.map(it => ({ z: it.p[0], x: 2 * it.p[1] + 0.4 }));       // desbaste: acabamento + 0,2 no raio
-  const xTop = Math.max(...xr.map(q => q.x)), xEnd = xr[xr.length - 1].x, zF = xr[xr.length - 1].z;
+  const xr = pout.map(it => ({ z: it.p[0], x: 2 * it.p[1] + SOB }));       // desbaste: acabamento + 1 no Ø
+  const xTop = Math.max(...xr.map(q => q.x)), xEnd = xr[xr.length - 1].x, zF = xr[xr.length - 1].z - 0.1;   // desbaste só 0,1 além de onde o raio da T7D7 chega no fim do chanfro
   // Z onde o desbaste desce para o Ø x (atrás do Ø50,8) e o trecho do caminho até lá
   const iBack = xr.findIndex(q => q.z < -7 + 1e-9);
   const cross = x => { for (let i = Math.max(1, iBack); i < xr.length; i++){ const a = xr[i - 1], b = xr[i];
@@ -47,11 +49,11 @@ window.prog46399 = function(){
     // entra por trás do canto do passe anterior (ali já está no nível de cima) e sobe até o canto em G1
     L.push(`G0 X${f3(xu)} Z${f3(a.z - 0.3)}`, `G0 X${f3(xIn + 0.3)} Z${f3(a.z - 0.3)}`, `G1 X${f3(xIn)} Z${f3(a.z)} F0.160`);
     for (let i = a.i; i < b.i; i++) L.push(`G1 X${f3(xr[i].x)} Z${f3(xr[i].z)}`);
-    L.push(`G1 X${f3(lvl)} Z${f3(b.z)}`, `G1 X${f3(lvl)} Z${f3(zF)}`, `G1 X${f3(lvl + 1)}`, `G0 X${f3(xu)} Z${f3(zF + 0.2)}`, `G0 X${f3(xu)} Z3.000`); };
+    L.push(`G1 X${f3(lvl)} Z${f3(b.z)}`, `G1 X${f3(lvl)} Z${f3(zF)}`, `G0 X${f3(lvl + 1)} Z${f3(zF + 0.3)}`, `G0 X${f3(xu)} Z${f3(zF + 0.3)}`, `G0 X${f3(xu)} Z3.000`); };
   // passes retos do bruto (Ø62) até o Ø50,8 + 0,4, a peça toda
   for (const lvl of [tO - 6, xTop]) L.push(`G0 X${f3(lvl)} Z3.500`, `G1 X${f3(lvl)} Z3.000 F1.000`, `G1 X${f3(lvl)} Z${f3(zF)} F0.160`, `G0 X${f3(lvl + 1)} Z${f3(zF + 0.2)}`, `G0 X${f3(lvl + 1)} Z3.000`);
   // atrás do Ø50,8: passes de 2 no raio descendo pela rampa / cone
-  for (let up = xTop, lvl = xTop - 4; lvl > xEnd + 0.5; up = lvl, lvl -= 4) pass(lvl, up);
+  for (let up = xTop, lvl = xTop - 4; lvl > xEnd + 1e-9; up = lvl, lvl -= 4) pass(lvl, up);
   L.push(";( FINISH )", `G0 X${f3(2 * pout[0].p[1])} Z3.000`, `G1 X${f3(2 * pout[0].p[1])} Z${f3(pout[0].p[0])}`, ...tipLines(pout, r, "0.130"));
   const lo = pout[pout.length - 1].p;
   L.push(`G1 X${f3(2 * lo[1] + 1)}`, `G0 X${f3(xTop + 1)} Z${f3(lo[0] + 0.2)}`, `G0 X${f3(tO + 1)} Z5.000`, "");
@@ -62,9 +64,10 @@ window.prog46399 = function(){
   zs.push(zRampa + BED - 0.2); zs.reverse();
   L.push(...sec("OUTSIDE GROOVE"), "G0 Z70", "T8D8", ";", ";", `G0 X${f3(XF)} Z3.000`, `G0 X${f3(XF)} Z${f3(zs[0])}`);
   for (const z of zs) L.push(`G0 X${f3(xa)} Z${f3(z)}`, `G1 X48.000 F0.050`, `G0 X${f3(xa)}`);
-  L.push(`G0 X${f3(XF)}`, "", ...sec("CUTTING"), `G0 X${f3(XF)} Z${f3(-H)}`, `G0 X${f3(D_EXT - 8.8)} Z${f3(-H)}`,
+  L.push(`G0 X${f3(XF)}`, "", ...sec("CUTTING"), `G0 X${f3(XF)} Z${f3(-H)}`, `G0 X${f3(tO + 2)} Z${f3(-H)}`,   // atrás do Z −24,8 a bucha está inteira (Ø62)
+   
     `G1 X${f3(D_INT - 0.1)} Z${f3(-H)} F0.100`, `G0 X${f3(XF)} Z${f3(-H)}`, `G0 X${f3(XF)} Z15.000`, "", "");
-  const g92 = 15 + progMaxZ(L) + 0.15;
+  const g92 = 15 + Math.max(progMaxZ(L), H + BED + 0.4) + 0.15;   // avanço = altura + bedame + 0,55 de face (G92 40,55)
   L.push(`G92 Z${f3(g92)}`, "N20 G00 Z100", "(RPT N10,N20)N0", "G54", "G00 X250 Z250", "M05", "M30");
   const dd = A => A.filter((l, i) => !(l.startsWith("G1 ") && i > 0 && A[i - 1].slice(3).startsWith(l.slice(3)))); L.splice(0, L.length, ...dd(L));
   const pit = L.join("\n"), mcs = fagorToMcs(pit);

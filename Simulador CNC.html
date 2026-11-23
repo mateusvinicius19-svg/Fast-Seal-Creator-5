@@ -2175,9 +2175,11 @@ function fieldHTML([k, label, def], wide){
   return `<label class="${wide || k === "nome" ? "wide" : ""}">${label}<input data-k="${k}" ${isText ? 'type="text"' : 'type="text" inputmode="decimal"'} placeholder="${ph}" value="${String(def).replace(".", isText ? "." : ",")}"></label>`;
 }
 // tolerâncias do desenho de volta ao padrão (campos vazios = "sem"/tabela), sem regerar o programa já salvo
+// v5.96.1 (usuário 23/11/2026: PSE 108 DP "não está mudando as ferramentas"): o TIPO DA PEÇA não volta ao padrão — depois de
+// salvar, mexer na peça zerava o tipoP ("dp" → Automático) e o DP virava Arruela ISO (sem material, sempre T7D7/T4D4/T8D8).
 function resetTolDefaults(){
   state.tolVals = null;
-  document.querySelectorAll("#genBox [data-k]").forEach(el => { if (TOL_KEYS.includes(el.dataset.k)) el.value = el.tagName === "SELECT" ? (el.querySelector('option[value=""]') ? "" : el.options[0].value) : ""; });
+  document.querySelectorAll("#genBox [data-k]").forEach(el => { if (TOL_KEYS.includes(el.dataset.k) && el.dataset.k !== "tipoP") el.value = el.tagName === "SELECT" ? (el.querySelector('option[value=""]') ? "" : el.options[0].value) : ""; });
   try { syncTolRows(); } catch(e){}
 }
 // v5.61.1 (usuário 16/11/2026, PSG 101 em PEAD saía "PTFE+BR"): o campo MATERIAL do cabeçalho do desenho vale mais que o material

@@ -6,6 +6,12 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.96.9 — PSG 103: desbaste em Z contínuo (23/11/2026)
+Teste dos 37 perfis: todos geram; com os valores padrão nenhum programa mudou (peça curta já era uma etapa).
+- Usuário: "o desbaste está em duas etapas, lembra da regra que precisa ser contínuo". O PSG 103 passa a desbastar cada Ø de
+  uma vez até o fim em Z, como o PSG 101 (ex.: 181 x 200 x 12, bucha 171 x 207: era "EM Z 2 ETAPAS DE 6.775", agora um passe
+  até Z −13,55). Só o PSG 103; PSA 108/109 e PSG 104 continuam iguais.
+
 ## 5.96.8 — PSG 103: cota da secção menor (parede do rebaixo) no detalhe B (23/11/2026)
 Nenhum programa muda (teste dos 37 perfis: todos geram, nenhum programa mudou; só o desenho do PSG 103 mudou).
 - Usuário: "preciso de cota nessa secção menor". O detalhe B do PSG 103 ganha a cota da parede do rebaixo

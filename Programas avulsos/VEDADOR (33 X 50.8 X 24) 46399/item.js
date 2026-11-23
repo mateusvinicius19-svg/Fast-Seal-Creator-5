@@ -24,7 +24,8 @@ window.prog46399 = function(){
   L.push(...sec("INSIDE"), "G0 Z70", "T4D4", ";", ";");
   // v3 (usuário 23/11/2026: "deixa pelo menos 1 mm para tirar no acabamento e a parte de trás não precisa sair fora da peça"):
   // desbaste deixa 1 no Ø para o acabamento; atrás vai só até Z −24,5 (o furo Ø33 passa 0,5 da face de trás para o corte soltar)
-  const SOB = 1, ZI = -(H + 0.5), zR = -4 + 0.2, xs = [D_INT - SOB];
+  const SOB = 1, ZI = -(H + BED),   // v4 (usuário: "em Z no final precisa ter no mínimo a medida do bedame") → Z −25
+        zR = -4 + 0.2, xs = [D_INT - SOB];
   for (let x = D_INT - SOB + 4; x < 47 - SOB - 1e-9; x += 4) xs.push(x);
   xs.forEach((x, i) => L.push(`G0 X${f3(x)} Z3.000`, `G1 X${f3(x)} Z${f3(i ? zR : ZI)} F0.140`, `G1 X${f3(x - 1)}`, `G0 X${f3(x - 1)} Z3.000`));
   const pin = tipPath(extendStart([[0, 23.5], [-4, 23.5], [-4, 16.5], [ZI + r, 16.5]], 1.0), r, "left", [-r, r]);
@@ -39,7 +40,7 @@ window.prog46399 = function(){
   L.push(...sec("OUTSIDE"), "G0 Z70", "T7D7", ";", ";");
   const pout = tipPath(extendStart(outer, 1.0), r, "right", [-r, -r]);
   const xr = pout.map(it => ({ z: it.p[0], x: 2 * it.p[1] + SOB }));       // desbaste: acabamento + 1 no Ø
-  const xTop = Math.max(...xr.map(q => q.x)), xEnd = xr[xr.length - 1].x, zF = xr[xr.length - 1].z - 0.1;   // desbaste só 0,1 além de onde o raio da T7D7 chega no fim do chanfro
+  const xTop = Math.max(...xr.map(q => q.x)), xEnd = xr[xr.length - 1].x, zF = -(H + BED);   // v4: desbaste vai até o fim do bedame (Z −25)
   // Z onde o desbaste desce para o Ø x (atrás do Ø50,8) e o trecho do caminho até lá
   const iBack = xr.findIndex(q => q.z < -7 + 1e-9);
   const cross = x => { for (let i = Math.max(1, iBack); i < xr.length; i++){ const a = xr[i - 1], b = xr[i];
@@ -64,7 +65,7 @@ window.prog46399 = function(){
   zs.push(zRampa + BED - 0.2); zs.reverse();
   L.push(...sec("OUTSIDE GROOVE"), "G0 Z70", "T8D8", ";", ";", `G0 X${f3(XF)} Z3.000`, `G0 X${f3(XF)} Z${f3(zs[0])}`);
   for (const z of zs) L.push(`G0 X${f3(xa)} Z${f3(z)}`, `G1 X48.000 F0.050`, `G0 X${f3(xa)}`);
-  L.push(`G0 X${f3(XF)}`, "", ...sec("CUTTING"), `G0 X${f3(XF)} Z${f3(-H)}`, `G0 X${f3(tO + 2)} Z${f3(-H)}`,   // atrás do Z −24,8 a bucha está inteira (Ø62)
+  L.push(`G0 X${f3(XF)}`, "", ...sec("CUTTING"), `G0 X${f3(XF)} Z${f3(-H)}`, `G0 X${f3(D_EXT - 8.8)} Z${f3(-H)}`,   // até Z −25 o desbaste já tirou a bucha
    
     `G1 X${f3(D_INT - 0.1)} Z${f3(-H)} F0.100`, `G0 X${f3(XF)} Z${f3(-H)}`, `G0 X${f3(XF)} Z15.000`, "", "");
   const g92 = 15 + Math.max(progMaxZ(L), H + BED + 0.4) + 0.15;   // avanço = altura + bedame + 0,55 de face (G92 40,55)

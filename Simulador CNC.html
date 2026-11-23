@@ -1804,6 +1804,11 @@ function psr212Back(g, H, xT6, pt, f3){
 // 0,08 × secção (mín. 0,5); lábio ext. até o canal 0,25 × secção + 0,5, lábio int. 0,36 × secção; chanfros 45° dos lábios
 // ext. 0,6 + 0,015 × secção a 52° com o eixo e int. 0,5 + 0,015 × secção a 45°; chanfro int. de trás 45° 0,5 (secção ≥ 7,5: 0,8);
 // degrau do anel: Ø = Ø int. + 1,1 × secção, largura 1,5 / 2 / 2,5 / 3 (secção < 4,5 / < 8 / < 11 / acima), feito pela T6D6.
+// v5.97.0 (usuário 23/11/2026: "ajusta a D45, ela não faz chanfro de 45 graus atrás, no máximo 30"): quando o interno é a T1D45,
+// o que ela corta pelas costas (chanfro interno de trás e a saída depois dele) fica no máximo 30° com o eixo. Mesma escolha de
+// ferramenta do pseFscBuild (digitada, ou pelo Ø: T4D14 < 11 · T1D45 < 40 · T2D12); o intToolByMin regera com a tInt certa.
+const D45_COSTAS = 30;
+function intD45(p){ const d = Number(p.dint); return String(fscTools(p, "T2D2", d < 11 ? "T4D14" : d < 40 ? "T1D45" : "T2D12").int).trim().toUpperCase() === "T1D45"; }
 function pse102rGeom(p){
   const opt = v => (v === "" || v === null || v === undefined || isNaN(v)) ? null : Number(v);
   const sec = (p.dext - p.dint) / 2, R = x => x / 2, H = Number(p.h);
@@ -1832,9 +1837,10 @@ function pse102rGeom(p){
   const zc = zS, zEnd = -H - 2, drop = Math.max(0.01, R(g.extCalc) - R(dS) - 0.5);
   const back = zc - drop > zEnd + 0.05 ? [[zc - drop, R(g.extCalc) - drop], [zEnd, R(g.extCalc) - drop]] : [[zEnd, R(g.extCalc) - (zc - zEnd)]];
   const outer = [[g.zO, R(xo1)], [g.zO - chOz, R(g.extAp)], [g.zO - g.lipLen, R(g.extCalc)], [zc, R(g.extCalc)], ...back];
-  const inner = [[0, R(xi1)], [-chI, R(g.intAp)], [-g.lipLen, R(g.intCalc)], [-H + g.chc, R(g.intCalc)], [-H - 0.5, R(g.intCalc) + g.chc + 0.5]];
+  const kIB = intD45(p) ? Math.tan(D45_COSTAS * Math.PI / 180) : 1;   // v5.97.0: chanfro interno de trás 45° → 30° com a T1D45
+  const inner = [[0, R(xi1)], [-chI, R(g.intAp)], [-g.lipLen, R(g.intCalc)], [-H + g.chc, R(g.intCalc)], [-H - 0.5, R(g.intCalc) + (g.chc + 0.5) * kIB]];
   return Object.assign({}, g, { Dm, Cg, xgOut, xgIn, beO, beI, be: (beO + beI) / 2, ang: (beO + beI) * 180 / Math.PI, Tout, Tin, zb: Tout[0], xB1: 2 * Tout[1], xB2: 2 * Tin[1], wCan: (xgOut - xgIn) / 2,
-    chO, chOz, chI, xo1, xi1, chCanal: Math.max(chO, chI), outer, inner, ring: true, step: true, Hb: H, dS, Ls, zS, ringI, ringO, xoBack: dS, chcZ: undefined });
+    chO, chOz, chI, xo1, xi1, chCanal: Math.max(chO, chI), outer, inner, kIB, ring: true, step: true, Hb: H, dS, Ls, zS, ringI, ringO, xoBack: dS, chcZ: undefined });
 }
 function pse102rProfile(p){
   const g = pse102rGeom(p), H = Number(p.h), R = x => x / 2, c = g.Rg, cz = g.Cg[0];
@@ -1842,7 +1848,7 @@ function pse102rProfile(p){
   const span = ((a1 - a0) < 0 ? a1 - a0 + 2 * Math.PI : a1 - a0);
   for (let k = 0; k <= 16; k++){ const a = a0 + span * k / 16; arc.push([cz + c * Math.cos(a), g.Cg[1] + c * Math.sin(a)]); }
   return [[g.zO, R(g.xo1)], [g.zO - g.chOz, R(g.extAp)], [g.zO - g.lipLen, R(g.extCalc)], [g.zS, R(g.extCalc)], [g.zS, R(g.dS)], [-H, R(g.dS)],
-          [-H, R(g.intCalc) + g.chc], [-H + g.chc, R(g.intCalc)], [-g.lipLen, R(g.intCalc)], [-g.chI, R(g.intAp)], [0, R(g.xi1)], [0, R(g.xgIn)],
+          [-H, R(g.intCalc) + g.chc * g.kIB], [-H + g.chc, R(g.intCalc)], [-g.lipLen, R(g.intCalc)], [-g.chI, R(g.intAp)], [0, R(g.xi1)], [0, R(g.xgIn)],
           ...arc.reverse(), [g.zO, R(g.xgOut)], [g.zO, R(g.xo1)]].map(([z, r]) => [-H - z, r]);
 }
 // geometria das gaxetas em U para desenho/bucha/tolerância (PSR 211/212 e PSE 102 R têm a sua)
@@ -5202,7 +5208,7 @@ function pseFscGeom(p){
   // PSH 117: lábio de estabilidade (V) atrás no interno: Ø = Ø interno − 0,6, flancos simétricos
   const Vd = P117 ? (opt(p.vD) ?? (p.dint - 0.6)) : null, dV = P117 ? (intCalc - Vd) / 2 : 0, aVb = P117 && dV > 0 ? dV / Math.tan((Number(p.vAb) > 5 ? Number(p.vAb) : 30) * D) : 0, aVf = P117 && dV > 0 ? dV / Math.tan((Number(p.vAf) > 5 ? Number(p.vAf) : 45) * D) : 0, aV = (aVb + aVf) / 2;   // V: flanco de trás 30°, da frente 45° (com o eixo)
   const inner = P117
-    ? [[zI, R(xi1)], [zI - chI, R(intAp)], [zI - lipLen, R(intCalc)], [-H + aVb + aVf, R(intCalc)], [-H + aVb, R(Vd)], [-H, R(intCalc)], [-H - 0.5, R(intCalc + 1)]]
+    ? [[zI, R(xi1)], [zI - chI, R(intAp)], [zI - lipLen, R(intCalc)], [-H + aVb + aVf, R(intCalc)], [-H + aVb, R(Vd)], [-H, R(intCalc)], [-H - 0.5, R(intCalc) + 0.5 * (intD45(p) ? Math.tan(D45_COSTAS * D) : 1)]]   // v5.97.0: saída a 30° com a T1D45
     : [[zI, R(xi1)], [zI - chI, R(intAp)], [zI - lipLen, R(intCalc)], [-H + chcZ, R(intCalc)], [-H - 0.5, R(intCalc) + chc + 0.5 * Math.tan(30 * D)]];
   const xoBack = extCalc - (2 * chc + 1) * chc / (chc + 0.5), xiBack = intCalc + 2 * chc;
   return { ai, ae, fi, fe, chc, chcZ, bi, bo, intCalc, intAp, extCalc, extAp, sec, prof, larg, chCanal, chO, chI, lipO, lipI, sobMedida, Dm, Rg, zb, xB1, xB2, xgOut, xgIn, xo1, xi1, outer, inner, xoBack, xiBack,
@@ -6016,11 +6022,13 @@ function s15Geom(p){
   };
   const F0 = [0, rF], F1 = [-H, rF], T0 = tang(F0), T1 = tang(F1), k = (F1[1] - T1[1]) / (F1[0] - T1[0]);
   const lip = [{ t: "L", a: F0, b: T0 }, { t: "A", a: T0, b: T1, c: C, R: Rt, cv: true }, { t: "L", a: T1, b: [-H - 0.3, rF + k * -0.3] }];
+  // v5.97.0: PSE 127 (canal no interno) com a T1D45 — chanfro interno de trás a 30° com o eixo (era 45°; a D45 não faz pelas costas)
+  const kB = LIP_OUT && intD45(p) ? Math.tan(D45_COSTAS * Math.PI / 180) : 1;
   const sG = -sL, rG = R(grvD), rB = R(botD), Cg = [zm, rB + sG * Rg], cz = c;   // lado do canal: ar para o lado sG; chanfros e canal entram no material (−sG); centro do raio do canal no ar
   const P = (z, r) => [z, r];
   const grv = [{ t: "L", a: P(0, rG - sG * c), b: P(-cz, rG) }, { t: "L", a: P(-cz, rG), b: P(zm + w / 2, rG) },
     { t: "A", a: P(zm + w / 2, rG), b: P(zm - w / 2, rG), c: Cg, R: Rg, cv: false },
-    { t: "L", a: P(zm - w / 2, rG), b: P(-H + cz, rG) }, { t: "L", a: P(-H + cz, rG), b: P(-H - 0.3, rG - sG * (c + 0.3)) }];
+    { t: "L", a: P(zm - w / 2, rG), b: P(-H + cz, rG) }, { t: "L", a: P(-H + cz, rG), b: P(-H - 0.3, rG - sG * (c + 0.3) * kB) }];
   const outer = LIP_OUT ? lip : grv, inner = LIP_OUT ? grv : lip;
   return { I, O, H, H0, ALOJ, sec, LIP_OUT, a, drop, Rt, kG, c, w, g, Rg, lipD, faceD, grvD, botD, minD, maxD, bi, bo, sobMedida, outer, inner, T0, T1, C, Cg, tol: { sec: tgSecTol(sec) } };
 }

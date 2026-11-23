@@ -6,6 +6,16 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.97.0 — Interno com a D45 (T1D45): no máximo 30° pelas costas (23/11/2026)
+Teste: os 37 perfis com os valores padrão e em PU com Ø 20, 33 e 45 (148 programas): todos geram; só mudaram PSH 117,
+PSH 125, PSE 102 R e PSE 127 quando o interno é a T1D45 (Ø de 12 a 40). Com a D12 (Ø ≥ 40) e nos padrões, nada mudou.
+- Usuário: "ajusta a D45, ela não faz chanfro de 45 graus atrás, no máximo 30". Com a T1D45:
+  - PSH 117 / PSH 125: a saída do interno depois do V de trás (fora da peça) era 45° → 30°.
+  - PSE 102 R: chanfro interno de trás 45° → 30° com o eixo (mesmo comprimento em Z; o desenho acompanha).
+  - PSE 127: chanfro interno de trás (0,3) 45° → 30° com o eixo (o desenho acompanha).
+- Ficaram como estão (são a forma da peça, não chanfro): PSH 110 intermediária (flanco do V a 45°, encaixe do conjunto) e o
+  canal arredondado do interno do PSE 127 (a metade da frente do canal passa de 30°).
+
 ## 5.96.9 — PSG 103: desbaste em Z contínuo (23/11/2026)
 Teste dos 37 perfis: todos geram; com os valores padrão nenhum programa mudou (peça curta já era uma etapa).
 - Usuário: "o desbaste está em duas etapas, lembra da regra que precisa ser contínuo". O PSG 103 passa a desbastar cada Ø de

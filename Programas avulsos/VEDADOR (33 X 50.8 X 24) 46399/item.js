@@ -35,7 +35,7 @@ window.prog46399 = function(){
   // ---- externo (T7D7, PEAD: sem G41/G42, raio 0,4 compensado nas coordenadas) — v2 (usuário 23/11/2026: "essa parte faz com
   //      a T7D7, o bedame faz só o paralelo nas costas"): chanfro da frente, Ø50,8, desce para o Ø48 numa rampa com a inclinação
   //      do cone (a parede reta em Z −7 fica para o bedame), Ø48, cone, chanfro de trás e segue o chanfro até passar o corte ----
-  const kC = 7 / 4, zRampa = -7 - 1.4 * kC;                                   // rampa Ø50,8 → Ø48 como o cone (≈ 29,7°): até Z −9,45
+  const zRampa = -7 - 1.4;   // v5 (usuário 23/11/2026: "essa descida coloca um ângulo de 45 graus"): rampa Ø50,8 → Ø48 a 45°, até Z −8,4
   const outer = [[0, 24.4], [-1, 25.4], [-7, 25.4], [zRampa, 24], [-16, 24], [-23, 20], [-H, 19]];   // termina no fim do chanfro de trás (não segue para fora da peça)
   L.push(...sec("OUTSIDE"), "G0 Z70", "T7D7", ";", ";");
   const pout = tipPath(extendStart(outer, 1.0), r, "right", [-r, -r]);

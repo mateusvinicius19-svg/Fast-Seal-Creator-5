@@ -32,8 +32,11 @@ vão até Z −25 (face de trás + 1 do bedame); o acabamento termina no fim do 
 **Desenho**: padrão aprovado (Ø só no corte A-A, secção ampliada só com alturas, lábio da frente 1,9 e secção 8,9), face do
 Z0 à direita, material PEAD.
 
+
+v5 (usuário 23/11/2026: "essa descida coloca um ângulo de 45 graus, vai ficar menos material para o bedame"): a rampa da T7D7
+do Ø50,8 para o Ø48 é a 45° (até Z −8,4); o bedame faz 2 mergulhos até o Ø48 (Z −7,6 e −7, o último na parede).
 ## Conferir antes de rodar
-- A T7D7 desce em rampa de ≈ 30° (cone e rampa do Ø48): confirme que a pastilha tem folga nas costas para isso.
+- A T7D7 desce a 45° na rampa do Ø48 e a ≈ 30° no cone: confirme que a pastilha tem folga nas costas para isso.
 - Profundidade do bedame: corta de Ø50,8 até Ø32,9 (≈ 9 mm no raio).
 
 Regerar: `node "Programas avulsos/VEDADOR (33 X 50.8 X 24) 46399/gerar.js"` (o Simulador no navegador também roda o `item.js`).

@@ -6,6 +6,11 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.96.6 — VEDADOR 46399: rampa do Ø48 a 45° (23/11/2026)
+Simulador não muda (só `Programas avulsos`).
+- Usuário: "essa descida coloca um ângulo de 45 graus, vai ficar menos material para o bedame". A T7D7 desce do Ø50,8 para o
+  Ø48 a 45° (até Z −8,4); o bedame faz 2 mergulhos na parede. `046399.PIT` e `MCS 500` regravados no W:.
+
 ## 5.96.5 — VEDADOR 46399: passes até Z −25 (largura do bedame) (23/11/2026)
 Simulador não muda (só `Programas avulsos`).
 - Usuário: "em Z no final precisa ter no mínimo a medida do bedame, que é de 1 mm". Desbaste externo e furo vão até Z −25

@@ -6,6 +6,12 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.96.1 — PSE 108 (DP): material volta a trocar as ferramentas depois de salvar (23/11/2026)
+Nenhum programa padrão muda (teste dos 37 perfis: todos geram, nenhum mudou).
+- Depois de salvar um programa, a primeira alteração na peça voltava as tolerâncias do desenho ao padrão e junto zerava o
+  TIPO DA PEÇA (DP → "Automático"). O botão continuava mostrando PSE 108 (DP), mas o gerador virava Arruela ISO, sem material:
+  trocar PU/NBR/PTFE não mudava nada (sempre T7D7 / T4D4 / T8D8). Agora o tipo da peça fica; as tolerâncias continuam voltando ao padrão.
+
 ## 5.96.0 — Abrir o Simulador sem ~130 consultas ao W: (22/11/2026)
 Nenhum programa muda (teste dos 37 perfis: todos geram, nenhum mudou).
 - Ao abrir, o Simulador procurava no W: a foto de cada ferramenta da biblioteca, uma por uma (2 consultas por ferramenta,

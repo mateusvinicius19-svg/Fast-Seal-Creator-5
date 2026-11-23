@@ -6,6 +6,11 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.96.5 — VEDADOR 46399: passes até Z −25 (largura do bedame) (23/11/2026)
+Simulador não muda (só `Programas avulsos`).
+- Usuário: "em Z no final precisa ter no mínimo a medida do bedame, que é de 1 mm". Desbaste externo e furo vão até Z −25
+  (face de trás + 1 do bedame). `046399.PIT` e `MCS 500` regravados no W:.
+
 ## 5.96.4 — VEDADOR 46399: 1 mm para o acabamento e nada saindo atrás da peça (23/11/2026)
 Simulador não muda (só `Programas avulsos`).
 - Usuário: "deixa pelo menos 1 mm para tirar no acabamento e a parte de trás não precisa sair fora da peça". Desbaste externo e

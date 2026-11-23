@@ -26,6 +26,9 @@ o desbaste (externo e interno) deixa 1 no Ø para o acabamento; o acabamento da 
 passes vão só até Z −24,78 (o raio da pastilha chega lá no fim do chanfro); o furo Ø33 até Z −24,5. Atrás disso a bucha fica
 inteira, então o bedame corta desde o Ø64.
 
+v4 (usuário 23/11/2026: "em Z no final precisa ter no mínimo a medida do bedame, que é de 1 mm"): passes do externo e o furo
+vão até Z −25 (face de trás + 1 do bedame); o acabamento termina no fim do chanfro; o bedame volta a entrar em X42.
+
 **Desenho**: padrão aprovado (Ø só no corte A-A, secção ampliada só com alturas, lábio da frente 1,9 e secção 8,9), face do
 Z0 à direita, material PEAD.
 

@@ -21,6 +21,11 @@ OUTSIDE GROOVE T8D8 (bedame 1 mm, referência = lado da frente da lâmina): só 
 Ø48 (Z −8,65, −7,8 e −7, o último na parede) → CUTTING T8D8 em Z −24 (F0,100). Bedame aproxima/recua em X72 (bucha Ø62 + 10).
 G92 Z40,55 (avanço 25,55 por peça).
 
+v3 (usuário 23/11/2026: "deixa pelo menos 1 mm para tirar no acabamento e a parte de trás não precisa sair fora da peça"):
+o desbaste (externo e interno) deixa 1 no Ø para o acabamento; o acabamento da T7D7 termina no fim do chanfro de trás e os
+passes vão só até Z −24,78 (o raio da pastilha chega lá no fim do chanfro); o furo Ø33 até Z −24,5. Atrás disso a bucha fica
+inteira, então o bedame corta desde o Ø64.
+
 **Desenho**: padrão aprovado (Ø só no corte A-A, secção ampliada só com alturas, lábio da frente 1,9 e secção 8,9), face do
 Z0 à direita, material PEAD.
 

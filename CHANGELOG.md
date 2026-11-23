@@ -6,6 +6,12 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.96.4 — VEDADOR 46399: 1 mm para o acabamento e nada saindo atrás da peça (23/11/2026)
+Simulador não muda (só `Programas avulsos`).
+- Usuário: "deixa pelo menos 1 mm para tirar no acabamento e a parte de trás não precisa sair fora da peça". Desbaste externo e
+  interno deixa 1 no Ø; acabamento da T7D7 termina no fim do chanfro de trás (não segue o chanfro para fora), passes até Z −24,78,
+  furo até Z −24,5; o bedame corta desde o Ø64. `046399.PIT` e `MCS 500` regravados no W:.
+
 ## 5.96.3 — VEDADOR 46399: Ø48, cone e chanfro de trás com a T7D7; bedame só na parede e no corte (23/11/2026)
 Simulador não muda (só `Programas avulsos`).
 - Usuário: "essa parte faz com a T7D7, o bedame faz só o paralelo nas costas". A T7D7 desce do Ø50,8 para o Ø48 numa rampa com

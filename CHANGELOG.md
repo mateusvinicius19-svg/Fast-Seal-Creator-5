@@ -6,6 +6,12 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.96.2 — VEDADOR (33 X 50.8 X 24) 46399: programa e desenho avulso em PEAD (23/11/2026)
+Simulador não muda (só arquivos novos em `Programas avulsos`).
+- Secção tirada do STL do Inventor; frente = face do Ø50,8, uma operação, bucha 31 x 62. T3D3 face, T4D4 interno (rebaixo
+  Ø47 x 4), T7D7 externo Ø50,8, bedame T8D8 faz o degrau Ø48, o cone, o chanfro de trás e o corte. Gravados no W:
+  `046399.PIT`, `MCS 500ĳ99.txt` e o PDF na pasta do desenho.
+
 ## 5.96.1 — PSE 108 (DP): material volta a trocar as ferramentas depois de salvar (23/11/2026)
 Nenhum programa padrão muda (teste dos 37 perfis: todos geram, nenhum mudou).
 - Depois de salvar um programa, a primeira alteração na peça voltava as tolerâncias do desenho ao padrão e junto zerava o

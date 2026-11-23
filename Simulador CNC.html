@@ -3324,22 +3324,32 @@ GEN.psa109 = {
 // na frente, ponta atrás, lábios com aperto). Regras tiradas dos programas VPA01B do W: (S = secção = (D − d) / 2, Dm = Ø médio):
 //  · macho Ø D − 0,15·S / d + 0,15·S; fêmea D − 0,03·S / d + 0,03·S; meio com aperto na frente dos lábios (D + i / d − i,
 //    i = 0,064·S + 0,07) e lábios terminando em D − 0,5 / d + 0,5 antes do V de 45° de trás (ponta na altura da peça);
-//  · V de 45°: entalhe do meio 0,4923·S − 1,035 de fundo; da fêmea 0,4349·S − 0,165; bico do macho com reta de meia-largura
+//  · V de 45°: entalhe do meio (S − 0,5)/2 de fundo (v5.97.1, era 0,4923·S − 1,035); da fêmea 0,4349·S − 0,165; bico do macho com reta de meia-largura
 //    0,125·S; rasgo no fundo do entalhe (T3D3) como nos programas; chanfro de trás de macho/fêmea 0,0571·S + 0,232;
-//  · alturas IGUAIS e o conjunto fecha EXATO a altura do alojamento (usuário): H = (n + 2)·L − (n + 1)·entalhe → L = (H + (n + 1)·entalhe) / (n + 2).
+//  · alturas IGUAIS e o conjunto fecha EXATO a altura do alojamento (usuário): L pelo encaixe de cada junta (ver psh110Geom, v5.97.1).
 // Materiais (usuário): meio PU, macho/fêmea PEAD; campos para trocar.
 function psh110Geom(p){
   // dAl / DAl / hAl: medidas do ALOJAMENTO quando o desenho troca dint/dext/h pelas da peça (psh110DrawP)
   const d = Number(p.dAl ?? p.dint), D = Number(p.DAl ?? p.dext), H = Number(p.hAl ?? p.h), n = Math.max(1, Math.round(Number(p.nm) || 1)), S = (D - d) / 2, rm = (D + d) / 4;
-  const dM = Math.max(0.3, 0.4923 * S - 1.035), dF = Math.max(0.3, 0.4349 * S - 0.165);
+  const dF = Math.max(0.3, 0.4349 * S - 0.165), sh = 0.5;
   // calibrado contra os programas 033704 (50x65) e os desenhos 500x520 / 555x492: aperto do meio 0,064·S + 0,07 (65,55 no 50x65),
   // lábios até D − 0,5 / d + 0,5, ponta de trás do meio na altura da peça; bico do macho com reta de meia-largura 0,125·S;
   // chanfro de trás de macho/fêmea 0,0571·S + 0,232 (0,66 no S 7,5 · 0,80 no S 10 · 2,03 no S 31,5, como nos desenhos)
-  const L = (H + (n + 1) * dM) / (n + 2), a = 0.125 * S, c = 0.0571 * S + 0.232;
+  const a = 0.125 * S, c = 0.0571 * S + 0.232;
   // v5.40.0 (usuário 13/11/2026): atrás da intermediária sem canto vivo — paralelo (face reta) de 0,25·S (igual à reta do bico da base);
-  // os flancos de 45° continuam os mesmos (o encaixe e a altura do conjunto não mudam), a ponta fica dentro do corte
+  // os flancos de 45° continuam os mesmos, a ponta fica dentro do corte
   const pv = String(p.pM ?? "").replace(",", "."), pM = pv !== "" && !isNaN(pv) && Number(pv) >= 0 ? Number(pv) : 0.25 * S;
-  return { d, D, H, n, S, rm, dM, dF, L, a, c, pM, iM: 0.064 * S + 0.07, sh: 0.5 };
+  // v5.97.1 (usuário 23/11/2026: "parece que uma peça está bastante dentro da outra… elas precisam se encaixar" / "o canal parece
+  // mais raso"): o entalhe da frente da intermediária era 0,4923·S − 1,035 (0,85 no S 3,8), bem menor que o V de trás (base ±1,66)
+  // → no conjunto o V entrava no corpo da peça seguinte. Agora o entalhe tem a mesma abertura da base do V, a 45°:
+  // fundo = (S − 0,5) / 2, e o V (ponta reta pM) entra flanco com flanco até os ombros encostarem na face.
+  // A altura de cada peça vem do encaixe real de cada junta (base → 1ª, intermediária → intermediária, última → tampa):
+  // H = (n + 2)·L − (eA + (n − 1)·eM + eB) → L = (H + eA + (n − 1)·eM + eB) / (n + 2).
+  const hb = (S - sh) / 2, dM = hb, vlen = Math.max(0, hb - pM / 2);                       // entalhe da intermediária e comprimento do V
+  const noseL = Math.max(0, ((D - 0.15 * S) / 2 - rm) - a);                                 // bico da base (mesma conta do psh110Contours)
+  const eA = Math.min(noseL, dM - a), eM = Math.min(vlen, dM - pM / 2), eB = Math.min(vlen, dF - pM / 2);
+  const L = (H + eA + (n - 1) * eM + eB) / (n + 2);
+  return { d, D, H, n, S, rm, dM, dF, L, a, c, pM, iM: 0.064 * S + 0.07, sh, vlen, eA, eM, eB };
 }
 // nomes das peças (usuário 13/11/2026): intermediária = a do meio; base = ângulo grande (ponta em V) na face; tampa = canal (entalhe) frontal
 const PSH110_PECAS = { M: "INTERMEDIÁRIA (-3)", A: "BASE (A, -1)", B: "TAMPA (B, -2)" };
@@ -6434,11 +6444,11 @@ function drawingSVGCore(p){ // PSE 120 (usuário 16/11/2026): UM desenho só par
   g += `<text x="${fx0 - re * fs - 30}" y="${fy0 - 6}" class="t">A</text><text x="${fx0 + re * fs + 22}" y="${fy0 - 6}" class="t">A</text>`;
   g += `<text x="${fx0}" y="${fy0 + re * fs + 36}" class="vt" text-anchor="middle">VISTA FRONTAL</text>`;
   if (p.tipoGen === "psh110"){   // PSH 110 (usuário 13/11/2026): conjunto montado — macho virado + n anéis do meio + fêmea, dentro do alojamento
-    const G = psh110Geom(p), n = G.n, Lp = G.L, st = Lp - G.dM;          // cada peça começa (L − entalhe) depois da anterior: fecha H exato
+    const G = psh110Geom(p), n = G.n, Lp = G.L;   // v5.97.1: cada peça começa (L − quanto entra na anterior) depois dela: fecha H exato
     const bw = PT ? 210 : 320, bh = PT ? 190 : 62, bx = PT ? 565 : 740, by = PT ? 505 : 388;
     // meia secção ampliada (faixa entre a haste e o alojamento), como nos desenhos do Fast Seal
     const r0 = G.d / 2 - 1, sc = Math.min(bw / G.H, bh / (G.S + 2)), yB = by + (bh + (G.S + 2) * sc) / 2, X = x => bx + x * sc, Y = r => yB - (r - r0) * sc;
-    const pcs = [["A", 0, true], ...Array.from({ length: n }, (_, i) => ["M", (i + 1) * st, false]), ["B", (n + 1) * st, false]];
+    const x1 = Lp - G.eA, pcs = [["A", 0, true], ...Array.from({ length: n }, (_, i) => ["M", x1 + i * (Lp - G.eM), false]), ["B", x1 + (n - 1) * (Lp - G.eM) + Lp - G.eB, false]];
     for (const [k, x0, mir] of pcs){
       const prof = psh110Profile(Object.assign({}, p, { peca: k })), xs = z => mir ? x0 + Lp + z : x0 - z;   // macho virado: a ponta entra no 1º anel
       g += `<path d="${prof.map(([z, r], i) => `${i ? "L" : "M"}${X(xs(z)).toFixed(2)},${Y(r).toFixed(2)}`).join("")}Z" class="p" style="stroke-width:1"/>`;

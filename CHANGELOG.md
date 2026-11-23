@@ -6,6 +6,16 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.97.1 — PSH 110 (chevron): entalhe da intermediária do tamanho do V — as peças encaixam (23/11/2026)
+Teste dos 37 perfis (PSH 110 nas 3 peças): todos geram; só o PSH 110 mudou (o PSH 110 30° não muda).
+- Usuário: "parece que uma peça está bastante dentro da outra no encaixe, elas precisam se encaixar" / "o canal parece mais raso".
+  O entalhe da frente da intermediária era 0,4923·S − 1,035 (0,85 no 36,35 x 44) e o V de trás abre ±1,66: no conjunto o V
+  entrava no corpo da peça seguinte. Agora o entalhe tem a abertura da base do V, a 45°: fundo (S − 0,5)/2 (1,66), e o V entra
+  flanco com flanco até os ombros encostarem na face.
+- Altura de cada peça pelo encaixe real de cada junta (base → 1ª, intermediária → intermediária, última → tampa); o conjunto
+  continua fechando H exato. Ex.: 36,35 x 44 x 23,5 com 4 intermediárias: 4,62 → 4,87 cada. Sobreposição no conjunto montado: zero
+  (conferido também em 50 x 65 x 30 e 100 x 120 x 40). Base e tampa com o mesmo formato; mudam só a altura.
+
 ## 5.97.0 — Interno com a D45 (T1D45): no máximo 30° pelas costas (23/11/2026)
 Teste: os 37 perfis com os valores padrão e em PU com Ø 20, 33 e 45 (148 programas): todos geram; só mudaram PSH 117,
 PSH 125, PSE 102 R e PSE 127 quando o interno é a T1D45 (Ø de 12 a 40). Com a D12 (Ø ≥ 40) e nos padrões, nada mudou.

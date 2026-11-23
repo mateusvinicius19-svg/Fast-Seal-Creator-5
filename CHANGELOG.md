@@ -8,7 +8,7 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 
 ## 5.96.7 — VEDADOR 46399: desenho no cadastro 46245 (23/11/2026)
 Simulador não muda (só `Programas avulsos`).
-- PDF regravado com COD INTERNO 46245 e pedido `_PEDIDOS ARGUSĲ45_046399.json` (Anexo 1 + programa 046399) na fila do Kuru.
+- PDF regravado com COD INTERNO 46245 e pedido `_PEDIDOS ARGUS\46245_046399.json` (Anexo 1 + programa 046399) na fila do Kuru.
 
 ## 5.96.6 — VEDADOR 46399: rampa do Ø48 a 45° (23/11/2026)
 Simulador não muda (só `Programas avulsos`).

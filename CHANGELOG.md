@@ -6,6 +6,12 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.96.3 — VEDADOR 46399: Ø48, cone e chanfro de trás com a T7D7; bedame só na parede e no corte (23/11/2026)
+Simulador não muda (só `Programas avulsos`).
+- Usuário: "essa parte faz com a T7D7, o bedame faz só o paralelo nas costas". A T7D7 desce do Ø50,8 para o Ø48 numa rampa com
+  a inclinação do cone e faz Ø48, cone e chanfro; o bedame T8D8 só tira a rampa até a parede reta em Z −7 e corta. `046399.PIT` e
+  `MCS 500` regravados no W: (o desenho não muda).
+
 ## 5.96.2 — VEDADOR (33 X 50.8 X 24) 46399: programa e desenho avulso em PEAD (23/11/2026)
 Simulador não muda (só arquivos novos em `Programas avulsos`).
 - Secção tirada do STL do Inventor; frente = face do Ø50,8, uma operação, bucha 31 x 62. T3D3 face, T4D4 interno (rebaixo

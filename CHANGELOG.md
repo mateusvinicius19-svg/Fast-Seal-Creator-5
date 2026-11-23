@@ -6,6 +6,10 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.96.7 — VEDADOR 46399: desenho no cadastro 46245 (23/11/2026)
+Simulador não muda (só `Programas avulsos`).
+- PDF regravado com COD INTERNO 46245 e pedido `_PEDIDOS ARGUSĲ45_046399.json` (Anexo 1 + programa 046399) na fila do Kuru.
+
 ## 5.96.6 — VEDADOR 46399: rampa do Ø48 a 45° (23/11/2026)
 Simulador não muda (só `Programas avulsos`).
 - Usuário: "essa descida coloca um ângulo de 45 graus, vai ficar menos material para o bedame". A T7D7 desce do Ø50,8 para o

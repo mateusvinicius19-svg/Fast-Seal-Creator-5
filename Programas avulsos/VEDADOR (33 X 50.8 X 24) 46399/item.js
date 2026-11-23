@@ -77,7 +77,7 @@ window.prog46399 = function(){
 // desenho: secção do STL pelo "Desenho do 3D", invertido (face do Ø50,8 = Z0 do programa à direita), material PEAD
 window.des46399 = function(){
   const I = ITEM46399;
-  const set = (k, v) => { const e = document.querySelector(`#dwgFields input[data-d="${k}"]`); if (e) e.value = v; }; set("prog", "46399"); set("mat", "PEAD");
+  const set = (k, v) => { const e = document.querySelector(`#dwgFields input[data-d="${k}"]`); if (e) e.value = v; }; set("prog", "46399"); set("mat", "PEAD"); set("cod", "46245");   // cód. interno (cadastro do item no ARGUS)
   const p0 = rev3DParams("VEDADOR (33 X 50.8 X 24) 46399.stl", I.poly, I.H); p0.desc = "VEDADOR"; p0.mat = "PEAD";
   const q = rev3DFlip(p0); q.desc = "VEDADOR"; q.mat = "PEAD"; q.dint = I.D_INT; q.dext = I.D_EXT;
   // padrão aprovado (46310 / 46707): Ø só no CORTE A-A (trás à esquerda, frente à direita); secção ampliada só com o contorno,

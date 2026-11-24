@@ -6,6 +6,13 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.98.3 — Alerta: PU / NBR com várias peças só no Ciclo SEM CHANFRO (24/11/2026)
+Teste dos 37 perfis: todos geram; nenhum programa mudou.
+- Usuário: "PU e NBR para fazer de várias peças apenas o perfil SEM CHANFRO, os outros coloca um alerta". PU, NBR e Viton
+  (padrão do NBR) com 2 ou mais peças por ciclo em PSA 108, Ciclo com chanfro, PSA 108 C/ CORTE, PSA 109, PSG e PSE 108 (DP)
+  mostram ATENÇÃO (faixa do topo e mensagem): fazer 1 peça por ciclo ou usar o Ciclo arruelas SEM CHANFRO. O programa continua
+  saindo (com bedame). Com 1 peça ou nos outros materiais, sem alerta.
+
 ## 5.98.2 — Faca em várias peças só no Ciclo arruelas SEM CHANFRO (24/11/2026)
 Teste dos 37 perfis: todos geram; nenhum programa mudou (padrões).
 - Usuário: "apenas nesse modelo que vamos fazer com a faca várias peças" (Ciclo arruelas várias peças SEM CHANFRO).

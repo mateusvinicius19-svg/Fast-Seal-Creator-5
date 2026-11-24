@@ -2377,6 +2377,11 @@ function generateCore(fromInput){
   }
   $("genMsg").textContent = (g.check(p) ? g.check(p) + " AVISE O RESPONSÁVEL antes de usar este programa." : `${g.name}: ${lines.length} linhas geradas.`) + (alojTxt ? " · " + alojTxt : "") + (toolTxt ? " · " + toolTxt : "");   // v5.48.1 (usuário): avisos pedem para avisar o responsável
   $("genMsg").style.color = g.check(p) ? "#a2231d" : ""; state.lastWarn = g.check(p) || "";   // v5.48.2: vai para a faixa do topo
+  // v5.98.3 (usuário 24/11/2026: "PU e NBR para fazer de várias peças apenas o perfil SEM CHANFRO, os outros coloca um alerta"):
+  // PU / NBR / Viton com 2+ peças por ciclo fora do Ciclo arruelas SEM CHANFRO → alerta (o programa sai, com bedame)
+  if (ARR_FACA.includes(p.matA) && variasSemFaca(type, p)){
+    const a = `ATENÇÃO: ${(ARR_MAT[p.matA] || [p.matA])[0].split(" ")[0]} com várias peças por ciclo só no "Ciclo arruelas várias peças SEM CHANFRO" — neste perfil faça 1 peça por ciclo.`;
+    $("genMsg").textContent = a + " " + $("genMsg").textContent; $("genMsg").style.color = "#a2231d"; state.lastWarn = state.lastWarn ? a + " " + state.lastWarn : a; }
   state.genType = type; state.genParams = p; saveForm();
   if (!state.alterNum) desDupCheck(p);   // já existe desenho com essas medidas? (pasta DESENHOS)
   { // bloco do alojamento: DP (PSE 108, O-ring por dentro) e DH (PSH 129, O-ring por fora)

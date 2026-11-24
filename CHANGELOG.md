@@ -6,6 +6,12 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.98.1 — PSA 108: várias peças por ciclo cortam com o bedame, não com a faca (24/11/2026)
+Teste dos 37 perfis: todos geram; nenhum programa mudou (padrão = 1 peça).
+- Usuário: "no PSA 108 quando fazemos para várias peças não colocar para fazer com a faca, apenas se for de 1 em 1".
+  PSA 108 com 2 ou mais peças por ciclo corta com o bedame (T8D8; T6D16 com secção > 14,8 ou Celeron, G92 +1), em PU, NBR,
+  Viton e PTFE fino. Com 1 peça continua a faca T5D5. Só o PSA 108 (Ciclo SEM CHANFRO e outros perfis iguais).
+
 ## 5.98.0 — PSO 109: campo Material (24/11/2026)
 Teste dos 37 perfis: todos geram; nenhum programa mudou (PSO em PU igual ao de antes).
 - Usuário: "preciso poder selecionar o material" (PSO 109). Campo Material com a lista completa (PU, NBR, Viton, PTFE puro,

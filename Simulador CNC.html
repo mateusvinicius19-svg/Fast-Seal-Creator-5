@@ -2504,8 +2504,11 @@ function intToolBlocks(lines, cand, g91){
         && (mov > 1 || (px !== null && pz !== null && Math.abs(nx - px) > 1e-6 && Math.abs(nz - pz) > 1e-6))) cur.reto = false;
     // (só movimentos que andam em Z: o "X−4" do fim é o recuo para dentro do furo, não conta)
     if (cur && mov > 0 && nx !== null && nz !== null && nz < -0.05 && pz !== null && Math.abs(nz - pz) > 1e-6) cur.minR = Math.min(cur.minR ?? Infinity, nx, px ?? Infinity);
+    // v5.97.4 (usuário 24/11/2026, 46428 PSR 102 22x30 PU do tarugo saiu com D14): o recuo radial no fundo do passe (G1 X11.5 =
+    // Ø13 − 1,5) não é Ø trabalhado — conta só o que anda em Z (o Ø de chegada e o de saída, se a saída já está dentro da peça)
+    if (cur && abs && mov > 0 && nx !== null && nz !== null && nz < -0.05 && pz !== null && Math.abs(nz - pz) > 1e-6)
+      cur.min = Math.min(cur.min, nx, pz < -0.05 && px !== null ? px : Infinity);
     px = nx; pz = nz;
-    if (cur && abs && /^G0?[123]\b/.test(t) && x && cz !== null && cz < -0.05) cur.min = Math.min(cur.min, Number(x[1]));
   });
   // v5.92.0: arruela sem desbaste interno (bucha justa) — o interno é todo em G91; com "g91" o menor Ø vem da posição real (G91 somado)
   if (g91) for (const b of out) if (!isFinite(b.min) && isFinite(b.minR ?? Infinity)) b.min = Number(fx(b.minR, 3));

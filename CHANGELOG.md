@@ -6,6 +6,11 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.98.5 — PSH 107 E 46356: tolerâncias do canal no desenho (24/11/2026)
+Só o desenho avulso (`Programas avulsos/PSH 107 E (16 X 26 X 5.6) 46356`); o Simulador não mudou.
+- Usuário: abertura do canal entre 2,8 e 2,9 → cota 2,9 0/−0,1; Ø23,7 0/−0,1 e Ø17,9 +0,1/0.
+- PDF do W: (`DESENHOS\PSH 107 E\PSH 107 E (16 X 26 X 5.6) 46356\`) regravado com a data de 24/11/2026.
+
 ## 5.98.4 — Material novo: PTFE+T46 (T-46) (24/11/2026)
 Teste dos 37 perfis: todos geram; nenhum programa mudou. Em PTFE+T46 os 34 perfis com lista de material saem iguais ao
 PTFE+GR, só muda o nome na linha ;MATERIAL (PSO 109: programa igual, o material vai para o desenho/histórico).

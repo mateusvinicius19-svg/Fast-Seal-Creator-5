@@ -1167,8 +1167,11 @@ const GEN = {
 
   pso: {
     name: "PSO 109 (O-ring)",
-    main: [["dint","Ø interno da peça (mm)",47.22],["sec","Secção da peça (mm)",3.53],["bi","Bucha Ø interno (vazio = automática PU)",""],["bo","Bucha Ø externo (vazio = automática PU)",""],
-           ["qtd","Quantidade de peças",1],["desc","Descrição (desenho / arquivo)","PSO 109"]],
+    main: [["dint","Ø interno da peça (mm)",47.22],["sec","Secção da peça (mm)",3.53],["bi","Bucha Ø interno (vazio = automática no PU e Teflon)",""],["bo","Bucha Ø externo (vazio = automática no PU e Teflon)",""],
+           ["qtd","Quantidade de peças",1],["desc","Descrição (desenho / arquivo)","PSO 109"],
+           // v5.98.0 (usuário 24/11/2026, "preciso poder selecionar o material"): só vai para o desenho, histórico e bucha
+           // automática (Teflon: Ø int − 2 / Ø ext + 2) — o programa é o mesmo em qualquer material
+           ["matA","Material","PU"]],
     params: [["folga","Folga de aproximação da ferramenta (mm)",0.6],["face","Faceado em Z (mm)",0.3],["sobre","Sobremetal/desbaste após o arco em Z (mm)",0.9],
              ["rpm","Rotação S (vazio = tabela pelo maior Ø)",""],["fFace","Avanço de faceamento F",0.15],["fFaca","Avanço da faca F",0.2],["g92","Valor do G92 Z",0.7]],
     build(p){
@@ -2338,7 +2341,7 @@ function generateCore(fromInput){
     else if (bi && !bed2 && bi.readOnly){ bi.value = bi.dataset.prev || "1"; bi.readOnly = false; bi.title = ""; p.bed = Number(String(bi.value).replace(",", ".")) || 1; } }
   if (bed2 && "bed" in p && !["psr211","psr212"].includes(type)){ p.bedOrig = p.bed; p.bed = 2; p.bedD16 = true; }
   let lines = g.build(p), d16 = false;
-  const toolTxt = (() => { const r = intToolByMin(g, p, lines, type); lines = r.lines; return r.txt; })();   // v5.84.0: interno pelo MENOR Ø trabalhado
+  const toolTxt = type === "pso" ? "" : (() => { const r = intToolByMin(g, p, lines, type); lines = r.lines; return r.txt; })();   // v5.84.0: interno pelo MENOR Ø trabalhado (PSO 109: ferramentas próprias, o material não muda o programa)
   if (bed2 && (celD16 || lines.some(l => /\bT8D8\b/.test(String(l))))){
     d16 = true;
     lines = lines.map(l => { l = String(l).replace(/\bT8D8\b/g, "T6D16").replace(/NOSEW 1(\s)/, "NOSEW 2$1");
@@ -2360,7 +2363,7 @@ function generateCore(fromInput){
   // v5.59.0 (usuário 16/11/2026): Celeron corta com METADE da rotação → G97 S/2 logo depois de chamar a ferramenta de corte e
   // volta à rotação do início antes do G92 (o RPT volta para o N10, que fica depois do G97 do começo).
   let celRpm = null;
-  if (p.matA === "CELERON" || /CELERON/i.test(String(p.mat || ""))){
+  if (type !== "pso" && (p.matA === "CELERON" || /CELERON/i.test(String(p.mat || "")))){
     const iS = lines.findIndex(l => /^\s*G97\s*S\s*\d/i.test(String(l))), iT = lines.findIndex(l => /^\s*T(6D16|8D8|5D5)\b/.test(String(l)));
     const S = iS >= 0 ? Number(String(lines[iS]).match(/S\s*([\d.]+)/i)[1]) : 0;
     if (S > 0 && iT > iS){

@@ -6,6 +6,13 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.98.0 — PSO 109: campo Material (24/11/2026)
+Teste dos 37 perfis: todos geram; nenhum programa mudou (PSO em PU igual ao de antes).
+- Usuário: "preciso poder selecionar o material" (PSO 109). Campo Material com a lista completa (PU, NBR, Viton, PTFE puro,
+  +BR, +GR, +FV, POM, Nylon/PEAD, Celeron). Usuário: "só o material" — o programa é o mesmo (T7D17 / interno pelo Ø / faca T5D5);
+  o material vai para o desenho, o histórico e a bucha automática (Teflon: Ø int − 2 × Ø ext + 2, como nos outros perfis).
+  O PSO fica fora da troca do interno pelo menor Ø e da meia rotação do Celeron.
+
 ## 5.97.4 — Interno pelo menor Ø: o recuo do passe no tarugo não conta mais (24/11/2026)
 Teste dos 37 perfis: todos geram; com os valores padrão nenhum programa mudou. Do tarugo: PSR 102 22x30 PU (46428) e
 22x32 PU passam de T4D14 para T1D45; PSR 102 14x22, PSR 101, PSH 105/117, PSE 106 e PSA 108 do tarugo ficam com a mesma ferramenta.

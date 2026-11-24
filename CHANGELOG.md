@@ -6,6 +6,12 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.98.6 — PSH 107 E 46356: cotas da secção no estilo novo + profundidade do canal com tolerância (24/11/2026)
+Só o desenho avulso (`Programas avulsos/PSH 107 E (16 X 26 X 5.6) 46356`); o Simulador não mudou.
+- Usuário (com imagem de exemplo): cada Ø da secção com linha de chamada horizontal e seta vertical, texto em pé ao lado
+  da seta; sai a cota corrida de baixo (0,25 / 2,15 / 3 / 0,2). Ficam a largura 5,6, chanfros e ângulos em chamada.
+- Profundidade do canal 3,2 0/−0,1 (dentro do canal) e abertura 2,9 0/−0,1 ao lado da face.
+
 ## 5.98.5 — PSH 107 E 46356: tolerâncias do canal no desenho (24/11/2026)
 Só o desenho avulso (`Programas avulsos/PSH 107 E (16 X 26 X 5.6) 46356`); o Simulador não mudou.
 - Usuário: abertura do canal entre 2,8 e 2,9 → cota 2,9 0/−0,1; Ø23,7 0/−0,1 e Ø17,9 +0,1/0.

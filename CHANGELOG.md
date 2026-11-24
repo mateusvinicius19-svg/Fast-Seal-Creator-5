@@ -6,6 +6,13 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.97.4 — Interno pelo menor Ø: o recuo do passe no tarugo não conta mais (24/11/2026)
+Teste dos 37 perfis: todos geram; com os valores padrão nenhum programa mudou. Do tarugo: PSR 102 22x30 PU (46428) e
+22x32 PU passam de T4D14 para T1D45; PSR 102 14x22, PSR 101, PSH 105/117, PSE 106 e PSA 108 do tarugo ficam com a mesma ferramenta.
+- Usuário: "programa 46428, veja por que o interno selecionou a D14". No tarugo o 1º passe é Ø13 e volta em G1 para Ø11,5 no
+  fundo (recuo); a regra do menor Ø trabalhado (v5.92.0) contava esse 11,5 → faixa 10–12 com ângulo → D14. Agora só contam os
+  movimentos que andam em Z (como já era nos programas em G91): menor Ø 13 → T1D45. Aplicado em todos os perfis do tarugo.
+
 ## 5.97.3 — Editar o programa: a edição não trava mais (24/11/2026)
 Teste dos 37 perfis: todos geram; nenhum programa mudou.
 - Usuário: "não estou conseguindo editar o programa, preciso mudar algumas coordenadas manual". Com a edição aberta, o gerador

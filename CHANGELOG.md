@@ -6,6 +6,13 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.98.2 — Faca em várias peças só no Ciclo arruelas SEM CHANFRO (24/11/2026)
+Teste dos 37 perfis: todos geram; nenhum programa mudou (padrões).
+- Usuário: "apenas nesse modelo que vamos fazer com a faca várias peças" (Ciclo arruelas várias peças SEM CHANFRO).
+  Com 2 ou mais peças por ciclo, os outros perfis não trocam mais o bedame pela faca T5D5: Ciclo com chanfro, PSA 108 C/ CORTE,
+  PSA 109 e PSG em PTFE fino (secção 1 a 3), e PSE 108 (DP) em PU/NBR/Viton → bedame T8D8 (T6D16 acima de 14,8).
+  Com 1 peça, como antes. O SEM CHANFRO continua com a faca em qualquer quantidade.
+
 ## 5.98.1 — PSA 108: várias peças por ciclo cortam com o bedame, não com a faca (24/11/2026)
 Teste dos 37 perfis: todos geram; nenhum programa mudou (padrão = 1 peça).
 - Usuário: "no PSA 108 quando fazemos para várias peças não colocar para fazer com a faca, apenas se for de 1 em 1".

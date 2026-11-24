@@ -2351,7 +2351,7 @@ function generateCore(fromInput){
   } else if (p.bedD16){ p.bed = p.bedOrig; delete p.bedD16; }
   // v5.92.0 (usuário 20-21/11/2026): PTFE (puro, +BR, +GR, +FV) com secção de 1 a 3 mm corta com a FACA T5D5 F0.22, não com o
   // bedame T8D8 (as linhas do corte trocam a ferramenta e o avanço; o resto do programa não muda)
-  const tefFaca = !d16 && !(type === "psa108" && psa108Varias(p)) && (isTeflon(p) || ["PTFE", "PTFEBR", "PTFEGR", "PTFEFV"].includes(p.matA)) && secCorte >= 1 - 1e-9 && secCorte <= 3 + 1e-9
+  const tefFaca = !d16 && !variasSemFaca(type, p) && (isTeflon(p) || ["PTFE", "PTFEBR", "PTFEGR", "PTFEFV"].includes(p.matA)) && secCorte >= 1 - 1e-9 && secCorte <= 3 + 1e-9
     && lines.some(l => /^\s*T8D8\b/.test(String(l)));
   if (tefFaca){
     let cut = false;
@@ -2999,6 +2999,15 @@ const ARR_FACA = ["PU", "NBR", "VITON"];
 // 1 em 1"): com mais de 1 peça por ciclo o corte fica com o bedame (T8D8; T6D16 acima de 14,8 / Celeron), em qualquer material.
 // Só o PSA 108 (SEM CHANFRO e os outros perfis continuam iguais).
 function psa108Varias(p){ return Math.max(1, Math.min(10, xround(Number(p.n) || 1, 0), psaMaxN(p))) > 1; }
+// v5.98.2 (usuário 24/11/2026: "apenas nesse modelo que vamos fazer com a faca várias peças" — Ciclo arruelas SEM CHANFRO):
+// nos outros perfis de várias peças (Ciclo com chanfro, PSA 108 C/ CORTE, PSA 109, PSG, PSE 108 DP) 2+ peças por ciclo não
+// trocam o bedame pela faca (PTFE fino, DP em PU/NBR/Viton). Com 1 peça, como antes.
+function variasSemFaca(type, p){
+  if (type === "semch" || !("n" in p)) return false;
+  if (["psa108", "psa108c", "psa109", "psg101", "psg103", "psg104"].includes(type)) return psa108Varias(p);
+  if (type === "iso" && String(p.tipoP || "") !== "dp") return false;
+  return xround(Number(p.n) || 1, 0) > 1;
+}
 function arrPuTools(L, p, semFaca){
   const m = p.matA || "PU"; if (!ARR_FACA.includes(m)) return L;
   const pu = m === "PU", ti = p.dint < 11 ? "T4D14" : p.dint < 40 ? "T1D45" : "T2D12", faca = !p.bedD16 && !semFaca;
@@ -3026,7 +3035,7 @@ function dpGaxTools(p){
   const T = fscTools({ mat, dint: p.dint }, "T2D2", p.dint < 11 ? "T4D14" : p.dint < 40 ? "T1D45" : "T2D12"), q = Object.assign({}, p);
   if (q.tExt === "T7D7") q.tExt = T.ext;
   if (q.tInt === "T4D4") q.tInt = T.int;
-  if (q.tBed === "T8D8" && T.cut !== "T8D8"){ q.tBed = T.cut; q.fBed = Number(T.fCut); }
+  if (q.tBed === "T8D8" && T.cut !== "T8D8" && !variasSemFaca("iso", p)){ q.tBed = T.cut; q.fBed = Number(T.fCut); }
   return q;
 }
 { const b = GEN.iso.build, dp = p => String(p.tipoP || "") === "dp";

@@ -2334,7 +2334,8 @@ function generateCore(fromInput){
   // v5.21.11 (usuário 11/11): Celeron sempre corta com a T6D16 → bedame 2 nas peças e G92 +1, igual à secção > 14,8
   const secCorte = (Number(p.dext) - Number(p.dint)) / 2, celD16 = p.matA === "CELERON" && "bed" in p;
   // v5.79.4 (usuário 19/11/2026: "PU e NBR só se corta com a T5D5"): PSA 108 em PU / NBR / Viton corta com a faca → sem bedame 2
-  const bed2 = (secCorte > 14.8 + 1e-9 && !(type === "psa108" && ARR_FACA.includes(p.matA || "PU"))) || celD16;
+  // v5.98.1 (usuário 24/11/2026): PSA 108 com VÁRIAS peças por ciclo não corta com a faca (só de 1 em 1) → bedame, regra normal
+  const bed2 = (secCorte > 14.8 + 1e-9 && !(type === "psa108" && ARR_FACA.includes(p.matA || "PU") && !psa108Varias(p))) || celD16;
   { // v5.21.12 (usuário 11/11): no Celeron o campo do bedame mostra 2 (travado); ao trocar de material volta para o que era
     const bi = document.querySelector('#genBox [data-k="bed"]');
     if (bi && bed2 && !bi.readOnly){ bi.dataset.prev = String(bi.value).trim() === "2" ? "1" : bi.value; bi.value = "2"; bi.readOnly = true; bi.title = "Corte com a T6D16 (Celeron ou secção > 14,8) — bedame 2"; }
@@ -2350,7 +2351,7 @@ function generateCore(fromInput){
   } else if (p.bedD16){ p.bed = p.bedOrig; delete p.bedD16; }
   // v5.92.0 (usuário 20-21/11/2026): PTFE (puro, +BR, +GR, +FV) com secção de 1 a 3 mm corta com a FACA T5D5 F0.22, não com o
   // bedame T8D8 (as linhas do corte trocam a ferramenta e o avanço; o resto do programa não muda)
-  const tefFaca = !d16 && (isTeflon(p) || ["PTFE", "PTFEBR", "PTFEGR", "PTFEFV"].includes(p.matA)) && secCorte >= 1 - 1e-9 && secCorte <= 3 + 1e-9
+  const tefFaca = !d16 && !(type === "psa108" && psa108Varias(p)) && (isTeflon(p) || ["PTFE", "PTFEBR", "PTFEGR", "PTFEFV"].includes(p.matA)) && secCorte >= 1 - 1e-9 && secCorte <= 3 + 1e-9
     && lines.some(l => /^\s*T8D8\b/.test(String(l)));
   if (tefFaca){
     let cut = false;
@@ -2994,9 +2995,13 @@ for (const k of ["ciclo", "semch", "psa108"]){
 // (no PSA 108 não troca mais para o bedame 2 T6D16 nesses materiais — ver generateCore). NBR/Viton: só o corte muda.
 // Só PSA 108 e SEM CHANFRO (PSA 108 C, PSG, PSA 109 mandam soPSA108: false; Ciclo com chanfro: igual).
 const ARR_FACA = ["PU", "NBR", "VITON"];
-function arrPuTools(L, p){
+// v5.98.1 (usuário 24/11/2026: "no PSA 108 quando fazemos para várias peças não colocar para fazer com a faca, apenas se for de
+// 1 em 1"): com mais de 1 peça por ciclo o corte fica com o bedame (T8D8; T6D16 acima de 14,8 / Celeron), em qualquer material.
+// Só o PSA 108 (SEM CHANFRO e os outros perfis continuam iguais).
+function psa108Varias(p){ return Math.max(1, Math.min(10, xround(Number(p.n) || 1, 0), psaMaxN(p))) > 1; }
+function arrPuTools(L, p, semFaca){
   const m = p.matA || "PU"; if (!ARR_FACA.includes(m)) return L;
-  const pu = m === "PU", ti = p.dint < 11 ? "T4D14" : p.dint < 40 ? "T1D45" : "T2D12", faca = !p.bedD16;
+  const pu = m === "PU", ti = p.dint < 11 ? "T4D14" : p.dint < 40 ? "T1D45" : "T2D12", faca = !p.bedD16 && !semFaca;
   if (!pu) return faca ? L.map(s => /^;T8D8 \(BEDAME\)/.test(String(s)) ? ";T5D5 (FACA)" : String(s).replace(/\bT8D8\b/g, "T5D5")) : L;
   return L.map(s => { s = String(s);
     if (/^;T7D7 \(EXTERNO\)/.test(s)) return ";T2D2 (EXTERNO PU)";
@@ -3007,7 +3012,7 @@ function arrPuTools(L, p){
 }
 for (const k of ["psa108", "semch"]){
   const b = GEN[k].build;
-  GEN[k].build = function(p){ const L = b.call(this, p); return k === "psa108" && p.soPSA108 === false ? L : arrPuTools(L, p); };
+  GEN[k].build = function(p){ const L = b.call(this, p); return k === "psa108" && p.soPSA108 === false ? L : arrPuTools(L, p, k === "psa108" && psa108Varias(p)); };
 }
 // v5.75.0 (usuário 19/11/2026): PSE 108 (DP) com MATERIAL em lista (mesma lista e ferramentas das arruelas: linha ;MATERIAL,
 // Celeron T2D54/T2D64/T6D16, T2D14 abaixo de Ø14). Só no DP — a Arruela ISO (mesmo GEN.iso) continua igual, sem material.

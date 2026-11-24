@@ -6,6 +6,14 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.98.4 — Material novo: PTFE+T46 (T-46) (24/11/2026)
+Teste dos 37 perfis: todos geram; nenhum programa mudou. Em PTFE+T46 os 34 perfis com lista de material saem iguais ao
+PTFE+GR, só muda o nome na linha ;MATERIAL (PSO 109: programa igual, o material vai para o desenho/histórico).
+- Usuário: "acrescenta o material T-46" (no Simulador). Mesmas regras do PTFE puro / +BR / +GR / +FV: ferramentas de Teflon
+  (T7D7 / T4D4, T2D14 abaixo de Ø14, bedame T8D8; faca T5D5 na secção de 1 a 3 com 1 peça), bucha automática Ø int − 2 /
+  Ø ext + 2, passe único saindo de bucha. Na linha ;MATERIAL sai "PTFE+T46" (como no programa 017473). Texto "T-46" / "T46"
+  em programas antigos é reconhecido como PTFE+T46.
+
 ## 5.98.3 — Alerta: PU / NBR com várias peças só no Ciclo SEM CHANFRO (24/11/2026)
 Teste dos 37 perfis: todos geram; nenhum programa mudou.
 - Usuário: "PU e NBR para fazer de várias peças apenas o perfil SEM CHANFRO, os outros coloca um alerta". PU, NBR e Viton

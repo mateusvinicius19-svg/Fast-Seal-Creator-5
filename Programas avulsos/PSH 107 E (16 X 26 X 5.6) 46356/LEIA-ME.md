@@ -18,7 +18,8 @@ medida: X20,8 = centro do canal, Z −3,2, F0,05) → INSIDE T2D14 (usuário: "D
 
 **Desenho**: folha Parts Seals (A4 retrato) pelo "Desenho do 3D", **invertido** (face do canal à direita, igual ao Z0 do
 programa — usuário: "o desenho sempre precisa ser igual o programa") e com a **cota da abertura do canal** (2,9) na face.
-Revisão 24/11/2026 (usuário): tolerâncias do canal — abertura 2,9 0/−0,1 (2,8 a 2,9), Ø23,7 0/−0,1, Ø17,9 +0,1/0.
+Revisão 24/11/2026 (usuário): tolerâncias do canal — abertura 2,9 0/−0,1 (2,8 a 2,9), Ø23,7 0/−0,1, Ø17,9 +0,1/0,
+profundidade 3,2 0/−0,1; cotas da secção no estilo da imagem dele (Ø com linha de chamada horizontal + seta vertical, sem cota corrida).
 O PDF do W: foi regravado pelo Simulador (servidor), mesmo código do `gerar_desenho.js`.
 
 ## Conferir antes de rodar

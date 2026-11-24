@@ -611,6 +611,9 @@ const $ = id => document.getElementById(id);
 const cv = $("cv"), ctx = cv.getContext("2d");
 
 function load(src, name){
+  // v5.97.3 (usuário 24/11/2026, "não estou conseguindo editar o programa"): o gerador refazia o programa com a edição aberta,
+  // a caixa de texto sumia e ficava "Editando" sem o botão Editar — carregar um programa fecha a edição
+  if (state.editing) endEdit();
   state.src = src; state.fileName = name || "Programa colado";
   const p = parseProgram(src);
   Object.assign(state, {lines: p.lines, moves: p.moves, total: p.total, header: p.header, tube: p.tube});
@@ -905,10 +908,13 @@ $("btnEdit").onclick = () => {
   const box = $("code"); box.innerHTML = ""; const ta = document.createElement("textarea"); ta.spellcheck = false; ta.value = state.src; box.appendChild(ta); ta.focus();
   $("btnApply").style.display = ""; $("btnEdit").style.display = "none"; $("modeTag").textContent = "Editando";
 };
-$("btnApply").onclick = () => {
-  const v = $("code").querySelector("textarea").value; state.editing = false;
+function endEdit(){
+  state.editing = false;
   $("btnApply").style.display = "none"; $("btnEdit").style.display = ""; $("modeTag").textContent = "Somente leitura";
-  load(v, state.fileName + " (editado)");
+}
+$("btnApply").onclick = () => {
+  const ta = $("code").querySelector("textarea"); endEdit();
+  if (ta) load(ta.value, state.fileName + " (editado)");
 };
 
 const EXAMPLE = `%PSA 108 52X57.1X2.9 ,MX---,

@@ -6,6 +6,12 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.97.3 — Editar o programa: a edição não trava mais (24/11/2026)
+Teste dos 37 perfis: todos geram; nenhum programa mudou.
+- Usuário: "não estou conseguindo editar o programa, preciso mudar algumas coordenadas manual". Com a edição aberta, o gerador
+  refazia o programa (campo do formulário mexido) e a caixa de texto sumia: ficava "Editando", sem o botão Editar, e o
+  "Aplicar e simular" dava erro — só voltava recarregando a página. Agora carregar um programa fecha a edição (volta o Editar).
+
 ## 5.97.2 — PSH 110: aperto da intermediária no mínimo 0,5 no Ø (23/11/2026)
 Teste dos 37 perfis: todos geram; com os valores padrão nenhum programa mudou (no padrão o aperto já passa de 0,5).
 - Usuário: "estou achando muito pouco o aperto, coloca no mínimo 0,5 em relação ao diâmetro nominal". Lábios da frente da

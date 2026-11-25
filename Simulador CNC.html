@@ -5546,7 +5546,7 @@ function roughPasses(path, stock, mode, feed, apRad, allowRad, rn, above){
   let clip = stock;
   for (let k = 1;; k++){ loopGuard(k, "desbaste");
     const lvl = stock - sg * step * k;
-    if (sg * (lvl - low) < 1 - 1e-6) break;   // a menos de 1 do ponto mais baixo: fica para a passada de contorno
+    if (sg * (lvl - low) < 0.05) break;   // 5.99.22: chegou no ponto mais baixo — a passada de contorno fica a no máximo 1 passe (8) do menor Ø do último passe
     if (od ? lvl >= topC - 1e-6 : lvl <= topC + 1e-6){
       const zp = od && above && above.dz > 0 && lvl > above.x + 1e-6 ? zEnd - above.dz : zEnd;
       if (zp !== zEnd) L.extraZ.push(`Z${f3(zp)}`, `Z${f3(zp + 0.2)}`);
@@ -5578,17 +5578,32 @@ function roughPasses(path, stock, mode, feed, apRad, allowRad, rn, above){
   // bucha (sem cortar nada) colada no lábio/acabamento. Se nenhum ponto dela entra no material, ela sai (o acabamento faz tudo).
   if (extra && seq.every(q => sg * q.x >= uC - 1e-6)) return L;   // passe que não corta nada: sai
   if (!extra && clip === stock && seq.every(q => od ? q.x >= stock - 1e-6 : q.x <= stock + 1e-6)){ L.semCorte = true; return L; }
-  const s0 = seq[0];
-  L.push(`G0 X${f3(s0.x)} Z3.500`, `G1 X${f3(s0.x)} Z3.000 F1.000`);
+  // 5.99.22 (usuário 25/11/2026, PSH 106 310x350x30 bucha 285x390: "tem passe que usina no mesmo ponto… perda de tempo"): trecho em
+  // que o percurso fica no nível do passe anterior (clip) já foi usinado — como no Mastor, recua 0,4, anda em rápido e volta a cortar
+  // só onde ainda tem material (no começo: entra direto onde começa o material; no fim: sai)
+  const air = q => Math.abs(sg * q.x - uC) < 1e-4, airSeg = j => seq[j].t === "L" && air(seq[j - 1]) && air(seq[j]);
+  let i0 = 0; while (i0 + 1 < seq.length && airSeg(i0 + 1)) i0++;
+  if (i0 >= seq.length - 1) return L;
+  const s0 = seq[i0], xR = f3(clip + sg * 0.4);
   let prev = s0, first = true;
-  for (let i = 1; i < seq.length; i++){
+  if (i0 === 0) L.push(`G0 X${f3(s0.x)} Z3.500`, `G1 X${f3(s0.x)} Z3.000 F1.000`);
+  else { const xL = f3(sg * (Math.max(uC, ...pts.filter(q => q.z >= s0.z - 1e-6).map(q => sg * sx(q.x))) + 0.5));   // entra por cima do que sobrou
+    L.push(`G0 X${xL} Z3.500`, `G0 X${xL} Z${f3(s0.z)}`, `G1 X${f3(s0.x)} Z${f3(s0.z)} F${feed}`); first = false; }
+  for (let i = i0 + 1; i < seq.length; i++){
     const q = seq[i];
+    if (airSeg(i)){
+      let j = i; while (j + 1 < seq.length && airSeg(j + 1)) j++;
+      if (j >= seq.length - 1) break;   // daqui até o fim já está usinado: sai
+      // o rápido passa ACIMA do que sobrou no trecho (o passe anterior seguiu o contorno onde ele fica acima do nível) + 0,5
+      const s = seq[j], uL = Math.max(uC, ...pts.filter(q => q.z <= prev.z + 1e-6 && q.z >= s.z - 1e-6).map(q => sg * sx(q.x))), xL = f3(sg * (uL + 0.5));
+      L.push(`G0 X${xL} Z${f3(prev.z)}`, `G0 X${xL} Z${f3(s.z)}`, `G1 X${f3(s.x)} Z${f3(s.z)}`); prev = s; i = j; continue;
+    }
     if (Math.abs(q.z - prev.z) < 5e-4 && Math.abs(q.x - prev.x) < 5e-4) continue;
     if (first){ L.push(`G1 X${f3(prev.x)} Z${f3(prev.z)} F${feed}`); first = false; }
     L.push(q.t === "A" ? `G${q.ccw ? 3 : 2} X${f3(q.x)} Z${f3(q.z)} R${f3(q.R ?? rn)}` : `G1 X${f3(q.x)} Z${f3(q.z)}`);
     prev = q;
   }
-  L.push(`G0 X${f3(clip + sg * 0.4)} Z${f3(zEnd + 0.2)}`, `G0 X${f3(clip + sg * 0.4)} Z3.000`);
+  L.push(`G0 X${xR} Z${f3(prev.z + 0.2)}`, `G0 X${xR} Z3.000`);
   return L;
   }
 }

@@ -6,6 +6,11 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.98.13 — PSE 108 (DP) com D14: fim do interno recua no X do desbaste (25/11/2026)
+- Usuário (PSE 108 8,5x10,9x2 PTFE+BR, tarugo): o acabamento interno da T2D14 recuava em X4.5 (Ø int − 4) e as costas da barra
+  pegavam do outro lado do furo. Agora, com a D14 (T2D14/T4D14) e passe de desbaste, recua no mesmo X em que saiu o último
+  passe de desbaste (X5.5). Só no PSE 108 (DP); outros perfis e ferramentas não mudaram.
+
 ## 5.98.12 — Ciclo de várias peças: número do programa de 1 peça e sem "Quem desenhou?" (25/11/2026)
 - Usuário: o ciclo é feito depois do programa/desenho de 1 peça e só é reaberto para mudar peças por ciclo ou bedame.
   Ao salvar o ciclo (2+ peças), o aviso "JÁ EXISTE desenho com essas medidas" não aparece mais: o número sugerido é o do

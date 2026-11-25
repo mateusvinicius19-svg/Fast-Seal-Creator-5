@@ -3074,6 +3074,12 @@ function dpBucha(L, p){
   if (od.length) out.splice(iF + 5, 0, "; (DESBASTE EXTERNO - MAX. 8 NO DIAMETRO, ACABAMENTO 2)", ...od);
   const iN = out.findIndex(s => /;\(INTERNO\)/.test(s));
   if (id.length) out.splice(iN + 1, 0, "; (DESBASTE INTERNO - MAX. 8 NO DIAMETRO, ACABAMENTO 2)", ...id);
+  // 5.98.13 (usuário 25/11/2026): D14 (furo pequeno, pouco espaço) — o fim do acabamento interno recua no MESMO X em que saiu o
+  // último passe de desbaste (Ø int − 4 levava as costas da barra no outro lado do furo)
+  if (lvI.length && D14_TOOLS.includes(String(p.tInt || "").toUpperCase())){
+    const xR = lvI[lvI.length - 1] - 1, k0 = out.findIndex((s, i) => i > iN + id.length && /^G01 X-?[\d.]+\s*$/.test(s) && /^G40 G00 Z/.test(out[i + 1] || ""));
+    if (k0 >= 0 && Number(out[k0].slice(5)) < xR) out[k0] = "G01 X" + X(xR);
+  }
   const iS = out.findIndex(s => /^G97 S/.test(s));
   if (iS >= 0 && (p.rpm === "" || p.rpm === undefined || isNaN(p.rpm))) out[iS] = "G97 S" + gen15(rpmLookup(D, RPM_TABLE)) + " M3";
   out.unshift(";BUCHA " + bu.txt);

@@ -6,6 +6,10 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.99.22 — Desbaste: sem passe no mesmo lugar; próximo passe a no máximo 8 do menor Ø do anterior (25/11/2026)
+- Passe que segue o contorno não repassa onde o passe anterior já usinou (PSH 106 310x350x30 bucha 285x390: "tem passe que usina no mesmo ponto"): como no Mastor, recua, anda em rápido por cima do que sobrou (+0,5) e volta a cortar só onde ainda tem material.
+- Cada passe fica a no máximo 8 no Ø do MENOR Ø do passe anterior; a passada de contorno também (antes podia chegar a 9).
+
 ## 5.99.21 — Desbaste no padrão do Mastor (níveis da bucha, passe não entra no perfil); contorno a 8 no Ø (25/11/2026)
 - Base: programas do Mastor na Programas_CNC (045002, 045016, 045060, 045078, 045079…). Os níveis em X saem da bucha de 8 em 8 no Ø (externo e interno) até o ponto mais baixo da passada de contorno; o passe que chega no perfil segue o contorno (não entra nele) — nenhum passe tira mais que 8 em lugar nenhum. Em Z continua como estava (passes até o fim, +1/+2 do PU); o Z do Mastor (parar no perfil) não foi copiado.
 - Passada de contorno (desbaste final) a 8 no Ø do acabamento, externo e interno (alR vazio = 4). Celeron, POM e Ø int < 20 com o sobremetal antigo do perfil. PSR 102 (desbaste próprio) não mudou.

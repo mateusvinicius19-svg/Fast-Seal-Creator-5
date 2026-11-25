@@ -6,6 +6,9 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.99.15 — PSH 110: opção Teflon externo e interno em 1 passe (25/11/2026)
+- PSH 110: campo "Teflon: externo e interno em 1 passe só" (Não / Sim). Com Sim e a peça em PTFE, sai sem desbaste: só o passe de acabamento no externo e no interno. Padrão Não (igual antes).
+
 ## 5.99.14 — PSH 110: interno da intermediária com a T2D1 (25/11/2026)
 - PSH 110 intermediária (PTFE e outros que usavam a T4D4): o V de 45° nas costas do interno a T4D4 não faz (máx. 30°) → interno com a T2D1. Base, tampa e intermediária em PU não mudam.
 

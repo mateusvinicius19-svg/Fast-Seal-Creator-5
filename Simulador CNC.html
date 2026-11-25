@@ -5960,8 +5960,14 @@ function psr102Build(p){
   const zDeep = pout[pout.length - 1].p[0] - (deepAbove(p, tO)?.dz || 0);   // sobremetal externo > 10 no Ø: esses passes vão 1 mm a mais em Z (usuário 09/11); > 15: 2 mm (v5.89.0)
   while (lvl > p.dext + 0.2){ pass(lvl, zDeep); clip = lvl; lvl -= step; }
   const zAt = x => -g.prot * (x - sh - g.tipo) / (g.lipf - g.tipo);
-  while (lvl > g.tipo + sh + 0.2){ pass(lvl, Math.min(Math.max(zAt(lvl), zF), 0.5)); clip = lvl; lvl -= step; }
-  const cp = pout.map(it => [it.p[0], it.p[0] > zF - 1e-6 ? Math.min(2 * it.p[1] + sh, clip) : 2 * it.p[1] + sh]);
+  // 5.99.10 (usuário 25/11/2026, PSR 102 25,4x35,5x4,76x7,14 PU bucha 12x48 / tarugo 40): o rebaixo da face leva UM desbaste (o
+  // contorno abaixo); os passes do lábio só quando o rebaixo é muito fundo (> 12 no Ø acima do contorno)
+  const clipBody = clip;   // Ø do último passe reto do calcanhar (o contorno termina nele)
+  if (clip - (g.tipo + sh) > 2 * step) while (lvl > g.tipo + sh + 0.2){ pass(lvl, Math.min(Math.max(zAt(lvl), zF), 0.5)); clip = lvl; lvl -= step; }
+  // contorno (sobremetal sh no Ø) só no rebaixo: preso no Ø já desbastado e termina quando chega nele (antes passava a peça toda a
+  // +5 no Ø, por cima do último passe reto — cortando ar)
+  const cp = []; for (const it of pout){ const x = Math.min(2 * it.p[1] + sh, it.p[0] > zF - 1e-6 ? clip : clipBody); cp.push([it.p[0], x]);
+    if (cp.length > 1 && x >= clipBody - 1e-6 && it.p[0] < 0) break; }
   L.push(`G0 X${f3(cp[0][1])} Z3.500`, `G1 X${f3(cp[0][1])} Z3.000 F1.000`);
   cp.slice(1).forEach((q, i) => L.push(`G1 X${f3(q[1])} Z${f3(q[0])}` + (i === 0 ? " F0.160" : "")));
   // v5.80.3 (usuário 19/11/2026): o contorno em G1 sobe acima da bucha (X143,6 no 120x138,6 bucha 142) e o recuo em G0 voltava em

@@ -6,6 +6,12 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.99.10 — PSR 102: um desbaste só no rebaixo da face (25/11/2026)
+- Usuário (PSR 102 25,4x35,5x4,76x7,14 PU, bucha 12x48 e tarugo Ø40): o externo tinha passe de contorno a +5 no Ø ao longo da
+  peça toda (com a bucha 48 passava por cima do passe X36 já feito) e no tarugo o rebaixo levava 2 desbastes (X34 + contorno).
+  Agora o rebaixo da face leva UM desbaste (o contorno), que termina no Ø do último passe do calcanhar; os passes do lábio só
+  quando o rebaixo é fundo (> 12 no Ø acima do contorno — ex.: 170x198 continua igual).
+
 ## 5.99.9 — PSG 101 também com "📐 Salvar só o desenho" (25/11/2026)
 - Usuário: o PSG 101 também precisa salvar só o desenho (programa já existe). Mesmo botão do PSE 108 (5.99.8):
   grava só o PDF em DESENHOS\PSG 101\… Outros perfis sem o botão.

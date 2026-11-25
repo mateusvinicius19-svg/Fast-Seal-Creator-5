@@ -6,6 +6,11 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.98.12 — Ciclo de várias peças: número do programa de 1 peça e sem "Quem desenhou?" (25/11/2026)
+- Usuário: o ciclo é feito depois do programa/desenho de 1 peça e só é reaberto para mudar peças por ciclo ou bedame.
+  Ao salvar o ciclo (2+ peças), o aviso "JÁ EXISTE desenho com essas medidas" não aparece mais: o número sugerido é o do
+  desenho existente (046140 → 046140 CICLO N PÇ). Também não pergunta "Quem desenhou?" (o desenho não é gravado, 5.98.11).
+
 ## 5.98.11 — Ciclo de várias peças: salvar não grava o desenho de novo (25/11/2026)
 - Usuário: o desenho e o programa de 1 peça são feitos antes; no programa "CICLO N PÇ" (PSA 108, PSE 108, ciclo de arruelas)
   o salvar agora grava só o .PIT e o MCS 500 — sem regravar/perguntar o desenho e sem imprimir.

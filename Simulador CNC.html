@@ -4383,10 +4383,13 @@ async function saveProgram0(auto){
   if (p110 === "A" || p110 === "B"){ try { const k = localStorage.getItem(k110); if (k) sug = k; } catch(e){} }
   // v5.70.3 (usuário 18/11/2026): pergunta cancelada não deixa mais "Procurando o próximo número livre…" na tela — diz por que não salvou
   const parar = t => { $("genMsg").textContent = "NÃO salvo: " + t; $("genMsg").style.color = "#b2221f"; };
+  const gp0 = state.genParams, nCiclo = gp0 && !auto ? (["ciclo", "semch"].includes(gp0.tipoGen) ? xround(gp0.n, 0) : cicloPcs(gp0)) : 0;
   // já existe desenho com as mesmas medidas (pasta DESENHOS): pergunta antes de criar número novo (usuário 17/11/2026)
   if (!auto && !state.alterNum && !p110 || p110 === "M"){ let L = null; try { L = await desDupes(state.genParams); } catch(e){}
     if (L && L.length){ const ex = L.find(x => x.num);
-      if (ex){
+      // 5.98.12 (usuário 25/11/2026): ciclo de várias peças é feito DEPOIS do programa/desenho de 1 peça — usa o número dele, sem perguntar
+      if (ex && nCiclo > 1) sug = ex.num;
+      else if (ex){
         if (!confirm(`JÁ EXISTE desenho com essas medidas:\n\n${L.map(x => "• " + x.name).join("\n")}\n\nOK = salvar um programa NOVO mesmo assim\nCancelar = não salvar e abrir o ${ex.num} existente`)){
           parar(`já existe o programa ${ex.num} com essas medidas (abrindo em 🔎 Ver programa).`);
           $("btnVer").click(); setTimeout(() => { const v = $("verNum"); if (v){ v.value = ex.num; $("verForm").requestSubmit(); } }, 50); return; }
@@ -4398,7 +4401,7 @@ async function saveProgram0(auto){
   const num = auto ? sug : forcedNum !== null ? forcedNum : prompt("Número do programa" + (state.alterNum ? " (alterando " + sug + ")" : sug ? " (próximo livre: " + sug + ")" : " (ex.: 046004)") + (suf ? ` — bucha especial: vai salvar como "número ${suf[1]}"` : "") + ":", sug);
   if (num === null) return parar("número do programa cancelado. Se a janela do número nem apareceu, aperte F5 e salve de novo.");
   if (!auto && !askCod()) return parar("Cód. interno cancelado. Para salvar sem código, deixe em branco e clique em OK.");
-  if (!auto && state.genParams && DESENHO_TYPES.includes(state.genParams.tipoGen) && !askDes()) return parar("\"Quem desenhou?\" cancelado.");
+  if (!auto && nCiclo <= 1 && state.genParams && DESENHO_TYPES.includes(state.genParams.tipoGen) && !askDes()) return parar("\"Quem desenhou?\" cancelado.");
   let base = num.trim().replace(/\.(pit|txt|nc)$/i, "");
   if (!base) return parar("número do programa em branco.");
   if (/^\d{1,6}[A-Z]?$/i.test(base)) base = base.replace(/^(\d+)/, d => d.padStart(6, "0"));
@@ -4406,7 +4409,6 @@ async function saveProgram0(auto){
   if (suf && !base.toUpperCase().includes(suf[1].toUpperCase())) base += " " + suf[1];
   // v5.8.0 (usuário 10/11): PSA 108 com várias peças por ciclo leva a quantidade no nome — "046140 CICLO 5 PÇ"
   // v5.21.10 (usuário 11/11): o "CICLO N PÇ" vai logo depois do número (045000 CICLO 5 PÇ 9X30), também no Programa Arruela/ciclo
-  const gp0 = state.genParams, nCiclo = gp0 && !auto ? (["ciclo", "semch"].includes(gp0.tipoGen) ? xround(gp0.n, 0) : cicloPcs(gp0)) : 0;
   { const nc = nCiclo;
     if (nc > 1 && !/CICLO/i.test(base)){ const m = /^(\d+)(.*)$/.exec(base); base = m ? `${m[1]} CICLO ${nc} PÇ${m[2]}` : `${base} CICLO ${nc} PÇ`; } }
   const pitName = base + ".PIT", mcsName = base.replace(/^0+(?=\d)/, "") + ".txt";

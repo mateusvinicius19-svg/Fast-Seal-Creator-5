@@ -6,6 +6,10 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.99.11 — PSR 102: último passe do calcanhar a 1 mm por lado do acabamento (25/11/2026)
+- Usuário (25,4x35,5 bucha 12x48): o passe X36 ficava a 0,25 por lado do Ø35,5. Agora o último passe reto do externo fica no
+  mínimo em Ø ext + 2 (X37,5); o rebaixo termina nele. Só o PSR 102.
+
 ## 5.99.10 — PSR 102: um desbaste só no rebaixo da face (25/11/2026)
 - Usuário (PSR 102 25,4x35,5x4,76x7,14 PU, bucha 12x48 e tarugo Ø40): o externo tinha passe de contorno a +5 no Ø ao longo da
   peça toda (com a bucha 48 passava por cima do passe X36 já feito) e no tarugo o rebaixo levava 2 desbastes (X34 + contorno).

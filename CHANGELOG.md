@@ -6,6 +6,12 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.99.0 — Cada perfil abre com as configurações do último item salvo (25/11/2026)
+- Usuário: ao escolher o perfil (ex.: PSH 106), o formulário vem com as configurações da última PSH 106 salva (💾 Salvar), não
+  com o padrão. Guardado por perfil no navegador (`ps_prof_<perfil>`; PSE 108 e Arruela ISO separados). Não voltam: tolerâncias
+  do desenho (começam no padrão) e a bucha digitada (bi/bo). Antes do 1º Salvar de cada perfil continua o padrão.
+- Correção: o "✏️ só trocar a bucha" gravava no histórico as configurações do formulário aberto (de outra peça); agora não grava.
+
 ## 5.98.13 — PSE 108 (DP) com D14: fim do interno recua no X do desbaste (25/11/2026)
 - Usuário (PSE 108 8,5x10,9x2 PTFE+BR, tarugo): o acabamento interno da T2D14 recuava em X4.5 (Ø int − 4) e as costas da barra
   pegavam do outro lado do furo. Agora, com a D14 (T2D14/T4D14) e passe de desbaste, recua no mesmo X em que saiu o último

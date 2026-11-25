@@ -6,6 +6,13 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.99.3 — Desenho do programa: reconhece o PSE 108 e usa o desenho padrão com os chanfros do programa (25/11/2026)
+- Usuário (027780 é um PSE 108): o 📐 Desenho do programa saía como perfil especial. Agora, se o programa encaixa no PSE 108 (DP),
+  a janela oferece "Usar o desenho padrão do PSE 108" com Ø/altura e CADA chanfro tirados do programa (externo frente/trás,
+  interno frente/trás; 0 = sem chanfro, sem cota). O PSE 108 entra em 2º na lista e vem escolhido se for o mais parecido ou se o
+  número já tem pasta em DESENHOS\PSE 108. Ø encaixado no X escrito no programa (11,8, não 11,806).
+- Desenho padrão do PSE 108/Arruela ISO gerados pelo formulário: sem mudança.
+
 ## 5.99.2 — Programa aberto do Programas_CNC: o Desenho é o do programa (25/11/2026)
 - Usuário (027780, PSE 108 do Fast Seal, 11,8x14x2): abrindo um programa existente (🔎 Ver programa, Histórico, arquivo ou
   colar), a etapa 4 Desenho / 👁 Ver desenho mostrava o perfil do FORMULÁRIO (PSE 108 novo, chanfro nos dois lados) e não o

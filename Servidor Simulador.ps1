@@ -182,6 +182,18 @@ function Atender($ctx) {
         if ([IO.Directory]::Exists($f)) { [IO.Directory]::Move($f, $to) } elseif ([IO.File]::Exists($f)) { [IO.File]::Move($f, $to) } else { SendText $ctx 404 'nao existe'; break }
         SendText $ctx 200 'ok'
       }
+      'cancel' {   # v5.99.0 (usuario 25/11/2026): Cancelar item - MOVE arquivo/pasta do Programas_CNC ou DESENHOS para _CANCELADOS; nunca apaga, nunca sobrescreve
+        if ($q.HttpMethod -ne 'POST') { SendText $ctx 405 'use POST'; break }
+        $to = Full (Arg $ctx 'to'); $can = Join-Path $ROOT '_CANCELADOS'
+        if (-not $to.StartsWith($can + [IO.Path]::DirectorySeparatorChar, 'OrdinalIgnoreCase')) { SendText $ctx 403 'destino so dentro de _CANCELADOS'; break }
+        $okSrc = $false
+        foreach ($d in 'Programas_CNC', 'DESENHOS') { if ($f.StartsWith((Join-Path $ROOT $d) + [IO.Path]::DirectorySeparatorChar, 'OrdinalIgnoreCase')) { $okSrc = $true } }
+        if (-not $okSrc) { SendText $ctx 403 'origem so do Programas_CNC ou DESENHOS'; break }
+        if ([IO.Directory]::Exists($to) -or [IO.File]::Exists($to)) { SendText $ctx 409 'ja existe'; break }
+        [IO.Directory]::CreateDirectory([IO.Path]::GetDirectoryName($to)) | Out-Null
+        if ([IO.Directory]::Exists($f)) { [IO.Directory]::Move($f, $to) } elseif ([IO.File]::Exists($f)) { [IO.File]::Move($f, $to) } else { SendText $ctx 404 'origem nao existe'; break }
+        SendText $ctx 200 'ok'
+      }
       default { SendText $ctx 404 'nao existe' }
     }
   } catch { try { SendText $ctx 500 "$_" } catch {} }

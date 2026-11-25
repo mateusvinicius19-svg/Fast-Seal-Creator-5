@@ -6,6 +6,22 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.99.0 — 🗑 Cancelar / refazer item (pasta _CANCELADOS) (25/11/2026)
+Teste dos 37 perfis: todos geram; nenhum programa mudou.
+- Usuário: "preciso de alguma opção para cancelar ou refazer o item" (PSE 106 46460, cód. 46466: desenhado com altura de
+  peça quando era tudo alojamento; refeito e salvo em cima → a pasta do desenho com as medidas erradas ficou em DESENHOS e o
+  histórico com 2 linhas). "Pode criar uma pasta e colocar cancelados" — para consultar os erros depois.
+- ✏️ Alterar programa → **🗑 Cancelar / refazer o item**: digita o número e aparece tudo o que existe com ele — .PIT (com as
+  variantes de bucha/ciclo/A-B), MCS 500, pastas de desenho em qualquer família, pedido ARGUS na fila e as linhas do histórico.
+  Marca o que está errado e escreve o motivo.
+- Nada é apagado: os marcados vão para `PROJETOS\_CANCELADOS\<NNNNNN> <data hora>\` (mesmas subpastas de origem) com um
+  `CANCELAMENTO.txt` (quem, quando, motivo, de onde saiu cada arquivo). As linhas do histórico ganham a coluna nova
+  **Cancelado** (data, quem e motivo) e aparecem riscadas em vermelho na lista.
+- **Cancelar e refazer**: depois de mover, reabre as medidas no formulário (Abrir configurações) e o 💾 Salvar sugere o
+  mesmo número. Pedido ARGUS já feito pelo Kuru (`feitos\`) não é mexido: a janela avisa.
+- Servidor: operação nova `cancel` (só move de Programas_CNC/DESENHOS para _CANCELADOS; nunca sobrescreve). Vale depois de
+  abrir pelo Abrir Simulador.bat (religa o servidor desta versão).
+
 ## 5.98.7 — PSH 106 / PSE 106: canal com altura ÷ 2 quando a altura é menor que a secção (25/11/2026)
 - Usuário (PSH 106 20x28x3): com altura < secção a profundidade do canal passa a ser altura ÷ 2 (antes secção ÷ 2:
   3 mm de altura ficava com canal de 2 mm; agora 1,5 mm). Altura ≥ secção continua secção ÷ 2.

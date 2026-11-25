@@ -4264,7 +4264,7 @@ async function nextFreeProg(dir){
 }
 // ---- histórico dos programas salvos (como "Produtos do trabalho" do Fast Seal): Programas_CNC\Historico Simulador CNC.csv ----
 const HIST_FILE = "Historico Simulador CNC.csv";
-const HIST_COLS = ["Data", "Programa", "Perfil", "Nominais", "Comentario", "Pecas/ciclo", "Custo peca (R$)", "Material", "Bucha I", "Bucha E", "Maquina", "Arquivo Fagor", "Arquivo MCS", "Desenho", "Parametros"];
+const HIST_COLS = ["Data", "Programa", "Perfil", "Nominais", "Comentario", "Pecas/ciclo", "Custo peca (R$)", "Material", "Bucha I", "Bucha E", "Maquina", "Arquivo Fagor", "Arquivo MCS", "Desenho", "Parametros", "Cancelado"];   // v5.99.0: "Cancelado" = data, quem e motivo (🗑 Cancelar item)
 // campos do formulário (para o "Alterar programa" reabrir igual)
 function formSnapshot(){ const vals = {}; document.querySelectorAll("#genBox input[data-k], #genBox select[data-k]").forEach(el => vals[el.dataset.k] = el.value); return JSON.stringify({ type: $("genType").value, vals }); }
 function histRecord(p, type, text, pitName, mcsName, pdfMsg){
@@ -4299,7 +4299,7 @@ async function histRead(dir){
 async function histAppend(dir, rec){
   const rows = await histRead(dir);
   const out = rows.length ? rows : [HIST_COLS.slice()];
-  if (!out[0].includes("Parametros")) out[0].push("Parametros");   // CSV antigo: ganha a coluna nova no fim
+  for (const k of HIST_COLS) if (!out[0].includes(k)) out[0].push(k);   // CSV antigo: ganha as colunas novas no fim (Parametros, Cancelado)
   out.push(out[0].map(k => rec[k] ?? ""));
   const txt = out.map(r => r.map(csvCell).join(";")).join("\r\n") + "\r\n";
   await writeFile(dir, HIST_FILE, toCp1252(txt));
@@ -4312,8 +4312,10 @@ function histRenderInline(rows, note){
   const head = HIST_ROWS[0] || HIST_COLS, data = HIST_ROWS.slice(1).reverse(), idx = HIST_SHOW.map(k => head.indexOf(k));
   const q = ($("histQi").value || "").toLowerCase(), list = q ? data.filter(r => r.join(" ").toLowerCase().includes(q)) : data;
   const th = `<tr>${HIST_SHOW.map(k => `<th style="text-align:left;padding:6px 8px;background:#f1f3f5;position:sticky;top:0;border-bottom:1px solid #dde1e6">${esc(k === "Comentario" ? "Comentário" : k === "Pecas/ciclo" ? "Peças/ciclo" : k === "Custo peca (R$)" ? "Custo peça (R$)" : k === "Maquina" ? "Máquina" : k)}</th>`).join("")}</tr>`;
-  const fi = head.indexOf("Arquivo Fagor");
-  $("histTi").innerHTML = th + list.map((r, i) => `<tr data-pit="${esc(fi >= 0 ? (r[fi] || "") : "")}" title="Clique para abrir no simulador" style="cursor:pointer;background:${i % 2 ? "#fafbfc" : "#fff"}">${idx.map(j => `<td style="padding:4px 8px;border-bottom:1px solid #eef0f2;white-space:nowrap">${esc(j >= 0 ? (r[j] || "") : "")}</td>`).join("")}</tr>`).join("");
+  const fi = head.indexOf("Arquivo Fagor"), ci = head.indexOf("Cancelado"), iPg = head.indexOf("Programa");
+  // v5.99.0: linha cancelada (🗑 Cancelar item) fica riscada e em vermelho; os arquivos estão em PROJETOS\_CANCELADOS
+  $("histTi").innerHTML = th + list.map((r, i) => { const can = ci >= 0 && String(r[ci] || "").trim();
+    return `<tr data-pit="${esc(fi >= 0 ? (r[fi] || "") : "")}" title="${can ? esc("CANCELADO: " + can + " — arquivos em PROJETOS\\_CANCELADOS") : "Clique para abrir no simulador"}" style="cursor:pointer;background:${can ? "#fdeeee" : i % 2 ? "#fafbfc" : "#fff"}${can ? ";color:#a2231d;text-decoration:line-through" : ""}">${idx.map(j => `<td style="padding:4px 8px;border-bottom:1px solid #eef0f2;white-space:nowrap">${esc(j >= 0 ? (r[j] || "") : "")}${can && j === iPg ? ' <b style="text-decoration:none;display:inline-block">CANCELADO</b>' : ""}</td>`).join("")}</tr>`; }).join("");
   $("histInfo").textContent = `${data.length} programas` + (note ? " · " + note : "") + " · clique numa linha para abrir o programa";
   $("histTi").querySelectorAll("tr[data-pit]").forEach(tr => tr.onclick = () => histOpenProgram(tr.dataset.pit, tr));
 }
@@ -4718,7 +4720,9 @@ async function altOpenConfig(num){
   if (iP < 0) return "O histórico está vazio.";
   const all = rows.slice(1).filter(r => (String(r[iP] || "").match(/^(\d+)/) || [])[1] === num);
   if (!all.length) return `O ${num} não está no histórico do Simulador (foi feito fora dele ou antes do histórico).`;
-  const ok = all.filter(r => iJ >= 0 && /^\{/.test(String(r[iJ] || "").trim()));
+  const iC = head.indexOf("Cancelado"), comP = all.filter(r => iJ >= 0 && /^\{/.test(String(r[iJ] || "").trim()));
+  // v5.99.0: vale a última linha NÃO cancelada; se todas foram canceladas (🗑 Cancelar e refazer), usa a última cancelada
+  const vivas = comP.filter(r => iC < 0 || !String(r[iC] || "").trim()), ok = vivas.length ? vivas : comP;
   if (!ok.length) return `O ${num} está no histórico, mas foi salvo sem as configurações (versão antiga ou pelo ✏️ só bucha). Abra pelo perfil e digite as medidas.`;
   const r = ok[ok.length - 1], n = formRestore(r[iJ]);
   state.alterNum = num;   // 💾 Salvar sugere o mesmo número (se o nome for igual, pergunta antes de substituir)
@@ -4738,6 +4742,9 @@ $("btnAlt").onclick = () => {
     <div style="border:1px solid #d5d9de;border-radius:8px;padding:10px;display:grid;gap:6px;background:#f7f8fa">
       <button class="btn" type="button" id="altCfg" style="justify-self:start">&#x1F4C2; Abrir configurações da peça</button>
       <span style="color:#666;font-size:12px">Abre no formulário as medidas e opções com que a peça foi salva (mesmo perfil), para mudar <b>peças por ciclo, tolerâncias do desenho</b> etc. e salvar de novo (💾 Salvar sugere o mesmo número).</span></div>
+    <div style="border:1px solid #e3b9b6;border-radius:8px;padding:10px;display:grid;gap:6px;background:#fdf5f4">
+      <button class="btn" type="button" id="altCan" style="justify-self:start">&#x1F5D1;&#xFE0F; Cancelar / refazer o item</button>
+      <span style="color:#666;font-size:12px">Item feito errado? Mostra tudo o que existe com esse número (programa, MCS 500, desenhos, pedido ARGUS e histórico) e <b>move para PROJETOS\\_CANCELADOS</b> (nada é apagado). <b>Cancelar e refazer</b> já reabre as medidas para corrigir e salvar com o <b>mesmo número</b>.</span></div>
     <b style="font:700 13px Segoe UI,Arial;margin-top:2px">Ou: só trocar a bucha</b>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
       <label>Bucha Ø interno<input id="altBi" style="${inp}" inputmode="decimal" placeholder="0 = tarugo"></label>
@@ -4749,6 +4756,12 @@ $("btnAlt").onclick = () => {
   m.onclick = e => { if (e.target === m) m.remove(); };
   $("altCancel").onclick = () => m.remove();
   $("altNum").focus();
+  $("altCan").onclick = () => {
+    let num = $("altNum").value.trim().replace(/\.pit$/i, "");
+    if (/^\d{1,6}$/.test(num)) num = num.padStart(6, "0");
+    if (!/^\d{6}/.test(num)) return $("altErr").textContent = "Digite o número do programa (ex.: 046048).";
+    m.remove(); canOpen(num.slice(0, 6));
+  };
   $("altCfg").onclick = () => {
     let num = $("altNum").value.trim().replace(/\.pit$/i, "");
     if (/^\d{1,6}$/.test(num)) num = num.padStart(6, "0");
@@ -4767,6 +4780,111 @@ $("btnAlt").onclick = () => {
     m.remove(); altRun(num, bi, bo);   // ainda dentro do clique: pode pedir a pasta Programas_CNC
   };
 };
+// ---- 🗑 Cancelar / refazer item (v5.99.0, usuário 25/11/2026) ----
+// "Preciso de alguma opção para cancelar ou refazer o item" (PSE 106 46460: desenhado com altura de PEÇA quando era tudo
+// ALOJAMENTO; refeito e salvo em cima → a pasta do desenho com as medidas erradas ficou em DESENHOS e o histórico com 2 linhas).
+// Nada é apagado: o que for marcado vai para PROJETOS\_CANCELADOS\<NNNNNN> <data hora>\ (mesmas subpastas de origem) com um
+// CANCELAMENTO.txt (quem, quando, motivo, de onde saiu cada arquivo) — dá para consultar os erros e devolver à mão.
+// As linhas do histórico NÃO somem: ganham a coluna "Cancelado" (data, quem e motivo) e aparecem riscadas.
+// Só pelo servidor (Abrir Simulador.bat): é ele que move os arquivos (operação "cancel": só de Programas_CNC/DESENHOS para _CANCELADOS).
+async function srvCancelMove(rel, toRel){
+  const r = await srvFetch(`${SRV}/fs/cancel?p=${encodeURIComponent(rel)}&to=${encodeURIComponent(toRel)}`, { method: "POST" }, true);
+  // servidor antigo (sem "cancel") responde 404 "nao existe"; o novo diz "origem nao existe" quando o arquivo sumiu
+  if (!r.ok) { const t = await r.text(); throw new Error(t === "nao existe" ? "servidor antigo: feche o Simulador e abra pelo Abrir Simulador.bat" : t === "origem nao existe" ? "não existe mais" : t); }
+}
+function canStamp(d = new Date()){ const z = v => String(v).padStart(2, "0"); return `${d.getFullYear()}-${z(d.getMonth() + 1)}-${z(d.getDate())} ${z(d.getHours())}h${z(d.getMinutes())}m${z(d.getSeconds())}`; }
+async function canFind(n6){
+  const n = n6.replace(/^0+(?=\d)/, ""), reP = new RegExp(`^${n6}(?!\\d)`), reM = new RegExp(`^${n}(?!\\d)`);
+  const root = srvDir("", "PROJETOS"), out = { itens: [], hist: [], feitos: [], avisos: [] };
+  // Programas_CNC (.PIT, com variantes "046460 9X30", "046460A", "046460 CICLO 5 PÇ")
+  try { const d = await root.getDirectoryHandle("Programas_CNC");
+    for await (const [nm, h] of d.entries(n6 + "*")) if (h.kind === "file" && reP.test(nm)) out.itens.push({ grupo: "Programa (Programas_CNC)", nome: nm, rel: `Programas_CNC/${nm}`, dest: `Programas_CNC/${nm}` });
+    try { const mc = await d.getDirectoryHandle("MCS 500");
+      for await (const [nm, h] of mc.entries(n + "*")) if (h.kind === "file" && reM.test(nm)) out.itens.push({ grupo: "MCS 500", nome: nm, rel: `Programas_CNC/MCS 500/${nm}`, dest: `Programas_CNC/MCS 500/${nm}` });
+    } catch(e){ if (e && e.srvFalha) throw e; out.avisos.push("pasta MCS 500 não encontrada"); }
+    const rows = await histRead(d), head = rows[0] || [], iP = head.indexOf("Programa"), iC = head.indexOf("Cancelado");
+    if (iP >= 0) rows.forEach((r, i) => { if (i && reP.test(String(r[iP] || ""))) out.hist.push({ i, r, head, cancelado: iC >= 0 ? String(r[iC] || "").trim() : "" }); });
+  } catch(e){ if (e && e.srvFalha) throw e; out.avisos.push("pasta Programas_CNC não encontrada"); }
+  // DESENHOS: pasta "PERFIL (medidas) 46460" em qualquer família (as pastas que começam com _ não são família)
+  try { const dd = await root.getDirectoryHandle("DESENHOS"), fams = [];
+    for await (const [nm, h] of dd.entries()) if (h.kind === "directory" && !nm.startsWith("_")) fams.push([nm, h]);
+    const achados = await Promise.all(fams.map(async ([fam, fh]) => { const L = [];
+      try { for await (const [nm, h] of fh.entries("*" + n + "*")) { const pd = desParse(nm); if (h.kind === "directory" && pd && pd.num.replace(/^0+(?=\d)/, "") === n) L.push({ grupo: "Desenho (DESENHOS\\" + fam + ")", nome: nm, rel: `DESENHOS/${fam}/${nm}`, dest: `DESENHOS/${fam}/${nm}`, fam }); } } catch(e){ if (e && e.srvFalha) throw e; }
+      return L; }));
+    achados.flat().forEach(x => out.itens.push(x));
+    // fila ARGUS: pendente (move junto) e já feito pelo Kuru (só avisa: o Anexo 1 do item já foi gravado)
+    try { const pa = await dd.getDirectoryHandle("_PEDIDOS ARGUS"), reJ = new RegExp(`_0*${n}\\.json$`, "i");
+      for await (const [nm, h] of pa.entries("*" + n + "*")) if (h.kind === "file" && reJ.test(nm)) out.itens.push({ grupo: "Pedido ARGUS na fila", nome: nm, rel: `DESENHOS/_PEDIDOS ARGUS/${nm}`, dest: `DESENHOS/_PEDIDOS ARGUS/${nm}` });
+      try { const fe = await pa.getDirectoryHandle("feitos"); for await (const [nm, h] of fe.entries("*" + n + "*")) if (h.kind === "file" && reJ.test(nm)) out.feitos.push(nm); } catch(e){}
+    } catch(e){ if (e && e.srvFalha) throw e; }
+  } catch(e){ if (e && e.srvFalha) throw e; out.avisos.push("pasta DESENHOS não encontrada"); }
+  return out;
+}
+async function canOpen(n6){
+  let m = $("canModal"); if (m) m.remove();
+  m = document.createElement("div"); m.id = "canModal"; m.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:90px 12px 40px";
+  const box = "background:#fff;border-radius:12px;max-width:760px;width:100%;padding:16px 18px;box-shadow:0 10px 40px rgba(0,0,0,.35);color:#222;font:13px Segoe UI,Arial;display:grid;gap:10px";
+  m.innerHTML = `<div style="${box}"><b style="font:700 16px Segoe UI,Arial">🗑️ Cancelar / refazer o ${esc(n6)}</b><span id="canMsg" style="color:#555">Procurando tudo o que existe com o número ${esc(n6)}…</span></div>`;
+  document.body.appendChild(m); m.onclick = e => { if (e.target === m) m.remove(); };
+  if (!SRV){ $("canMsg").style.color = "#b2221f"; $("canMsg").innerHTML = 'Cancelar item só funciona com o Simulador aberto pelo <b>Abrir Simulador.bat</b> (é o servidor dele que move os arquivos no W:). <button class="btn" type="button" id="canX">Fechar</button>'; $("canX").onclick = () => m.remove(); return; }
+  let F; try { F = await canFind(n6); } catch(e){ $("canMsg").style.color = "#b2221f"; $("canMsg").innerHTML = esc("Não consegui ler o W: — " + (e && e.message || e)) + ' <button class="btn" type="button" id="canX">Fechar</button>'; $("canX").onclick = () => m.remove(); return; }
+  const cel = "padding:4px 8px;border-bottom:1px solid #eef0f2;vertical-align:top";
+  const linhaArq = (x, k) => `<tr><td style="${cel}"><input type="checkbox" data-can="${k}" checked></td><td style="${cel};color:#666;white-space:nowrap">${esc(x.grupo)}</td><td style="${cel}">${esc(x.nome)}</td></tr>`;
+  const hv = (h, k) => { const c = h.head.indexOf(k); return c >= 0 ? String(h.r[c] || "") : ""; };
+  const linhaHist = (h, k) => `<tr${h.cancelado ? ' style="color:#999"' : ""}><td style="${cel}"><input type="checkbox" data-canh="${k}" ${h.cancelado ? "disabled" : "checked"}></td><td style="${cel};white-space:nowrap">${esc(hv(h, "Data"))}</td><td style="${cel}">${esc(hv(h, "Programa"))} · ${esc(hv(h, "Perfil"))} · ${esc(hv(h, "Nominais"))}${hv(h, "Comentario") ? " · " + esc(hv(h, "Comentario")) : ""}${h.cancelado ? " — já cancelado: " + esc(h.cancelado) : ""}</td></tr>`;
+  const nada = !F.itens.length && !F.hist.filter(h => !h.cancelado).length;
+  m.firstElementChild.innerHTML = `<b style="font:700 16px Segoe UI,Arial">🗑️ Cancelar / refazer o ${esc(n6)}</b>
+    <span style="color:#555">Marque o que está <b>errado</b>. Os arquivos marcados vão para <b>PROJETOS\\_CANCELADOS\\${esc(n6)} &lt;data hora&gt;</b> (nada é apagado). As linhas marcadas do histórico ficam riscadas, com o motivo.</span>
+    ${F.itens.length ? `<table style="border-collapse:collapse;width:100%"><tr><th></th><th style="text-align:left;${cel}">Onde</th><th style="text-align:left;${cel}">Arquivo / pasta</th></tr>${F.itens.map(linhaArq).join("")}</table>` : `<i style="color:#666">Nenhum arquivo com o número ${esc(n6)} no Programas_CNC, MCS 500, DESENHOS ou fila ARGUS.</i>`}
+    ${F.hist.length ? `<b style="margin-top:4px">Histórico do Simulador</b><table style="border-collapse:collapse;width:100%">${F.hist.map(linhaHist).join("")}</table>` : ""}
+    ${F.feitos.length ? `<div style="background:#fff7e0;border:1px solid #e8cf86;border-radius:8px;padding:8px">⚠ O Kuru já gravou no ARGUS o pedido ${F.feitos.map(esc).join(", ")} (Anexo 1 + código do programa). Ao <b>refazer</b> e salvar com o Cód. interno, sai um pedido novo que substitui o Anexo 1. Se só <b>cancelar</b>, confira o item no ARGUS à mão.</div>` : ""}
+    ${F.avisos.length ? `<span style="color:#a2231d">⚠ ${F.avisos.map(esc).join(" · ")}</span>` : ""}
+    <label>Motivo (fica no CANCELAMENTO.txt e no histórico)<input id="canMot" style="padding:7px 9px;border:1px solid #ccd;border-radius:6px;font:14px Segoe UI,Arial;width:100%;box-sizing:border-box" placeholder="ex.: desenhado com altura da peça, era tudo alojamento"></label>
+    <span id="canMsg"></span>
+    <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap"><button class="btn" type="button" id="canX">Fechar</button>
+      <button class="btn" type="button" id="canSo" ${nada ? "disabled" : ""}>🗑️ Só cancelar</button>
+      <button class="btn primary" type="button" id="canRef" ${!F.hist.some(h => /^\{/.test(hv(h, "Parametros").trim())) ? 'disabled title="Sem as medidas no histórico: cancele e faça de novo pelo perfil"' : ""}>🗑️ Cancelar e refazer</button></div>`;
+  $("canX").onclick = () => m.remove();
+  const rodar = async refazer => {
+    const itens = F.itens.filter((x, k) => m.querySelector(`[data-can="${k}"]`).checked), hist = F.hist.filter((h, k) => { const c = m.querySelector(`[data-canh="${k}"]`); return c && c.checked; });
+    const mot = $("canMot").value.trim(), msg = (t, bad) => { $("canMsg").style.color = bad ? "#b2221f" : "#555"; $("canMsg").textContent = t; };
+    if (!itens.length && !hist.length && !refazer) return msg("Marque pelo menos um arquivo ou linha do histórico.", true);
+    if (!mot && !confirm("Cancelar sem escrever o motivo?")) return;
+    m.querySelectorAll("button").forEach(b => b.disabled = true); msg("Movendo para _CANCELADOS…");
+    let pasta = `_CANCELADOS/${n6} ${canStamp()}`; const ok = [], falhou = [];
+    for (let k = 2; await srvStat(pasta).catch(() => null); k++) pasta = `_CANCELADOS/${n6} ${canStamp()} (${k})`;   // nunca mistura dois cancelamentos
+    for (const x of itens){ try { await srvCancelMove(x.rel, `${pasta}/${x.dest}`); ok.push(x); if (x.fam) delete desListCache[x.fam]; } catch(e){ falhou.push(`${x.nome}: ${e.message}`); } }
+    const quando = new Date().toLocaleString("pt-BR"), quem = state.user || "", marca = `${quando}${quem ? " por " + quem : ""}${mot ? " - " + mot : ""}`;
+    let hOk = 0, hErr = "";
+    if (hist.length) try {
+      const dir = await progDir(false, true); if (!dir) throw new Error("sem acesso ao Programas_CNC");
+      const rows = await histRead(dir), head = rows[0] || [], iP = head.indexOf("Programa"), iD = head.indexOf("Data");
+      if (!head.includes("Cancelado")) head.push("Cancelado");
+      const iC = head.indexOf("Cancelado");
+      for (const h of hist){ const r = rows[h.i];   // confere que a linha ainda é a mesma (outro PC pode ter mexido)
+        if (r && r[iP] === h.r[iP] && r[iD] === h.r[iD]){ while (r.length <= iC) r.push(""); r[iC] = marca; hOk++; } else hErr = " · alguma linha do histórico mudou enquanto isso: confira"; }
+      if (hOk){ const txt = rows.map(r => r.map(csvCell).join(";")).join("\r\n") + "\r\n"; await writeFile(dir, HIST_FILE, toCp1252(txt)); if (histOpen()) histLoadInline(false); }
+    } catch(e){ hErr = " · histórico NÃO marcado: " + e.message; }
+    if (ok.length) try {   // CANCELAMENTO.txt: para consultar o erro depois e saber de onde voltar cada arquivo
+      const L = [`CANCELAMENTO DO PROGRAMA ${n6}`, `Data: ${quando}`, `Quem: ${quem || "?"}`, `Motivo: ${mot || "(sem motivo)"}`, `Refazer: ${refazer ? "sim (refeito com o mesmo numero)" : "nao"}`, "",
+        "Arquivos movidos (origem em W:\\Parts\\PartsSeals\\PROJETOS):", ...ok.map(x => "  " + x.rel.replace(/\//g, "\\")), "",
+        "Linhas do historico marcadas:", ...(hist.length ? hist.map(h => "  " + h.r.slice(0, 5).join(" | ")) : ["  (nenhuma)"]),
+        ...(F.feitos.length ? ["", "Pedido ARGUS ja gravado pelo Kuru: " + F.feitos.join(", ")] : []), "",
+        "Para desfazer: mova cada arquivo/pasta de volta para a mesma pasta de origem."];
+      let d = srvDir("", "PROJETOS"); for (const nm of pasta.split("/")) d = await d.getDirectoryHandle(nm, { create: true });
+      await writeFile(d, "CANCELAMENTO.txt", toCp1252(L.join("\r\n") + "\r\n"));
+    } catch(e){ falhou.push("CANCELAMENTO.txt: " + e.message); }
+    const res = `${ok.length} arquivo(s)/pasta(s) em PROJETOS\\${pasta.replace(/\//g, "\\")}` + (hOk ? ` · ${hOk} linha(s) do histórico marcada(s) como CANCELADO` : "") + hErr + (falhou.length ? ` · NÃO moveu: ${falhou.join(" · ")}` : "");
+    if (falhou.length){ msg("⚠ " + res, true); $("canX").disabled = false; return; }
+    m.remove();
+    if (refazer){
+      const r = await altOpenConfig(n6).catch(e => "Erro: " + (e && e.message || e));
+      if (r !== true){ $("genMsg").textContent = `🗑️ Cancelado: ${res}. Não reabri as medidas: ${r}`; $("genMsg").style.color = "#b2221f"; return; }
+      $("genMsg").textContent = `🗑️ ${n6} cancelado (${res}). ` + $("genMsg").textContent + ` Ao salvar, use o mesmo número ${n6}.`;
+    } else { $("genMsg").textContent = `🗑️ ${n6} cancelado: ${res}.`; $("genMsg").style.color = ""; }
+  };
+  $("canSo").onclick = () => rodar(false); $("canRef").onclick = () => rodar(true);
+}
 // ---- 🧰 Biblioteca de ferramentas (v5.15.0, usuário 11/11/2026): as que já usamos, pelo corretor (T posição · D corretor) ----
 // Fotos: o usuário manda a foto de cada uma → embutir em FERR_FOTO[código] = "data:image/jpeg;base64,..." (vale em todos os PCs).
 const FERR_TIPOS = { face: "Faceamento", ext: "Externo", int: "Interno", corte: "Corte / bedame", canal: "Canal frontal (anel)", ranhura: "Ranhura externa" };

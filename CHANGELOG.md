@@ -6,6 +6,10 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.99.1 — Teste de perfis sem abrir o navegador do usuário (25/11/2026)
+- Usuário: o teste abria o navegador dele a cada vez. CLAUDE.md: rodar `testar-perfis.ps1` sempre com `-SemAbrir` e abrir a
+  página no navegador interno do app. O Simulador não mudou.
+
 ## 5.99.0 — Cada perfil abre com as configurações do último item salvo (25/11/2026)
 - Usuário: ao escolher o perfil (ex.: PSH 106), o formulário vem com as configurações da última PSH 106 salva (💾 Salvar), não
   com o padrão. Guardado por perfil no navegador (`ps_prof_<perfil>`; PSE 108 e Arruela ISO separados). Não voltam: tolerâncias

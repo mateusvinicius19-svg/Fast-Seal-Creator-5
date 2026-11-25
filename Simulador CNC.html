@@ -5543,6 +5543,14 @@ function roughPasses(path, stock, mode, feed, apRad, allowRad, rn, above){
     clip = lvl;
   }
   // passada de contorno: acabamento + 3 mm (no raio), sem passar do nível "clip"
+  // 5.99.19 (usuário 25/11/2026, PSH 106 310x350x20 bucha 300x390): do último passe reto até o ponto MAIS BAIXO da passada de contorno
+  // (chanfro / ângulos) ficava mais que um passe (14 no Ø com passes de 8) → a profundidade, contada do menor Ø, é dividida em
+  // passadas de contorno iguais de no máximo "step" no Ø (as de cima afastadas do perfil); a última é a de sempre (acabamento + sobremetal)
+  const deep = od ? clip - Math.min(...pts.map(q => q.x + shift)) : Math.max(...pts.map(q => q.x - shift)) - clip;
+  const nC = deep > step + 1e-6 ? Math.ceil(deep / step - 1e-9) : 1;
+  for (let j = nC - 1; j >= 1; j--) contour(shift + j * deep / nC, true);
+  return contour(shift, false);
+  function contour(shift, extra){
   const sx = x => x + sg * shift, out = x => od ? Math.min(x, clip) : Math.max(x, clip), beyond = x => od ? x > clip + 1e-9 : x < clip - 1e-9;
   const seq = [{ t: "L", z: pts[0].z, x: out(sx(pts[0].x)) }];
   for (let i = 1; i < pts.length; i++){
@@ -5558,6 +5566,7 @@ function roughPasses(path, stock, mode, feed, apRad, allowRad, rn, above){
   }
   // v5.79.1 (usuário 19/11/2026, PSE 107 e "nas outras"): bucha com pouco material — a passada de contorno ficava toda no Ø da
   // bucha (sem cortar nada) colada no lábio/acabamento. Se nenhum ponto dela entra no material, ela sai (o acabamento faz tudo).
+  if (extra && seq.every(q => od ? q.x >= clip - 1e-6 : q.x <= clip + 1e-6)) return L;   // passada a mais que não corta nada: sai
   if (clip === stock && seq.every(q => od ? q.x >= stock - 1e-6 : q.x <= stock + 1e-6)){ L.semCorte = true; return L; }
   const s0 = seq[0];
   L.push(`G0 X${f3(s0.x)} Z3.500`, `G1 X${f3(s0.x)} Z3.000 F1.000`);
@@ -5571,6 +5580,7 @@ function roughPasses(path, stock, mode, feed, apRad, allowRad, rn, above){
   }
   L.push(`G0 X${f3(clip + sg * 0.4)} Z${f3(zEnd + 0.2)}`, `G0 X${f3(clip + sg * 0.4)} Z3.000`);
   return L;
+  }
 }
 // Ferramentas por material (usuário 06/11/2026): TEFLON / PTFE puro → face T3D3, externo T7D7, interno T4D4, corte T8D8
 // (corte F0.100 e G92 = 15 + H + 1,25, como nos programas PSR 102 em PTFE 020537/020765/021029). PU e demais: T2D2 / T1D45-T2D12 / T5D5.

@@ -2458,6 +2458,7 @@ function generateCore(fromInput){
   lines = puOnePass(lines);   // v5.82.0: PU com até 6 no Ø para tirar → só o acabamento
   if (type !== "psr102") lines = puRetracts(lines);   // v5.81.0: recuos do PU como no PSR 102 (o PSR 102 já sai assim do gerador)
   lines = retractRules(lines, type);   // v5.84.0: + folga mínima por ferramenta, material e faixa de Ø (D14: exata)
+  lines = puOutsideFirst(lines);   // 5.99.7: PU — externo (e canais do externo) antes do interno
   const fname = (type === "dual" || type === "pse127" || type === "psh131" || type === "iso" || type === "dhr" || type === "dpr" || type === "psh110" || type === "psh110t" || type === "psr101" || type === "psa108" || type === "psa108c" || type === "psa109" || type === "psg101" || type === "psg103" || type === "psg104" || type === "lip" || type === "pso" || type === "pse106" || type === "psh106" || type === "psh108" || type === "psh117" || type === "psh125" || type === "psh105" || type === "pse105" || type === "pse103" || type === "pse107" || type === "pse118" || type === "psh107" || type === "psh121" || type === "psh103" || type === "psr102" || type === "psr211" || type === "psr212" || type === "pse102r" || type === "pse120") ? pieceFile(p) + (buchaIsException(p) || (state.alterNum && p.bi !== "" && p.bo !== "") ? ` ${gen15(p.bi)}X${gen15(p.bo)}` : "") : `PSA108 ${gen15(p.dint)}X${gen15(p.dext)}X${gen15(p.h)} - ${xround(p.n,0)} pcs`;
   load(lines.join("\n"), fname); state.progExt = false;   // 5.99.2: programa do formulário → desenho do formulário
   if (!g.check(p)) try { $("genMsg").textContent += costTxt(pieceCost(lines.join("\n"), ["ciclo", "semch"].includes(type) ? xround(p.n, 0) : (isPSA(type) || type === "iso") ? cicloPcs(p) : 1)); } catch(e){}
@@ -2497,6 +2498,23 @@ function puRetracts(lines){
     prevCut = g1 && !g0; prevLine = t;
     return out;
   });
+}
+// 5.99.7 (usuário 25/11/2026): itens em PU — o EXTERNO é feito antes do INTERNO, e as outras ferramentas do externo (canal martelo
+// T6D6, OUTSIDE 2…) vão juntas, antes do interno. Programas estilo Fast Seal (seções ;( NOME )): os blocos ;( OUTSIDE… ) que estão
+// depois do 1º ;( INSIDE ) sobem para antes dele, na mesma ordem entre si. Cada bloco começa com G0 Z70 + troca de ferramenta.
+function puOutsideFirst(lines){
+  const L = lines.map(String), mat = L.find(l => /^;MATERIAL:/i.test(l)) || "";
+  if (!isPU(mat.replace(/^;MATERIAL:\s*/i, ""))) return lines;
+  const star = l => /^;\(\s*\*+\s*\)\s*$/.test(String(l).trim()), B = [];
+  for (let i = 0; i + 2 < L.length; i++){ const h = /^;\(\s*([A-Z][A-Z0-9 ]*?)\s*\)\s*$/.exec(L[i + 1].trim()); if (star(L[i]) && h && star(L[i + 2])) B.push({ a: i, name: h[1] }); }
+  B.forEach((b, k) => b.b = k + 1 < B.length ? B[k + 1].a : L.length);
+  const iIn = B.findIndex(b => b.name === "INSIDE"); if (iIn < 0) return lines;
+  const mv = B.slice(iIn + 1).filter(b => /^OUTSIDE\b/.test(b.name) && b.name !== "CUTTING");
+  if (!mv.length || B[B.length - 1] && mv.includes(B[B.length - 1])) return lines;   // o último bloco leva o fim do programa: não mexe
+  const out = L.slice(0, B[iIn].a);
+  for (const b of mv) out.push(...L.slice(b.a, b.b));
+  for (const b of B.slice(iIn)) if (!mv.includes(b)) out.push(...L.slice(b.a, b.b));
+  return out;
 }
 // v5.82.0 (usuário 19/11/2026: "se for tirar pouco material nos diâmetros, até 6 mm, coloca em apenas 1 passe"): programas estilo
 // Fast Seal em PU — em cada seção OUTSIDE / INSIDE, se o material a tirar no Ø for ≤ 6 (externo: Ø ext. da bucha − menor Ø do

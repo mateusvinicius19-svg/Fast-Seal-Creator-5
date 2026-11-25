@@ -2410,7 +2410,7 @@ function generateCore(fromInput){
 // recuo em G1 (X − 0,5) também vai 1 a mais para dentro. Só G90; arruelas/ISO/DH/DP (estilo planilha) não têm essas seções.
 function puRetracts(lines){
   const L = lines.map(String), mat = L.find(l => /^;MATERIAL:/i.test(l)) || "";
-  if (!/\bPU\b/i.test(mat) || !L.some(l => /^;\(\s*(OUTSIDE|INSIDE)\s*\)/.test(l))) return lines;
+  if (!(/\bPU\b/i.test(mat) || isBorracha(mat)) || !L.some(l => /^;\(\s*(OUTSIDE|INSIDE)\s*\)/.test(l))) return lines;   // 5.98.10: NBR/Viton com os recuos do PU (usuário 25/11/2026)
   const num = v => Number(v), X = l => { const m = /X(-?[\d.]+)/.exec(l); return m ? num(m[1]) : null; }, Zv = l => /Z-?[\d.]/.test(l);
   const setX = (l, x) => l.replace(/X-?[\d.]+/, "X" + fx(x, 3));
   let sec = "", abs = true, cx = null, prevCut = false, map = null, prevLine = "";
@@ -2563,9 +2563,10 @@ const D14_TOOLS = ["T4D14", "T2D14"];
 function retractRules(lines, type){
   const L = lines.map(String), matL = L.find(l => /^;MATERIAL:/i.test(l)) || "";
   if (!L.some(l => /^;\(\s*(OUTSIDE|INSIDE)\s*\)/.test(l))) return lines;
-  const mat = matL.replace(/^;MATERIAL:\s*/i, ""), pu = isPU(mat), tb = /TUBE\s+([\d.]+)\/([\d.]+)/i.exec(matL), tarugo = !!tb && Number(tb[1]) === 0;
+  const mat = matL.replace(/^;MATERIAL:\s*/i, ""), borr = isBorracha(mat), pu = isPU(mat) || borr, tb = /TUBE\s+([\d.]+)\/([\d.]+)/i.exec(matL), tarugo = !!tb && Number(tb[1]) === 0;
   const insMin = tarugo ? Math.min(...intToolBlocks(L, Object.keys(INT_TOOL_MIN).concat(["T4D81", "T1D51"])).map(b => b.min)) : -Infinity;
   const X = l => { const m = /X(-?[\d.]+)/.exec(l); return m ? Number(m[1]) : null; }, setX = (l, x) => l.replace(/X-?[\d.]+/, "X" + fx(x, 3));
+  const bBlocks = borr ? intToolBlocks(L, PTFE_INT_TOOLS, true) : [];
   let sec = "", tool = "", abs = true, cx = null, prevCut = false, pass = null, map = null;
   return L.map((l, i) => {
     const t = l.replace(/;.*$/, "").trim(), hd = /^;\(\s*([A-Z][A-Z0-9 ]*?)\s*\)\s*$/.exec(l.trim());
@@ -2577,10 +2578,13 @@ function retractRules(lines, type){
     const g0 = /^G0?0\b/.test(t), g1 = /^G0?[123]\b/.test(t) || (!g0 && /^[XZ]/.test(t) && prevCut);
     let out = l;
     if (on && g0){
-      const x = X(t), f = pass ? folgaRecuo(tool, pu, ins ? pass.min : pass.max) : null;
+      // 5.98.10 (usuário 25/11/2026): NBR/Viton com a folga da ferramenta que o PU usaria (T7D7 → T2D2; interno → D14/D45/D12 pelo Ø)
+      const blk = borr && ins ? bBlocks.find(b => i >= b.a && i < b.b) : null;   // como no PU: ferramenta pelo menor Ø do bloco
+      const fTool = !borr || !pass ? tool : ins ? (D14_TOOLS.includes(tool) ? tool : puIntTool(blk ? blk.min : pass.min, false)) : tool === "T7D7" ? "T2D2" : tool;
+      const x = X(t), f = pass ? folgaRecuo(fTool, pu, ins ? pass.min : pass.max) : null;
       if (prevCut && x !== null && cx !== null && Math.abs(x - cx) > 1e-9 && f !== null && (ins ? x < cx : x > cx)){
         let nx = ins ? pass.min - f : pass.max + f;
-        if (ins){ const lim = Math.max(INT_TOOL_MIN[tool] ?? -Infinity, insMin - 1.5); nx = Math.min(Math.max(nx, lim), pass.min - 0.1); }
+        if (ins){ const lim = Math.max(INT_TOOL_MIN[fTool] ?? INT_TOOL_MIN[tool] ?? -Infinity, insMin - 1.5); nx = Math.min(Math.max(nx, lim), pass.min - 0.1); }
         // a folga é o MÍNIMO: recuo maior que já vinha (bucha + 2, +1 do PU 5.81.0) fica. D14: exato (barra fina, 1 no Ø)
         nx = Number(fx(D14_TOOLS.includes(tool) ? nx : ins ? Math.min(x, nx) : Math.max(x, nx), 3));
         map = [x, nx]; out = setX(l, nx);

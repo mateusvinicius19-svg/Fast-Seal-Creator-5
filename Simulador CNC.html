@@ -5958,7 +5958,9 @@ function psr102Build(p){
   let lvl = tO - step, clip = tO;
   // acima do Ø do calcanhar: passe até o fim da peça (Z do contorno), senão sobra o anel em volta do calcanhar com bucha grande (usuário 09/11: 189,2x202,8 bucha 173x219)
   const zDeep = pout[pout.length - 1].p[0] - (deepAbove(p, tO)?.dz || 0);   // sobremetal externo > 10 no Ø: esses passes vão 1 mm a mais em Z (usuário 09/11); > 15: 2 mm (v5.89.0)
-  while (lvl > p.dext + 0.2){ pass(lvl, zDeep); clip = lvl; lvl -= step; }
+  // 5.99.11 (usuário 25/11/2026): o último passe do calcanhar fica a 1 mm por lado do acabamento (era X36 para o Ø35,5 — muito perto)
+  const xMinE = p.dext + 2;
+  while (lvl > p.dext + 0.2){ const x = Math.max(lvl, xMinE); if (x < clip - 0.5){ pass(x, zDeep); clip = x; } lvl -= step; }
   const zAt = x => -g.prot * (x - sh - g.tipo) / (g.lipf - g.tipo);
   // 5.99.10 (usuário 25/11/2026, PSR 102 25,4x35,5x4,76x7,14 PU bucha 12x48 / tarugo 40): o rebaixo da face leva UM desbaste (o
   // contorno abaixo); os passes do lábio só quando o rebaixo é muito fundo (> 12 no Ø acima do contorno)

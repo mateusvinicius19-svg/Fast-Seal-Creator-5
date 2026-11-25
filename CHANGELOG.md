@@ -6,6 +6,9 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.99.17 — Alterar programa: troca a ferramenta interna quando a do programa não alcança a bucha nova (25/11/2026)
+- ✏️ Alterar programa (ex.: 046496 com bucha 30x73): o 1º passe interno novo (Ø36,7) ficava abaixo do mínimo da T2D12 (Ø40) e dava erro "altere à mão". Agora troca a ferramenta do INSIDE pela do menor Ø trabalhado (PU: T4D14 / T1D45 / T2D12; outros: T2D14 / T4D4) e avisa na mensagem.
+
 ## 5.99.16 — PSH 110: salvar e imprimir as 3 peças de uma vez; desenho como sai usinado (25/11/2026)
 - 💾 Salvar no PSH 110 grava intermediária (número normal), base (número + A) e tampa (número + B): programa (.PIT + MCS) e desenho de cada uma. Pergunta número, Cód. interno e "Quem desenhou?" só uma vez. Pedido ARGUS só da intermediária. No fim imprime os 3 desenhos (uma folha cada).
 - Botão 🖨 Imprimir os 3: reimprime os 3 desenhos do conjunto depois.

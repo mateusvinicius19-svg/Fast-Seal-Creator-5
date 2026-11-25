@@ -4705,7 +4705,14 @@ function altRough(txt, bi, bo){
       if (bi < 13){ lv.push(13); a = 13; }   // tarugo: 1º passe Ø13
       const n = Math.ceil((p.x - a) / 8 - 1e-9); for (let j = 1; j < n; j++) lv.push(a + j * (p.x - a) / n);
       const t = tool(sIn), mn = ALT_TOOL_MIN[t];
-      if (mn && lv[0] < mn) return { err: `a ferramenta interna ${t} trabalha a partir de Ø${mn}; com a bucha Ø${gen15(bi)} o 1º passe seria Ø${f3(lv[0])} — altere à mão` };
+      // 5.99.17 (usuário 25/11/2026, 046496 com bucha 30x73): a ferramenta do programa não alcança o 1º passe → troca pela do
+      // menor Ø trabalhado (regra 5.84: PU T4D14 / T1D45 / T2D12; outros T2D14 / T4D4) em vez de parar
+      if (mn && lv[0] < mn){
+        const mt = txt.match(/;MATERIAL: USER DEFINED (.+?) [\d.]+\/[\d.]+/i), nt = isPU(mt ? mt[1] : "") ? puIntTool(lv[0]) : outIntTool(lv[0]);
+        const mn2 = ALT_TOOL_MIN[nt] || INT_TOOL_MIN[nt] || 0, ti = L.findIndex((l, i) => i >= sIn.i && i < sIn.end && /^T\d+D\d+/i.test(l.trim()));
+        if (nt === t || lv[0] < mn2 || ti < 0) return { err: `a ferramenta interna ${t} trabalha a partir de Ø${mn}; com a bucha Ø${gen15(bi)} o 1º passe seria Ø${f3(lv[0])} — altere à mão` };
+        L[ti] = L[ti].replace(new RegExp(t, "i"), nt); notes.push(`ferramenta interna ${t} → ${nt} (1º passe Ø${f3(lv[0])})`);
+      }
       ins[p.i] = lv.flatMap(x => [`G0 X${f3(x)} Z3.500`, `G1 X${f3(x)} Z3.000 F1.000`, `G1 X${f3(x)} Z${f3(p.zEnd)} F${p.feed || "0.140"}`, `G0 X${f3(x - 0.4)} Z${f3(p.zEnd + 0.2)}`, `G0 X${f3(x - 0.4)} Z3.000`]);
       notes.push(`+${lv.length} passe(s) interno(s)`);
     }

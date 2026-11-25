@@ -323,7 +323,7 @@ header .logo{background:linear-gradient(135deg,#c8102e,#8f1a17);box-shadow:0 2px
       <details class="params" id="buchaBox" style="display:none"><summary>Buchas (tabela + adicionadas)</summary><div class="buchas" id="buchaList"></div><div class="fields"><label>Ø interno da bucha<input id="bNewI" type="text" inputmode="decimal"></label><label>Ø externo da bucha<input id="bNewO" type="text" inputmode="decimal"></label></div><button class="btn" id="bAdd" type="button">+ Adicionar bucha</button> <span class="note">Vermelha: a escolhida (a mais leve que serve, com 1 mm de folga). T = tarugo. Amarelas: adicionadas. ✕ remove. Mudanças ficam salvas neste computador.</span></details>
       <div class="genbar">
         <button class="btn primary" id="btnCopy" style="display:none">&#x29C9; Copiar</button>
-        <button class="btn" id="btnSave" title="Salva o Fagor (.PIT) no Programas_CNC e a versão convertida (.txt) no MCS 500">&#x1F4BE; Salvar Fagor + MCS 500</button><button class="btn" id="btnPreview" style="display:none" title="Ver o desenho desta peça antes de salvar (não salva nada e não pede o código)">&#x1F441; Ver desenho</button><button class="btn" id="btnCopyMcs" style="display:none" title="Copia a versão convertida para o MCS 500">&#x29C9; Copiar MCS</button><button class="btn" id="btnDirRoot" style="display:none" title="Pasta única W:\Parts\PartsSeals\PROJETOS (tem Programas_CNC, MCS 500 e DESENHOS): escolha uma vez; nos outros dias é só clicar e Permitir">&#x1F513; PROJETOS</button><button class="btn" id="btnDirProg" style="display:none" title="Escolher a pasta W:\Parts\PartsSeals\PROJETOS\Programas_CNC">&#x1F4C1; Programas_CNC</button><button class="btn" id="btnDirMcs" style="display:none" title="Escolher a pasta W:\Parts\PartsSeals\PROJETOS\Programas_CNC\MCS 500">&#x1F4C1; MCS 500</button><button class="btn" id="btnAlt" title="Abrir um programa do Programas_CNC pelo número e refazer com outra bucha (salva como NNNNNN BIxBO — o original não muda)">&#x270F;&#xFE0F; Alterar programa</button><button class="btn" id="btnVer" title="Digitar o número e ver o programa e as variantes (NNNNNN BIxBO...)">&#x1F50E; Ver programa</button><button class="btn" id="btnPast" title="Estoque de pastilhas: entrada, baixa e histórico">&#x1F9F0; Pastilhas</button><button class="btn" id="btnHist" title="Programas salvos pelo Simulador (Programas_CNC\Historico Simulador CNC.csv)">&#x1F4CB; Histórico</button><button class="btn" id="btnDirDes" title="Escolher a pasta W:\Parts\PartsSeals\PROJETOS\DESENHOS">&#x1F4C1; DESENHOS</button>
+        <button class="btn" id="btnSave" title="Salva o Fagor (.PIT) no Programas_CNC e a versão convertida (.txt) no MCS 500">&#x1F4BE; Salvar Fagor + MCS 500</button><button class="btn" id="btnSaveDes" style="display:none" title="PSE 108: grava SÓ o desenho (PDF) na pasta DESENHOS para um programa que já existe — não mexe no .PIT nem no MCS 500">&#x1F4D0; Salvar só o desenho</button><button class="btn" id="btnPreview" style="display:none" title="Ver o desenho desta peça antes de salvar (não salva nada e não pede o código)">&#x1F441; Ver desenho</button><button class="btn" id="btnCopyMcs" style="display:none" title="Copia a versão convertida para o MCS 500">&#x29C9; Copiar MCS</button><button class="btn" id="btnDirRoot" style="display:none" title="Pasta única W:\Parts\PartsSeals\PROJETOS (tem Programas_CNC, MCS 500 e DESENHOS): escolha uma vez; nos outros dias é só clicar e Permitir">&#x1F513; PROJETOS</button><button class="btn" id="btnDirProg" style="display:none" title="Escolher a pasta W:\Parts\PartsSeals\PROJETOS\Programas_CNC">&#x1F4C1; Programas_CNC</button><button class="btn" id="btnDirMcs" style="display:none" title="Escolher a pasta W:\Parts\PartsSeals\PROJETOS\Programas_CNC\MCS 500">&#x1F4C1; MCS 500</button><button class="btn" id="btnAlt" title="Abrir um programa do Programas_CNC pelo número e refazer com outra bucha (salva como NNNNNN BIxBO — o original não muda)">&#x270F;&#xFE0F; Alterar programa</button><button class="btn" id="btnVer" title="Digitar o número e ver o programa e as variantes (NNNNNN BIxBO...)">&#x1F50E; Ver programa</button><button class="btn" id="btnPast" title="Estoque de pastilhas: entrada, baixa e histórico">&#x1F9F0; Pastilhas</button><button class="btn" id="btnHist" title="Programas salvos pelo Simulador (Programas_CNC\Historico Simulador CNC.csv)">&#x1F4CB; Histórico</button><button class="btn" id="btnDirDes" title="Escolher a pasta W:\Parts\PartsSeals\PROJETOS\DESENHOS">&#x1F4C1; DESENHOS</button>
         <button class="btn" id="btnDraw" style="display:none">&#x1F4D0; Desenho</button>
         <button class="btn" id="btnProgDes" title="Desenho a partir do programa aberto/gerado: simula a usinagem e cota a peça que sobra (como o desenho do 3D).">&#x1F4D0; Desenho do programa</button><button class="btn" id="btn3D" title="Desenho a partir do 3D do Inventor: no Inventor, Arquivo → Exportar → Formato CAD → STL (mm). Também dá para arrastar o .stl para a tela.">&#x1F9CA; Desenho do 3D (Inventor)</button><input type="file" id="file3D" accept=".stl" style="display:none">
         <span class="note" id="genMsg"></span>
@@ -2237,6 +2237,7 @@ function dpRec(sec){
 function dpFormSync(){
   const box = $("genMain"); if (!box) return;
   const tp = document.querySelector("#genBox [data-k=tipoP]"), on = $("genType").value === "iso" && tp && tp.value === "dp";
+  { const b = $("btnSaveDes"); if (b) b.style.display = on ? "" : "none"; }   // 5.99.8: "Salvar só o desenho" só no PSE 108
   const lab = k => { const e = box.querySelector(`[data-k="${k}"]`); return e ? e.closest("label") : null; };
   let sec = box.querySelector("[data-k=sec][data-dpsec]");   // só o campo criado aqui (lip, dpr, pso têm secção própria)
   const di = box.querySelector("[data-k=dint]"), de = box.querySelector("[data-k=dext]"), hh = box.querySelector("[data-k=h]");
@@ -4557,6 +4558,29 @@ async function saveProgram0(auto){
   return false;
 }
 $("btnSave").onclick = () => saveProgram(false);
+// 5.99.8 (usuário 25/11/2026): PSE 108 — muitos itens já têm programa mas não têm desenho: grava SÓ o desenho (DESENHOS\PSE 108 (DP)\…)
+// com o número do programa que já existe (+ pedido ARGUS se tiver Cód. interno). Não grava .PIT, MCS 500 nem histórico.
+async function saveDrawingOnly(){
+  const msg = (t, err) => { $("genMsg").textContent = t; $("genMsg").style.color = err ? "#b2221f" : ""; };
+  try {
+    const gp = state.genParams; if (!gp || !DESENHO_TYPES.includes(gp.tipoGen)) return msg("Gere a peça primeiro.", true);
+    let dd = await desDir(false, true); if (!dd) dd = await desDir(false, false);
+    if (!dd) return msg("NÃO salvo: sem acesso à pasta DESENHOS.", true);
+    const v = prompt("Número do programa que JÁ EXISTE (só o desenho vai ser salvo; o programa não é mexido):", state.alterNum || "");
+    if (v === null) return msg("NÃO salvo: número cancelado.", true);
+    const n = v.trim().replace(/\.pit$/i, ""); if (!/^\d{1,6}[A-Z]?$/i.test(n)) return msg("NÃO salvo: digite só o número do programa (ex.: 000830).", true);
+    const num = n.replace(/^(\d+)/, d => d.padStart(6, "0")), pit = num + ".PIT";
+    let dir = null; try { dir = await progDir(false, true); } catch(e){}
+    if (dir && !(await fileExists(dir, pit)) && !confirm(`Não achei o ${pit} no Programas_CNC.\n\nSalvar o desenho com o número ${num} mesmo assim?`)) return msg("NÃO salvo: programa não encontrado.", true);
+    if (!askCod()) return msg("NÃO salvo: Cód. interno cancelado.", true);
+    if (!askDes()) return msg("NÃO salvo: \"Quem desenhou?\" cancelado.", true);
+    msg("Salvando o desenho…");
+    const m = await saveDrawingPdf(gp, num, dd, false, pit);
+    msg(`Só o desenho (programa ${num} não foi mexido)${m}.`, /NÃO salvo|não salvo/.test(m));
+    if (!/NÃO salvo|não salvo|mantido/.test(m)) setTimeout(() => { openPreview(); setTimeout(() => { updatePrintCss(); window.print(); }, 400); }, 100);   // imprime, como no 💾 Salvar
+  } catch(e){ msg("NÃO salvo: " + (e && e.message || e), true); }
+}
+$("btnSaveDes").onclick = () => saveDrawingOnly();
 $("btnDirRoot").onclick = async () => {
   const msg = (t, bad) => { $("genMsg").textContent = t; $("genMsg").style.color = bad ? "#b2221f" : ""; };
   if (SRV) return msg("🔒 Aberto pelo servidor: grava direto no W:\\Parts\\PartsSeals\\PROJETOS (Programas_CNC, MCS 500 e DESENHOS), sem pedir pasta.");

@@ -6,6 +6,9 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.99.19 — Desbaste: passada de contorno contada do menor Ø, no máximo 8 no Ø (25/11/2026)
+- Gaxetas e perfis com desbaste em contorno (ex.: PSH 106 310x350x20, bucha 300x390): do último passe reto (366) até o ponto mais baixo da passada de contorno (chanfro / ângulos, 352,8) ficavam 13,2 no Ø de uma vez. Agora essa profundidade, contada do menor Ø, é dividida em passadas de contorno iguais de no máximo um passe (8 no Ø): 359,4 e 352,8.
+
 ## 5.99.18 — Desbaste interno e externo: 8 mm por passe no Ø (25/11/2026)
 - Gaxetas, raspadores, PSR, PSH 110, Dual, PSE 127, PSH 131…: campo "Desbaste ext./int.: quanto tirar por passada" vazio = 4 no raio (8 no Ø), era 3 (6 no Ø). Continua 3 (como antes) em Celeron, POM e peça pequena (Ø interno < 20). Valor digitado no campo continua valendo.
 - Arruelas e guias (PSA 108, PSG…) já desbastavam no máximo 8 no Ø: não mudam.

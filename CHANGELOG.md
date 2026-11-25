@@ -6,6 +6,11 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.99.21 — Desbaste no padrão do Mastor (níveis da bucha, passe não entra no perfil); contorno a 8 no Ø (25/11/2026)
+- Base: programas do Mastor na Programas_CNC (045002, 045016, 045060, 045078, 045079…). Os níveis em X saem da bucha de 8 em 8 no Ø (externo e interno) até o ponto mais baixo da passada de contorno; o passe que chega no perfil segue o contorno (não entra nele) — nenhum passe tira mais que 8 em lugar nenhum. Em Z continua como estava (passes até o fim, +1/+2 do PU); o Z do Mastor (parar no perfil) não foi copiado.
+- Passada de contorno (desbaste final) a 8 no Ø do acabamento, externo e interno (alR vazio = 4). Celeron, POM e Ø int < 20 com o sobremetal antigo do perfil. PSR 102 (desbaste próprio) não mudou.
+- Ex.: PSH 106 310x350x20 bucha 300x390: externo 382 / 374 / 366 / 358 (segue o lábio) / contorno 354,9 / acabamento 346,9.
+
 ## 5.99.20 — Desbaste padronizado: passes iguais contados do menor Ø; acabamento 4 no Ø (25/11/2026)
 - Desbaste interno e externo (gaxetas, raspadores, PSR, PSH 110, PSE 127…): a profundidade toda, da bucha até o ponto mais baixo (chanfro / ângulos), é dividida em passes IGUAIS de no máximo 8 no Ø, contados do menor Ø. Acima do perfil o passe é reto; nos ângulos segue o contorno. Ex.: PSH 106 310x350x20 bucha 300x390: 382,2 / 374,3 / 366,5 / 358,6 / 350,9 e acabamento 346,9.
 - PSE/PSH 106 e família, PSE 120: sobremetal do acabamento 2 no raio (4 no Ø), era 3 (6 no Ø). Os que já eram 1,5 (3 no Ø) não mudam.

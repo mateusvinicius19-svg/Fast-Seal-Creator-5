@@ -6,6 +6,12 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.99.6 — Ciclo de várias peças sugere o número do programa de 1 peça pelo histórico (25/11/2026)
+- Usuário (830): salvou o PSE 108 de 1 peça e logo o ciclo de 4 — o Salvar sugeriu número NOVO. A busca era na lista da pasta
+  DESENHOS, guardada 10 min (ainda sem o desenho recém-salvo). Agora o ciclo procura no HISTÓRICO o programa de 1 peça com o
+  mesmo perfil e medidas e sugere "000830" (a janela avisa: salva como "000830 CICLO 4 PÇ"). Salvar um desenho também atualiza
+  a lista da família na hora.
+
 ## 5.99.5 — PSE 108: chanfros voltam ao recomendado ao digitar Ø externo ou secção (25/11/2026)
 - Usuário: ao abrir o PSE 108 e digitar Ø ext / secção / altura, ficavam os chanfros do item anterior (memória do perfil e
   formulário salvo) e era preciso apagar. Agora digitar o Ø externo ou a secção limpa os chanfros (= recomendado da tabela);

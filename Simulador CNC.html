@@ -4282,6 +4282,7 @@ async function saveDrawingPdf(p, num, dd, keepIfExists, pitName){
   if (!(await fileExists(sub, fn))) try { for await (const [n, h] of sub.entries()) if (h.kind === "file" && n.startsWith(nm + " - ") && /\.pdf$/i.test(n)){ fn = n; break; } } catch(e){}
   if (await fileExists(sub, fn)){ if (keepIfExists) return " · desenho já existe (mantido)"; if (!confirm(`O desenho "${fn}" já existe. Substituir?`)) return " · PDF mantido"; }
   await writeFile(sub, fn, await drawingPdfBytes(p));
+  delete desListCache[desFam(p)];   // 5.99.6: a lista da família já vê o desenho novo (ciclo logo depois sugere o número dele)
   let ped = "";
   // v5.88.0: a PASTA é "fd" (sem o A/B da peça). Antes ia "nm" e o pedido do PSE 102 R/PSE 120 (anel A) e do PSH 110 (A/B)
   // apontava para "…46354A\…46354A.pdf", pasta que não existe — o Kuru dava "PDF não encontrado".
@@ -4455,11 +4456,20 @@ async function saveProgram0(auto){
   // v5.70.3 (usuário 18/11/2026): pergunta cancelada não deixa mais "Procurando o próximo número livre…" na tela — diz por que não salvou
   const parar = t => { $("genMsg").textContent = "NÃO salvo: " + t; $("genMsg").style.color = "#b2221f"; };
   const gp0 = state.genParams, nCiclo = gp0 && !auto ? (["ciclo", "semch"].includes(gp0.tipoGen) ? xround(gp0.n, 0) : cicloPcs(gp0)) : 0;
+  // 5.99.6 (usuário 25/11/2026, 830): ciclo de várias peças → o número do programa de 1 peça com o MESMO perfil e medidas, pelo
+  // histórico (a lista da pasta DESENHOS fica guardada 10 min e não tinha o desenho que acabou de ser salvo)
+  let cicloDe = "";
+  if (!auto && !state.alterNum && nCiclo > 1 && dir) try {
+    const rows = await histRead(dir), hd = rows[0] || [], iP = hd.indexOf("Programa"), iF = hd.indexOf("Perfil"), iN = hd.indexOf("Nominais"), iC = hd.indexOf("Pecas/ciclo");
+    const me = histRecord(gp0, state.genType || "", "", "x.PIT", "x.txt", ""), base = s => String(s || "").replace(/\s*\(ciclo.*$/i, "").trim();
+    const r = rows.slice(1).filter(x => base(x[iF]) === base(me["Perfil"]) && x[iN] === me["Nominais"] && String(x[iC]).trim() === "1" && /^\d+/.test(x[iP] || "")).pop();
+    if (r){ cicloDe = (r[iP].match(/^\d+/) || [""])[0]; sug = cicloDe; }
+  } catch(e){}
   // já existe desenho com as mesmas medidas (pasta DESENHOS): pergunta antes de criar número novo (usuário 17/11/2026)
-  if (!auto && !state.alterNum && !p110 || p110 === "M"){ let L = null; try { L = await desDupes(state.genParams); } catch(e){}
+  if (!cicloDe && (!auto && !state.alterNum && !p110 || p110 === "M")){ let L = null; try { L = await desDupes(state.genParams); } catch(e){}
     if (L && L.length){ const ex = L.find(x => x.num);
       // 5.98.12 (usuário 25/11/2026): ciclo de várias peças é feito DEPOIS do programa/desenho de 1 peça — usa o número dele, sem perguntar
-      if (ex && nCiclo > 1) sug = ex.num;
+      if (ex && nCiclo > 1){ sug = ex.num; cicloDe = ex.num; }
       else if (ex){
         if (!confirm(`JÁ EXISTE desenho com essas medidas:\n\n${L.map(x => "• " + x.name).join("\n")}\n\nOK = salvar um programa NOVO mesmo assim\nCancelar = não salvar e abrir o ${ex.num} existente`)){
           parar(`já existe o programa ${ex.num} com essas medidas (abrindo em 🔎 Ver programa).`);
@@ -4469,7 +4479,7 @@ async function saveProgram0(auto){
         const n = prompt(`Já existe o desenho "${L[0].name}" SEM número de programa.\n\nDigite o número do programa (pegue no ARGUS): o programa salva com esse número e a pasta do desenho ganha o número (o desenho que está lá fica).\n\nCancelar = salvar como programa NOVO`, "");
         if (n !== null && /^\d{1,6}$/.test(n.trim())){ state.dupRename = { fam: desFam(state.genParams), from: L[0].name }; forcedNum = n.trim(); }
       } } }
-  const num = auto ? sug : forcedNum !== null ? forcedNum : prompt("Número do programa" + (state.alterNum ? " (alterando " + sug + ")" : sug ? " (próximo livre: " + sug + ")" : " (ex.: 046004)") + (suf ? ` — bucha especial: vai salvar como "número ${suf[1]}"` : "") + ":", sug);
+  const num = auto ? sug : forcedNum !== null ? forcedNum : prompt("Número do programa" + (state.alterNum ? " (alterando " + sug + ")" : cicloDe ? ` (ciclo de ${nCiclo} peças do ${sug} — salva como "${sug} CICLO ${nCiclo} PÇ")` : sug ? " (próximo livre: " + sug + ")" : " (ex.: 046004)") + (suf ? ` — bucha especial: vai salvar como "número ${suf[1]}"` : "") + ":", sug);
   if (num === null) return parar("número do programa cancelado. Se a janela do número nem apareceu, aperte F5 e salve de novo.");
   if (!auto && !askCod()) return parar("Cód. interno cancelado. Para salvar sem código, deixe em branco e clique em OK.");
   if (!auto && nCiclo <= 1 && state.genParams && DESENHO_TYPES.includes(state.genParams.tipoGen) && !askDes()) return parar("\"Quem desenhou?\" cancelado.");

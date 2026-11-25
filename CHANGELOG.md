@@ -6,6 +6,12 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.98.10 — NBR e Viton com os recuos do PU (25/11/2026)
+- Usuário (PSH 107 28x38x10 NBR): recuos das ferramentas diferentes do PU. Agora o `puRetracts` (+1 no Ø, 5.81.0) vale também
+  para NBR/Viton e o `retractRules` usa a folga da ferramenta que o PU usaria: T7D7 → folga da T2D2; interno → D45/D12/D14
+  pelo menor Ø do bloco (mesma escolha do PU), com o Ø mínimo dessa ferramenta. A D14 (T2D14) continua com o recuo exato de 1.
+- PU e PTFE não mudaram. Contorno (ferramentas, só-acabamento até 6 no Ø do PU) continua como era.
+
 ## 5.98.9 — Altura < secção: canal e lábios com altura ÷ 2 também no PSH 105, PSH 117, PSE 105, PSR 211 e PSR 212 (25/11/2026)
 - Usuário: replicar a regra do PSH/PSE 106 (5.98.7/5.98.8). Lista `HM2_TYPES`; nos PSR vale a altura do corpo (hb).
 - Altura ≥ secção e os outros perfis (PSH 108 etc.) não mudaram.

@@ -1303,7 +1303,7 @@ const GEN = {
     name: "PSE 106",
     main: [["dint","Diâmetro interno (mm)",100],["dext","Diâmetro externo (mm)",120],["h","Altura (mm)",12],
            ["rpt","Nº de repetições RPT (vazio = 0)",""],["mat","Material","PU"],["bi","Bucha Ø interno (vazio = automática)",""],["bo","Bucha Ø externo (vazio = automática)",""]],
-    params: [["apR","Desbaste ext./int.: quanto tirar por passada (no raio, mm; vazio = 4 = 8 no Ø; Celeron/POM e Ø int < 20: 3)",""],["alR","Acabamento ext./int.: sobremetal deixado (no raio, mm)",3],
+    params: [["apR","Desbaste ext./int.: quanto tirar por passada (no raio, mm; vazio = 4 = 8 no Ø; Celeron/POM e Ø int < 20: 3)",""],["alR","Acabamento ext./int.: sobremetal deixado (no raio, mm; 2 = 4 no Ø)",2],
              ["apC","Canal: quanto aprofundar por passada (mm)",3],["alC","Canal: sobremetal deixado para o acabamento (mm)",1],
              ["rn","Raio da ponta das ferramentas (mm)",0.4],
              ["tInt","Ferramenta interna (vazio = pelo menor Ø trabalhado: T4D14 abaixo de Ø11, T1D45 até Ø40, senão T2D12)",""],["S","Rotação S (vazio = tabela pelo Ø ext.)",""],
@@ -1429,7 +1429,7 @@ GEN.pse120 = { name: "PSE 120",
          ["rL","Raio do lábio (vazio = 0,214 × altura)",""],["ds","Ø do assento dos anéis (vazio = Ø int. + 0,8 × secção)",""],
          ["rpt","Nº de repetições RPT (vazio = 0)",""],["mat","Material","PU"],["matR","Material do anel (peça A)","PTFE"],
          ["bi","Bucha Ø interno (vazio = automática)",""],["bo","Bucha Ø externo (vazio = automática)",""]],
-  params: [["apR","Desbaste ext./int.: quanto tirar por passada (no raio, mm; vazio = 4 = 8 no Ø; Celeron/POM e Ø int < 20: 3)",""],["alR","Acabamento ext./int.: sobremetal deixado (no raio, mm)",3],
+  params: [["apR","Desbaste ext./int.: quanto tirar por passada (no raio, mm; vazio = 4 = 8 no Ø; Celeron/POM e Ø int < 20: 3)",""],["alR","Acabamento ext./int.: sobremetal deixado (no raio, mm; 2 = 4 no Ø)",2],
            ["rn","Raio da ponta das ferramentas (mm)",0.4],["tInt","Ferramenta interna (vazio = pelo menor Ø trabalhado: T4D14 abaixo de Ø11, T1D45 até Ø40, senão T2D12)",""],["S","Rotação S (vazio = tabela pelo Ø ext.)",""],
            ["ae","Aperto do lábio no Ø (vazio = 0,9 até Ø40 · 1,1 até Ø100 · 1,5 acima)",""],["chI","Chanfro interno, frente 45° e trás 30° (vazio = 0,08 × secção, mín. 0,3)",""],
            ["cA","Anel (peça A): chanfros 45° do externo (vazio = 0,2)",""],["cAF","Anel (peça A): chanfro 45° do interno na frente (vazio = 0,2)",""],["cAI","Anel (peça A): chanfro interno de trás a 30°, em Z (vazio = 0,2)",""]],
@@ -2341,7 +2341,7 @@ function saveForm(){
 // 5.99.0 (usuário 25/11/2026): cada perfil lembra as configurações do ÚLTIMO item salvo dele (💾 Salvar) e, ao escolher o perfil
 // de novo, o formulário abre com elas (não com o padrão). Não voltam: tolerâncias do desenho (começam no padrão, como no F5) e a
 // bucha digitada (é da medida daquele item). PSE 108 (DP) e Arruela ISO são o mesmo gerador: chaves separadas.
-const PROF_MEM_SKIP = new Set(["bi", "bo", "apR"]);   // 5.99.18: apR vazio = padrão pelo material (não volta o 3 antigo)
+const PROF_MEM_SKIP = new Set(["bi", "bo", "apR", "alR"]);   // 5.99.18: apR vazio = padrão pelo material (não volta o 3 antigo)
 function profMemKey(){ const t = $("genType").value, tp = document.querySelector("#genBox [data-k=tipoP]"); return t === "iso" && tp && tp.value === "dp" ? "dp" : t; }
 function profMemSave(){ try { const vals = {}; document.querySelectorAll("#genBox input[data-k], #genBox select[data-k]").forEach(el => vals[el.dataset.k] = el.value);
   localStorage.setItem("ps_prof_" + profMemKey(), JSON.stringify(vals)); } catch(e){} }
@@ -5533,22 +5533,22 @@ function roughPasses(path, stock, mode, feed, apRad, allowRad, rn, above){
   const peak = od ? Math.max(...pts.map(q => q.x)) : Math.min(...pts.map(q => q.x));
   const zEnd = pts[pts.length - 1].z, zStart = pts[0].z;
   if (!(stock > 0) || (od ? stock <= peak : stock >= peak)) return L;
-  let clip = stock, k = 1;
-  for (;; k++){ loopGuard(k, "desbaste");
-    const lvl = stock - sg * step * k;
-    if (od ? lvl <= peak + shift : lvl >= peak - shift) break;
-    const zp = od && above && above.dz > 0 && lvl > above.x + 1e-6 ? zEnd - above.dz : zEnd;
-    if (zp !== zEnd) L.extraZ.push(`Z${f3(zp)}`, `Z${f3(zp + 0.2)}`);
-    L.push(`G0 X${f3(lvl)} Z3.500`, `G1 X${f3(lvl)} Z3.000 F1.000`, `G1 X${f3(lvl)} Z${f3(zp)} F${feed}`, `G0 X${f3(lvl + sg * 0.4)} Z${f3(zp + 0.2)}`, `G0 X${f3(lvl + sg * 0.4)} Z3.000`);
-    clip = lvl;
+  let clip = stock;
+  // 5.99.20 (usuário 25/11/2026: "precisa padronizar… tenho um passe tirando muito pouco"): a profundidade TOTAL — da bucha até o
+  // ponto mais baixo da passada de contorno (chanfro / ângulos) — é dividida em passes IGUAIS de no máximo "step" no Ø, contados do
+  // menor Ø. Nível acima do perfil = passe reto; nível que entra nos ângulos = passada de contorno afastada do perfil (k × passe).
+  // A última é a de sempre (acabamento + sobremetal). (5.99.19 deixava 8 / 8 / 8 nos retos e o resto dividido só no contorno.)
+  const low = od ? Math.min(...pts.map(q => q.x + shift)) : Math.max(...pts.map(q => q.x - shift)), topC = peak + sg * shift;
+  const tot = sg * (stock - low), nP = tot > 1e-6 ? Math.ceil(tot / step - 1e-9) : 1, dP = tot / nP;
+  for (let k = nP - 1; k >= 1; k--){ loopGuard(nP - k, "desbaste");
+    const lvl = low + sg * k * dP;
+    if (od ? lvl >= topC - 1e-6 : lvl <= topC + 1e-6){
+      const zp = od && above && above.dz > 0 && lvl > above.x + 1e-6 ? zEnd - above.dz : zEnd;
+      if (zp !== zEnd) L.extraZ.push(`Z${f3(zp)}`, `Z${f3(zp + 0.2)}`);
+      L.push(`G0 X${f3(lvl)} Z3.500`, `G1 X${f3(lvl)} Z3.000 F1.000`, `G1 X${f3(lvl)} Z${f3(zp)} F${feed}`, `G0 X${f3(lvl + sg * 0.4)} Z${f3(zp + 0.2)}`, `G0 X${f3(lvl + sg * 0.4)} Z3.000`);
+      clip = lvl;
+    } else contour(shift + k * dP, true);
   }
-  // passada de contorno: acabamento + 3 mm (no raio), sem passar do nível "clip"
-  // 5.99.19 (usuário 25/11/2026, PSH 106 310x350x20 bucha 300x390): do último passe reto até o ponto MAIS BAIXO da passada de contorno
-  // (chanfro / ângulos) ficava mais que um passe (14 no Ø com passes de 8) → a profundidade, contada do menor Ø, é dividida em
-  // passadas de contorno iguais de no máximo "step" no Ø (as de cima afastadas do perfil); a última é a de sempre (acabamento + sobremetal)
-  const deep = od ? clip - Math.min(...pts.map(q => q.x + shift)) : Math.max(...pts.map(q => q.x - shift)) - clip;
-  const nC = deep > step + 1e-6 ? Math.ceil(deep / step - 1e-9) : 1;
-  for (let j = nC - 1; j >= 1; j--) contour(shift + j * deep / nC, true);
   return contour(shift, false);
   function contour(shift, extra){
   const sx = x => x + sg * shift, out = x => od ? Math.min(x, clip) : Math.max(x, clip), beyond = x => od ? x > clip + 1e-9 : x < clip - 1e-9;

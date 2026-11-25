@@ -6,6 +6,11 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.99.5 — PSE 108: chanfros voltam ao recomendado ao digitar Ø externo ou secção (25/11/2026)
+- Usuário: ao abrir o PSE 108 e digitar Ø ext / secção / altura, ficavam os chanfros do item anterior (memória do perfil e
+  formulário salvo) e era preciso apagar. Agora digitar o Ø externo ou a secção limpa os chanfros (= recomendado da tabela);
+  chanfro digitado depois vale. Só o PSE 108.
+
 ## 5.99.4 — PSE 108 (DP): Ø externo → secção → altura e chanfros recomendados pela tabela (25/11/2026)
 - Usuário: preencher Ø externo, secção e depois altura (Ø interno = Ø ext − 2 × secção, só leitura).
 - Chanfros (campo vazio = recomendado; digitado vale). Peças padrão [secção · altura · chanfro externo frente/trás · interno]:

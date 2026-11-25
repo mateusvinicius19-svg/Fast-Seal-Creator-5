@@ -2250,7 +2250,11 @@ function dpFormSync(){
     const first = box.querySelector(":scope > label"); if (first && lab("dext") !== first) box.insertBefore(lab("dext"), first);
     lab("dext").after(lab("sec")); lab("sec").after(lab("h")); lab("h").after(lab("dint"));
     di.readOnly = true; di.style.opacity = ".7"; di.title = "Ø externo − 2 × secção";
-    if (box.dataset.dp !== "1") for (const k of ["chF", "chT", "chI"]){ const e = box.querySelector(`[data-k="${k}"]`); if (e) e.value = ""; }
+    const chClear = () => { for (const k of ["chF", "chT", "chI"]){ const e = box.querySelector(`[data-k="${k}"]`); if (e) e.value = ""; } };
+    if (box.dataset.dp !== "1") chClear();
+    // 5.99.5 (usuário 25/11/2026): digitou Ø externo ou secção (peça nova) → chanfros voltam ao recomendado (não ficam os do item anterior);
+    // chanfro digitado DEPOIS vale
+    for (const el of [de, sec]) el.addEventListener("input", chClear);
     box.dataset.dp = "1";
   }
   const s = num(sec.value), D = num(de.value);

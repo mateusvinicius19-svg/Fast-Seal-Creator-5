@@ -4406,7 +4406,8 @@ async function saveProgram0(auto){
   if (suf && !base.toUpperCase().includes(suf[1].toUpperCase())) base += " " + suf[1];
   // v5.8.0 (usuário 10/11): PSA 108 com várias peças por ciclo leva a quantidade no nome — "046140 CICLO 5 PÇ"
   // v5.21.10 (usuário 11/11): o "CICLO N PÇ" vai logo depois do número (045000 CICLO 5 PÇ 9X30), também no Programa Arruela/ciclo
-  { const gp0 = state.genParams, nc = gp0 && !auto ? (["ciclo", "semch"].includes(gp0.tipoGen) ? xround(gp0.n, 0) : cicloPcs(gp0)) : 0;
+  const gp0 = state.genParams, nCiclo = gp0 && !auto ? (["ciclo", "semch"].includes(gp0.tipoGen) ? xround(gp0.n, 0) : cicloPcs(gp0)) : 0;
+  { const nc = nCiclo;
     if (nc > 1 && !/CICLO/i.test(base)){ const m = /^(\d+)(.*)$/.exec(base); base = m ? `${m[1]} CICLO ${nc} PÇ${m[2]}` : `${base} CICLO ${nc} PÇ`; } }
   const pitName = base + ".PIT", mcsName = base.replace(/^0+(?=\d)/, "") + ".txt";
   const fagor = currentText(), pitBytes = toCp1252(fagor.replace(/\n/g, "\r\n") + "\r\n"), mcsBytes = toCp1252(fagorToMcs(fagor));
@@ -4438,13 +4439,17 @@ async function saveProgram0(auto){
         pdfMsg += ` · pasta do desenho renomeada: ${to}`; keepDes = true; delete desListCache[R.fam];
       } catch(e){ pdfMsg += ` · pasta NÃO renomeada (${e.message}): renomeie à mão "${R.from}" para "${to}"`; }
     }
-    if (!auto && gp && DESENHO_TYPES.includes(gp.tipoGen)){   // alterar programa: o desenho do original continua valendo (não mexe)
+    // 5.98.11 (usuário 25/11/2026): ciclo de várias peças (PSA 108, PSE 108…) — o desenho já foi salvo com o programa de 1 peça:
+    // não grava o desenho de novo nem imprime
+    const desCiclo = nCiclo > 1;
+    if (desCiclo) pdfMsg += " · ciclo de várias peças: desenho não gravado de novo (vale o do programa de 1 peça)";
+    else if (!auto && gp && DESENHO_TYPES.includes(gp.tipoGen)){   // alterar programa: o desenho do original continua valendo (não mexe)
       try { pdfMsg = (await saveDrawingPdf(gp, base.match(/^\d+/) ? base.match(/^\d+/)[0] : base, dd, keepDes, pitName)) + pdfMsg; } catch(e){ pdfMsg = " · PDF não salvo: " + e.message + pdfMsg; }
     }
     try { const rec = histRecord(auto ? {} : (gp || {}), auto ? "" : (state.genType || ""), fagor, pitName, mcsName, pdfMsg); if (auto && state.alterRec) Object.assign(rec, state.alterRec); await histAppend(dir, rec); if (histOpen()) histLoadInline(false); } catch(e){ pdfMsg += " · histórico não gravado: " + e.message; }
     $("genMsg").textContent = `Salvo: ${pitName} (Programas_CNC) e ${mcsName} (MCS 500, convertido)${pdfMsg}.`; state.tolResetPending = true; /* v5.20.1: tolerâncias voltam ao padrão quando começar a peça seguinte (a impressão desta continua com as dela) */ $("genMsg").style.color = /NÃO salvo/.test(pdfMsg) ? "#b2221f" : "";
     if (auto) $("genMsg").textContent = `✏️ ${state.alterNote || ""} Salvo: ${pitName} (Programas_CNC) e ${mcsName} (MCS 500)${pdfMsg}. O ${state.alterNum} original não mudou.`;
-    if (!auto && gp && DESENHO_TYPES.includes(gp.tipoGen) && !/NÃO salvo|não salvo/.test(pdfMsg)) setTimeout(() => { openPreview(); setTimeout(() => { updatePrintCss(); window.print(); }, 400); }, 100);   // imprime o desenho salvo
+    if (!auto && !desCiclo && gp && DESENHO_TYPES.includes(gp.tipoGen) && !/NÃO salvo|não salvo/.test(pdfMsg)) setTimeout(() => { openPreview(); setTimeout(() => { updatePrintCss(); window.print(); }, 400); }, 100);   // imprime o desenho salvo
     return true;
   } catch(e){ alert("Não foi possível salvar: " + e.message); }
   return false;

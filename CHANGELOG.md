@@ -6,6 +6,10 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.99.18 — Desbaste interno e externo: 8 mm por passe no Ø (25/11/2026)
+- Gaxetas, raspadores, PSR, PSH 110, Dual, PSE 127, PSH 131…: campo "Desbaste ext./int.: quanto tirar por passada" vazio = 4 no raio (8 no Ø), era 3 (6 no Ø). Continua 3 (como antes) em Celeron, POM e peça pequena (Ø interno < 20). Valor digitado no campo continua valendo.
+- Arruelas e guias (PSA 108, PSG…) já desbastavam no máximo 8 no Ø: não mudam.
+
 ## 5.99.17 — Alterar programa: troca a ferramenta interna quando a do programa não alcança a bucha nova (25/11/2026)
 - ✏️ Alterar programa (ex.: 046496 com bucha 30x73): o 1º passe interno novo (Ø36,7) ficava abaixo do mínimo da T2D12 (Ø40) e dava erro "altere à mão". Agora troca a ferramenta do INSIDE pela do menor Ø trabalhado (PU: T4D14 / T1D45 / T2D12; outros: T2D14 / T4D4) e avisa na mensagem.
 

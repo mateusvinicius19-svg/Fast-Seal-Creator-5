@@ -1303,7 +1303,7 @@ const GEN = {
     name: "PSE 106",
     main: [["dint","Diâmetro interno (mm)",100],["dext","Diâmetro externo (mm)",120],["h","Altura (mm)",12],
            ["rpt","Nº de repetições RPT (vazio = 0)",""],["mat","Material","PU"],["bi","Bucha Ø interno (vazio = automática)",""],["bo","Bucha Ø externo (vazio = automática)",""]],
-    params: [["apR","Desbaste ext./int.: quanto tirar por passada (no raio, mm)",3],["alR","Acabamento ext./int.: sobremetal deixado (no raio, mm)",3],
+    params: [["apR","Desbaste ext./int.: quanto tirar por passada (no raio, mm; vazio = 4 = 8 no Ø; Celeron/POM e Ø int < 20: 3)",""],["alR","Acabamento ext./int.: sobremetal deixado (no raio, mm)",3],
              ["apC","Canal: quanto aprofundar por passada (mm)",3],["alC","Canal: sobremetal deixado para o acabamento (mm)",1],
              ["rn","Raio da ponta das ferramentas (mm)",0.4],
              ["tInt","Ferramenta interna (vazio = pelo menor Ø trabalhado: T4D14 abaixo de Ø11, T1D45 até Ø40, senão T2D12)",""],["S","Rotação S (vazio = tabela pelo Ø ext.)",""],
@@ -1429,7 +1429,7 @@ GEN.pse120 = { name: "PSE 120",
          ["rL","Raio do lábio (vazio = 0,214 × altura)",""],["ds","Ø do assento dos anéis (vazio = Ø int. + 0,8 × secção)",""],
          ["rpt","Nº de repetições RPT (vazio = 0)",""],["mat","Material","PU"],["matR","Material do anel (peça A)","PTFE"],
          ["bi","Bucha Ø interno (vazio = automática)",""],["bo","Bucha Ø externo (vazio = automática)",""]],
-  params: [["apR","Desbaste ext./int.: quanto tirar por passada (no raio, mm)",3],["alR","Acabamento ext./int.: sobremetal deixado (no raio, mm)",3],
+  params: [["apR","Desbaste ext./int.: quanto tirar por passada (no raio, mm; vazio = 4 = 8 no Ø; Celeron/POM e Ø int < 20: 3)",""],["alR","Acabamento ext./int.: sobremetal deixado (no raio, mm)",3],
            ["rn","Raio da ponta das ferramentas (mm)",0.4],["tInt","Ferramenta interna (vazio = pelo menor Ø trabalhado: T4D14 abaixo de Ø11, T1D45 até Ø40, senão T2D12)",""],["S","Rotação S (vazio = tabela pelo Ø ext.)",""],
            ["ae","Aperto do lábio no Ø (vazio = 0,9 até Ø40 · 1,1 até Ø100 · 1,5 acima)",""],["chI","Chanfro interno, frente 45° e trás 30° (vazio = 0,08 × secção, mín. 0,3)",""],
            ["cA","Anel (peça A): chanfros 45° do externo (vazio = 0,2)",""],["cAF","Anel (peça A): chanfro 45° do interno na frente (vazio = 0,2)",""],["cAI","Anel (peça A): chanfro interno de trás a 30°, em Z (vazio = 0,2)",""]],
@@ -1569,7 +1569,7 @@ GEN.dpr = { name: "PSE 125 (DPR)",
 GEN.psr102 = { name: "PSR 102",
   main: [["dint","Diâmetro interno – haste (mm)",180],["dext","Diâmetro externo (mm)",192],["hh","Altura do calcanhar (mm)",7],["h","Altura total (mm)",10],
          ["rpt","Nº de repetições RPT (vazio = 0)",""],["mat","Material","PU"],["bi","Bucha Ø interno (vazio = automática)",""],["bo","Bucha Ø externo (vazio = automática)",""]],
-  params: [["apR","Desbaste: quanto tirar por passada (no raio, mm)",3],["alR","Sobremetal deixado para o acabamento (no raio, mm)",2.5],["rn","Raio da ponta das ferramentas (mm)",0.4],
+  params: [["apR","Desbaste ext./int.: quanto tirar por passada (no raio, mm; vazio = 4 = 8 no Ø; Celeron/POM e Ø int < 20: 3)",""],["alR","Sobremetal deixado para o acabamento (no raio, mm)",2.5],["rn","Raio da ponta das ferramentas (mm)",0.4],
            ["tInt","Ferramenta interna (vazio = pelo menor Ø trabalhado: T4D14 abaixo de Ø11, T1D45 até Ø40, senão T2D12)",""],["S","Rotação S (vazio = tabela pelo Ø ext.)",""],
            ["g92a","G92: parte fixa do extra (mm)",0.768],["g92b","G92: acréscimo por mm de corte no raio",0.0265],
            ["fi","Folga do calcanhar interno (vazio = 1,0)",""],["ai","Aperto da ponta no Ø (vazio = 1,0 até Ø150, 2,0 acima)",""],
@@ -1704,7 +1704,7 @@ GEN.psr101 = { name: "PSR 101",
   main: [["dint","Ø haste (mm)",63],["dext","Ø alojamento (mm)",71],["h1","Altura do corpo h1 (de trás até o degrau, mm)",4],["h2","Altura até o lábio h2 (de trás até o começo do lábio, mm)",5],["h","Altura total H (mm)",7],
          ["r1CP","Chanfro 45° no canto do degrau, lado do lábio (vazio = 0,3 / 0,4 / 0,5 pela secção)",""],
          ["rpt","Nº de repetições RPT (vazio = 0)",""],["mat","Material","PU"],["bi","Bucha Ø interno (vazio = automática)",""],["bo","Bucha Ø externo (vazio = automática)",""]],
-  params: [["apR","Desbaste: quanto tirar por passada (no raio, mm)",3],["alR","Sobremetal deixado para o acabamento (no raio, mm)",1.5],["rn","Raio da ponta das ferramentas (mm)",0.4],
+  params: [["apR","Desbaste ext./int.: quanto tirar por passada (no raio, mm; vazio = 4 = 8 no Ø; Celeron/POM e Ø int < 20: 3)",""],["alR","Sobremetal deixado para o acabamento (no raio, mm)",1.5],["rn","Raio da ponta das ferramentas (mm)",0.4],
            ["tInt","Ferramenta interna (vazio = pelo menor Ø trabalhado: T4D14 abaixo de Ø11, T1D45 até Ø40, senão T2D12)",""],["S","Rotação S (vazio = tabela pelo Ø ext.)",""],
            ["r1Ap","Aperto da ponta no Ø (vazio = 1,1 / 1,4 / 1,8 pela secção)",""],["r1ZT","Ponta do lábio: distância da face (vazio = 0,25)",""],["r1St","Degrau: quanto menor que o Ø alojamento (vazio = 2 / 3 / 4 pela secção)",""],
            ["r1LipE","Lábio no degrau: Ø − haste (vazio = secção, ou seja Ø médio)",""],["r1E0","Aresta de fora do lábio na face: Ø − haste (vazio = 0,45)",""],
@@ -2341,7 +2341,7 @@ function saveForm(){
 // 5.99.0 (usuário 25/11/2026): cada perfil lembra as configurações do ÚLTIMO item salvo dele (💾 Salvar) e, ao escolher o perfil
 // de novo, o formulário abre com elas (não com o padrão). Não voltam: tolerâncias do desenho (começam no padrão, como no F5) e a
 // bucha digitada (é da medida daquele item). PSE 108 (DP) e Arruela ISO são o mesmo gerador: chaves separadas.
-const PROF_MEM_SKIP = new Set(["bi", "bo"]);
+const PROF_MEM_SKIP = new Set(["bi", "bo", "apR"]);   // 5.99.18: apR vazio = padrão pelo material (não volta o 3 antigo)
 function profMemKey(){ const t = $("genType").value, tp = document.querySelector("#genBox [data-k=tipoP]"); return t === "iso" && tp && tp.value === "dp" ? "dp" : t; }
 function profMemSave(){ try { const vals = {}; document.querySelectorAll("#genBox input[data-k], #genBox select[data-k]").forEach(el => vals[el.dataset.k] = el.value);
   localStorage.setItem("ps_prof_" + profMemKey(), JSON.stringify(vals)); } catch(e){} }
@@ -2407,6 +2407,8 @@ function generateCore(fromInput){
     if (bi && bed2 && !bi.readOnly){ bi.dataset.prev = String(bi.value).trim() === "2" ? "1" : bi.value; bi.value = "2"; bi.readOnly = true; bi.title = "Corte com a T6D16 (Celeron ou secção > 14,8) — bedame 2"; }
     else if (bi && !bed2 && bi.readOnly){ bi.value = bi.dataset.prev || "1"; bi.readOnly = false; bi.title = ""; p.bed = Number(String(bi.value).replace(",", ".")) || 1; } }
   if (bed2 && "bed" in p && !["psr211","psr212"].includes(type)){ p.bedOrig = p.bed; p.bed = 2; p.bedD16 = true; }
+  // 5.99.18 (usuário 25/11/2026: "desbaste dos itens de PU muito pouco"): desbaste interno e externo vazio = 4 no raio (8 no Ø) em todos os materiais; Celeron e POM e peça pequena (Ø int < 20) continuam 3
+  if ("apR" in p && (p.apR === "" || isNaN(p.apR))){ const m = type === "psh110" || type === "psh110t" ? psh110Mat(p) : ["pse120", "pse102r"].includes(type) && pse102rPiece(p) === "A" ? p.matR : p.mat; p.apR = /^(CELERON|POM)$/i.test(String(m || "").trim()) || Number(p.dint) < 20 ? 3 : 4; }
   let lines = g.build(p), d16 = false;
   const toolTxt = type === "pso" ? "" : (() => { const r = intToolByMin(g, p, lines, type); lines = r.lines; return r.txt; })();   // v5.84.0: interno pelo MENOR Ø trabalhado (PSO 109: ferramentas próprias, o material não muda o programa)
   if (bed2 && (celD16 || lines.some(l => /\bT8D8\b/.test(String(l))))){
@@ -3565,7 +3567,7 @@ GEN.psh110 = {
   main: [["peca","Peça do conjunto","M"],["dint","Ø haste (mm)",50],["dext","Ø alojamento (mm)",65],["h","Altura (mm)",35],["nm","Quantidade de intermediárias",5],
          ["matM","Material da intermediária","PU"],["matF","Material da base e da tampa","NYLON"],["rpt","Nº de repetições RPT (vazio = intermediária: quantidade − 1; base/tampa: 0)",""],
          ["bi","Bucha Ø interno (vazio = automática)",""],["bo","Bucha Ø externo (vazio = automática)",""],["um1","Teflon: externo e interno em 1 passe só","N"]],
-  params: [["apR","Desbaste: quanto tirar por passada (no raio, mm)",3],["alR","Sobremetal deixado para o acabamento (no raio, mm)",1.5],["rn","Raio da ponta das ferramentas (mm)",0.4],["S","Rotação S (vazio = tabela pelo Ø ext.)",""],["pM","Paralelo atrás da intermediária (largura, vazio = 0,25 × secção; 0 = ponta viva)",""],["pZ","Intermediária: reta em Z no fim do externo/interno (vazio = 0,6)",""]],
+  params: [["apR","Desbaste ext./int.: quanto tirar por passada (no raio, mm; vazio = 4 = 8 no Ø; Celeron/POM e Ø int < 20: 3)",""],["alR","Sobremetal deixado para o acabamento (no raio, mm)",1.5],["rn","Raio da ponta das ferramentas (mm)",0.4],["S","Rotação S (vazio = tabela pelo Ø ext.)",""],["pM","Paralelo atrás da intermediária (largura, vazio = 0,25 × secção; 0 = ponta viva)",""],["pZ","Intermediária: reta em Z no fim do externo/interno (vazio = 0,6)",""]],
   build(p){
     const g = psh110Geom(p), C = psh110Contours(p), k = C.k, L = g.L, f3 = v => fx(v, 3), r = Number(p.rn) > 0 ? Number(p.rn) : 0.4;
     const mat = psh110Mat(p), PU = mat === "PU", lab = psh110MatLabel(mat); p.mat = lab;
@@ -3735,7 +3737,7 @@ function psh110tGroove(Dm, dep, R, f3){
 GEN.psh110t = {
   name: "PSH 110 30° (chevron a 30°)",
   main: GEN.psh110.main.map(a => a.slice()),
-  params: [["apR","Desbaste: quanto tirar por passada (no raio, mm)",3],["alR","Sobremetal deixado para o acabamento (no raio, mm)",1.5],["rn","Raio da ponta das ferramentas (mm)",0.4],["S","Rotação S (vazio = tabela pelo Ø ext.)",""],
+  params: [["apR","Desbaste ext./int.: quanto tirar por passada (no raio, mm; vazio = 4 = 8 no Ø; Celeron/POM e Ø int < 20: 3)",""],["alR","Sobremetal deixado para o acabamento (no raio, mm)",1.5],["rn","Raio da ponta das ferramentas (mm)",0.4],["S","Rotação S (vazio = tabela pelo Ø ext.)",""],
            ["pM","Paralelo atrás da intermediária = reta do bico da base (largura, vazio = 0,4 × secção; 0 = ponta viva)",""],["pZ","Intermediária: reta em Z no fim do externo/interno (vazio = 0,6)",""]],
   build(p){
     const g = psh110tGeom(p), C = psh110tContours(p), k = C.k, L = g.L, f3 = v => fx(v, 3), r = Number(p.rn) > 0 ? Number(p.rn) : 0.4;
@@ -6167,7 +6169,7 @@ function dualBuild(p){
 GEN.dual = { name: "DUAL SEAL",
   main: [["dint","Diâmetro interno – haste (mm)",100],["dext","Diâmetro externo – alojamento (mm)",110],["h","Altura (mm)",8],["med","Medidas","A"],
          ["rpt","Nº de repetições RPT (vazio = 0)",""],["mat","Material","PU"],["bi","Bucha Ø interno (vazio = automática)",""],["bo","Bucha Ø externo (vazio = automática)",""]],
-  params: [["apR","Desbaste: quanto tirar por passada (no raio, mm)",3],["alR","Sobremetal deixado para o acabamento (no raio, mm)",1.5],["rn","Raio da ponta das ferramentas (mm)",0.4],
+  params: [["apR","Desbaste ext./int.: quanto tirar por passada (no raio, mm; vazio = 4 = 8 no Ø; Celeron/POM e Ø int < 20: 3)",""],["alR","Sobremetal deixado para o acabamento (no raio, mm)",1.5],["rn","Raio da ponta das ferramentas (mm)",0.4],
            ["tInt","Ferramenta interna (vazio = pelo menor Ø trabalhado: T4D14 abaixo de Ø11, T1D45 até Ø40, senão T2D12)",""],["S","Rotação S (vazio = tabela pelo Ø ext.)",""],
            ["dl","Altura dos lábios no raio (vazio = 0,1 × secção + 0,23)",""]],
   build(p){ return dualBuild(p); },
@@ -6368,7 +6370,7 @@ function s15Build(p){
   L.push(`G92 Z${f3(g92)}`, "N20 G00 Z100", `(RPT N10,N20)N${rpt}`, "G54", "G00 X250 Z250", "M05", "M30");
   return L;
 }
-const S15_PARAMS = [["apR","Desbaste: quanto tirar por passada (no raio, mm)",3],["alR","Sobremetal deixado para o acabamento (no raio, mm)",1.5],["rn","Raio da ponta das ferramentas (mm)",0.4],
+const S15_PARAMS = [["apR","Desbaste ext./int.: quanto tirar por passada (no raio, mm; vazio = 4 = 8 no Ø; Celeron/POM e Ø int < 20: 3)",""],["alR","Sobremetal deixado para o acabamento (no raio, mm)",1.5],["rn","Raio da ponta das ferramentas (mm)",0.4],
   ["tInt","Ferramenta interna (vazio = pelo menor Ø trabalhado: T4D14 abaixo de Ø11, T1D45 até Ø40, senão T2D12)",""],["S","Rotação S (vazio = tabela pelo Ø ext.)",""],
   ["s15Ap","Lábio: aperto no Ø (vazio = como o Fast Seal)",""],["s15Dr","Lábio: queda até a face no raio (vazio = como o Fast Seal)",""],["s15Rt","Lábio: raio da ponta (vazio = 0,21 × secção)",""],
   ["s15Ag","Lado do canal: aperto em % do Ø (vazio = como o Fast Seal, ±0,3 % + 0,013 × secção)",""],["s15Ch","Lado do canal: chanfros 45° (vazio = 0,3)",""],

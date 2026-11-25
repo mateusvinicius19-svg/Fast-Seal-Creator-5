@@ -323,7 +323,7 @@ header .logo{background:linear-gradient(135deg,#c8102e,#8f1a17);box-shadow:0 2px
       <details class="params" id="buchaBox" style="display:none"><summary>Buchas (tabela + adicionadas)</summary><div class="buchas" id="buchaList"></div><div class="fields"><label>Ø interno da bucha<input id="bNewI" type="text" inputmode="decimal"></label><label>Ø externo da bucha<input id="bNewO" type="text" inputmode="decimal"></label></div><button class="btn" id="bAdd" type="button">+ Adicionar bucha</button> <span class="note">Vermelha: a escolhida (a mais leve que serve, com 1 mm de folga). T = tarugo. Amarelas: adicionadas. ✕ remove. Mudanças ficam salvas neste computador.</span></details>
       <div class="genbar">
         <button class="btn primary" id="btnCopy" style="display:none">&#x29C9; Copiar</button>
-        <button class="btn" id="btnSave" title="Salva o Fagor (.PIT) no Programas_CNC e a versão convertida (.txt) no MCS 500">&#x1F4BE; Salvar Fagor + MCS 500</button><button class="btn" id="btnSaveDes" style="display:none" title="PSE 108, PSG 101 e PSA 108: grava SÓ o desenho (PDF) na pasta DESENHOS para um programa que já existe — não mexe no .PIT nem no MCS 500">&#x1F4D0; Salvar só o desenho</button><button class="btn" id="btnPreview" style="display:none" title="Ver o desenho desta peça antes de salvar (não salva nada e não pede o código)">&#x1F441; Ver desenho</button><button class="btn" id="btnCopyMcs" style="display:none" title="Copia a versão convertida para o MCS 500">&#x29C9; Copiar MCS</button><button class="btn" id="btnDirRoot" style="display:none" title="Pasta única W:\Parts\PartsSeals\PROJETOS (tem Programas_CNC, MCS 500 e DESENHOS): escolha uma vez; nos outros dias é só clicar e Permitir">&#x1F513; PROJETOS</button><button class="btn" id="btnDirProg" style="display:none" title="Escolher a pasta W:\Parts\PartsSeals\PROJETOS\Programas_CNC">&#x1F4C1; Programas_CNC</button><button class="btn" id="btnDirMcs" style="display:none" title="Escolher a pasta W:\Parts\PartsSeals\PROJETOS\Programas_CNC\MCS 500">&#x1F4C1; MCS 500</button><button class="btn" id="btnAlt" title="Abrir um programa do Programas_CNC pelo número e refazer com outra bucha (salva como NNNNNN BIxBO — o original não muda)">&#x270F;&#xFE0F; Alterar programa</button><button class="btn" id="btnVer" title="Digitar o número e ver o programa e as variantes (NNNNNN BIxBO...)">&#x1F50E; Ver programa</button><button class="btn" id="btnPast" title="Estoque de pastilhas: entrada, baixa e histórico">&#x1F9F0; Pastilhas</button><button class="btn" id="btnHist" title="Programas salvos pelo Simulador (Programas_CNC\Historico Simulador CNC.csv)">&#x1F4CB; Histórico</button><button class="btn" id="btnDirDes" title="Escolher a pasta W:\Parts\PartsSeals\PROJETOS\DESENHOS">&#x1F4C1; DESENHOS</button>
+        <button class="btn" id="btnSave" title="Salva o Fagor (.PIT) no Programas_CNC e a versão convertida (.txt) no MCS 500">&#x1F4BE; Salvar Fagor + MCS 500</button><button class="btn" id="btnPrint110" style="display:none" title="PSH 110: imprime os 3 desenhos do conjunto (intermediária, base A e tampa B) com as medidas da tela">&#x1F5A8; Imprimir os 3</button><button class="btn" id="btnSaveDes" style="display:none" title="PSE 108, PSG 101 e PSA 108: grava SÓ o desenho (PDF) na pasta DESENHOS para um programa que já existe — não mexe no .PIT nem no MCS 500">&#x1F4D0; Salvar só o desenho</button><button class="btn" id="btnPreview" style="display:none" title="Ver o desenho desta peça antes de salvar (não salva nada e não pede o código)">&#x1F441; Ver desenho</button><button class="btn" id="btnCopyMcs" style="display:none" title="Copia a versão convertida para o MCS 500">&#x29C9; Copiar MCS</button><button class="btn" id="btnDirRoot" style="display:none" title="Pasta única W:\Parts\PartsSeals\PROJETOS (tem Programas_CNC, MCS 500 e DESENHOS): escolha uma vez; nos outros dias é só clicar e Permitir">&#x1F513; PROJETOS</button><button class="btn" id="btnDirProg" style="display:none" title="Escolher a pasta W:\Parts\PartsSeals\PROJETOS\Programas_CNC">&#x1F4C1; Programas_CNC</button><button class="btn" id="btnDirMcs" style="display:none" title="Escolher a pasta W:\Parts\PartsSeals\PROJETOS\Programas_CNC\MCS 500">&#x1F4C1; MCS 500</button><button class="btn" id="btnAlt" title="Abrir um programa do Programas_CNC pelo número e refazer com outra bucha (salva como NNNNNN BIxBO — o original não muda)">&#x270F;&#xFE0F; Alterar programa</button><button class="btn" id="btnVer" title="Digitar o número e ver o programa e as variantes (NNNNNN BIxBO...)">&#x1F50E; Ver programa</button><button class="btn" id="btnPast" title="Estoque de pastilhas: entrada, baixa e histórico">&#x1F9F0; Pastilhas</button><button class="btn" id="btnHist" title="Programas salvos pelo Simulador (Programas_CNC\Historico Simulador CNC.csv)">&#x1F4CB; Histórico</button><button class="btn" id="btnDirDes" title="Escolher a pasta W:\Parts\PartsSeals\PROJETOS\DESENHOS">&#x1F4C1; DESENHOS</button>
         <button class="btn" id="btnDraw" style="display:none">&#x1F4D0; Desenho</button>
         <button class="btn" id="btnProgDes" title="Desenho a partir do programa aberto/gerado: simula a usinagem e cota a peça que sobra (como o desenho do 3D).">&#x1F4D0; Desenho do programa</button><button class="btn" id="btn3D" title="Desenho a partir do 3D do Inventor: no Inventor, Arquivo → Exportar → Formato CAD → STL (mm). Também dá para arrastar o .stl para a tela.">&#x1F9CA; Desenho do 3D (Inventor)</button><input type="file" id="file3D" accept=".stl" style="display:none">
         <span class="note" id="genMsg"></span>
@@ -2238,7 +2238,8 @@ function dpRec(sec){
 function dpFormSync(){
   const box = $("genMain"); if (!box) return;
   const tp = document.querySelector("#genBox [data-k=tipoP]"), on = $("genType").value === "iso" && tp && tp.value === "dp";
-  { const b = $("btnSaveDes"); if (b) b.style.display = on || ["psg101", "psa108"].includes($("genType").value) ? "" : "none"; }   // 5.99.8: "Salvar só o desenho" no PSE 108 (5.99.9: e no PSG 101; 5.99.13: e no PSA 108)
+  { const b = $("btnSaveDes"); if (b) b.style.display = on || ["psg101", "psa108"].includes($("genType").value) ? "" : "none"; }
+  { const b = $("btnPrint110"); if (b) b.style.display = $("genType").value === "psh110" ? "" : "none"; }   // 5.99.16   // 5.99.8: "Salvar só o desenho" no PSE 108 (5.99.9: e no PSG 101; 5.99.13: e no PSA 108)
   const lab = k => { const e = box.querySelector(`[data-k="${k}"]`); return e ? e.closest("label") : null; };
   let sec = box.querySelector("[data-k=sec][data-dpsec]");   // só o campo criado aqui (lip, dpr, pso têm secção própria)
   const di = box.querySelector("[data-k=dint]"), de = box.querySelector("[data-k=dext]"), hh = box.querySelector("[data-k=h]");
@@ -4295,7 +4296,7 @@ async function isDesenhosDir(dd){ for (const n of ["PSA 108", "PSE 106", "PSH 10
 async function saveDrawingPdf(p, num, dd, keepIfExists, pitName){
   if (!dd) return " · PDF não salvo (clique em 📁 DESENHOS e salve de novo)";
   if (!(await isDesenhosDir(dd))) return ` · PDF NÃO salvo: a pasta escolhida em 📁 DESENHOS ("${dd.name}") não é a W:\\Parts\\PartsSeals\\PROJETOS\\DESENHOS — clique em 📁 DESENHOS e escolha a certa`;
-  const fp = document.querySelector("#dwgFields input[data-d=prog]"); if (fp) fp.value = String(num);
+  const fp = document.querySelector("#dwgFields input[data-d=prog]"); if (fp) fp.value = String(num) + (p.tipoGen === "psh110" && psh110Piece(p) !== "M" ? psh110Piece(p) : "");   // 5.99.16: base / tampa com o A / B no carimbo
   const fam = await dd.getDirectoryHandle(desFam(p), { create: true });
   const fd = desenhoFolderName(p, num), sub = await fam.getDirectoryHandle(fd, { create: true });
   // PSH 110 (usuário 13/11/2026): as 3 peças na MESMA pasta do conjunto, como no W: — meio "… 30249.pdf", macho "…A.pdf", fêmea "…B.pdf"
@@ -4322,6 +4323,7 @@ const DESENHOS_W = "W:\\Parts\\PartsSeals\\PROJETOS\\DESENHOS";
 async function pedidoArgus(dd, p, num, pdf, pitName){
   const el = document.querySelector("#dwgFields [data-d=cod]"), cod = String(el ? el.value : "").trim();
   if (!cod) return " · sem Cód. interno: Anexo 1 do ARGUS não pedido";
+  if (state.save110 && state.save110.num) return " · ARGUS: só a intermediária (base e tampa não vão para o Anexo)";   // 5.99.16
   if (!/^\d+$/.test(cod)) return ` · Cód. interno "${cod}" não é número: pedido ARGUS não gravado`;
   const pd = await dd.getDirectoryHandle("_PEDIDOS ARGUS", { create: true });
   const prog = String(num || "").replace(/\D/g, "");
@@ -4473,6 +4475,8 @@ async function saveProgram0(auto){
   // sufixo da bucha quando ela foi digitada à mão (exceção: não sobrescreve o programa padrão)
   const suf = (state.fileName || "").match(/ (\d+(?:\.\d+)?X\d+(?:\.\d+)?)$/i);
   let sug = "", forcedNum = null; state.dupRename = null;
+  // 5.99.16 (usuário 25/11/2026): PSH 110 salva as 3 peças num clique (save110Conjunto) — base e tampa com o número da intermediária, sem perguntar
+  const s110 = !auto && state.save110 ? state.save110 : null; if (s110 && s110.num) forcedNum = s110.num;
   if (state.alterNum) sug = state.alterNum;   // Alterar programa: mesmo número + sufixo da bucha
   else if (dir){ $("genMsg").textContent = "Procurando o próximo número livre…"; $("genMsg").style.color = ""; sug = await nextFreeProg(dir); }
   // PSH 110 (usuário 13/11/2026): o meio salva com o número normal; macho e fêmea com o MESMO número + A / B (030249, 030249A, 030249B)
@@ -4506,8 +4510,8 @@ async function saveProgram0(auto){
       } } }
   const num = auto ? sug : forcedNum !== null ? forcedNum : prompt("Número do programa" + (state.alterNum ? " (alterando " + sug + ")" : cicloDe ? ` (ciclo de ${nCiclo} peças do ${sug} — salva como "${sug} CICLO ${nCiclo} PÇ")` : sug ? " (próximo livre: " + sug + ")" : " (ex.: 046004)") + (suf ? ` — bucha especial: vai salvar como "número ${suf[1]}"` : "") + ":", sug);
   if (num === null) return parar("número do programa cancelado. Se a janela do número nem apareceu, aperte F5 e salve de novo.");
-  if (!auto && !askCod()) return parar("Cód. interno cancelado. Para salvar sem código, deixe em branco e clique em OK.");
-  if (!auto && nCiclo <= 1 && state.genParams && DESENHO_TYPES.includes(state.genParams.tipoGen) && !askDes()) return parar("\"Quem desenhou?\" cancelado.");
+  if (!auto && !(s110 && s110.num) && !askCod()) return parar("Cód. interno cancelado. Para salvar sem código, deixe em branco e clique em OK.");
+  if (!auto && !(s110 && s110.num) && nCiclo <= 1 && state.genParams && DESENHO_TYPES.includes(state.genParams.tipoGen) && !askDes()) return parar("\"Quem desenhou?\" cancelado.");
   let base = num.trim().replace(/\.(pit|txt|nc)$/i, "");
   if (!base) return parar("número do programa em branco.");
   if (/^\d{1,6}[A-Z]?$/i.test(base)) base = base.replace(/^(\d+)/, d => d.padStart(6, "0"));
@@ -4518,6 +4522,7 @@ async function saveProgram0(auto){
   { const nc = nCiclo;
     if (nc > 1 && !/CICLO/i.test(base)){ const m = /^(\d+)(.*)$/.exec(base); base = m ? `${m[1]} CICLO ${nc} PÇ${m[2]}` : `${base} CICLO ${nc} PÇ`; } }
   const pitName = base + ".PIT", mcsName = base.replace(/^0+(?=\d)/, "") + ".txt";
+  if (s110) s110.base = base;   // 5.99.16: PSH 110 conjunto — número da intermediária para a base (A) e a tampa (B)
   const fagor = currentText(), pitBytes = toCp1252(fagor.replace(/\n/g, "\r\n") + "\r\n"), mcsBytes = toCp1252(fagorToMcs(fagor));
   if (!window.showDirectoryPicker && !SRV){   // navegador sem acesso a pastas: baixa os dois arquivos
     await saveBytes(pitBytes, pitName, "text/plain", "pit"); await saveBytes(mcsBytes, mcsName, "text/plain", "txt");
@@ -4558,12 +4563,59 @@ async function saveProgram0(auto){
     if (!auto && gp) profMemSave();   // 5.99.0: o perfil abre com estas configurações da próxima vez
     $("genMsg").textContent = `Salvo: ${pitName} (Programas_CNC) e ${mcsName} (MCS 500, convertido)${pdfMsg}.`; state.tolResetPending = true; /* v5.20.1: tolerâncias voltam ao padrão quando começar a peça seguinte (a impressão desta continua com as dela) */ $("genMsg").style.color = /NÃO salvo/.test(pdfMsg) ? "#b2221f" : "";
     if (auto) $("genMsg").textContent = `✏️ ${state.alterNote || ""} Salvo: ${pitName} (Programas_CNC) e ${mcsName} (MCS 500)${pdfMsg}. O ${state.alterNum} original não mudou.`;
-    if (!auto && !desCiclo && gp && DESENHO_TYPES.includes(gp.tipoGen) && !/NÃO salvo|não salvo/.test(pdfMsg)) setTimeout(() => { openPreview(); setTimeout(() => { updatePrintCss(); window.print(); }, 400); }, 100);   // imprime o desenho salvo
+    if (!auto && !desCiclo && !s110 && gp && DESENHO_TYPES.includes(gp.tipoGen) && !/NÃO salvo|não salvo/.test(pdfMsg)) setTimeout(() => { openPreview(); setTimeout(() => { updatePrintCss(); window.print(); }, 400); }, 100);   // imprime o desenho salvo
     return true;
   } catch(e){ alert("Não foi possível salvar: " + e.message); }
   return false;
 }
-$("btnSave").onclick = () => saveProgram(false);
+$("btnSave").onclick = () => $("genType").value === "psh110" && state.genParams && state.genParams.tipoGen === "psh110" ? save110Conjunto() : saveProgram(false);
+// 5.99.16 (usuário 25/11/2026): PSH 110 = sempre as 3 peças. Um 💾 Salvar grava a intermediária (número normal, pergunta número,
+// Cód. interno e "Quem desenhou?"), a base (número + A) e a tampa (número + B), programa + desenho de cada uma na mesma pasta;
+// pedido ARGUS só da intermediária (o item do conjunto). No fim imprime os 3 desenhos. 🖨 Imprimir os 3 reimprime depois.
+function gen110(k){ const sel = document.querySelector("#genBox [data-k=peca]"); if (sel) sel.value = k; generate(); return state.genParams; }
+async function save110Conjunto(){
+  const k0 = (document.querySelector("#genBox [data-k=peca]") || {}).value || "M", gps = {}, res = [];
+  let num = null;
+  try {
+    state.save110 = {};
+    gps.M = gen110("M");
+    if (!(await saveProgram(false))) return;
+    res.push($("genMsg").textContent);
+    num = ((state.save110.base || "").match(/^\d+/) || [null])[0]; if (!num) return;
+    state.save110.num = num;
+    for (const k of ["A", "B"]){
+      gps[k] = gen110(k);
+      const ok = await saveProgram(false); res.push($("genMsg").textContent);
+      if (!ok){ num = null; break; }
+    }
+  } finally {
+    state.save110 = null;
+    if (res.length){ gen110("M"); const t = res.join("  ‖  "), bad = /NÃO salvo|não salvo/.test(t);
+      setTimeout(() => { $("genMsg").textContent = t; $("genMsg").style.color = bad ? "#b2221f" : ""; }, 300); }   // depois da mensagem do gerar
+    else gen110(k0);
+  }
+  if (num && gps.A && gps.B) print110(gps, num);
+}
+// imprime intermediária, base e tampa (uma folha cada), com o número de cada programa no carimbo
+function print110(gps, num){
+  const fp = document.querySelector("#dwgFields input[data-d=prog]"), old = fp ? fp.value : "";
+  const svgs = ["M", "A", "B"].map(k => { if (fp) fp.value = String(num) + (k === "M" ? "" : k); return drawingSVG(gps[k]); });
+  if (fp) fp.value = String(num);
+  printDrawings(svgs);
+}
+function printDrawings(svgs){
+  openPreview(); $("pvPage").innerHTML = svgs[0];
+  let at = $("pvPage"); for (const s of svgs.slice(1)){ const d = document.createElement("div"); d.className = "pvpage pvExtra"; d.innerHTML = s; at.after(d); at = d; }
+  pvLayout(); setTimeout(() => { updatePrintCss(); window.print(); }, 400);
+}
+$("btnPrint110").onclick = () => {
+  const fp = document.querySelector("#dwgFields input[data-d=prog]"), cur = String(fp && fp.value || "").replace(/[AB]$/i, "");
+  const v = prompt("Número do programa da intermediária (base = número + A, tampa = número + B):", cur);
+  if (v === null) return; const num = v.trim().replace(/^(\d+)/, d => d.padStart(6, "0"));
+  const k0 = (document.querySelector("#genBox [data-k=peca]") || {}).value || "M", gps = {};
+  for (const k of ["M", "A", "B"]) gps[k] = gen110(k);
+  gen110(k0); print110(gps, num);
+};
 // 5.99.8 (usuário 25/11/2026): PSE 108 — muitos itens já têm programa mas não têm desenho: grava SÓ o desenho (DESENHOS\PSE 108 (DP)\…)
 // com o número do programa que já existe (+ pedido ARGUS se tiver Cód. interno). Não grava .PIT, MCS 500 nem histórico.
 async function saveDrawingOnly(){
@@ -6477,7 +6529,8 @@ function drawingSVGCore(p){ // PSE 120 (usuário 16/11/2026): UM desenho só par
   const info = dwgInfo();
   const W = PT ? 794 : 1123, H = PT ? 1123 : 794;                     // A4 paisagem (96 dpi)
   const ri = p.dint / 2, re = p.dext / 2, h = p.h, sec = (p.dext - p.dint) / 2;
-  const prof = profileOf(p);
+  // 5.99.16 (usuário 25/11/2026): PSH 110 desenhado como sai usinado — face da frente (Z0) à DIREITA (perfil espelhado em Z)
+  const mir110 = p.tipoGen === "psh110", prof = mir110 ? profileOf(p).map(([z, r]) => [-h - z, r]) : profileOf(p);
   const f2 = v => fmtN(v, Math.abs(v - Math.round(v)) < 1e-9 ? 0 : (Math.abs(v * 10 - Math.round(v * 10)) < 1e-9 ? 1 : 2));
   // carimbo com as medidas da descrição/cadastro (usuário 07/11/2026): com ALOJAMENTO a altura do alojamento; raspador com as duas alturas.
   // As vistas continuam com a altura final da peça.
@@ -6569,10 +6622,10 @@ function drawingSVGCore(p){ // PSE 120 (usuário 16/11/2026): UM desenho só par
     g += call(DX(-c / 2), DY(re - c / 2), dzf - 28, dyE - 6, `${fmtN(c, 2)} x 45°`) + call(DX(-(h - c / 2)), DY(re - c / 2), dzb + 16, dyE + 20, `${fmtN(c, 2)} x 45°`);
     g += call(DX(-cF / 2), DY(ri + cF / 2), dzf - 28, dyI + 18, `${fmtN(cF, 2)} x 45°`) + call(DX(-(h - zBI / 2)), DY(ri + zBI * T30 / 2), dzb + 16, dyI + 18, `${fmtN(zBI, 2)} x 30°`);
   } else if (p.tipoGen === "psh110") {   // PSH 110: peça escolhida do chevron — altura e V
-    const G = psh110Geom(p), C = psh110Contours(p);
-    if (C.notch) g += call(DX(-C.notch), DY(G.rm), dzf - 40, (dyE + dyI) / 2, `V 45° · fundo ${fmtN(C.notch, 2)}`);
-    if (C.nose) g += call(DX(0), DY(G.rm), dzf - 40, (dyE + dyI) / 2, `ponta V 45° · reta ${fmtN(2 * C.nose, 2)}`);
-    if (C.k === "M" && G.pM > 0) g += call(DX(-h), DY(G.rm), dzb + 22, (dyE + dyI) / 2 + 28, `paralelo ${fmtN(G.pM, 2)}`);   // v5.40.0: atrás sem canto vivo
+    const G = psh110Geom(p), C = psh110Contours(p);   // 5.99.16: perfil espelhado (frente à direita) → chamadas trocam de lado
+    if (C.notch) g += call(DX(-h + C.notch), DY(G.rm), dzb + 22, (dyE + dyI) / 2, `V 45° · fundo ${fmtN(C.notch, 2)}`);
+    if (C.nose) g += call(DX(-h), DY(G.rm), dzb + 22, (dyE + dyI) / 2, `ponta V 45° · reta ${fmtN(2 * C.nose, 2)}`);
+    if (C.k === "M" && G.pM > 0) g += call(DX(0), DY(G.rm), dzf - 22, (dyE + dyI) / 2 + 28, `paralelo ${fmtN(G.pM, 2)}`, "end");   // v5.40.0: atrás sem canto vivo
   } else if (p.tipoGen === "psa109") {   // PSA 109: chanfros da frente (menores) e de trás + raio na face
     const G = psa109Geom(p), kI = 1 / TAN(60), aB = p.angIB > 0 ? p.angIB : 30;
     // v5.56.1: perfil espelhado no desenho (canal do lado de trás) → chamadas trocam de lado
@@ -6835,6 +6888,7 @@ function pvLayout(){
   const k = fit * pvZoom;
   pg.style.width = (pw * k) + "px"; pg.style.height = (ph * k) + "px";
   pg.style.padding = (5 * k) + "px";                          // margem de 5 mm
+  document.querySelectorAll(".pvExtra").forEach(e => { e.style.width = pg.style.width; e.style.height = pg.style.height; e.style.padding = pg.style.padding; e.style.marginTop = "24px"; });   // 5.99.16: folhas a mais (PSH 110: 3 desenhos)
   $("pvZoomTxt").textContent = Math.round(pvZoom * 100) + "%";
 }
 // ---- v5.53.0 (usuário 16/11/2026): DESENHO A PARTIR DO 3D DO INVENTOR ----
@@ -7518,6 +7572,7 @@ function updatePrintCss(){
     body.pvopen .pvbody{display:block!important}
     body.pvopen .pvstage{display:block!important;padding:0!important;overflow:visible!important}
     body.pvopen #pvPage{width:${P ? "199mm" : "287mm"}!important;height:${P ? "286mm" : "199mm"}!important;padding:0!important;margin:0 auto!important;box-shadow:none!important;page-break-inside:avoid;break-inside:avoid}
+    body.pvopen .pvExtra{width:${P ? "199mm" : "287mm"}!important;height:${P ? "286mm" : "199mm"}!important;padding:0!important;margin:0 auto!important;box-shadow:none!important;page-break-before:always;break-before:page;page-break-inside:avoid;break-inside:avoid}
     *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   }`;
 }
@@ -7527,9 +7582,9 @@ setOrient = v => { _setOrient(v); updatePrintCss(); };
 $("pvOrient").onchange = e => setOrient(e.target.value);
 $("dwgOrient").onchange = e => setOrient(e.target.value);
 const _openPreview = openPreview;
-openPreview = () => { _openPreview(); document.body.classList.add("pvopen"); updatePrintCss(); };
+openPreview = () => { document.querySelectorAll(".pvExtra").forEach(e => e.remove()); _openPreview(); document.body.classList.add("pvopen"); updatePrintCss(); };
 $("dwgPrint").onclick = openPreview;
-function closePreview(){ $("pvModal").classList.remove("show"); document.body.classList.remove("pvopen"); }
+function closePreview(){ $("pvModal").classList.remove("show"); document.body.classList.remove("pvopen"); document.querySelectorAll(".pvExtra").forEach(e => e.remove()); }
 $("pvClose").onclick = closePreview;
 document.addEventListener("keydown", e => { if (e.key === "Escape" && $("pvModal").classList.contains("show")) closePreview(); });
 // Ctrl+P com a prévia aberta passa pelo mesmo botão (pergunta o Cód. interno antes)

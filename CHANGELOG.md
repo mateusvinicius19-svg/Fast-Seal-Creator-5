@@ -6,6 +6,11 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.99.16 — PSH 110: salvar e imprimir as 3 peças de uma vez; desenho como sai usinado (25/11/2026)
+- 💾 Salvar no PSH 110 grava intermediária (número normal), base (número + A) e tampa (número + B): programa (.PIT + MCS) e desenho de cada uma. Pergunta número, Cód. interno e "Quem desenhou?" só uma vez. Pedido ARGUS só da intermediária. No fim imprime os 3 desenhos (uma folha cada).
+- Botão 🖨 Imprimir os 3: reimprime os 3 desenhos do conjunto depois.
+- Desenho do PSH 110 espelhado: face da frente (Z0) à direita, igual sai usinado. Carimbo da base / tampa com o A / B no número.
+
 ## 5.99.15 — PSH 110: opção Teflon externo e interno em 1 passe (25/11/2026)
 - PSH 110: campo "Teflon: externo e interno em 1 passe só" (Não / Sim). Com Sim e a peça em PTFE, sai sem desbaste: só o passe de acabamento no externo e no interno. Padrão Não (igual antes).
 

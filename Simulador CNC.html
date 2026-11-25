@@ -887,7 +887,7 @@ document.addEventListener("keydown", e => {
 
 function readFile(f){
   const fr = new FileReader();
-  fr.onload = () => load(fr.result, f.name);
+  fr.onload = () => { load(fr.result, f.name); state.progExt = true; };
   fr.readAsText(f, "windows-1252");
 }
 $("file").onchange = e => { if (e.target.files[0]) readFile(e.target.files[0]); e.target.value = ""; };
@@ -900,7 +900,7 @@ document.body.addEventListener("drop", e => { e.preventDefault(); const f = e.da
 
 $("btnPaste").onclick = () => { $("pasteArea").value = ""; $("modal").classList.add("show"); $("pasteArea").focus(); };
 $("pasteCancel").onclick = () => $("modal").classList.remove("show");
-$("pasteOk").onclick = () => { const v = $("pasteArea").value; $("modal").classList.remove("show"); if (v.trim()) load(v, "Programa colado"); };
+$("pasteOk").onclick = () => { const v = $("pasteArea").value; $("modal").classList.remove("show"); if (v.trim()){ load(v, "Programa colado"); state.progExt = true; } };
 
 $("btnEdit").onclick = () => {
   if (state.editing) return;
@@ -2411,7 +2411,7 @@ function generateCore(fromInput){
   if (type !== "psr102") lines = puRetracts(lines);   // v5.81.0: recuos do PU como no PSR 102 (o PSR 102 já sai assim do gerador)
   lines = retractRules(lines, type);   // v5.84.0: + folga mínima por ferramenta, material e faixa de Ø (D14: exata)
   const fname = (type === "dual" || type === "pse127" || type === "psh131" || type === "iso" || type === "dhr" || type === "dpr" || type === "psh110" || type === "psh110t" || type === "psr101" || type === "psa108" || type === "psa108c" || type === "psa109" || type === "psg101" || type === "psg103" || type === "psg104" || type === "lip" || type === "pso" || type === "pse106" || type === "psh106" || type === "psh108" || type === "psh117" || type === "psh125" || type === "psh105" || type === "pse105" || type === "pse103" || type === "pse107" || type === "pse118" || type === "psh107" || type === "psh121" || type === "psh103" || type === "psr102" || type === "psr211" || type === "psr212" || type === "pse102r" || type === "pse120") ? pieceFile(p) + (buchaIsException(p) || (state.alterNum && p.bi !== "" && p.bo !== "") ? ` ${gen15(p.bi)}X${gen15(p.bo)}` : "") : `PSA108 ${gen15(p.dint)}X${gen15(p.dext)}X${gen15(p.h)} - ${xround(p.n,0)} pcs`;
-  load(lines.join("\n"), fname);
+  load(lines.join("\n"), fname); state.progExt = false;   // 5.99.2: programa do formulário → desenho do formulário
   if (!g.check(p)) try { $("genMsg").textContent += costTxt(pieceCost(lines.join("\n"), ["ciclo", "semch"].includes(type) ? xround(p.n, 0) : (isPSA(type) || type === "iso") ? cicloPcs(p) : 1)); } catch(e){}
   // 🧰 T8D8 → T6D16 quando a secção passa de 14,8 (feito acima, antes de montar o programa)
   if ((isPSG(type) || type === "psa108c") && p.corte !== "N") $("genMsg").textContent += (psgAcr(p) > 0 ? ` · ${(ARR_MAT[p.matA] || [p.matA])[0].split(" ")[0]}: usinado ${fmtN(psgAcr(p), 2)} mm maior nos diâmetros (Ø${fmtN(p.dint + psgAcr(p), 3)} / Ø${fmtN(p.dext + psgAcr(p), 3)}) por causa da serra de ${fmtN(PSG_SERRA, 1)}; desenho com a medida nominal` : "") + ` · corte da ${type === "psa108c" ? "arruela" : "guia"} a ${fmtN(psgAng(p), 0)}° no acabamento${psgAcr(p) > 0 ? "" : " (sem perda)"}.`;
@@ -4351,7 +4351,7 @@ async function histOpenProgram(name, tr){
   try {
     const fh = await dir.getFileHandle(name), buf = new Uint8Array(await (await fh.getFile()).arrayBuffer());
     let s = ""; for (const b of buf) s += String.fromCharCode(b);
-    load(s.replace(/\r\n/g, "\n").replace(/\n+$/, ""), name.replace(/\.PIT$/i, ""));
+    load(s.replace(/\r\n/g, "\n").replace(/\n+$/, ""), name.replace(/\.PIT$/i, "")); state.progExt = true;
     $("histTi").querySelectorAll("tr").forEach(x => x.style.outline = ""); if (tr) tr.style.outline = "2px solid #b2221f";
     $("genMsg").textContent = "Aberto para conferência: " + name + " (Programas_CNC)."; $("genMsg").style.color = "";
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -4704,7 +4704,7 @@ async function verOpen(D, k, name){
     const dir = k === "P" ? D.P : D.M, buf = new Uint8Array(await (await (await dir.getFileHandle(name)).getFile()).arrayBuffer());
     let s = ""; for (const b of buf) s += String.fromCharCode(b);
     s = s.replace(/\r\n/g, "\n").replace(/\n+$/, "");
-    load(k === "P" ? s : mcsToFagor(s), name.replace(/\.(PIT|txt)$/i, "") + (k === "M" ? " (MCS 500)" : ""));
+    load(k === "P" ? s : mcsToFagor(s), name.replace(/\.(PIT|txt)$/i, "") + (k === "M" ? " (MCS 500)" : "")); state.progExt = true;
     if ($("verModal")) $("verModal").remove();
     $("genMsg").textContent = `Aberto para conferência: ${name} (${k === "P" ? "Programas_CNC" : "MCS 500"}).`; $("genMsg").style.color = "";
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -6695,8 +6695,11 @@ function askCod(force){
   return true;
 }
 // v5.21.4 (usuário 11/11): 👁 Ver desenho = olhar o desenho antes de salvar o projeto (sem pedir o Cód. interno, sem gravar nada)
-$("btnPreview").onclick = () => { if (!state.genParams) generate(); if (!state.genParams) return; try { openPreview(); } catch(e){ $("genMsg").textContent = "Não consegui montar o desenho: " + e.message; } };
-$("btnDraw").onclick = () => { if (!state.genParams || !askCod()) return; $("dwgSheet").innerHTML = drawingSVG(state.genParams); $("dwgModal").classList.add("show"); };
+// 5.99.2 (usuário 25/11/2026, 027780): programa aberto do Programas_CNC / histórico / arquivo → o desenho é o DESTE programa
+// (📐 Desenho do programa), não um perfil novo montado pelo formulário (que saía, p.ex., PSE 108 com chanfro atrás que o programa não faz)
+function progExtDesenho(){ if (state.progExt !== true) return false; progDrawing(); return true; }
+$("btnPreview").onclick = () => { if (progExtDesenho()) return; if (!state.genParams) generate(); if (!state.genParams) return; try { openPreview(); } catch(e){ $("genMsg").textContent = "Não consegui montar o desenho: " + e.message; } };
+$("btnDraw").onclick = () => { if (progExtDesenho()) return; if (!state.genParams || !askCod()) return; $("dwgSheet").innerHTML = drawingSVG(state.genParams); $("dwgModal").classList.add("show"); };
 $("dwgFields").addEventListener("input", () => { if (state.genParams) $("dwgSheet").innerHTML = drawingSVG(state.genParams); });
 $("dwgClose").onclick = () => $("dwgModal").classList.remove("show");
 /* visualização de impressão */
@@ -7198,6 +7201,7 @@ function progDrawing(){
       if (fit && fit.dev <= 0.3) std = { t: "lip", name: rank[0].name, p: fit.p, dev: fit.dev, txt: `Ø${fv3(fit.p.dint)} · secção ${fv3(fit.p.sec)} · altura ${fv3(fit.p.h)} · rebaixo ${fv3(fit.p.h2)} x ${fv3(fit.p.b)} · flanco ${fmtN(fit.p.af - 90, 1)}° · base ${fmtN(fit.p.ab, 1)}° · chanfro ${fv3(fit.p.ch)}` }; }
     progTolAsk(p, rank, sp => { if (sp) state.genParams = sp;
       state.genParams.fromProg = true;   // v5.71.0: desenho do programa → Imprimir também salva no W: e grava o pedido ARGUS
+      state.progExt = "feito";   // 5.99.2: o 👁 / Desenho seguintes mostram este desenho (sem perguntar de novo)
       // v5.61.2 (usuário 16/11/2026): Programa Nº = o do programa aberto (ficava o da peça anterior); Cód. interno da peça anterior sai
       const nm = String(state.fileName || "").match(/^0*(\d+[A-Z]?)/i), set = (k, v) => { const a = document.querySelector(`#dwgFields [data-d="${k}"]`), b = document.querySelector(`#pvSide [data-dd="${k}"]`); if (a) a.value = v; if (b) b.value = v; };
       set("prog", nm ? nm[1].toUpperCase() : ""); set("cod", ""); try { saveForm(); } catch(e){}
@@ -7214,7 +7218,7 @@ async function progDrawingNum(num){
     msg(`Procurando ${num} no Programas_CNC…`);
     const f = await altFind(dir, num, msg);
     if (!f) throw new Error(`não achei o programa ${num} (*.PIT) no Programas_CNC`);
-    load(await (await f.fh.getFile()).text(), f.name);
+    load(await (await f.fh.getFile()).text(), f.name); state.progExt = true;
     progDrawing();
   } catch(e){ errShow("Desenho do programa", e); }
 }

@@ -6,6 +6,11 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.99.2 — Programa aberto do Programas_CNC: o Desenho é o do programa (25/11/2026)
+- Usuário (027780, PSE 108 do Fast Seal, 11,8x14x2): abrindo um programa existente (🔎 Ver programa, Histórico, arquivo ou
+  colar), a etapa 4 Desenho / 👁 Ver desenho mostrava o perfil do FORMULÁRIO (PSE 108 novo, chanfro nos dois lados) e não o
+  programa (faca em Z-2: chanfro só na frente). Agora fazem o 📐 Desenho do programa. Gerar pelo formulário volta ao normal.
+
 ## 5.99.1 — Teste de perfis sem abrir o navegador do usuário (25/11/2026)
 - Usuário: o teste abria o navegador dele a cada vez. CLAUDE.md: rodar `testar-perfis.ps1` sempre com `-SemAbrir` e abrir a
   página no navegador interno do app. O Simulador não mudou.

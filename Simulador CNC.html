@@ -3570,6 +3570,9 @@ GEN.psh110 = {
     const am = ARR_MAT[mat] || ARR_MAT.PU;
     const tools = PU ? { face: "T3D3", ext: "T2D2", int: g.d < 40 ? "T1D45" : "T2D12", cut: "T5D5", fCut: "0.220" }
                      : { face: "T7D7", ext: am[1] || "T7D7", int: g.d < T4D4_MIN ? "T2D14" : (am[2] || "T4D4"), cut: am[3] || "T8D8", fCut: "0.100" };
+    // 5.99.14 (usuário 25/11/2026, PSH 110 36,35x44x23,5 PTFE): o V de 45° nas costas do interno da intermediária a T4D4 não faz
+    // (máx. 30° nas costas) → interno da intermediária com a T2D1. Base, tampa e PU continuam iguais.
+    if (k === "M" && tools.int === "T4D4") tools.int = "T2D1";
     // bucha: digitada, ou a mais leve da lista (PU) que serve; se não, tubo sob medida 3 mm para cada lado no Ø
     const xs = [...C.outer, ...C.inner].map(q => 2 * q[1]), xMax = Math.max(...xs), xMin = Math.min(...xs);
     const ok = v => v !== "" && v !== undefined && v !== null && !isNaN(v);

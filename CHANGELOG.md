@@ -6,6 +6,13 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.99.4 — PSE 108 (DP): Ø externo → secção → altura e chanfros recomendados pela tabela (25/11/2026)
+- Usuário: preencher Ø externo, secção e depois altura (Ø interno = Ø ext − 2 × secção, só leitura).
+- Chanfros (campo vazio = recomendado; digitado vale). Peças padrão [secção · altura · chanfro externo frente/trás · interno]:
+  1,1·2·0,2·0,1 · 1,9·3·0,4·0,15 · 2,65·4·0,6·0,25 · 3,5·6·0,8·0,35 · 5·7,9·1·0,4 · 6,5·7,9·1·0,4. Fora do padrão: sugestão
+  interpolada pela secção (arredonda a 0,05). Altura vazia = a da tabela. Alojamento (Fast Seal) também preenche a secção.
+- Só o PSE 108; Arruela ISO, PSH 129, PSE 125 e PSO 109 iguais.
+
 ## 5.99.3 — Desenho do programa: reconhece o PSE 108 e usa o desenho padrão com os chanfros do programa (25/11/2026)
 - Usuário (027780 é um PSE 108): o 📐 Desenho do programa saía como perfil especial. Agora, se o programa encaixa no PSE 108 (DP),
   a janela oferece "Usar o desenho padrão do PSE 108" com Ø/altura e CADA chanfro tirados do programa (externo frente/trás,

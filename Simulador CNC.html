@@ -2222,7 +2222,45 @@ function buildForm(){
   generate();
   try { updateProfBtn(); } catch(e){}
 }
+// 5.99.4 (usuário 25/11/2026): PSE 108 (DP) — preencher Ø EXTERNO, SECÇÃO e depois ALTURA (Ø interno = Ø ext − 2 × secção) e chanfros
+// recomendados pela tabela das peças padrão [secção, altura, chanfro externo (frente e trás), chanfro interno em Z]; fora do padrão:
+// sugestão interpolada pela secção (arredonda a 0,05). Campo vazio = recomendado; digitado vale. Só o PSE 108 (Arruela ISO igual).
+const DP_PADRAO = [[1.1, 2, 0.2, 0.1], [1.9, 3, 0.4, 0.15], [2.65, 4, 0.6, 0.25], [3.5, 6, 0.8, 0.35], [5, 7.9, 1, 0.4], [6.5, 7.9, 1, 0.4]];
+function dpRec(sec){
+  const T = DP_PADRAO, std = T.find(r => Math.abs(r[0] - sec) < 0.01), r05 = v => Math.round(v * 20) / 20;
+  if (std) return { h: std[1], ch: std[2], chI: std[3], std: true };
+  if (!(sec > 0)) return null;
+  const lo = [...T].reverse().find(r => r[0] <= sec) || T[0], hi = T.find(r => r[0] >= sec) || T[T.length - 1], t = hi[0] > lo[0] ? (sec - lo[0]) / (hi[0] - lo[0]) : 0;
+  const f = i => lo[i] + t * (hi[i] - lo[i]);
+  return { h: Math.round(f(1) * 10) / 10, ch: r05(f(2)), chI: Math.max(0.05, r05(f(3))), std: false };
+}
+function dpFormSync(){
+  const box = $("genMain"); if (!box) return;
+  const tp = document.querySelector("#genBox [data-k=tipoP]"), on = $("genType").value === "iso" && tp && tp.value === "dp";
+  const lab = k => { const e = box.querySelector(`[data-k="${k}"]`); return e ? e.closest("label") : null; };
+  let sec = box.querySelector("[data-k=sec][data-dpsec]");   // só o campo criado aqui (lip, dpr, pso têm secção própria)
+  const di = box.querySelector("[data-k=dint]"), de = box.querySelector("[data-k=dext]"), hh = box.querySelector("[data-k=h]");
+  if (!on){ if (sec) sec.closest("label").remove(); if (di && box.dataset.dp === "1"){ di.readOnly = false; di.style.opacity = ""; } box.dataset.dp = ""; return; }
+  if (!di || !de || !hh) return;
+  const num = v => parseFloat(String(v).replace(",", "."));
+  if (!sec){   // entrou no PSE 108: Ø ext → secção → altura → Ø int. (calculado); chanfros vazios = recomendados
+    const s0 = num(de.value) > num(di.value) ? xround((num(de.value) - num(di.value)) / 2, 3) : "";
+    lab("dext").insertAdjacentHTML("afterend", `<label>Secção (mm)<input data-k="sec" data-dpsec="1" type="text" inputmode="decimal" value="${String(s0).replace(".", ",")}"></label>`);
+    sec = box.querySelector("[data-k=sec][data-dpsec]");
+    const first = box.querySelector(":scope > label"); if (first && lab("dext") !== first) box.insertBefore(lab("dext"), first);
+    lab("dext").after(lab("sec")); lab("sec").after(lab("h")); lab("h").after(lab("dint"));
+    di.readOnly = true; di.style.opacity = ".7"; di.title = "Ø externo − 2 × secção";
+    if (box.dataset.dp !== "1") for (const k of ["chF", "chT", "chI"]){ const e = box.querySelector(`[data-k="${k}"]`); if (e) e.value = ""; }
+    box.dataset.dp = "1";
+  }
+  const s = num(sec.value), D = num(de.value);
+  if (s > 0 && D > 2 * s) di.value = String(xround(D - 2 * s, 3)).replace(".", ",");
+  const r = dpRec(s);
+  for (const [k, v] of [["chF", r && r.ch], ["chT", r && r.ch], ["chI", r && r.chI], ["h", r && r.h]]){ const e = box.querySelector(`[data-k="${k}"]`);
+    if (e) e.placeholder = r ? `${r.std ? "padrão" : "sugestão"}: ${fmtN(v, 2)}` : ""; }
+}
 function readParams(){
+  try { dpFormSync(); } catch(e){}
   const p = {};
   document.querySelectorAll("#genBox input[data-k], #genBox select[data-k]").forEach(inp => {
     const k = inp.dataset.k, raw = inp.value.trim();
@@ -2230,6 +2268,12 @@ function readParams(){
     else p[k] = raw === "" ? "" : parseFloat(raw.replace(",", "."));
   });
   if (TOL_KEYS.some(k => k in p)) { state.tolVals = {}; for (const k of TOL_KEYS) if (k in p) state.tolVals[k] = p[k]; }
+  if ($("genType").value === "iso" && p.tipoP === "dp" && "sec" in p){   // 5.99.4: PSE 108 — Ø int. pela secção; vazio = recomendado
+    const e = v => v === "" || v === undefined || isNaN(v);
+    if (!e(p.sec) && p.sec > 0 && p.dext > 2 * p.sec) p.dint = xround(p.dext - 2 * p.sec, 3);
+    const r = dpRec(e(p.sec) ? (p.dext - p.dint) / 2 : p.sec);
+    if (r){ if (e(p.chF)) p.chF = r.ch; if (e(p.chT)) p.chT = r.ch; if (e(p.chI)) p.chI = r.chI; if (e(p.h)) p.h = r.h; }
+  }
   if (isPSA($("genType").value)){
     const sug = psaFill(p);
     for (const k of ["chE", "chI"]){ const e = document.querySelector(`#genBox [data-k="${k}"]`); if (e) e.placeholder = "sugestão: " + fmtN(sug, 2); }
@@ -2798,7 +2842,7 @@ function alojApply(kind){
     const pad = DP_ALOJ_PADRAO.find(x => Math.abs((s.A - s.B) / 2 - x.rad) < 0.01 && (x.F === undefined || Math.abs((s.F || 0) - x.F) < 0.01) && (x.W === undefined || Math.abs(W - x.W) < 0.01));
     const t = pad ? pad.sec : (s.A - s.B) / 2 - Lc, hh = pad && pad.h !== undefined ? pad.h : (s.F > 0 ? s.F - 0.2 : null);
     if (!(t > 0)){ info.textContent = `Secção do PTFE ficou ${fmtN(t, 2)}: alojamento raso para o O-ring ${fmtN(W, 2)} (L ${fmtN(Lc, 2)}).`; info.style.color = "#b2221f"; return; }
-    set("dint", s.A - 2 * t); set("dext", s.A); if (hh !== null) set("h", hh);
+    set("dint", s.A - 2 * t); set("dext", s.A); set("sec", t); if (hh !== null) set("h", hh);   // 5.99.4: PSE 108 com campo de secção
     const o = ativadorFor(W, s.B, "dp");
     info.style.color = "#444"; info.innerHTML = (pad ? `Alojamento padrão (fundo ${fmtN(pad.rad, 2)}${pad.F !== undefined ? " x " + fmtN(pad.F, 2) : ""}): secção PTFE <b>${fmtN(t, 2)}</b>${hh !== null ? `, altura <b>${fmtN(hh, 2)}</b>` : ""}` : `Secção PTFE = (${fmtN(s.A, 2)} − ${fmtN(s.B, 2)})/2 − L ${fmtN(Lc, 2)} = <b>${fmtN(t, 2)}</b>`) + ` · anel Ø${fmtN(s.A - 2 * t, 2)} x Ø${fmtN(s.A, 2)}${hh !== null ? " x " + fmtN(hh, 2) : ""} · ${esc(ativadorTxt(o))}`;
   } else {

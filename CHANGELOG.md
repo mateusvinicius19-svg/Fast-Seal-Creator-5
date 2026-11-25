@@ -6,6 +6,9 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.99.12 — Ciclo de várias peças sem desenho na pasta grava o desenho
+- PSA 108 (e os outros ciclos): salvando o ciclo de N peças e ainda NÃO existe desenho com essas medidas em DESENHOS, grava o desenho (pergunta "Quem desenhou?" e imprime), como no salvar normal. Se o desenho já existe (feito com o programa de 1 peça), continua sem mexer.
+
 ## 5.99.11 — PSR 102: último passe do calcanhar a 1 mm por lado do acabamento (25/11/2026)
 - Usuário (25,4x35,5 bucha 12x48): o passe X36 ficava a 0,25 por lado do Ø35,5. Agora o último passe reto do externo fica no
   mínimo em Ø ext + 2 (X37,5); o rebaixo termina nele. Só o PSR 102.

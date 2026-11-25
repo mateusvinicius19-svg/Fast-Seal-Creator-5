@@ -6,6 +6,13 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.99.7 — PU: externo (e canais do externo) antes do interno (25/11/2026)
+- Usuário: nos itens de PU, o externo é feito antes do interno, e as outras ferramentas do externo (canal martelo T6D6 do
+  PSR 211/212 e PSE 102 R, OUTSIDE 2 do PSE 120) vão juntas, antes do interno. Pós-processamento `puOutsideFirst`: só muda a
+  ORDEM dos blocos (mesmas linhas). Face, canal frontal e corte no mesmo lugar.
+- Mudam (PU): PSE 102 R, 103, 105, 106, 107, 118, 120 · PSH 103, 105, 106, 107, 108, 117, 121, 125 · PSR 211, 212.
+  NBR, Viton, PTFE e os que já faziam o externo antes (PSH 110/131, PSR 101/102, PSE 127, dual, PSH 129, arruelas) iguais.
+
 ## 5.99.6 — Ciclo de várias peças sugere o número do programa de 1 peça pelo histórico (25/11/2026)
 - Usuário (830): salvou o PSE 108 de 1 peça e logo o ciclo de 4 — o Salvar sugeriu número NOVO. A busca era na lista da pasta
   DESENHOS, guardada 10 min (ainda sem o desenho recém-salvo). Agora o ciclo procura no HISTÓRICO o programa de 1 peça com o

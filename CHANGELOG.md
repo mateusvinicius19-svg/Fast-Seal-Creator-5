@@ -6,6 +6,9 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.99.14 — PSH 110: interno da intermediária com a T2D1 (25/11/2026)
+- PSH 110 intermediária (PTFE e outros que usavam a T4D4): o V de 45° nas costas do interno a T4D4 não faz (máx. 30°) → interno com a T2D1. Base, tampa e intermediária em PU não mudam.
+
 ## 5.99.13 — PSA 108: botão "Salvar só o desenho" (25/11/2026)
 - PSA 108 ganha o 📐 Salvar só o desenho, igual ao PSE 108 / PSG 101: grava só o PDF em DESENHOS\PSA 108 para um programa que já existe.
 - Desfeita a mudança da 5.99.12: o ciclo de várias peças volta a não gravar desenho (como na 5.98.11).

@@ -6,6 +6,10 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.99.13 — PSA 108: botão "Salvar só o desenho" (25/11/2026)
+- PSA 108 ganha o 📐 Salvar só o desenho, igual ao PSE 108 / PSG 101: grava só o PDF em DESENHOS\PSA 108 para um programa que já existe.
+- Desfeita a mudança da 5.99.12: o ciclo de várias peças volta a não gravar desenho (como na 5.98.11).
+
 ## 5.99.12 — Ciclo de várias peças sem desenho na pasta grava o desenho
 - PSA 108 (e os outros ciclos): salvando o ciclo de N peças e ainda NÃO existe desenho com essas medidas em DESENHOS, grava o desenho (pergunta "Quem desenhou?" e imprime), como no salvar normal. Se o desenho já existe (feito com o programa de 1 peça), continua sem mexer.
 

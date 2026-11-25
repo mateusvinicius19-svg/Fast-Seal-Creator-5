@@ -6,6 +6,11 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.98.11 — Ciclo de várias peças: salvar não grava o desenho de novo (25/11/2026)
+- Usuário: o desenho e o programa de 1 peça são feitos antes; no programa "CICLO N PÇ" (PSA 108, PSE 108, ciclo de arruelas)
+  o salvar agora grava só o .PIT e o MCS 500 — sem regravar/perguntar o desenho e sem imprimir.
+- 1 peça por ciclo continua igual (grava e imprime o desenho).
+
 ## 5.98.10 — NBR e Viton com os recuos do PU (25/11/2026)
 - Usuário (PSH 107 28x38x10 NBR): recuos das ferramentas diferentes do PU. Agora o `puRetracts` (+1 no Ø, 5.81.0) vale também
   para NBR/Viton e o `retractRules` usa a folga da ferramenta que o PU usaria: T7D7 → folga da T2D2; interno → D45/D12/D14

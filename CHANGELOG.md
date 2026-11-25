@@ -6,6 +6,10 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.99.9 — PSG 101 também com "📐 Salvar só o desenho" (25/11/2026)
+- Usuário: o PSG 101 também precisa salvar só o desenho (programa já existe). Mesmo botão do PSE 108 (5.99.8):
+  grava só o PDF em DESENHOS\PSG 101\… Outros perfis sem o botão.
+
 ## 5.99.8 — PSE 108: botão "📐 Salvar só o desenho" (25/11/2026)
 - Usuário: muitos itens já têm programa mas não têm desenho. No PSE 108, o botão pede o número do programa que já existe
   (avisa se não achar o .PIT), o Cód. interno e quem desenhou, e grava SÓ o PDF em DESENHOS\PSE 108 (DP)\… (+ pedido ARGUS

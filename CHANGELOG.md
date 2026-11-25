@@ -6,6 +6,11 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.99.8 — PSE 108: botão "📐 Salvar só o desenho" (25/11/2026)
+- Usuário: muitos itens já têm programa mas não têm desenho. No PSE 108, o botão pede o número do programa que já existe
+  (avisa se não achar o .PIT), o Cód. interno e quem desenhou, e grava SÓ o PDF em DESENHOS\PSE 108 (DP)\… (+ pedido ARGUS
+  se tiver código) e imprime, como o Salvar. Não grava .PIT, MCS 500 nem histórico.
+
 ## 5.99.7 — PU: externo (e canais do externo) antes do interno (25/11/2026)
 - Usuário: nos itens de PU, o externo é feito antes do interno, e as outras ferramentas do externo (canal martelo T6D6 do
   PSR 211/212 e PSE 102 R, OUTSIDE 2 do PSE 120) vão juntas, antes do interno. Pós-processamento `puOutsideFirst`: só muda a

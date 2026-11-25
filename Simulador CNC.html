@@ -1335,7 +1335,7 @@ const GEN = {
 };
 
 /* ------------------------- formulário --------------------------- */
-const TEXT_KEYS = new Set(["med","peca","matM","matF","matR","corte","aloj","sf","tExt","tInt","tBed","nome","desc","mat","tipoP","tiT","tiV","tiV2","teT","teV","teV2","thT","thV","thV2","tsT","tsV","tsV2","tolG"]);
+const TEXT_KEYS = new Set(["med","um1","peca","matM","matF","matR","corte","aloj","sf","tExt","tInt","tBed","nome","desc","mat","tipoP","tiT","tiV","tiV2","teT","teV","teV2","thT","thV","thV2","tsT","tsV","tsV2","tolG"]);
 const TOL_KEYS = ["tipoP","tiT","tiV","tiV2","teT","teV","teV2","thT","thV","thV2","tsT","tsV","tsV2","tolG"];
 const TOL_DIMS = [["ti","Ø interno"],["te","Ø externo"],["th","Altura"],["ts","Secção"]];   // Secção: v5.21.21 ("sem" = tolerância padrão do perfil)
 // v5.21.21: tolerância da secção escolhida no bloco "Tolerâncias do desenho" (substitui a padrão do perfil); null = usar a padrão
@@ -2184,6 +2184,7 @@ function fieldHTML([k, label, def], wide){
   if (k === "matA") return `<label>${label}<select data-k="matA" class="orient" style="width:100%">${Object.entries(ARR_MAT).map(([v, a]) => `<option value="${v}"${def === v ? " selected" : ""}>${a[0]}</option>`).join("")}</select></label>`;
   // gaxetas / raspadores (usuário 09/11/2026): material em lista, com NBR como nas arruelas; o texto vai na linha ;MATERIAL
   if (k === "mat") return `<label>${label}<select data-k="mat" class="orient" style="width:100%">${GAX_MAT.map(([v, t]) => `<option value="${v}"${def === v ? " selected" : ""}>${t}</option>`).join("")}</select></label>`;
+  if (k === "um1") return `<label>${label}<select data-k="um1" class="orient" style="width:100%"><option value="N"${def !== "S" ? " selected" : ""}>Não · desbaste normal</option><option value="S"${def === "S" ? " selected" : ""}>Sim · só o passe de acabamento</option></select></label>`;   // 5.99.15: PSH 110 Teflon
   if (k === "sf") return `<label>${label}<select data-k="sf" class="orient" style="width:100%"><option value="PSE"${def === "PSE" ? " selected" : ""}>PSE · interno sem folga</option><option value="PSH"${def === "PSH" ? " selected" : ""}>PSH · externo sem folga</option></select></label>`;
   const isText = TEXT_KEYS.has(k);
   const ph = {tiS:"+0,1",tiI:"-0,1",teS:"+0,2",teI:"0",thS:"+0,1",thI:"-0,1",tolG:"ex.: Demais cotas NBR ISO 2768-1 classe média"}[k] || "";
@@ -3562,7 +3563,7 @@ GEN.psh110 = {
   name: "PSH 110 (chevron)",
   main: [["peca","Peça do conjunto","M"],["dint","Ø haste (mm)",50],["dext","Ø alojamento (mm)",65],["h","Altura (mm)",35],["nm","Quantidade de intermediárias",5],
          ["matM","Material da intermediária","PU"],["matF","Material da base e da tampa","NYLON"],["rpt","Nº de repetições RPT (vazio = intermediária: quantidade − 1; base/tampa: 0)",""],
-         ["bi","Bucha Ø interno (vazio = automática)",""],["bo","Bucha Ø externo (vazio = automática)",""]],
+         ["bi","Bucha Ø interno (vazio = automática)",""],["bo","Bucha Ø externo (vazio = automática)",""],["um1","Teflon: externo e interno em 1 passe só","N"]],
   params: [["apR","Desbaste: quanto tirar por passada (no raio, mm)",3],["alR","Sobremetal deixado para o acabamento (no raio, mm)",1.5],["rn","Raio da ponta das ferramentas (mm)",0.4],["S","Rotação S (vazio = tabela pelo Ø ext.)",""],["pM","Paralelo atrás da intermediária (largura, vazio = 0,25 × secção; 0 = ponta viva)",""],["pZ","Intermediária: reta em Z no fim do externo/interno (vazio = 0,6)",""]],
   build(p){
     const g = psh110Geom(p), C = psh110Contours(p), k = C.k, L = g.L, f3 = v => fx(v, 3), r = Number(p.rn) > 0 ? Number(p.rn) : 0.4;
@@ -3609,13 +3610,15 @@ GEN.psh110 = {
     // v5.91.0 (usuário 21/11/2026): PU com sobremetal externo > 10 no Ø — passes acima do Ø ext +1 mm em Z (> 15: +2); a faca e a
     // saída do acabamento externo ficam a 10 mm acima da peça (maior Ø + 10), não mais pela bucha; o extra não conta no G92.
     const dA = deepAbove({ mat, dext: g.D }, bo);
-    const rOut = k === "M" ? psh110Rough(pout, bo, "od", "0.160", Number(p.apR), Number(p.alR), r, dA) : roughPasses(pout, bo, "od", "0.160", Number(p.apR), Number(p.alR), r, dA);
+    // 5.99.15 (usuário 25/11/2026): Teflon com "1 passe só" = sem desbaste no externo e no interno, só o acabamento
+    const um1 = /^PTFE/.test(mat) && String(p.um1 || "").toUpperCase() === "S";
+    const rOut = um1 ? Object.assign([], { extraZ: [] }) : k === "M" ? psh110Rough(pout, bo, "od", "0.160", Number(p.apR), Number(p.alR), r, dA) : roughPasses(pout, bo, "od", "0.160", Number(p.apR), Number(p.alR), r, dA);
     Lp.push(...rOut, ";( FINISH )", `G0 X${f3(2 * pout[0].p[1])} Z3.000`, `G1 X${f3(2 * pout[0].p[1])} Z${f3(pout[0].p[0])}`, ...tipLines(pout, r, "0.130"));
     const lo = pout[pout.length - 1].p, xS = dA ? xMax + FACA_MIN : bo + 1; Lp.push(`G0 X${f3(xS)} Z${f3(lo[0] + 0.2)}`, `G0 X${f3(xS)} Z5.000`, "");
     // ---- interno ----
     Lp.push(...sec("INSIDE"), "G0 Z70", tools.int, ";", ";");
     const pin = tipPath(extendStart(cIn, 1.0), r, "left", [-r, r]);
-    if (bi > 0) Lp.push(...(k === "M" ? psh110Rough(pin, bi, "id", "0.140", Number(p.apR), Number(p.alR), r) : roughPasses(pin, bi, "id", "0.140", Number(p.apR), Number(p.alR), r)));
+    if (bi > 0 && !um1) Lp.push(...(k === "M" ? psh110Rough(pin, bi, "id", "0.140", Number(p.apR), Number(p.alR), r) : roughPasses(pin, bi, "id", "0.140", Number(p.apR), Number(p.alR), r)));
     Lp.push(";( FINISH )", `G0 X${f3(2 * pin[0].p[1])} Z3.000`, `G1 X${f3(2 * pin[0].p[1])} Z${f3(pin[0].p[0])}`, ...tipLines(pin, r, "0.140"));
     const li = pin[pin.length - 1].p; Lp.push(`G0 X${f3(Math.max(0, xMin - 2))} Z${f3(li[0] + 0.2)}`, `G0 X${f3(Math.max(0, xMin - 2))} Z5.000`, "");
     // ---- corte: na altura da peça (como nos programas VPA01B) ----

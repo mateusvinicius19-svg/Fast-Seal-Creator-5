@@ -6,6 +6,10 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.98.9 — Altura < secção: canal e lábios com altura ÷ 2 também no PSH 105, PSH 117, PSE 105, PSR 211 e PSR 212 (25/11/2026)
+- Usuário: replicar a regra do PSH/PSE 106 (5.98.7/5.98.8). Lista `HM2_TYPES`; nos PSR vale a altura do corpo (hb).
+- Altura ≥ secção e os outros perfis (PSH 108 etc.) não mudaram.
+
 ## 5.98.8 — PSH 106 / PSE 106: lábios com altura ÷ 2 (igual ao canal) quando a altura é menor que a secção (25/11/2026)
 - Usuário: no 20x28x3 os lábios externo e interno ficavam com 2 (secção ÷ 2); agora acompanham o canal (1,5).
 - Só PSH 106 e PSE 106; altura ≥ secção e os outros perfis (inclusive PSH 108) não mudaram.

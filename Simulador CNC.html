@@ -5186,6 +5186,8 @@ const TG_F = [[0.5,0.2],[1.0,0.3],[1.5,0.3],[2.0,0.5],[2.5,0.5],[2.5,0.5]];   //
 function tgFaixa(d){ const lim = [20, 50, 150, 250, 400]; for (let i = 0; i < lim.length; i++) if (d < lim[i]) return i; return 5; }
 function tgSecTol(s){ return s < 5 ? 0.2 : s < 8 ? 0.3 : s < 12 ? 0.4 : 0.5; }
 
+// Gaxetas em que, com altura < secção, canal e lábios ficam com altura ÷ 2 (usuário 25/11/2026; PSR: altura do corpo)
+const HM2_TYPES = ["pse106","psh106","psh105","psh117","pse105","psr211","psr212"];
 function pseFscGeom(p){
   const D = Math.PI / 180, tan = a => Math.tan(a * D);
   const opt = v => (v === "" || v === null || v === undefined || isNaN(v)) ? null : Number(v);
@@ -5195,8 +5197,8 @@ function pseFscGeom(p){
   const fi = PSH ? (opt(p.fi) ?? (["psh117","psh105","psh103","psh125","psr211","psr212"].includes(p.tipoGen) ? xround(0.134 * (p.dext - p.dint) / 2, 2) : TG_B[fi_][0])) : 0;   // PSH 117: folga do calcanhar int. = 0,134 × secção (Fast Seal)
   const fe = PSH ? 0 : (opt(p.fe) ?? (["pse105","pse103"].includes(p.tipoGen) ? 0.7 : TG_C[fe_][0]));   // PSE 105: folga externa 0,7 (Fast Seal)
   const intCalc = opt(p.xHi) ?? (p.dint + fi), intAp = opt(p.xLi) ?? (p.dint - ai), extCalc = opt(p.xHe) ?? (p.dext - fe), extAp = opt(p.xLe) ?? (p.dext + ae);
-  const sec = (p.dext - p.dint) / 2, prof = opt(p.pCan) ?? (["pse107","psh107","psh103","pse103","pse118","psh121","psh125"].includes(p.tipoGen) ? orDepth(oc107(sec, p)) : p.tipoGen === "psh108" ? sec / 6 : ["pse106","psh106"].includes(p.tipoGen) && !p._g108 && Number(p.h) < sec ? Number(p.h) / 2 : sec / 2), secAp = sec + (PSH ? ae : ai), larg = secAp / 2;   // PSE/PSH 106 (usuário 25/11/2026): altura < secção → canal com altura ÷ 2
-  const lipLen = opt(p.lLab) ?? (["pse106","psh106"].includes(p.tipoGen) && !p._g108 && Number(p.h) < sec ? Number(p.h) / 2 : sec / 2);   // PSE/PSH 106 (usuário 25/11/2026): altura < secção → lábios com altura ÷ 2 (igual ao canal)
+  const sec = (p.dext - p.dint) / 2, prof = opt(p.pCan) ?? (["pse107","psh107","psh103","pse103","pse118","psh121","psh125"].includes(p.tipoGen) ? orDepth(oc107(sec, p)) : p.tipoGen === "psh108" ? sec / 6 : HM2_TYPES.includes(p.tipoGen) && !p._g108 && Number(p.h) < sec ? Number(p.h) / 2 : sec / 2), secAp = sec + (PSH ? ae : ai), larg = secAp / 2;   // PSE/PSH 106 (usuário 25/11/2026; 5.98.9: + PSH 105/117, PSE 105, PSR 211/212 — altura do corpo): altura < secção → canal com altura ÷ 2
+  const lipLen = opt(p.lLab) ?? (HM2_TYPES.includes(p.tipoGen) && !p._g108 && Number(p.h) < sec ? Number(p.h) / 2 : sec / 2);   // PSE/PSH 106 (usuário 25/11/2026): altura < secção → lábios com altura ÷ 2 (igual ao canal)
   const secCalc = sec - fi / 2 - fe / 2;
   const chc = opt(p.chc) ?? (secCalc < 10 ? 0.5 : secCalc < 15 ? 0.75 : 1.0);
   const chcZ = chc / Math.tan(30 * D);   // chanfro interno do calcanhar a 30° (comprimento em Z)

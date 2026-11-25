@@ -5196,7 +5196,7 @@ function pseFscGeom(p){
   const fe = PSH ? 0 : (opt(p.fe) ?? (["pse105","pse103"].includes(p.tipoGen) ? 0.7 : TG_C[fe_][0]));   // PSE 105: folga externa 0,7 (Fast Seal)
   const intCalc = opt(p.xHi) ?? (p.dint + fi), intAp = opt(p.xLi) ?? (p.dint - ai), extCalc = opt(p.xHe) ?? (p.dext - fe), extAp = opt(p.xLe) ?? (p.dext + ae);
   const sec = (p.dext - p.dint) / 2, prof = opt(p.pCan) ?? (["pse107","psh107","psh103","pse103","pse118","psh121","psh125"].includes(p.tipoGen) ? orDepth(oc107(sec, p)) : p.tipoGen === "psh108" ? sec / 6 : ["pse106","psh106"].includes(p.tipoGen) && !p._g108 && Number(p.h) < sec ? Number(p.h) / 2 : sec / 2), secAp = sec + (PSH ? ae : ai), larg = secAp / 2;   // PSE/PSH 106 (usuário 25/11/2026): altura < secção → canal com altura ÷ 2
-  const lipLen = opt(p.lLab) ?? sec / 2;
+  const lipLen = opt(p.lLab) ?? (["pse106","psh106"].includes(p.tipoGen) && !p._g108 && Number(p.h) < sec ? Number(p.h) / 2 : sec / 2);   // PSE/PSH 106 (usuário 25/11/2026): altura < secção → lábios com altura ÷ 2 (igual ao canal)
   const secCalc = sec - fi / 2 - fe / 2;
   const chc = opt(p.chc) ?? (secCalc < 10 ? 0.5 : secCalc < 15 ? 0.75 : 1.0);
   const chcZ = chc / Math.tan(30 * D);   // chanfro interno do calcanhar a 30° (comprimento em Z)

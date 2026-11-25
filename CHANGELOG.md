@@ -6,6 +6,11 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.98.7 — PSH 106 / PSE 106: canal com altura ÷ 2 quando a altura é menor que a secção (25/11/2026)
+- Usuário (PSH 106 20x28x3): com altura < secção a profundidade do canal passa a ser altura ÷ 2 (antes secção ÷ 2:
+  3 mm de altura ficava com canal de 2 mm; agora 1,5 mm). Altura ≥ secção continua secção ÷ 2.
+- Só PSH 106 e PSE 106; PSH 108 (que usa a geometria do 106) e os outros perfis não mudaram.
+
 ## 5.98.6 — PSH 107 E 46356: cotas da secção no estilo novo + profundidade do canal com tolerância (24/11/2026)
 Só o desenho avulso (`Programas avulsos/PSH 107 E (16 X 26 X 5.6) 46356`); o Simulador não mudou.
 - Usuário (com imagem de exemplo): cada Ø da secção com linha de chamada horizontal e seta vertical, texto em pé ao lado

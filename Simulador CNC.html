@@ -5195,7 +5195,7 @@ function pseFscGeom(p){
   const fi = PSH ? (opt(p.fi) ?? (["psh117","psh105","psh103","psh125","psr211","psr212"].includes(p.tipoGen) ? xround(0.134 * (p.dext - p.dint) / 2, 2) : TG_B[fi_][0])) : 0;   // PSH 117: folga do calcanhar int. = 0,134 × secção (Fast Seal)
   const fe = PSH ? 0 : (opt(p.fe) ?? (["pse105","pse103"].includes(p.tipoGen) ? 0.7 : TG_C[fe_][0]));   // PSE 105: folga externa 0,7 (Fast Seal)
   const intCalc = opt(p.xHi) ?? (p.dint + fi), intAp = opt(p.xLi) ?? (p.dint - ai), extCalc = opt(p.xHe) ?? (p.dext - fe), extAp = opt(p.xLe) ?? (p.dext + ae);
-  const sec = (p.dext - p.dint) / 2, prof = opt(p.pCan) ?? (["pse107","psh107","psh103","pse103","pse118","psh121","psh125"].includes(p.tipoGen) ? orDepth(oc107(sec, p)) : p.tipoGen === "psh108" ? sec / 6 : sec / 2), secAp = sec + (PSH ? ae : ai), larg = secAp / 2;
+  const sec = (p.dext - p.dint) / 2, prof = opt(p.pCan) ?? (["pse107","psh107","psh103","pse103","pse118","psh121","psh125"].includes(p.tipoGen) ? orDepth(oc107(sec, p)) : p.tipoGen === "psh108" ? sec / 6 : ["pse106","psh106"].includes(p.tipoGen) && !p._g108 && Number(p.h) < sec ? Number(p.h) / 2 : sec / 2), secAp = sec + (PSH ? ae : ai), larg = secAp / 2;   // PSE/PSH 106 (usuário 25/11/2026): altura < secção → canal com altura ÷ 2
   const lipLen = opt(p.lLab) ?? sec / 2;
   const secCalc = sec - fi / 2 - fe / 2;
   const chc = opt(p.chc) ?? (secCalc < 10 ? 0.5 : secCalc < 15 ? 0.75 : 1.0);
@@ -5212,7 +5212,7 @@ function pseFscGeom(p){
   const Wt = (extAp - intAp) / 2, xgOutT = extAp - 2 * (Number(p.fO) > 0 ? Number(p.fO) / 100 : (recOut ? 0.27 : 0.248)) * Wt, xgInT = intAp + 2 * (Number(p.fI) > 0 ? Number(p.fI) / 100 : (recOut ? 0.248 : 0.27)) * Wt;
   // PSH 108 (usuário 12/11/2026): canal com a MESMA abertura do 106, 1/3 da profundidade, fundo RETO e um raio em cada canto
   // (externo e interno) de 0,5 a 1 mm (0,4 × prof.), flancos no ângulo do 106; hb = meia-largura do fundo reto entre os dois raios
-  const P108 = p.tipoGen === "psh108", g106 = P108 ? pseFscGeom(Object.assign({}, p, { tipoGen: "psh106", pCan: "" })) : null, R108 = P108 ? Math.min(Math.max(0.5, Math.min(1.0, Math.round(0.4 * prof * 20) / 20)), 0.9 * prof) : 0;
+  const P108 = p.tipoGen === "psh108", g106 = P108 ? pseFscGeom(Object.assign({}, p, { tipoGen: "psh106", pCan: "", _g108: true })) : null, R108 = P108 ? Math.min(Math.max(0.5, Math.min(1.0, Math.round(0.4 * prof * 20) / 20)), 0.9 * prof) : 0;
   const wCan = opt(p.wCan) ?? (O107 ? OC : REC ? (xgOutT - xgInT) / 2 + 0.414 * rec : secAp / 2);   // abertura na face (no raio); 106: secção com aperto / 2
   if (REC && !O107) Dm = recOut ? xgInT + wCan : xgOutT - wCan;
   if (O107 && opt(p.oID) !== null) Dm = opt(p.oID) + OC;          // 107: centro do O-ring = Ø int. do O-ring + secção

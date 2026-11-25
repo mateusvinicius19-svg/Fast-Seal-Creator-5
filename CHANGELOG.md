@@ -6,6 +6,10 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.99.20 — Desbaste padronizado: passes iguais contados do menor Ø; acabamento 4 no Ø (25/11/2026)
+- Desbaste interno e externo (gaxetas, raspadores, PSR, PSH 110, PSE 127…): a profundidade toda, da bucha até o ponto mais baixo (chanfro / ângulos), é dividida em passes IGUAIS de no máximo 8 no Ø, contados do menor Ø. Acima do perfil o passe é reto; nos ângulos segue o contorno. Ex.: PSH 106 310x350x20 bucha 300x390: 382,2 / 374,3 / 366,5 / 358,6 / 350,9 e acabamento 346,9.
+- PSE/PSH 106 e família, PSE 120: sobremetal do acabamento 2 no raio (4 no Ø), era 3 (6 no Ø). Os que já eram 1,5 (3 no Ø) não mudam.
+
 ## 5.99.19 — Desbaste: passada de contorno contada do menor Ø, no máximo 8 no Ø (25/11/2026)
 - Gaxetas e perfis com desbaste em contorno (ex.: PSH 106 310x350x20, bucha 300x390): do último passe reto (366) até o ponto mais baixo da passada de contorno (chanfro / ângulos, 352,8) ficavam 13,2 no Ø de uma vez. Agora essa profundidade, contada do menor Ø, é dividida em passadas de contorno iguais de no máximo um passe (8 no Ø): 359,4 e 352,8.
 

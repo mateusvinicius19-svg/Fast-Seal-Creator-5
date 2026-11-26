@@ -6,6 +6,12 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.99.32 — PSG 104 em PU troca as ferramentas (26/11/2026)
+- Pedido do usuário: no PSG 104, escolher PU não trocava as ferramentas. Agora, como no PSA 108 de 1 peça: PU → externo T2D2,
+  interno T4D14 (< Ø11) / T1D45 (11 a 40) / T2D12 (≥ 40), corte com a faca T5D5; NBR / Viton → T7D7 / T4D4 e corte na faca T5D5.
+  Secção > 14,8 em PU/NBR/Viton também corta com a faca (não vai mais para o bedame T6D16).
+- Só o PSG 104: os outros materiais do PSG 104 e todos os outros perfis geram o mesmo programa (teste dos 37 perfis: nenhum mudou).
+
 ## 5.99.31 — POLIA MCS 3: corte A-A com as duas metades iguais (26/11/2026)
 - A pedido do usuário, a metade de cima do corte A-A ficou igual à de baixo (furo Ø19 nas duas; o rasgo continua cotado na vista frontal); PDF regravado. O Simulador não mudou.
 

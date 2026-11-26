@@ -6681,6 +6681,10 @@ function drawingSVGCore(p){ // PSE 120 (usuário 16/11/2026): UM desenho só par
     g += ext(xR, dyE - 4, xR, yh - 6) + ext(dzb, yR - 4, dzb, yh - 6) + dimH(xR, dzb, yh, fv3(p.hReb));
     { const cR = psgChR(p); if (cR > 0) g += call(DX(-h + p.hReb + cR / 2), DY(re - cR / 2), dzb + 16, dyE - 8, `${fmtN(cR, 2)} x 45°`); }
     g += `<text x="${xR - 8}" y="${yh + 4}" class="tn" text-anchor="end">rebaixo Ø ${fmtN(p.dReb, 2)}</text>`;
+    // v5.99.33 (usuário 26/11/2026: "preciso que tenha cota na menor secção deste perfil"): secção no rebaixo
+    // (Ø rebaixo − Ø int.) / 2, como no PSG 103, entre as chamadas de chanfro da direita e a cota da secção total
+    const xs = dzb + 96;
+    g += ext(dzb + 4, yR, xs + 6, yR) + dimV(xs, yR, dyI, f2((p.dReb - p.dint) / 2));
   }
   if (p.tipoGen === "psg103" && p.dReb > 0 && p.hReb > 0){   // PSG 103: altura do rebaixo e Ø do rebaixo
     const yR = DY(p.dReb / 2), yh = dyI + 24;

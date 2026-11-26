@@ -6,6 +6,9 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.99.28 — POLIA MCS 3: vista frontal girada 45° (26/11/2026)
+- A pedido do usuário, a vista frontal da POLIA MCS 3 (rasgo de chaveta, corte A-A e cotas do rasgo) ficou girada 45°; PDF regravado em `DESENHOS\MAQUINAS`. O Simulador não mudou.
+
 ## 5.99.27 — Desenhos avulsos CHAPA MCS 3 e POLIA MCS 3 (26/11/2026)
 - `Desenhos avulsos/CHAPA MCS 3/desenho.js`: chapa 152 x 190 x 15 do STL, furo Ø95 +0,05/0 e 4 furos M8 passante a 45° em Ø130 +0,05/0 (vista frontal e lateral).
 - `Desenhos avulsos/POLIA MCS 3/desenho.js`: polia existente — abrir furo Ø19 +0,05/0 e rasgo de chaveta 6 mm (vista frontal e corte A-A).

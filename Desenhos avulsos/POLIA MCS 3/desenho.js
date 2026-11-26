@@ -26,8 +26,10 @@ window.desPoliaMCS3 = function(){
     g += `<circle cx="${cx}" cy="${cy}" r="${R1 * s}" style="${VIS}"/><circle cx="${cx}" cy="${cy}" r="${R2 * s}" style="${VIS}"/>`;
     g += `<circle cx="${cx}" cy="${cy}" r="${RR * s}" style="${HID}"/>`;                                   // rebaixo Ø25,8 do outro lado
     const a0 = Math.atan2(RK, KW / 2);
-    g += `<path d="M${X(KW / 2)},${Y(RK)} A${RF * s},${RF * s} 0 1 1 ${X(-KW / 2)},${Y(RK)} L${X(-KW / 2)},${Y(KT)} L${X(KW / 2)},${Y(KT)} Z" style="${VIS}"/>`;
     g += ln(cx - (R1 + 6) * s, cy, cx + (R1 + 6) * s, cy, CEN) + ln(cx, cy - (R1 + 6) * s, cx, cy + (R1 + 6) * s, CEN);
+    // usuário 26/11/2026: vista frontal girada 45° (rasgo, corte A-A e cotas do rasgo juntos)
+    const gi = g.length;
+    g += `<path d="M${X(KW / 2)},${Y(RK)} A${RF * s},${RF * s} 0 1 1 ${X(-KW / 2)},${Y(RK)} L${X(-KW / 2)},${Y(KT)} L${X(KW / 2)},${Y(KT)} Z" style="${VIS}"/>`;
     // corte A-A (vertical, pelo rasgo)
     g += `<path d="M${cx - 9},${Y(R1 + 9)} L${cx},${Y(R1 + 9)} L${cx},${Y(R1 + 3)}" style="${VIS}"/><text x="${cx - 18}" y="${Y(R1 + 9) + 4}" class="t">A</text>`;
     g += `<path d="M${cx - 9},${Y(-R1 - 9)} L${cx},${Y(-R1 - 9)} L${cx},${Y(-R1 - 3)}" style="${VIS}"/><text x="${cx - 18}" y="${Y(-R1 - 9) + 4}" class="t">A</text>`;
@@ -38,7 +40,8 @@ window.desPoliaMCS3 = function(){
     g += ln(X(-KW / 2), yk, X(KW / 2), yk, "stroke:#b2221f;stroke-width:.8") + `<text x="${X(KW / 2) + 34}" y="${yk + 4}" class="t">${n(KW)}</text>`;
     const xk = X(R1) + 26;
     g += ext(X(KW / 2) + 4, Y(KT), xk + 6, Y(KT)) + ext(X(0) + 4, Y(-RF), xk + 6, Y(-RF)) + dimV(xk, Y(KT), Y(-RF), n(KT + RF));
-    g += call(X(-RF * Math.cos(Math.PI / 4)), Y(-RF * Math.sin(Math.PI / 4)), X(-R1) - 10, Y(-R1) + 4, tol(`Ø${n(2 * RF)}`), 84);
+    g = g.slice(0, gi) + `<g transform="rotate(45 ${cx} ${cy})">${g.slice(gi)}</g>`;
+    g += call(X(-RF * Math.cos(Math.PI / 4)), Y(RF * Math.sin(Math.PI / 4)), X(-R1) - 10, Y(R1) - 4, tol(`Ø${n(2 * RF)}`), 84);
     g += `<text x="${cx}" y="${Y(-R1) + 62}" class="vt" text-anchor="middle">VISTA FRONTAL</text>`;
 
     // ---------------- CORTE A-A (pelo rasgo de chaveta) ----------------

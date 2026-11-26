@@ -53,8 +53,7 @@ window.desPoliaMCS3 = function(){
     const dn = [[0, -RR], [0, -R1], [L1, -R1], [L1, -R2], [L, -R2], [L, -RF], [LR, -RF], [LR, -RR]];
     const path = P => P.map(([z, r], i) => `${i ? "L" : "M"}${SX(z).toFixed(2)},${SY(r).toFixed(2)}`).join("") + "Z";
     g += `<path d="${path(up)}" fill="url(#hatch)" style="stroke:#111;stroke-width:1.6"/><path d="${path(dn)}" fill="url(#hatch)" style="stroke:#111;stroke-width:1.6"/>`;
-    g += ln(SX(LR), SY(RK), SX(L), SY(RK), THIN);                                                           // canto do rasgo com o furo (atrás do corte)
-    g += ln(SX(0), SY(RR), SX(LR), SY(RR), THIN) + ln(SX(LR), SY(RK), SX(LR), SY(-RF), THIN) + ln(SX(LR), SY(-RF), SX(L), SY(-RF), THIN);
+    // usuário 26/11/2026: sem linhas dentro do furo (fundo do rebaixo em Z12 e canto do rasgo) — o corte fica só com o contorno
     g += ln(SX(-8), cy, SX(L + 8), cy, CEN);
     // comprimentos: 12 (rebaixo) e 45 embaixo; 33 em cima
     const yb1 = SY(-R1) + 26, yb2 = SY(-R1) + 54, yt = SY(R1) - 26;

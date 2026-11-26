@@ -6,6 +6,9 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.99.24 — Programa avulso VEDADOR (28 X 46 X 26) 46498 em PU (26/11/2026)
+- `Programas avulsos/VEDADOR (28 X 46 X 26) 46498/`: programa 046498 (PU, bucha 12 x 48: T3D3, T2D2, T1D45, T6D6 atrás do colar, faca T5D5) e desenho (cód. interno 42871) feitos do STL; gravados no W:. O pré-acabamento não passa no mesmo lugar do acabamento (parede do colar e atrás do colar), pedido do usuário. O Simulador não mudou.
+
 ## 5.99.23 — Desbaste volta a ser como na 5.99.17 (26/11/2026)
 - A pedido do usuário, desfeitas as mudanças de desbaste das versões 5.99.18 a 5.99.22 (passe de 8 no Ø, passada de contorno dividida, passes iguais, padrão do Mastor, rápido no trecho já usinado, acabamento 4/8 no Ø). Desbaste e sobremetal voltam aos de antes; o assunto vai ser revisto depois com calma.
 

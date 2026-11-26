@@ -6,6 +6,9 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.99.26 — Programa avulso VEDADOR (400 X 430 X 21) 46504 em PU (26/11/2026)
+- `Programas avulsos/VEDADOR (400 X 430 X 21) 46504/`: programa 046504 (PU, bucha 327 x 444: T3D3, T2D2 em camadas, T6D6 atrás do colar, T2D12, faca T5D5) e desenho (cód. interno 46524) feitos do STL; gravados no W:. O Simulador não mudou.
+
 ## 5.99.25 — Programa avulso VEDADOR (9.7 X 16 X 5.5) 46499 em PEAD (26/11/2026)
 - `Programas avulsos/VEDADOR (9.7 X 16 X 5.5) 46499/`: programa 046499 (PEAD, tarugo Ø20: T3D3, T7D7, T2D14, bedame T8D8) e desenho (cód. interno 46501) feitos do STL; gravados no W:. O Simulador não mudou.
 

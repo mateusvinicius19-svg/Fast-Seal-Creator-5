@@ -6,6 +6,9 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.99.23 — Desbaste volta a ser como na 5.99.17 (26/11/2026)
+- A pedido do usuário, desfeitas as mudanças de desbaste das versões 5.99.18 a 5.99.22 (passe de 8 no Ø, passada de contorno dividida, passes iguais, padrão do Mastor, rápido no trecho já usinado, acabamento 4/8 no Ø). Desbaste e sobremetal voltam aos de antes; o assunto vai ser revisto depois com calma.
+
 ## 5.99.22 — Desbaste: sem passe no mesmo lugar; próximo passe a no máximo 8 do menor Ø do anterior (25/11/2026)
 - Passe que segue o contorno não repassa onde o passe anterior já usinou (PSH 106 310x350x30 bucha 285x390: "tem passe que usina no mesmo ponto"): como no Mastor, recua, anda em rápido por cima do que sobrou (+0,5) e volta a cortar só onde ainda tem material.
 - Cada passe fica a no máximo 8 no Ø do MENOR Ø do passe anterior; a passada de contorno também (antes podia chegar a 9).

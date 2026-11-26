@@ -2401,7 +2401,8 @@ function generateCore(fromInput){
   const secCorte = (Number(p.dext) - Number(p.dint)) / 2, celD16 = p.matA === "CELERON" && "bed" in p;
   // v5.79.4 (usuário 19/11/2026: "PU e NBR só se corta com a T5D5"): PSA 108 em PU / NBR / Viton corta com a faca → sem bedame 2
   // v5.98.1 (usuário 24/11/2026): PSA 108 com VÁRIAS peças por ciclo não corta com a faca (só de 1 em 1) → bedame, regra normal
-  const bed2 = (secCorte > 14.8 + 1e-9 && !(type === "psa108" && ARR_FACA.includes(p.matA || "PU") && !psa108Varias(p))) || celD16;
+  // v5.99.32: PSG 104 (sempre 1 peça por ciclo) em PU / NBR / Viton também corta com a faca
+  const bed2 = (secCorte > 14.8 + 1e-9 && !(((type === "psa108" && !psa108Varias(p)) || type === "psg104") && ARR_FACA.includes(p.matA || "PU"))) || celD16;
   { // v5.21.12 (usuário 11/11): no Celeron o campo do bedame mostra 2 (travado); ao trocar de material volta para o que era
     const bi = document.querySelector('#genBox [data-k="bed"]');
     if (bi && bed2 && !bi.readOnly){ bi.dataset.prev = String(bi.value).trim() === "2" ? "1" : bi.value; bi.value = "2"; bi.readOnly = true; bi.title = "Corte com a T6D16 (Celeron ou secção > 14,8) — bedame 2"; }
@@ -3335,7 +3336,10 @@ GEN.psg104 = {
         L.splice(i1 - 2, 0, ...rb);
       }
     }
-    return L;
+    // v5.99.32 (usuário 26/11/2026: "PSG 104 quando eu coloco PU ele não altera as ferramentas"): PU → externo T2D2, interno
+    // T4D14 (< 11) / T1D45 (11 a 40) / T2D12 (≥ 40), corte faca T5D5; NBR/Viton → só o corte na T5D5 (como no PSA 108).
+    // 1 peça por ciclo (n: 1), então a faca vale. Só o PSG 104 (PSG 101/103 e os outros continuam iguais).
+    return arrPuTools(L, q, false);
   },
   check(p){
     const a = psgAcr(p), q = Object.assign({}, p, { tipoGen: "psa108", soPSA108: false, psaSugOld: true, zCont: false, n: 1, dint: p.dint + a, dext: p.dext + a }), m = [];

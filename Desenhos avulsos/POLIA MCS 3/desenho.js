@@ -49,7 +49,8 @@ window.desPoliaMCS3 = function(){
 
     // ---------------- CORTE A-A (pelo rasgo de chaveta) ----------------
     const z0 = 470, SX = z => z0 + z * s, SY = r => cy - r * s;
-    const up = [[0, RR], [0, R1], [L1, R1], [L1, R2], [L, R2], [L, KT], [LR, KT], [LR, RR]];
+    // usuário 26/11/2026: metade de cima igual à de baixo (furo Ø19 nas duas; o rasgo fica cotado na vista frontal)
+    const up = [[0, RR], [0, R1], [L1, R1], [L1, R2], [L, R2], [L, RF], [LR, RF], [LR, RR]];
     const dn = [[0, -RR], [0, -R1], [L1, -R1], [L1, -R2], [L, -R2], [L, -RF], [LR, -RF], [LR, -RR]];
     const path = P => P.map(([z, r], i) => `${i ? "L" : "M"}${SX(z).toFixed(2)},${SY(r).toFixed(2)}`).join("") + "Z";
     g += `<path d="${path(up)}" fill="url(#hatch)" style="stroke:#111;stroke-width:1.6"/><path d="${path(dn)}" fill="url(#hatch)" style="stroke:#111;stroke-width:1.6"/>`;

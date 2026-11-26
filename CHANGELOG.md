@@ -6,6 +6,9 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.99.31 — POLIA MCS 3: corte A-A com as duas metades iguais (26/11/2026)
+- A pedido do usuário, a metade de cima do corte A-A ficou igual à de baixo (furo Ø19 nas duas; o rasgo continua cotado na vista frontal); PDF regravado. O Simulador não mudou.
+
 ## 5.99.30 — POLIA MCS 3: corte A-A sem linhas dentro do furo (26/11/2026)
 - A pedido do usuário, saíram do corte A-A as linhas dentro do furo (fundo do rebaixo em Z12 e canto do rasgo); PDF regravado. O Simulador não mudou.
 

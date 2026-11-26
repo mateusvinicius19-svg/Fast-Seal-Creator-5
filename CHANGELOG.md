@@ -6,6 +6,11 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.99.27 — Desenhos avulsos CHAPA MCS 3 e POLIA MCS 3 (26/11/2026)
+- `Desenhos avulsos/CHAPA MCS 3/desenho.js`: chapa 152 x 190 x 15 do STL, furo Ø95 +0,05/0 e 4 furos M8 passante a 45° em Ø130 +0,05/0 (vista frontal e lateral).
+- `Desenhos avulsos/POLIA MCS 3/desenho.js`: polia existente — abrir furo Ø19 +0,05/0 e rasgo de chaveta 6 mm (vista frontal e corte A-A).
+- PDFs gravados em `DESENHOS\MAQUINAS`; material em branco (não informado). O Simulador não mudou.
+
 ## 5.99.26 — Programa avulso VEDADOR (400 X 430 X 21) 46504 em PU (26/11/2026)
 - `Programas avulsos/VEDADOR (400 X 430 X 21) 46504/`: programa 046504 (PU, bucha 327 x 444: T3D3, T2D2 em camadas, T6D6 atrás do colar, T2D12, faca T5D5) e desenho (cód. interno 46524) feitos do STL; gravados no W:. O Simulador não mudou.
 

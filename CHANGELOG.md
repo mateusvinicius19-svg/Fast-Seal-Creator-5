@@ -6,6 +6,9 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.99.29 — POLIA MCS 3: vista frontal girada 90° (26/11/2026)
+- A pedido do usuário ("vira mais 45"), a vista frontal da POLIA MCS 3 ficou girada 90° (rasgo para a direita, corte A-A na horizontal) e um pouco menor, para não encostar nas cotas do corte; PDF regravado. O Simulador não mudou.
+
 ## 5.99.28 — POLIA MCS 3: vista frontal girada 45° (26/11/2026)
 - A pedido do usuário, a vista frontal da POLIA MCS 3 (rasgo de chaveta, corte A-A e cotas do rasgo) ficou girada 45°; PDF regravado em `DESENHOS\MAQUINAS`. O Simulador não mudou.
 

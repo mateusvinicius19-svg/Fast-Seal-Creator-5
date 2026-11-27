@@ -6,6 +6,9 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.99.34 — Programa e desenho VEDADOR (27 X 40 X 6) 34542, ciclo de 3 peças (27/11/2026)
+- `Programas avulsos/VEDADOR (27 X 40 X 6) 34542/`: ciclo de 3 peças no padrão PSA 108 + canal externo 3,8 até Ø28,7 com a T2D94 (bedame 3,8, 1 entrada por peça) e desenho no padrão aprovado (canal reto, sem chanfro na boca); gravados no W: (PDF do Mastor guardado como "- MASTOR.pdf"). O Simulador não mudou.
+
 ## 5.99.33 — PSG 104: cota da secção menor no desenho (26/11/2026)
 - Pedido do usuário: o detalhe B do PSG 104 só cotava a secção total. Agora cota também a secção no rebaixo
   ((Ø rebaixo − Ø int.) / 2), ao lado da secção total, como já era no PSG 103. Só o desenho do PSG 104; programas iguais (37 perfis).

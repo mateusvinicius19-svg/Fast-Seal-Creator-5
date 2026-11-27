@@ -3,16 +3,17 @@
 // (o STL tem 374,27 / 389,77; o nome da pasta diz 374,17 / 389,6). Chanfros 0,5 nos 4 cantos.
 // Z0 = face com o canal raso em RAIO R8,516 (0,5 de fundo, de Ø376,27 a Ø387,77, fundo em Ø382,02 — usuário: "a face também é raio"): é a única face que dá para usinar —
 // a outra (lisa) é a do corte. Em a (0 = frente, para trás):
-//   externo: chanfro 0,5 → Ø389,77 até a 1,406, canal em RAIO R4,696 (fundo Ø387,77 em a 4,303) até a 7,2, chanfro 0,5
+//   externo: chanfro 0,5 → Ø389,77 até a 1, canal em RAIO R5,305 (fundo Ø387,77 em a 4,1) até a 7,2, chanfro 0,5
+//            (usuário 27/11/2026: a borda do canal na frente é 1 mm, não 1,406 do STL — canal igual ao do interno, 1 / 6,2 / 1)
 //   interno: chanfro 0,5 → Ø374,27 até a 1, canal em RAIO R5,533 (fundo Ø376,17 em a 4,1) até a 7,2, chanfro 0,5
 // Usuário 27/11/2026: "no externo e interno é RAIO, você fez em ângulo" — o STL só tem 3 a 5 pontos em cada canal (o Simulador
-// ligava com retas); o raio é o que passa por eles: externo meia-corda 2,897 / fundo 1 → R4,696; interno 3,1 / 0,95 → R5,533.
+// ligava com retas); o raio é o que passa por eles: externo (com a borda de 1 mm) meia-corda 3,1 / fundo 1 → R5,305; interno 3,1 / 0,95 → R5,533.
 // Roda dentro do Simulador CNC.html (usa tipPath, tipLines, fagorToMcs, rev3DParams...): prog46542() e des46542().
-const RO46542 = (2.897 ** 2 + 1 ** 2) / 2, RI46542 = (3.1 ** 2 + 0.95 ** 2) / (2 * 0.95), RF46542 = (2.875 ** 2 + 0.5 ** 2) / (2 * 0.5);   // raio do canal: (meia-corda² + fundo²) / (2 × fundo)
+const RO46542 = (3.1 ** 2 + 1 ** 2) / 2, RI46542 = (3.1 ** 2 + 0.95 ** 2) / (2 * 0.95), RF46542 = (2.875 ** 2 + 0.5 ** 2) / (2 * 0.5);   // raio do canal: (meia-corda² + fundo²) / (2 × fundo)
 window.ITEM46542 = {
   // primitivas em Z da usinagem (0 = face do canal, para trás negativo) e raio; arcos côncavos (centro no ar)
-  od: [{ t: "L", a: [0, 194.385], b: [-0.5, 194.885] }, { t: "L", a: [-0.5, 194.885], b: [-1.406, 194.885] },
-       { t: "A", a: [-1.406, 194.885], b: [-7.2, 194.885], c: [-4.303, 193.885 + RO46542], R: RO46542, cv: false },
+  od: [{ t: "L", a: [0, 194.385], b: [-0.5, 194.885] }, { t: "L", a: [-0.5, 194.885], b: [-1, 194.885] },
+       { t: "A", a: [-1, 194.885], b: [-7.2, 194.885], c: [-4.1, 193.885 + RO46542], R: RO46542, cv: false },
        { t: "L", a: [-7.2, 194.885], b: [-7.7, 194.885] }, { t: "L", a: [-7.7, 194.885], b: [-8.2, 194.385] }],
   id: [{ t: "L", a: [0, 187.635], b: [-0.5, 187.135] }, { t: "L", a: [-0.5, 187.135], b: [-1, 187.135] },
        { t: "A", a: [-1, 187.135], b: [-7.2, 187.135], c: [-4.1, 188.085 - RI46542], R: RI46542, cv: false },
@@ -47,7 +48,7 @@ window.prog46542 = function(){
   L.push(...sec("FACE GROOVE"), ";( FINISH )", `G0 X${f3(2 * pf[0].p[1])} Z1.000`, `G1 X${f3(2 * pf[0].p[1])} Z${f3(pf[0].p[0])} F0.150`, ...s15Lines(pf, "0.120"),
          `G0 X${f3(2 * lf[1])} Z1.000`, `G0 X${f3(tO + 4)} Z1.000`, "");
   // ---- externo (T2D2): bucha Ø391 deixa só 1,23 no Ø — só o acabamento (PU até 6 no Ø = passe único). Chanfro da frente,
-  //      Ø389,77, canal em RAIO R4,696 (G2/G3 com R − 0,4 na ponta), chanfro de trás e um pouco além da linha do corte ----
+  //      Ø389,77, canal em RAIO R5,305 (G2/G3 com R − 0,4 na ponta), chanfro de trás e um pouco além da linha do corte ----
   const outer = [...I.od, { t: "L", a: [-8.2, 194.385], b: [-8.6, 193.985] }];
   const pout = s15Path(outer, r, 1, [-r, -r], 1.0), lo = pout[pout.length - 1].p;
   L.push(...sec("OUTSIDE"), "G0 Z70", "T2D2", ";", ";", ";( FINISH )", `G0 X${f3(2 * pout[0].p[1])} Z3.000`, `G1 X${f3(2 * pout[0].p[1])} Z${f3(pout[0].p[0])} F1.000`,
@@ -98,7 +99,7 @@ window.des46542 = function(){
   // largura total e as secções — sem chanfros, raios nem ângulos. Aqui a = 0 é a face de TRÁS (esquerda) e a = L a face do canal.
   const poly = q.customProfile.map(([z, r]) => [-z, r]), L = q.h, rmax = Math.max(...poly.map(v => v[1])), rmin = Math.min(...poly.map(v => v[1]));
   q.corteD = [...new Set(poly.map(v => v[1]))];
-  Object.defineProperty(q, "customNotes", { value: "VEDADOR Ø374,27 x Ø389,77 x 8,2 · do 3D (STL) · canais em raio: externo R4,7, interno R5,53, face R8,52 · chanfros 0,5 · cotas em mm", writable: true });
+  Object.defineProperty(q, "customNotes", { value: "VEDADOR Ø374,27 x Ø389,77 x 8,2 · do 3D (STL) · canais em raio: externo R5,3, interno R5,53, face R8,52 · chanfros 0,5 · cotas em mm", writable: true });
   const orig = q.customViews;
   q.customViews = (pp, PT) => { let g = orig(pp, PT);
     g = g.replace(/<line[^>]*class="e"\/><line[^>]*class="e"\/><line[^>]*class="d"[^>]*\/><text[^>]*rotate\(-90[^>]*>Ø[^<]*<\/text>/g, "");
@@ -107,7 +108,7 @@ window.des46542 = function(){
     const ext = (x1, y1, x2, y2) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="e"/>`;
     const dimV = (x, y1, y2, txt) => { const tx = x - 5, ty = (y1 + y2) / 2; return arr(x, y1, x, y2) + `<text x="${tx}" y="${ty}" class="t" text-anchor="middle" transform="rotate(-90 ${tx} ${ty})">${txt}</text>`; };
     // esquerda = trás (Ø374,27, Ø376,17 do V interno, Ø387,77 do V externo, Ø389,77); direita = frente / Z0 (canal da face Ø376,27 e Ø382,02)
-    for (const [sd, list] of [[-1, [[187.135, 0.5], [188.085, 4.1], [193.885, 3.897], [194.885, 0.5]]], [1, [[188.135, L], [191.01, L - 0.5]]]]) list.forEach(([r, a], k) => { const xe = X2(a), xx = sd < 0 ? X2(0) - 20 * (k + 1) : X2(L) + 24 * (k + 1);
+    for (const [sd, list] of [[-1, [[187.135, 0.5], [188.085, 4.1], [193.885, 4.1], [194.885, 0.5]]], [1, [[188.135, L], [191.01, L - 0.5]]]]) list.forEach(([r, a], k) => { const xe = X2(a), xx = sd < 0 ? X2(0) - 20 * (k + 1) : X2(L) + 24 * (k + 1);
       g += ext(xe + sd * 3, Y2(r), xx + sd * 5, Y2(r)) + ext(xe + sd * 3, Y2(-r), xx + sd * 5, Y2(-r)) + dimV(xx, Y2(r), Y2(-r), "Ø " + f(2 * r)); });
     const T = "SECÇÃO (ampliada)</text>", iT = g.indexOf(T), head = g.slice(0, iT), tail = g.slice(iT + T.length);
     const prof = head.match(/<path d="[^"]*" class="p"\/>/)[0];
@@ -119,7 +120,7 @@ window.des46542 = function(){
     // largura total (bem em cima)
     h += ext(X(0), yT - 4, X(0), yT - 52) + ext(X(L), yT - 4, X(L), yT - 52) + dimH(X(0), X(L), yT - 46, f(L));
     // externo (cota corrida em cima): face de trás até o V, V, até a face do canal
-    const zt = [0, 1, 6.794, L], yd = yT - 20;
+    const zt = [0, 1, 7.2, L], yd = yT - 20;
     zt.forEach(z => h += ext(X(z), yT - 4, X(z), yd - 6));
     for (let i = 1; i < zt.length; i++) h += dimH(X(zt[i - 1]), X(zt[i]), yd, f(zt[i] - zt[i - 1]));
     // interno (cota corrida embaixo): V do interno
@@ -136,7 +137,7 @@ window.des46542 = function(){
        + `<text x="${X(L - 0.5) - 30}" y="${yG - 4}" class="t" text-anchor="end">${f(0.5)}</text>`;
     // fundo dos V: externo 1 (Ø389,77 → Ø387,77) e interno 0,95 (Ø374,27 → Ø376,17), à esquerda
     const xa = X(0) - 30, xc = X(0) - 30;
-    h += ext(X(3.897) - 4, Y(193.885), xa - 6, Y(193.885)) + ext(X(0) - 4, yT, xa - 6, yT) + dimV2(xa, yT, Y(193.885), f(rmax - 193.885), -6);
+    h += ext(X(4.1) - 4, Y(193.885), xa - 6, Y(193.885)) + ext(X(0) - 4, yT, xa - 6, yT) + dimV2(xa, yT, Y(193.885), f(rmax - 193.885), -6);
     h += ext(X(4.1) - 4, Y(188.085), xc - 6, Y(188.085)) + ext(X(0) - 4, yB, xc - 6, yB) + dimV2(xc, Y(188.085), yB, f(188.085 - rmin), -6);
     h += `<text x="${X(L / 2)}" y="${yB + 74}" class="vt" text-anchor="middle">SECÇÃO (ampliada)</text>`;
     return h + tail; };

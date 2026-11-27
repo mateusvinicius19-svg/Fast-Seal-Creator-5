@@ -6,6 +6,9 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.104.4 — VEDADOR 46542: canal externo com borda de 1 mm dos dois lados (27/11/2026)
+- Usuário: a borda do canal externo na frente é 1 mm (o STL tinha 1,406). Canal externo agora 1 / 6,2 / 1 (igual ao interno), fundo Ø387,77 em 4,1, raio R5,305 (G2 R4,905 na ponta). Programa e PDF regravados no W:. O Simulador não mudou.
+
 ## 5.104.3 — VEDADOR 46542: canal da face também em raio (27/11/2026)
 - Usuário: "a face também é raio". Canal da face (0,5 de fundo, de Ø376,27 a Ø387,77) agora em R8,516 no programa (T3D3, G3 R8,116 na ponta, cantos R0,4) e no desenho. 046542, 46542.txt e o PDF regravados no W:. O Simulador não mudou.
 

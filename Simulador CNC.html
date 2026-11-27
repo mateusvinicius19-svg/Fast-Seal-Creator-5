@@ -1817,7 +1817,7 @@ function psr212Back(g, H, xT6, pt, f3){
 // o que ela corta pelas costas (chanfro interno de trás e a saída depois dele) fica no máximo 30° com o eixo. Mesma escolha de
 // ferramenta do pseFscBuild (digitada, ou pelo Ø: T4D14 < 11 · T1D45 < 40 · T2D12); o intToolByMin regera com a tInt certa.
 const D45_COSTAS = 30;
-function intD45(p){ const d = Number(p.dint); return String(fscTools(p, "T2D2", d < 11 ? "T4D14" : d < 40 ? "T1D45" : "T2D12").int).trim().toUpperCase() === "T1D45"; }
+function intD45(p){ const d = Number(p.dint); return /^T[12]D45$/.test(String(fscTools(p, "T2D2", d < 11 ? "T4D14" : d < 40 ? "T1D45" : "T2D12").int).trim().toUpperCase()); }   // 5.102.0: T2D45 também
 function pse102rGeom(p){
   const opt = v => (v === "" || v === null || v === undefined || isNaN(v)) ? null : Number(v);
   const sec = (p.dext - p.dint) / 2, R = x => x / 2, H = Number(p.h);
@@ -2559,12 +2559,12 @@ function puOnePass(lines){
 // (3) D14 (T4D14 no PU, T2D14 no PTFE/POM/PEAD — mesmo corretor D14 "INTERNO AFIADO"): barra inteiriça fina, recuo de só 1 no Ø
 //     (0,5 nos furos pequenos, preso no Ø3,5), como nos programas corrigidos à mão.
 // v5.92.0 (usuário 20-21/11/2026): Ø mínimo de cada ferramenta de interno — D14 Ø4, D81 Ø10, D45 Ø12, D4 Ø15 (D12: 39, como antes)
-const INT_TOOL_MIN = { T4D14: 4, T2D14: 4, T4D81: 10, T2D81: 10, T1D45: 12, T2D12: 39, T4D4: 15 };
+const INT_TOOL_MIN = { T4D14: 4, T2D14: 4, T4D81: 10, T2D81: 10, T1D45: 12, T2D45: 12, T2D12: 39, T4D4: 15 };
 //                    faixa do Ø do passe:  <11  11–21 21–30 30–40  ≥40       (_X = fora do PU)
 const FOLGA_RECUO = { T2D2:  [2,   2,    2.5,  2.5,   3],
                       T7D7:  [1.5, 1.5,  1.5,  1.5,   1.5], T7D7_X: [1.5, 1.5, 1.5, 1.5, 2],
                       T4D14: [1,   1,    1,    1,     1],   T2D14:  [1,   1,   1,   1,   1],   // D14: bem fina, folga pequena
-                      T1D45: [1,   2.5,  3,    3,     3],
+                      T1D45: [1,   2.5,  3,    3,     3],   T2D45: [1,   2.5,  3,    3,     3],   // T2D45 = a D45 nos outros materiais
                       T2D12: [1,   1,    1,    1,     3.5],   // abaixo de 40 fica presa no Ø mínimo (39)
                       T4D4:  [2,   2,    2,    2,     2],   T4D4_X: [2,   2,   2,   2,   2.5] };
 function folgaRecuo(tool, pu, x){
@@ -2573,11 +2573,12 @@ function folgaRecuo(tool, pu, x){
 }
 // v5.92.0 (usuário 20-21/11/2026) — regra do interno pelo MENOR Ø trabalhado:
 //   PU:                         D14 (T4D14) < 10 · D81 (T4D81) 10–12 · D45 (T1D45) 12–40 · D12 (T2D12) ≥ 40
-//   PTFE, POM, PEAD, NBR, Viton: D14 (T2D14) < 10 · D81 (T2D81) 10–12 · D14 (T2D14) 12–15 · D4 (T4D4) ≥ 15
+//   PTFE, POM, PEAD, NBR, Viton: D14 (T2D14) < 10 · D81 (T2D81) 10–12 · D45 (T2D45) 12–15 (5.102.0; era D14) · D4 (T4D4) ≥ 15
 //   A D81 só faz interno RETO: com chanfro/ângulo/perfil no interno, de 10 a 12 fica a D14.
-const PU_INT_TOOLS = ["T4D14", "T4D81", "T1D45", "T2D12"], PTFE_INT_TOOLS = ["T4D4", "T2D14", "T2D81"];
+const PU_INT_TOOLS = ["T4D14", "T4D81", "T1D45", "T2D12"], PTFE_INT_TOOLS = ["T4D4", "T2D14", "T2D81", "T2D45"];
 function puIntTool(min, reto){ return min < 10 ? "T4D14" : min < 12 ? (reto ? "T4D81" : "T4D14") : min < 40 ? "T1D45" : "T2D12"; }
-function outIntTool(min, reto){ return min < 10 ? "T2D14" : min < 12 ? (reto ? "T2D81" : "T2D14") : min < T4D4_MIN ? "T2D14" : "T4D4"; }
+// 5.102.0 (usuário 27/11/2026): "habilita a D45 para os outros materiais, montada na T2" — de 12 a 15 é a T2D45 (era a D14)
+function outIntTool(min, reto){ return min < 10 ? "T2D14" : min < 12 ? (reto ? "T2D81" : "T2D14") : min < T4D4_MIN ? "T2D45" : "T4D4"; }
 // blocos de ferramenta interna do programa: { tool, min (menor Ø cortado, G1 com Z < 0), a (linha do T), b (fim), fsc (dentro de ;( INSIDE )) }
 function intToolBlocks(lines, cand, g91){
   const L = lines.map(String), out = [], fscProg = L.some(l => /^;\(\s*INSIDE\s*\)/.test(l)); let sec = "", abs = true, cur = null, cz = null;
@@ -4701,7 +4702,7 @@ $("btnHist").onclick = () => { const b = $("histBox"); if (histOpen()){ b.style.
 //  · INSIDE: passes retos a mais (máx. 8 no Ø; tarugo: 1º Ø13) antes do 1º passe, até o Z final dele — como o 037512 feito à mão (bucha 53)
 //  · OUTSIDE: passes retos a mais quando a bucha nova deixa > 8 no Ø acima do 1º passe externo
 function altOldBucha(txt){ const m = txt.match(/TUBE ([\d.]+)\/([\d.]+)/i) || txt.match(/;BUCHA ([\d.]+)\s*X\s*([\d.]+)/i); return m ? [+m[1], +m[2]] : null; }
-const ALT_TOOL_MIN = { T2D12: 40, T1D45: 11, T1D51: 21 };   // Ø mínimo de trabalho da ferramenta interna (regras de usinagem)
+const ALT_TOOL_MIN = { T2D12: 40, T1D45: 11, T2D45: 12, T1D51: 21 };   // Ø mínimo de trabalho da ferramenta interna (regras de usinagem)
 function altRough(txt, bi, bo){
   const L = txt.replace(/\r/g, "").split("\n"), f3 = v => (Math.round(v * 1000) / 1000).toFixed(3);
   const old = altOldBucha(txt); if (!old) return { err: "o programa não tem a linha ;MATERIAL ... TUBE com a bucha" };
@@ -5123,9 +5124,9 @@ FERR.forEach(f => { const n = FERR_CORR_NOME[f.c] || FERR_CORR_NOME[f.alt]; if (
 // TABELA DE CODIGOS FERRAMENTAS.txt) e Ø mínimo pelas regras do interno (5.92.0). Só a biblioteca: os geradores não leem esses campos.
 [ ["T1D1", { sup: "S16 R SVUCL 11", pastilha: "VCGT 110304-AK" }],
   ["T4D4", { sup: "S10K-SDUCR 07", pastilha: "DCGT 070204-AK", min: 15 }],
-  ["T1D45", { pastilha: "DCGT 070204-AK", min: 12, uso: "Interno em PU quando o MENOR Ø trabalhado vai de 12 a 40 — só PU" }],
+  ["T1D45", { alt: "T2D45", pastilha: "DCGT 070204-AK", min: 12, mat: "PU na T1 · PTFE, POM, PEAD, NBR e Viton na T2 (T2D45)", uso: "Interno com o MENOR Ø trabalhado de 12 a 40 em PU (T1D45) e de 12 a 15 nos outros materiais (T2D45)" }],
   ["T4D14", { min: 4, uso: "Interno em PU quando o MENOR Ø trabalhado é < 10 (e de 10 a 12 quando o interno tem chanfro)" }],
-  ["T2D14", { corr: "INTERNO AFIADO", min: 4, uso: "Interno em PTFE, POM, PEAD, NBR e Viton com o MENOR Ø trabalhado < 10, de 10 a 12 com chanfro, e de 12 a 15" }],
+  ["T2D14", { corr: "INTERNO AFIADO", min: 4, uso: "Interno em PTFE, POM, PEAD, NBR e Viton com o MENOR Ø trabalhado < 10 e de 10 a 12 com chanfro (de 12 a 15 é a T2D45)" }],
   ["T4D81", { alt: "T2D81", min: 10, mat: "PU na T4 · PTFE, POM, PEAD, NBR e Viton na T2", uso: "Interno RETO (sem chanfro / ângulo) com o MENOR Ø trabalhado de 10 a 12" }],
   ["T7D7", { sup: "SVJBL 2020 K16", pastilha: "VCGT 160404 AK (ou Iscar VCGT 331 IC20 / Ceratizit VCGT 160404FN 25P)", raio: 0.4 }],
   ["T7D17", { sup: "SVJBL 2020 K16", pastilha: "VCGT 160404 AK (afiada sem as costas)" }],
@@ -5616,7 +5617,7 @@ function puAcimaPeca(p, tO, dMax, xAntes){ return deepAbove(p, tO) ? dMax + FACA
 function isBorracha(mat){ return /NBR|BORRACHA|VITON|FKM/i.test(String(mat || "")); }
 function fscTools(p, ext, intDef){
   const tf = isTeflon(p);
-  if (tf) return { tf, ext: "T7D7", int: p.tInt || (Number(p.dint) < T4D4_MIN ? "T2D14" : "T4D4"), cut: "T8D8", fCut: "0.100" };
+  if (tf) return { tf, ext: "T7D7", int: p.tInt || (Number(p.dint) < 12 ? "T2D14" : Number(p.dint) < T4D4_MIN ? "T2D45" : "T4D4"), cut: "T8D8", fCut: "0.100" };
   // NBR (usuário 09/11/2026): externo e interno do cadastro das arruelas (ARR_MAT.NBR: T7D7 / T4D4); face e corte como no PU
   if (isBorracha(p.mat)) return { tf, ext: ARR_MAT.NBR[1], int: p.tInt || ARR_MAT.NBR[2], cut: "T5D5", fCut: "0.220" };
   return { tf, ext, int: p.tInt || intDef, cut: "T5D5", fCut: "0.220" };

@@ -6,6 +6,11 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.102.0 — D45 nos outros materiais, montada na T2 (T2D45) (27/11/2026)
+- PTFE, POM, PEAD, NBR e Viton: interno com o MENOR Ø trabalhado de 12 a 15 sai com a T2D45 (era a T2D14). Resto da regra igual: D14 < 10 · D81 10–12 (reto) · T4D4 ≥ 15. PU igual (T1D45 de 12 a 40).
+- T2D45 com as regras da D45: chanfro interno de trás no máximo 30°, Ø mínimo 12, folgas de recuo da T1D45; no cadastro de ferramentas é a mesma D45 (T1 no PU, T2 nos outros).
+- Teste dos 38 perfis: todos geram, nenhum programa padrão mudou (só peças com furo de 12 a 15 nesses materiais).
+
 ## 5.101.0 — Perfil novo PSA 108 SEM PERDA (corte com a faca T5D5) (27/11/2026)
 - Mesma arruela do PSA 108 (chanfros, desbaste, ferramentas por material, bucha, desenho e pasta PSA 108), para ciclo de várias peças cortadas com a faca T5D5: sem o valor do bedame entre as peças (passo = altura) e corte com a T5D5 em F0,2 (campo "Avanço do corte com a faca").
 - Sem o alerta de PU com várias peças (aqui a faca vale para qualquer nº de peças). Celeron: sai com a faca e um ATENÇÃO (Celeron não corta na faca).

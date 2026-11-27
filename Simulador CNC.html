@@ -1399,7 +1399,7 @@ GEN.psr212 = Object.assign({}, GEN.psr211, { name: "PSR 212",
 GEN.pse102r = Object.assign({}, GEN.pse106, { name: "PSE 102 R",
   main: [["peca","Peça do conjunto","U"],["dint","Diâmetro interno (mm)",121.2],["dext","Diâmetro externo (mm)",133.8],["h","Altura (mm)",9],
          ["lr","Largura do anel = comprimento do degrau (vazio = 1,5 · 2 · 2,5 · 3 pela secção)",""],["ds","Ø do degrau do anel (vazio = Ø int. + 1,1 × secção)",""],
-         ...GEN.pse106.main.slice(3), ["matR","Material do anel (peça A)","PTFE"]],
+         ...GEN.pse106.main.slice(3), ["matR","Material do anel (peça A)","POM"]],   // 5.100.0 (usuário 27/11/2026): anel de apoio do PSE 102 R em POM por padrão
   params: [...GEN.pse106.params.filter(f => !["ai","ae","fe","fi","chc","cLab","rCan"].includes(f[0])),
            ["cA","Anel (peça A): chanfros 45° do externo, frente e trás (vazio = 0,042 × espessura do anel)",""],["cAF","Anel (peça A): chanfro 45° do interno na frente (vazio = 0,105 × espessura)",""],["cAI","Anel (peça A): chanfro interno de trás a 30° com o eixo, comprimento em Z (vazio = 0,063 × espessura)",""],
            ["ai","Aperto interno no Ø (vazio = 1,5 como no Fast Seal)",""],["ae","Aperto externo no Ø (vazio = 1,5 como no Fast Seal)",""],
@@ -4300,7 +4300,7 @@ async function isDesenhosDir(dd){ for (const n of ["PSA 108", "PSE 106", "PSH 10
 async function saveDrawingPdf(p, num, dd, keepIfExists, pitName){
   if (!dd) return " · PDF não salvo (clique em 📁 DESENHOS e salve de novo)";
   if (!(await isDesenhosDir(dd))) return ` · PDF NÃO salvo: a pasta escolhida em 📁 DESENHOS ("${dd.name}") não é a W:\\Parts\\PartsSeals\\PROJETOS\\DESENHOS — clique em 📁 DESENHOS e escolha a certa`;
-  const fp = document.querySelector("#dwgFields input[data-d=prog]"); if (fp) fp.value = String(num) + (p.tipoGen === "psh110" && psh110Piece(p) !== "M" ? psh110Piece(p) : "");   // 5.99.16: base / tampa com o A / B no carimbo
+  const fp = document.querySelector("#dwgFields input[data-d=prog]"); if (fp) fp.value = String(num) + (p.tipoGen === "psh110" && psh110Piece(p) !== "M" ? psh110Piece(p) : "") + (p.tipoGen === "pse102r" && pse102rPiece(p) === "A" ? "A" : "");   // 5.100.0: PSE 102 R anel com o A no carimbo   // 5.99.16: base / tampa com o A / B no carimbo
   const fam = await dd.getDirectoryHandle(desFam(p), { create: true });
   const fd = desenhoFolderName(p, num), sub = await fam.getDirectoryHandle(fd, { create: true });
   // PSH 110 (usuário 13/11/2026): as 3 peças na MESMA pasta do conjunto, como no W: — meio "… 30249.pdf", macho "…A.pdf", fêmea "…B.pdf"
@@ -5783,6 +5783,8 @@ const DEFAULT_TOL = [["2000","0.5","1.2","3.0"],["1000","0.3","0.8","2.0"],["400
 // v5.21.9 (usuário 11/11): desenho saía sem MATERIAL quando o campo do cabeçalho ficava vazio (arruelas, guias, PSO, DH, ISO).
 // Agora: campo digitado > material escolhido no perfil (mat / matA) > linha ;MATERIAL do programa > PU nas gaxetas
 function dwgMat(p){
+  // 5.100.0 (usuário 27/11/2026): PSE 102 R — a gaxeta (U) sai como "PU+<material do anel>" (POM padrão); o anel (A) usa o p.mat dele
+  if (p.tipoGen === "pse102r" && !p.ringA) return String(p.mat || "PU") + "+" + ringMatLabel({ matR: p.matR || "POM" });
   if (p.mat) return String(p.mat);
   if (p.matA && !(p.tipoGen === "iso" && String(p.tipoP || "") !== "dp")){ const a = ARR_MAT[p.matA]; return a ? a[0].replace(/\s*\(.*\)\s*$/, "") : String(p.matA); }
   try { const m = /;MATERIAL:\s*(?:USER DEFINED\s+)?(.+?)(?:\s+[\d.]+\/[\d.]+.*|\s+-\s+.*)?$/im.exec(currentText().split("\n").slice(0, 12).join("\n")); if (m && m[1].trim()) return m[1].trim(); } catch(e){}

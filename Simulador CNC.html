@@ -2349,6 +2349,7 @@ function profMemLoad(){
   let v = null; try { v = JSON.parse(localStorage.getItem("ps_prof_" + profMemKey()) || "null"); } catch(e){}
   if (!v) return false;
   for (const [k, x] of Object.entries(v)){ if ((TOL_KEYS.includes(k) && k !== "tipoP") || PROF_MEM_SKIP.has(k)) continue;
+    if (k === "peca" && $("genType").value === "pse102r") continue;   // 5.100.3 (usuário 27/11/2026): PSE 102 R abre sempre na gaxeta U
     const el = document.querySelector(`#genBox [data-k="${k}"]`); if (el && !el.readOnly) el.value = x; }
   try { syncTolRows(); } catch(e){}
   generate(); return true;
@@ -7639,7 +7640,8 @@ sizeCanvas(); draw();
   if (s && s.type && GEN[s.type]) $("genType").value = s.type;
   buildForm();
   if (!s || s.type !== $("genType").value) return;
-  for (const [k, v] of Object.entries(s.vals || {})){ if (TOL_KEYS.includes(k) && k !== "tipoP") continue;   // tolerâncias não voltam: começam no padrão
+  for (const [k, v] of Object.entries(s.vals || {})){ if (TOL_KEYS.includes(k) && k !== "tipoP") continue;
+    if (k === "peca" && s.type === "pse102r") continue;   // 5.100.3: PSE 102 R abre sempre na gaxeta U   // tolerâncias não voltam: começam no padrão
     // v5.57.1 (usuário 16/11/2026): o TIPO DA PEÇA volta (PSE 108 = "dp"); sem ele, ao reabrir, o PSE 108 virava "Automático"
     // e as peças por ciclo eram ignoradas (isoN só vale com o PSE 108 escolhido) → gerava 1 peça
     const el = document.querySelector(`#genBox [data-k="${k}"]`); if (el) el.value = k === "mat" ? matFromText(v) : v;

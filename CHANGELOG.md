@@ -6,6 +6,10 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.100.3 — PSE 102 R abre sempre na gaxeta U (27/11/2026)
+- Ao escolher o PSE 102 R (ou reabrir o Simulador com ele) a peça é sempre a GAXETA (U); as outras configurações do último item continuam voltando. Antes, depois de salvar o anel, abria no anel (A).
+- Só o PSE 102 R. Teste dos 37 perfis: todos geram, nenhum programa mudou.
+
 ## 5.100.2 — PSE 102 R: material da peça embaixo do PU+POM no desenho (27/11/2026)
 - Carimbo: embaixo do "PU+POM" sai "PEÇA: PU (GAXETA)" no desenho da gaxeta e "PEÇA: POM (ANEL A)" no do anel (segue o material escolhido); a linha da bucha desceu uma linha.
 - Só o PSE 102 R. Teste dos 37 perfis: todos geram, nenhum programa mudou.

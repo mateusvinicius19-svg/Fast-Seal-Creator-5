@@ -3333,7 +3333,9 @@ GEN.psg104 = {
   params: GEN.psg103.params,
   build(p){
     const a = psgAcr(p), dR = p.dReb + a, hR = p.hReb, dE = p.dext + a;
-    const q = Object.assign({}, p, { tipoGen: "psa108", soPSA108: false, zCont: false, n: 1, dint: p.dint + a, dext: dE, angE: psgAngE(p) });
+    // 5.103.1 (usuário 27/11/2026, PSG 104 205x230 Celeron: "tem passes duplicados"): desbaste em Z contínuo, como PSG 101/103 —
+    // cada Ø de uma vez até o fim (antes 2 etapas passavam o mesmo Ø duas vezes)
+    const q = Object.assign({}, p, { tipoGen: "psa108", soPSA108: false, zCont: true, n: 1, dint: p.dint + a, dext: dE, angE: psgAngE(p) });
     if (p.chE === "" || p.chE === undefined) q.chE = psg104ChSug(p);
     if (p.chI === "" || p.chI === undefined) q.chI = psg104ChSug(p);
     const L = GEN.psa108.build(q), cE = q.chE;

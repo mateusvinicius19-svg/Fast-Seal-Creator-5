@@ -6,6 +6,11 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.106.0 — DH PSH 129: chanfro externo padrão pela secção (27/11/2026)
+- Usuário: secção 2,65 (altura 4) → chanfro externo 0,3; secção 3,5 (altura 6) → 0,5. O campo "Chanfro externo 45°" agora é vazio = padrão: 0,3 até a secção 2,65 e 0,5 acima (antes fixo em 0,5). Digitado vale.
+- O chanfro não volta da memória do perfil (fica sempre no padrão pela secção). Só o PSH 129 (PSE 125 igual).
+- Teste dos 38 perfis: todos geram, nenhum programa padrão mudou (o padrão do PSH 129 é secção 6,5 → 0,5, como antes).
+
 ## 5.105.0 — Celeron: programa sem ":" e afastamentos em Z100 (27/11/2026)
 - Usuário: a máquina não lê os ":" que ficam nos programas de Celeron. Em Celeron o programa sai sem nenhum ":" (;MATERIAL Celeron, ;(CELERON METADE DA ROTACAO NO CORTE), ;CELERON USINADO ...).
 - Afastamentos do Celeron: G0 Z50 do início e Z70 / Z50 antes de trocar a ferramenta vão para Z100.

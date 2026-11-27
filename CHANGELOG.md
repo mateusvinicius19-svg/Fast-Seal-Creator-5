@@ -6,6 +6,11 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.104.0 — "Salvar só o desenho" em todos os perfis com desenho (27/11/2026)
+- O botão 📐 Salvar só o desenho (grava só o PDF em DESENHOS para um programa que já existe; não mexe no .PIT, MCS 500 nem histórico) aparecia só no PSE 108, PSG 101 e PSA 108 — agora aparece em todos os perfis que têm desenho (o Ciclo com chanfro não tem desenho próprio).
+- Peça com letra (anel A do PSE 102 R / PSE 120, base A / tampa B do PSH 110): pode digitar o número com ou sem a letra — grava "…A.pdf" com o A no carimbo, sem duplicar a letra.
+- Teste dos 38 perfis: todos geram, nenhum programa mudou.
+
 ## 5.103.2 — PSG 104: desbaste externo não desce mais até o faceado (27/11/2026)
 - Usuário (programa 046540 200X236, Celeron): depois do desbaste do Ø externo e do desbaste do rebaixo a ferramenta descia em G0 até X(Ø int − 2,7) = X197,3 (posição do faceamento) e voltava em G91 até o início do perfil — duas vezes. Agora tira esses G0 e vai em G0 direto ao Ø de início do perfil (ex.: X219,428), como o PSA 108 desde a 5.76.1.
 - 046540 200X236 regravado no W: (Programas_CNC e MCS 500) só com essa diferença. Só o PSG 104. Teste dos 38 perfis: todos geram, nenhum programa padrão mudou.

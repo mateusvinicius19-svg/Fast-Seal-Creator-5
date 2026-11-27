@@ -6,6 +6,9 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.104.3 — VEDADOR 46542: canal da face também em raio (27/11/2026)
+- Usuário: "a face também é raio". Canal da face (0,5 de fundo, de Ø376,27 a Ø387,77) agora em R8,516 no programa (T3D3, G3 R8,116 na ponta, cantos R0,4) e no desenho. 046542, 46542.txt e o PDF regravados no W:. O Simulador não mudou.
+
 ## 5.104.2 — VEDADOR 46542: canais do externo e do interno em raio (27/11/2026)
 - Usuário: "no externo e interno é raio, você fez em ângulo". O STL tem só 3 a 5 pontos em cada canal e o Simulador ligava com retas; agora o canal externo é R4,696 e o interno R5,533 (o raio que passa pelos pontos), no programa (G2/G3 com R − 0,4 na ponta, s15Path) e no desenho. 046542, 46542.txt e o PDF regravados no W:. O Simulador não mudou.
 

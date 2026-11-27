@@ -6,6 +6,10 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.103.2 — PSG 104: desbaste externo não desce mais até o faceado (27/11/2026)
+- Usuário (programa 046540 200X236, Celeron): depois do desbaste do Ø externo e do desbaste do rebaixo a ferramenta descia em G0 até X(Ø int − 2,7) = X197,3 (posição do faceamento) e voltava em G91 até o início do perfil — duas vezes. Agora tira esses G0 e vai em G0 direto ao Ø de início do perfil (ex.: X219,428), como o PSA 108 desde a 5.76.1.
+- 046540 200X236 regravado no W: (Programas_CNC e MCS 500) só com essa diferença. Só o PSG 104. Teste dos 38 perfis: todos geram, nenhum programa padrão mudou.
+
 ## 5.103.1 — PSG 104: desbaste em Z contínuo (sem passes duplicados) (27/11/2026)
 - Usuário (PSG 104 205x230x9,95 Celeron, rebaixo Ø220 x 6,35): o desbaste externo e o interno iam em 2 etapas em Z e passavam o MESMO Ø duas vezes (X232 até Z−5,975 e de novo até Z−11,95). Agora cada Ø vai de uma vez até o fim, como no PSG 101 e PSG 103.
 - Só o PSG 104. Teste dos 38 perfis: todos geram, nenhum programa padrão mudou (as medidas padrão não chegavam a ter etapas).

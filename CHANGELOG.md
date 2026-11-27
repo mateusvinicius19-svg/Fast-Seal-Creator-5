@@ -6,6 +6,12 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.100.0 — PSE 102 R: anel de apoio em POM por padrão e desenho "PU+POM" (27/11/2026)
+- Material do anel (peça A) começa em POM (era PTFE).
+- Desenho do conjunto sai com MATERIAL "PU+<material do anel>" (PU+POM; trocou o material do anel, troca no desenho).
+- Ao salvar o anel (A), o carimbo sai com o A no Nº do programa (o arquivo já era "…A" no programa e no PDF).
+- Só o PSE 102 R (PSE 120 igual). Teste dos 37 perfis: todos geram, nenhum programa mudou.
+
 ## 5.99.35 — Desenho VEDADOR (27 X 40 X 6) 34542 com o cód. interno 33841 (27/11/2026)
 - `item.js` preenche o COD INTERNO 33841; PDF regravado no W:. O Simulador não mudou.
 

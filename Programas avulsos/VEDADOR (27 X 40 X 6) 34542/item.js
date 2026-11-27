@@ -10,7 +10,7 @@ window.ITEM34542 = {
 };
 window.des34542 = function(){
   const I = ITEM34542;
-  const set = (k, v) => { const e = document.querySelector(`#dwgFields input[data-d="${k}"]`); if (e) e.value = v; }; set("prog", "34542"); set("mat", I.MAT);
+  const set = (k, v) => { const e = document.querySelector(`#dwgFields input[data-d="${k}"]`); if (e) e.value = v; }; set("prog", "34542"); set("mat", I.MAT); set("cod", "33841");   // cód. interno (usuário 27/11/2026)
   const p0 = rev3DParams("VEDADOR (27 X 40 X 6) 34542", I.poly, I.H); p0.desc = "VEDADOR"; p0.mat = I.MAT;
   const q = rev3DFlip(p0); q.desc = "VEDADOR"; q.mat = I.MAT; q.dint = I.D_INT; q.dext = I.D_EXT;
   // padrão aprovado (46310 / 46707 / 46498): Ø só no CORTE A-A; secção ampliada só com o contorno, alturas em cota corrida,

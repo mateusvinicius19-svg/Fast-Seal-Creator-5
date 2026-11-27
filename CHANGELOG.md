@@ -6,6 +6,9 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.99.35 — Desenho VEDADOR (27 X 40 X 6) 34542 com o cód. interno 33841 (27/11/2026)
+- `item.js` preenche o COD INTERNO 33841; PDF regravado no W:. O Simulador não mudou.
+
 ## 5.99.34 — Programa e desenho VEDADOR (27 X 40 X 6) 34542, ciclo de 3 peças (27/11/2026)
 - `Programas avulsos/VEDADOR (27 X 40 X 6) 34542/`: ciclo de 3 peças no padrão PSA 108 + canal externo 3,8 até Ø28,7 com a T2D94 (bedame 3,8, 1 entrada por peça) e desenho no padrão aprovado (canal reto, sem chanfro na boca); gravados no W: (PDF do Mastor guardado como "- MASTOR.pdf"). O Simulador não mudou.
 

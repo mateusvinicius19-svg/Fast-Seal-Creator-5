@@ -1,14 +1,14 @@
 // VEDADOR (374.17 X 389.6 X 8.2) 46542 — PU, bucha 301 x 391 (usuário 27/11/2026), 1 operação, cód. interno 46516.
 // Secção tirada do STL do Inventor (W:\...\DESENHOS\VEDADOR\VEDADOR (374.17 X 389.6 X 8.2) 46542\): Ø374,27 x Ø389,77 x 8,2
 // (o STL tem 374,27 / 389,77; o nome da pasta diz 374,17 / 389,6). Chanfros 0,5 nos 4 cantos.
-// Z0 = face com o canal em V raso (0,5 de fundo, de Ø376,27 a Ø387,77, fundo em Ø382,02): é a única face que dá para usinar —
+// Z0 = face com o canal raso em RAIO R8,516 (0,5 de fundo, de Ø376,27 a Ø387,77, fundo em Ø382,02 — usuário: "a face também é raio"): é a única face que dá para usinar —
 // a outra (lisa) é a do corte. Em a (0 = frente, para trás):
 //   externo: chanfro 0,5 → Ø389,77 até a 1,406, canal em RAIO R4,696 (fundo Ø387,77 em a 4,303) até a 7,2, chanfro 0,5
 //   interno: chanfro 0,5 → Ø374,27 até a 1, canal em RAIO R5,533 (fundo Ø376,17 em a 4,1) até a 7,2, chanfro 0,5
 // Usuário 27/11/2026: "no externo e interno é RAIO, você fez em ângulo" — o STL só tem 3 a 5 pontos em cada canal (o Simulador
 // ligava com retas); o raio é o que passa por eles: externo meia-corda 2,897 / fundo 1 → R4,696; interno 3,1 / 0,95 → R5,533.
 // Roda dentro do Simulador CNC.html (usa tipPath, tipLines, fagorToMcs, rev3DParams...): prog46542() e des46542().
-const RO46542 = (2.897 ** 2 + 1 ** 2) / 2, RI46542 = (3.1 ** 2 + 0.95 ** 2) / (2 * 0.95);   // raio do canal: (meia-corda² + fundo²) / (2 × fundo)
+const RO46542 = (2.897 ** 2 + 1 ** 2) / 2, RI46542 = (3.1 ** 2 + 0.95 ** 2) / (2 * 0.95), RF46542 = (2.875 ** 2 + 0.5 ** 2) / (2 * 0.5);   // raio do canal: (meia-corda² + fundo²) / (2 × fundo)
 window.ITEM46542 = {
   // primitivas em Z da usinagem (0 = face do canal, para trás negativo) e raio; arcos côncavos (centro no ar)
   od: [{ t: "L", a: [0, 194.385], b: [-0.5, 194.885] }, { t: "L", a: [-0.5, 194.885], b: [-1.406, 194.885] },
@@ -17,11 +17,13 @@ window.ITEM46542 = {
   id: [{ t: "L", a: [0, 187.635], b: [-0.5, 187.135] }, { t: "L", a: [-0.5, 187.135], b: [-1, 187.135] },
        { t: "A", a: [-1, 187.135], b: [-7.2, 187.135], c: [-4.1, 188.085 - RI46542], R: RI46542, cv: false },
        { t: "L", a: [-7.2, 187.135], b: [-7.7, 187.135] }, { t: "L", a: [-7.7, 187.135], b: [-8.2, 187.635] }],
-  D_INT: 374.27, D_EXT: 389.77, H: 8.2, tI: 301, tO: 391, r: 0.4, RO: RO46542, RI: RI46542
+  D_INT: 374.27, D_EXT: 389.77, H: 8.2, tI: 301, tO: 391, r: 0.4, RO: RO46542, RI: RI46542, RF: RF46542,
+  // canal da face: arco côncavo com o centro no ar (na frente da face), de Ø387,77 a Ø376,27, fundo 0,5 em Ø382,02
+  fc: { t: "A", a: [0, 193.885], b: [0, 188.135], c: [RF46542 - 0.5, 191.01], R: RF46542, cv: false }
 };
 // contorno fechado [a, raio] (a = 0 na face do canal) para o desenho: arcos em 16 partes
 ITEM46542.poly = (() => { const I = ITEM46542, A = q => [Math.abs(q[0]) < 1e-9 ? 0 : -q[0], q[1]], o = s15Sample(I.od).map(A), i = s15Sample(I.id).map(A).reverse(),
-  P = [...o, ...i, [0, 188.135], [0.5, 191.01], [0, 193.885]];
+  f = s15Sample([I.fc]).map(A).reverse(), P = [...o, ...i, ...f];
   return P.filter((q, k) => !k || Math.hypot(q[0] - P[k - 1][0], q[1] - P[k - 1][1]) > 1e-6); })();
 window.prog46542 = function(){
   const I = ITEM46542, f3 = v => fx(v, 3), now = new Date(), pad = n => String(n).padStart(2, "0");
@@ -33,10 +35,16 @@ window.prog46542 = function(){
     `;MATERIAL: USER DEFINED PU ${f3(tI)}/${f3(tO)} - TUBE ${f3(tI)}/${f3(tO)}`, `;DATE OF FILE: ${date}`, ";INTERVALO    MM", "G90 ", "G95 ", "G54", `G97S${gen15(S)}M3`, "N10", "", ""];
   // ---- faceamento (T3D3) ----
   L.push(...sec("FACING DOWNWARD"), "G0 Z100", "T3D3", `G0 X${f3(tO + 4)} Z0.690`, `G1 X${f3(tO + 4)} Z0.000`, ";( FINISH )", `G1 X${f3(tI - 4)} Z0.000 F0.150`, `G0 X${f3(tI - 4)} Z0.690`, "");
-  // ---- canal em V da face (T3D3, a mesma do faceamento: rômbica 35° R0,4, desce usinando direto) — 0,5 de fundo, passe único ----
-  const face = [[0, 195.2], [0, 193.885], [-0.5, 191.01], [0, 188.135], [0, 187.6]];
-  const pf = tipPath(face, r, "left", [-r, -r]), lf = pf[pf.length - 1].p;
-  L.push(...sec("FACE GROOVE"), ";( FINISH )", `G0 X${f3(2 * pf[0].p[1])} Z1.000`, `G1 X${f3(2 * pf[0].p[1])} Z${f3(pf[0].p[0])} F0.150`, ...tipLines(pf, r, "0.120"),
+  // ---- canal da face em RAIO R8,516 (T3D3, a mesma do faceamento: rômbica 35° R0,4, desce usinando direto) — 0,5 de fundo,
+  //      passe único. Centro da ponta: na face Z +0,4; nos cantos vivos arco R0,4; no canal arco R8,516 − 0,4 (côncavo) ----
+  const fc = I.fc, nz = (q, c) => { const d = [c[0] - q[0], c[1] - q[1]], n = Math.hypot(d[0], d[1]); return [d[0] / n, d[1] / n]; };
+  const ctr = (q, n) => [q[0] + n[0] * r, q[1] + n[1] * r], Pv = q => [q[0] - r, q[1] - r];
+  const cw = (p0, p1, c) => ((p0[0] - c[0]) * (p1[1] - c[1]) - (p0[1] - c[1]) * (p1[0] - c[0])) > 0;
+  const c0 = ctr(fc.a, [1, 0]), c1 = ctr(fc.a, nz(fc.a, fc.c)), c2 = ctr(fc.b, nz(fc.b, fc.c)), c3 = ctr(fc.b, [1, 0]);
+  const pf = [{ t: "L", p: Pv(ctr([0, 195.2], [1, 0])) }, { t: "L", p: Pv(c0) }, { t: "A", p: Pv(c1), ccw: cw(c0, c1, fc.a), R: r },
+              { t: "A", p: Pv(c2), ccw: cw(c1, c2, fc.c), R: fc.R - r }, { t: "A", p: Pv(c3), ccw: cw(c2, c3, fc.b), R: r }, { t: "L", p: Pv(ctr([0, 187.6], [1, 0])) }];
+  const lf = pf[pf.length - 1].p;
+  L.push(...sec("FACE GROOVE"), ";( FINISH )", `G0 X${f3(2 * pf[0].p[1])} Z1.000`, `G1 X${f3(2 * pf[0].p[1])} Z${f3(pf[0].p[0])} F0.150`, ...s15Lines(pf, "0.120"),
          `G0 X${f3(2 * lf[1])} Z1.000`, `G0 X${f3(tO + 4)} Z1.000`, "");
   // ---- externo (T2D2): bucha Ø391 deixa só 1,23 no Ø — só o acabamento (PU até 6 no Ø = passe único). Chanfro da frente,
   //      Ø389,77, canal em RAIO R4,696 (G2/G3 com R − 0,4 na ponta), chanfro de trás e um pouco além da linha do corte ----
@@ -90,7 +98,7 @@ window.des46542 = function(){
   // largura total e as secções — sem chanfros, raios nem ângulos. Aqui a = 0 é a face de TRÁS (esquerda) e a = L a face do canal.
   const poly = q.customProfile.map(([z, r]) => [-z, r]), L = q.h, rmax = Math.max(...poly.map(v => v[1])), rmin = Math.min(...poly.map(v => v[1]));
   q.corteD = [...new Set(poly.map(v => v[1]))];
-  Object.defineProperty(q, "customNotes", { value: "VEDADOR Ø374,27 x Ø389,77 x 8,2 · do 3D (STL) · canais do externo e do interno em raio (R4,7 e R5,53) · chanfros 0,5 · cotas em mm", writable: true });
+  Object.defineProperty(q, "customNotes", { value: "VEDADOR Ø374,27 x Ø389,77 x 8,2 · do 3D (STL) · canais em raio: externo R4,7, interno R5,53, face R8,52 · chanfros 0,5 · cotas em mm", writable: true });
   const orig = q.customViews;
   q.customViews = (pp, PT) => { let g = orig(pp, PT);
     g = g.replace(/<line[^>]*class="e"\/><line[^>]*class="e"\/><line[^>]*class="d"[^>]*\/><text[^>]*rotate\(-90[^>]*>Ø[^<]*<\/text>/g, "");

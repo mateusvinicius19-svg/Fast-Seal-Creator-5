@@ -6,6 +6,10 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.100.2 — PSE 102 R: material da peça embaixo do PU+POM no desenho (27/11/2026)
+- Carimbo: embaixo do "PU+POM" sai "PEÇA: PU (GAXETA)" no desenho da gaxeta e "PEÇA: POM (ANEL A)" no do anel (segue o material escolhido); a linha da bucha desceu uma linha.
+- Só o PSE 102 R. Teste dos 37 perfis: todos geram, nenhum programa mudou.
+
 ## 5.100.1 — PSE 102 R: anel de apoio (POM) já sugere o número com A (27/11/2026)
 - Salvando o anel (A), a janela do número já vem com o número da gaxeta + A (ex.: 046123A) e diz "anel de apoio POM do 046123".
 - Depois de salvar e imprimir a gaxeta (U), o formulário passa sozinho para o anel A — o próximo 💾 Salvar é o do POM.

@@ -4512,7 +4512,10 @@ async function saveProgram0(auto){
         const n = prompt(`Já existe o desenho "${L[0].name}" SEM número de programa.\n\nDigite o número do programa (pegue no ARGUS): o programa salva com esse número e a pasta do desenho ganha o número (o desenho que está lá fica).\n\nCancelar = salvar como programa NOVO`, "");
         if (n !== null && /^\d{1,6}$/.test(n.trim())){ state.dupRename = { fam: desFam(state.genParams), from: L[0].name }; forcedNum = n.trim(); }
       } } }
-  const num = auto ? sug : forcedNum !== null ? forcedNum : prompt("Número do programa" + (state.alterNum ? " (alterando " + sug + ")" : cicloDe ? ` (ciclo de ${nCiclo} peças do ${sug} — salva como "${sug} CICLO ${nCiclo} PÇ")` : sug ? " (próximo livre: " + sug + ")" : " (ex.: 046004)") + (suf ? ` — bucha especial: vai salvar como "número ${suf[1]}"` : "") + ":", sug);
+  // 5.100.1 (usuário 27/11/2026): PSE 102 R — o anel de apoio (A, POM) já sugere o número da gaxeta com o A (ex.: 046123A)
+  const a102 = p110 === "A" && state.genParams && state.genParams.tipoGen === "pse102r" && /^\d+$/.test(String(sug).trim()) && (() => { try { return String(localStorage.getItem(k110) || "") === String(sug).trim(); } catch(e){ return false; } })();   // só com o número da gaxeta salva
+  if (a102) sug = String(sug).trim() + "A";
+  const num = auto ? sug : forcedNum !== null ? forcedNum : prompt("Número do programa" + (a102 ? ` (anel de apoio ${ringMatLabel(state.genParams)} do ${sug.slice(0, -1)})` : state.alterNum ? " (alterando " + sug + ")" : cicloDe ? ` (ciclo de ${nCiclo} peças do ${sug} — salva como "${sug} CICLO ${nCiclo} PÇ")` : sug ? " (próximo livre: " + sug + ")" : " (ex.: 046004)") + (suf ? ` — bucha especial: vai salvar como "número ${suf[1]}"` : "") + ":", sug);
   if (num === null) return parar("número do programa cancelado. Se a janela do número nem apareceu, aperte F5 e salve de novo.");
   if (!auto && !(s110 && s110.num) && !askCod()) return parar("Cód. interno cancelado. Para salvar sem código, deixe em branco e clique em OK.");
   if (!auto && !(s110 && s110.num) && nCiclo <= 1 && state.genParams && DESENHO_TYPES.includes(state.genParams.tipoGen) && !askDes()) return parar("\"Quem desenhou?\" cancelado.");
@@ -4566,8 +4569,10 @@ async function saveProgram0(auto){
     try { const rec = histRecord(auto ? {} : (gp || {}), auto ? "" : (state.genType || ""), fagor, pitName, mcsName, pdfMsg); if (auto && state.alterRec) Object.assign(rec, state.alterRec); await histAppend(dir, rec); if (histOpen()) histLoadInline(false); } catch(e){ pdfMsg += " · histórico não gravado: " + e.message; }
     if (!auto && gp) profMemSave();   // 5.99.0: o perfil abre com estas configurações da próxima vez
     $("genMsg").textContent = `Salvo: ${pitName} (Programas_CNC) e ${mcsName} (MCS 500, convertido)${pdfMsg}.`; state.tolResetPending = true; /* v5.20.1: tolerâncias voltam ao padrão quando começar a peça seguinte (a impressão desta continua com as dela) */ $("genMsg").style.color = /NÃO salvo/.test(pdfMsg) ? "#b2221f" : "";
+    // 5.100.1 (usuário 27/11/2026): PSE 102 R — depois da gaxeta (U) o formulário passa para o anel A (POM)
+    const u102 = !auto && gp && gp.tipoGen === "pse102r" && pse102rPiece(gp) === "U";
     if (auto) $("genMsg").textContent = `✏️ ${state.alterNote || ""} Salvo: ${pitName} (Programas_CNC) e ${mcsName} (MCS 500)${pdfMsg}. O ${state.alterNum} original não mudou.`;
-    if (!auto && !desCiclo && !s110 && gp && DESENHO_TYPES.includes(gp.tipoGen) && !/NÃO salvo|não salvo/.test(pdfMsg)) setTimeout(() => { openPreview(); setTimeout(() => { updatePrintCss(); window.print(); }, 400); }, 100);   // imprime o desenho salvo
+    if (!auto && !desCiclo && !s110 && gp && DESENHO_TYPES.includes(gp.tipoGen) && !/NÃO salvo|não salvo/.test(pdfMsg)) setTimeout(() => { openPreview(); setTimeout(() => { updatePrintCss(); window.print(); if (u102) setTimeout(() => { const sel = document.querySelector('#genBox [data-k=peca]'); if (sel){ sel.value = "A"; generate(); setTimeout(() => { $("genMsg").textContent = `Salvo a gaxeta ${pitName}. Agora o ANEL DE APOIO (A, ${ringMatLabel(gp)}): clique em 💾 Salvar — sugere ${(base.match(/^\d+/) || [base])[0]}A.`; }, 300); } }, 300); }, 400); }, 100);   // imprime o desenho salvo
     return true;
   } catch(e){ alert("Não foi possível salvar: " + e.message); }
   return false;

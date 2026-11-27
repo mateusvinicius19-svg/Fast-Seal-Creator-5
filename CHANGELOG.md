@@ -6,6 +6,11 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.100.1 — PSE 102 R: anel de apoio (POM) já sugere o número com A (27/11/2026)
+- Salvando o anel (A), a janela do número já vem com o número da gaxeta + A (ex.: 046123A) e diz "anel de apoio POM do 046123".
+- Depois de salvar e imprimir a gaxeta (U), o formulário passa sozinho para o anel A — o próximo 💾 Salvar é o do POM.
+- Só o PSE 102 R (PSE 120 igual). Teste dos 37 perfis: todos geram, nenhum programa mudou.
+
 ## 5.100.0 — PSE 102 R: anel de apoio em POM por padrão e desenho "PU+POM" (27/11/2026)
 - Material do anel (peça A) começa em POM (era PTFE).
 - Desenho do conjunto sai com MATERIAL "PU+<material do anel>" (PU+POM; trocou o material do anel, troca no desenho).

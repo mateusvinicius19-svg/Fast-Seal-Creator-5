@@ -2464,6 +2464,10 @@ function generateCore(fromInput){
   if (type !== "psr102") lines = puRetracts(lines);   // v5.81.0: recuos do PU como no PSR 102 (o PSR 102 já sai assim do gerador)
   lines = retractRules(lines, type);   // v5.84.0: + folga mínima por ferramenta, material e faixa de Ø (D14: exata)
   lines = puOutsideFirst(lines);   // 5.99.7: PU — externo (e canais do externo) antes do interno
+  // 5.105.0 (usuário 27/11/2026): Celeron — a máquina não lê os ":" dos comentários (;MATERIAL: / ;(CELERON: ...)) → sai sem os ":";
+  // e os afastamentos em Z (G0 Z50 do início, Z70 / Z50 antes de trocar a ferramenta) vão para Z100. Só no Celeron.
+  if (type !== "pso" && (p.matA === "CELERON" || /CELERON/i.test(String(p.mat || ""))))
+    lines = lines.map(l => { l = String(l).replace(/:/g, ""); return /^\s*(G0+\s+)?Z(50|70)(\.0+)?\s*$/.test(l) ? l.replace(/Z(50|70)(\.0+)?/, "Z100") : l; });
   const fname = (type === "dual" || type === "pse127" || type === "psh131" || type === "iso" || type === "dhr" || type === "dpr" || type === "psh110" || type === "psh110t" || type === "psr101" || type === "psa108" || type === "psa108f" || type === "psa108c" || type === "psa109" || type === "psg101" || type === "psg103" || type === "psg104" || type === "lip" || type === "pso" || type === "pse106" || type === "psh106" || type === "psh108" || type === "psh117" || type === "psh125" || type === "psh105" || type === "pse105" || type === "pse103" || type === "pse107" || type === "pse118" || type === "psh107" || type === "psh121" || type === "psh103" || type === "psr102" || type === "psr211" || type === "psr212" || type === "pse102r" || type === "pse120") ? pieceFile(p) + (buchaIsException(p) || (state.alterNum && p.bi !== "" && p.bo !== "") ? ` ${gen15(p.bi)}X${gen15(p.bo)}` : "") : `PSA108 ${gen15(p.dint)}X${gen15(p.dext)}X${gen15(p.h)} - ${xround(p.n,0)} pcs`;
   load(lines.join("\n"), fname); state.progExt = false;   // 5.99.2: programa do formulário → desenho do formulário
   if (!g.check(p)) try { $("genMsg").textContent += costTxt(pieceCost(lines.join("\n"), ["ciclo", "semch"].includes(type) ? xround(p.n, 0) : (isPSA(type) || type === "iso") ? cicloPcs(p) : 1)); } catch(e){}
@@ -5830,7 +5834,7 @@ function dwgMat(p){
   if (["pse102r","pse120"].includes(p.tipoGen) && !p.ringA) return String(p.mat || "PU") + "+" + ringMatLabel({ matR: p.matR || "POM" });
   if (p.mat) return String(p.mat);
   if (p.matA && !(p.tipoGen === "iso" && String(p.tipoP || "") !== "dp")){ const a = ARR_MAT[p.matA]; return a ? a[0].replace(/\s*\(.*\)\s*$/, "") : String(p.matA); }
-  try { const m = /;MATERIAL:\s*(?:USER DEFINED\s+)?(.+?)(?:\s+[\d.]+\/[\d.]+.*|\s+-\s+.*)?$/im.exec(currentText().split("\n").slice(0, 12).join("\n")); if (m && m[1].trim()) return m[1].trim(); } catch(e){}
+  try { const m = /;MATERIAL:?\s*(?:USER DEFINED\s+)?(.+?)(?:\s+[\d.]+\/[\d.]+.*|\s+-\s+.*)?$/im.exec(currentText().split("\n").slice(0, 12).join("\n")); if (m && m[1].trim()) return m[1].trim(); } catch(e){}
   return ["pse106","psh106","psh108","psh117","psh105","pse105","pse107","psh107","psh103","pse103","pse118","psh121","psh125","psr211","psr212","pse102r","pse120","psr102","dual","pse127","psh131"].includes(p.tipoGen) ? "PU" : "";
 }
 function dwgInfo(){
@@ -7365,7 +7369,7 @@ function progTolApply(q, it){
     q.tolFrom = it.name; q.tolSec = T.ts || null; }
 }
 // material do desenho do programa (usuário 16/11/2026): pergunta junto com as tolerâncias; sugere o ;MATERIAL do programa
-function progMatGuess(){ try { const m = /;MATERIAL:\s*(?:USER DEFINED\s+)?(.+?)(?:\s+[\d.]+\/[\d.]+.*|\s+-\s+.*)?$/im.exec(currentText().split("\n").slice(0, 12).join("\n")); return m && m[1].trim() ? m[1].trim().toUpperCase() : ""; } catch(e){ return ""; } }
+function progMatGuess(){ try { const m = /;MATERIAL:?\s*(?:USER DEFINED\s+)?(.+?)(?:\s+[\d.]+\/[\d.]+.*|\s+-\s+.*)?$/im.exec(currentText().split("\n").slice(0, 12).join("\n")); return m && m[1].trim() ? m[1].trim().toUpperCase() : ""; } catch(e){ return ""; } }
 function progMatSet(mat){ dwgMatClear(); }   // v5.61.1: o material vai no p.mat do desenho (não fica preso no cabeçalho para as próximas peças)
 function progTolAsk(q, rank, done, std){
   const old = $("ptModal"); if (old) old.remove();

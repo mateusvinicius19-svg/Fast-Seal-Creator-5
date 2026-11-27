@@ -6,6 +6,9 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.104.2 — VEDADOR 46542: canais do externo e do interno em raio (27/11/2026)
+- Usuário: "no externo e interno é raio, você fez em ângulo". O STL tem só 3 a 5 pontos em cada canal e o Simulador ligava com retas; agora o canal externo é R4,696 e o interno R5,533 (o raio que passa pelos pontos), no programa (G2/G3 com R − 0,4 na ponta, s15Path) e no desenho. 046542, 46542.txt e o PDF regravados no W:. O Simulador não mudou.
+
 ## 5.104.1 — Programa e desenho VEDADOR (374.17 X 389.6 X 8.2) 46542 em PU (27/11/2026)
 - `Programas avulsos/VEDADOR (374.17 X 389.6 X 8.2) 46542/`: programa 046542 (PU, bucha 301 x 391: T3D3 face + canal em V da face, T2D2 acabamento, T2D12 em camadas, faca T5D5) e desenho (cód. interno 46516) feitos do STL; gravados no W:. O Simulador não mudou.
 

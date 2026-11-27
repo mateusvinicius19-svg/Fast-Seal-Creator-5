@@ -6,6 +6,11 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.101.0 — Perfil novo PSA 108 SEM PERDA (corte com a faca T5D5) (27/11/2026)
+- Mesma arruela do PSA 108 (chanfros, desbaste, ferramentas por material, bucha, desenho e pasta PSA 108), para ciclo de várias peças cortadas com a faca T5D5: sem o valor do bedame entre as peças (passo = altura) e corte com a T5D5 em F0,2 (campo "Avanço do corte com a faca").
+- Sem o alerta de PU com várias peças (aqui a faca vale para qualquer nº de peças). Celeron: sai com a faca e um ATENÇÃO (Celeron não corta na faca).
+- PSA 108 e os outros perfis iguais. Teste dos perfis: 38 geram, só o PSA 108 SEM PERDA é novo.
+
 ## 5.100.3 — PSE 102 R abre sempre na gaxeta U (27/11/2026)
 - Ao escolher o PSE 102 R (ou reabrir o Simulador com ele) a peça é sempre a GAXETA (U); as outras configurações do último item continuam voltando. Antes, depois de salvar o anel, abria no anel (A).
 - Só o PSE 102 R. Teste dos 37 perfis: todos geram, nenhum programa mudou.

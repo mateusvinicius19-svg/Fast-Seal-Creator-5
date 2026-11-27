@@ -6,6 +6,12 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.105.0 — Celeron: programa sem ":" e afastamentos em Z100 (27/11/2026)
+- Usuário: a máquina não lê os ":" que ficam nos programas de Celeron. Em Celeron o programa sai sem nenhum ":" (;MATERIAL Celeron, ;(CELERON METADE DA ROTACAO NO CORTE), ;CELERON USINADO ...).
+- Afastamentos do Celeron: G0 Z50 do início e Z70 / Z50 antes de trocar a ferramenta vão para Z100.
+- Só Celeron (todos os perfis que têm Celeron: PSA 108, PSG 101/103/104, ciclos...). Os outros materiais iguais. Ler o material de um programa aberto aceita ;MATERIAL sem ":".
+- Teste dos 38 perfis: todos geram, nenhum programa padrão mudou (nenhum padrão é Celeron).
+
 ## 5.104.4 — VEDADOR 46542: canal externo com borda de 1 mm dos dois lados (27/11/2026)
 - Usuário: a borda do canal externo na frente é 1 mm (o STL tinha 1,406). Canal externo agora 1 / 6,2 / 1 (igual ao interno), fundo Ø387,77 em 4,1, raio R5,305 (G2 R4,905 na ponta). Programa e PDF regravados no W:. O Simulador não mudou.
 

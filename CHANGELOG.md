@@ -6,6 +6,9 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.104.1 — Programa e desenho VEDADOR (374.17 X 389.6 X 8.2) 46542 em PU (27/11/2026)
+- `Programas avulsos/VEDADOR (374.17 X 389.6 X 8.2) 46542/`: programa 046542 (PU, bucha 301 x 391: T3D3 face + canal em V da face, T2D2 acabamento, T2D12 em camadas, faca T5D5) e desenho (cód. interno 46516) feitos do STL; gravados no W:. O Simulador não mudou.
+
 ## 5.104.0 — "Salvar só o desenho" em todos os perfis com desenho (27/11/2026)
 - O botão 📐 Salvar só o desenho (grava só o PDF em DESENHOS para um programa que já existe; não mexe no .PIT, MCS 500 nem histórico) aparecia só no PSE 108, PSG 101 e PSA 108 — agora aparece em todos os perfis que têm desenho (o Ciclo com chanfro não tem desenho próprio).
 - Peça com letra (anel A do PSE 102 R / PSE 120, base A / tampa B do PSH 110): pode digitar o número com ou sem a letra — grava "…A.pdf" com o A no carimbo, sem duplicar a letra.

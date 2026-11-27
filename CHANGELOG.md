@@ -6,6 +6,10 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.103.1 — PSG 104: desbaste em Z contínuo (sem passes duplicados) (27/11/2026)
+- Usuário (PSG 104 205x230x9,95 Celeron, rebaixo Ø220 x 6,35): o desbaste externo e o interno iam em 2 etapas em Z e passavam o MESMO Ø duas vezes (X232 até Z−5,975 e de novo até Z−11,95). Agora cada Ø vai de uma vez até o fim, como no PSG 101 e PSG 103.
+- Só o PSG 104. Teste dos 38 perfis: todos geram, nenhum programa padrão mudou (as medidas padrão não chegavam a ter etapas).
+
 ## 5.103.0 — PSE 120 com as mesmas mudanças do PSE 102 R (27/11/2026)
 - Anel de apoio (A) em POM por padrão (era PTFE).
 - Desenho com MATERIAL "PU+<material do anel>" e, embaixo, "PEÇA: PU (ANEL GT)" ou "PEÇA: POM (ANEL A)"; bucha uma linha abaixo.

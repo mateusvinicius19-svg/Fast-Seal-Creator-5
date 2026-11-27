@@ -1,4 +1,4 @@
-# VEDADOR (27 X 40 X 6) — programa 34542 (perfil em U, Mastor GR07 27/40/6/28,7/3,8)
+# VEDADOR (27 X 40 X 6) — programa 34542, cód. interno 33841 (perfil em U, Mastor GR07 27/40/6/28,7/3,8)
 
 Perfil em U: Ø int 27, Ø ext 40, altura 6, canal externo de 3,8 até Ø28,7 (paredes de 1,1, fundo 0,85), chanfros 0,2.
 Usuário 27/11/2026: canal feito pela **T2D94 (bedame 3,8)** entrando 1 vez só → canal reto, sem os chanfros 0,2 da boca.

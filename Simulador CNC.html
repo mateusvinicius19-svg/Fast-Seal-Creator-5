@@ -3361,6 +3361,16 @@ GEN.psg104 = {
         rb.push("G0 X" + g3(xb), "G91");
         L.splice(i1 - 2, 0, ...rb);
       }
+      // 5.103.2 (usuário 27/11/2026, 046540: "no desbaste externo ela desce duas vezes para a posição do faceado e retorna em G0"):
+      // depois de cada desbaste a ferramenta descia em G0 até X(Ø int − xAb) só para subir de novo em G91 até o início do perfil
+      // (como o PSA 108 antes da 5.76.1). Agora: tira o "G0 X(faceado) / G91" que vem logo antes de outro G90 e, no último,
+      // vai em G0 direto ao Ø de início do perfil (absoluto) e só então G91. Só o PSG 104.
+      for (let j = L.length - 1; j >= 2; j--) if (/^G0 X[\d.]+$/.test(L[j - 1]) && L[j] === "G91" && L[j + 1] === "G90") L.splice(j - 1, 2);
+      const jR = L.findIndex(l => /;\(EXTERNO NO REBAIXO\)/.test(l));
+      if (jR >= 2 && L[jR - 1] === "G91" && /^G0 X[\d.]+$/.test(L[jR - 2])){
+        const xa = Number(L[jR - 2].slice(4)) + Number(L[jR].match(/^X(-?[\d.]+)/)[1]);
+        L.splice(jR - 2, 3, "G0 X" + g3(xa) + " ;(EXTERNO NO REBAIXO)", "G91");
+      }
     }
     // v5.99.32 (usuário 26/11/2026: "PSG 104 quando eu coloco PU ele não altera as ferramentas"): PU → externo T2D2, interno
     // T4D14 (< 11) / T1D45 (11 a 40) / T2D12 (≥ 40), corte faca T5D5; NBR/Viton → só o corte na T5D5 (como no PSA 108).

@@ -6,6 +6,12 @@ Regra: toda alteração sobe a versão em `VERSION`, ganha uma entrada aqui (dat
 - MENOR (5.x.0): recurso novo, perfil novo, rotina nova.
 - MAIOR (x.0.0): mudança grande de formato/fluxo.
 
+## 5.103.0 — PSE 120 com as mesmas mudanças do PSE 102 R (27/11/2026)
+- Anel de apoio (A) em POM por padrão (era PTFE).
+- Desenho com MATERIAL "PU+<material do anel>" e, embaixo, "PEÇA: PU (ANEL GT)" ou "PEÇA: POM (ANEL A)"; bucha uma linha abaixo.
+- Salvando o anel: carimbo com o A no Nº do programa e a janela já sugere o número do ANEL GT + A; depois de salvar o ANEL GT o formulário passa para o anel A.
+- Abre sempre no ANEL GT. PSE 102 R igual. Teste dos 38 perfis: todos geram, nenhum programa mudou.
+
 ## 5.102.0 — D45 nos outros materiais, montada na T2 (T2D45) (27/11/2026)
 - PTFE, POM, PEAD, NBR e Viton: interno com o MENOR Ø trabalhado de 12 a 15 sai com a T2D45 (era a T2D14). Resto da regra igual: D14 < 10 · D81 10–12 (reto) · T4D4 ≥ 15. PU igual (T1D45 de 12 a 40).
 - T2D45 com as regras da D45: chanfro interno de trás no máximo 30°, Ø mínimo 12, folgas de recuo da T1D45; no cadastro de ferramentas é a mesma D45 (T1 no PU, T2 nos outros).

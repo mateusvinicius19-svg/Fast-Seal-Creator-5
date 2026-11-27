@@ -1427,7 +1427,7 @@ GEN.pse102r = Object.assign({}, GEN.pse106, { name: "PSE 102 R",
 GEN.pse120 = { name: "PSE 120",
   main: [["peca","Peça do conjunto","U"],["dint","Diâmetro interno (mm)",83.5],["dext","Diâmetro externo (mm)",96],["h","Altura (mm)",7],
          ["rL","Raio do lábio (vazio = 0,214 × altura)",""],["ds","Ø do assento dos anéis (vazio = Ø int. + 0,8 × secção)",""],
-         ["rpt","Nº de repetições RPT (vazio = 0)",""],["mat","Material","PU"],["matR","Material do anel (peça A)","PTFE"],
+         ["rpt","Nº de repetições RPT (vazio = 0)",""],["mat","Material","PU"],["matR","Material do anel (peça A)","POM"],   // 5.103.0: POM por padrão, como o PSE 102 R
          ["bi","Bucha Ø interno (vazio = automática)",""],["bo","Bucha Ø externo (vazio = automática)",""]],
   params: [["apR","Desbaste ext./int.: quanto tirar por passada (no raio, mm)",3],["alR","Acabamento ext./int.: sobremetal deixado (no raio, mm)",3],
            ["rn","Raio da ponta das ferramentas (mm)",0.4],["tInt","Ferramenta interna (vazio = pelo menor Ø trabalhado: T4D14 abaixo de Ø11, T1D45 até Ø40, senão T2D12)",""],["S","Rotação S (vazio = tabela pelo Ø ext.)",""],
@@ -2349,7 +2349,7 @@ function profMemLoad(){
   let v = null; try { v = JSON.parse(localStorage.getItem("ps_prof_" + profMemKey()) || "null"); } catch(e){}
   if (!v) return false;
   for (const [k, x] of Object.entries(v)){ if ((TOL_KEYS.includes(k) && k !== "tipoP") || PROF_MEM_SKIP.has(k)) continue;
-    if (k === "peca" && $("genType").value === "pse102r") continue;   // 5.100.3 (usuário 27/11/2026): PSE 102 R abre sempre na gaxeta U
+    if (k === "peca" && ["pse102r","pse120"].includes($("genType").value)) continue;   // 5.103.0: PSE 120 também (ANEL GT)   // 5.100.3 (usuário 27/11/2026): PSE 102 R abre sempre na gaxeta U
     const el = document.querySelector(`#genBox [data-k="${k}"]`); if (el && !el.readOnly) el.value = x; }
   try { syncTolRows(); } catch(e){}
   generate(); return true;
@@ -4324,7 +4324,7 @@ async function isDesenhosDir(dd){ for (const n of ["PSA 108", "PSE 106", "PSH 10
 async function saveDrawingPdf(p, num, dd, keepIfExists, pitName){
   if (!dd) return " · PDF não salvo (clique em 📁 DESENHOS e salve de novo)";
   if (!(await isDesenhosDir(dd))) return ` · PDF NÃO salvo: a pasta escolhida em 📁 DESENHOS ("${dd.name}") não é a W:\\Parts\\PartsSeals\\PROJETOS\\DESENHOS — clique em 📁 DESENHOS e escolha a certa`;
-  const fp = document.querySelector("#dwgFields input[data-d=prog]"); if (fp) fp.value = String(num) + (p.tipoGen === "psh110" && psh110Piece(p) !== "M" ? psh110Piece(p) : "") + (p.tipoGen === "pse102r" && pse102rPiece(p) === "A" ? "A" : "");   // 5.100.0: PSE 102 R anel com o A no carimbo   // 5.99.16: base / tampa com o A / B no carimbo
+  const fp = document.querySelector("#dwgFields input[data-d=prog]"); if (fp) fp.value = String(num) + (p.tipoGen === "psh110" && psh110Piece(p) !== "M" ? psh110Piece(p) : "") + (["pse102r","pse120"].includes(p.tipoGen) && pse102rPiece(p) === "A" ? "A" : "");   // 5.103.0: + PSE 120 · 5.100.0: PSE 102 R anel com o A no carimbo   // 5.99.16: base / tampa com o A / B no carimbo
   const fam = await dd.getDirectoryHandle(desFam(p), { create: true });
   const fd = desenhoFolderName(p, num), sub = await fam.getDirectoryHandle(fd, { create: true });
   // PSH 110 (usuário 13/11/2026): as 3 peças na MESMA pasta do conjunto, como no W: — meio "… 30249.pdf", macho "…A.pdf", fêmea "…B.pdf"
@@ -4537,7 +4537,7 @@ async function saveProgram0(auto){
         if (n !== null && /^\d{1,6}$/.test(n.trim())){ state.dupRename = { fam: desFam(state.genParams), from: L[0].name }; forcedNum = n.trim(); }
       } } }
   // 5.100.1 (usuário 27/11/2026): PSE 102 R — o anel de apoio (A, POM) já sugere o número da gaxeta com o A (ex.: 046123A)
-  const a102 = p110 === "A" && state.genParams && state.genParams.tipoGen === "pse102r" && /^\d+$/.test(String(sug).trim()) && (() => { try { return String(localStorage.getItem(k110) || "") === String(sug).trim(); } catch(e){ return false; } })();   // só com o número da gaxeta salva
+  const a102 = p110 === "A" && state.genParams && ["pse102r","pse120"].includes(state.genParams.tipoGen) && /^\d+$/.test(String(sug).trim()) && (() => { try { return String(localStorage.getItem(k110) || "") === String(sug).trim(); } catch(e){ return false; } })();   // só com o número da gaxeta salva
   if (a102) sug = String(sug).trim() + "A";
   const num = auto ? sug : forcedNum !== null ? forcedNum : prompt("Número do programa" + (a102 ? ` (anel de apoio ${ringMatLabel(state.genParams)} do ${sug.slice(0, -1)})` : state.alterNum ? " (alterando " + sug + ")" : cicloDe ? ` (ciclo de ${nCiclo} peças do ${sug} — salva como "${sug} CICLO ${nCiclo} PÇ")` : sug ? " (próximo livre: " + sug + ")" : " (ex.: 046004)") + (suf ? ` — bucha especial: vai salvar como "número ${suf[1]}"` : "") + ":", sug);
   if (num === null) return parar("número do programa cancelado. Se a janela do número nem apareceu, aperte F5 e salve de novo.");
@@ -4594,9 +4594,9 @@ async function saveProgram0(auto){
     if (!auto && gp) profMemSave();   // 5.99.0: o perfil abre com estas configurações da próxima vez
     $("genMsg").textContent = `Salvo: ${pitName} (Programas_CNC) e ${mcsName} (MCS 500, convertido)${pdfMsg}.`; state.tolResetPending = true; /* v5.20.1: tolerâncias voltam ao padrão quando começar a peça seguinte (a impressão desta continua com as dela) */ $("genMsg").style.color = /NÃO salvo/.test(pdfMsg) ? "#b2221f" : "";
     // 5.100.1 (usuário 27/11/2026): PSE 102 R — depois da gaxeta (U) o formulário passa para o anel A (POM)
-    const u102 = !auto && gp && gp.tipoGen === "pse102r" && pse102rPiece(gp) === "U";
+    const u102 = !auto && gp && ["pse102r","pse120"].includes(gp.tipoGen) && pse102rPiece(gp) === "U";   // 5.103.0: + PSE 120
     if (auto) $("genMsg").textContent = `✏️ ${state.alterNote || ""} Salvo: ${pitName} (Programas_CNC) e ${mcsName} (MCS 500)${pdfMsg}. O ${state.alterNum} original não mudou.`;
-    if (!auto && !desCiclo && !s110 && gp && DESENHO_TYPES.includes(gp.tipoGen) && !/NÃO salvo|não salvo/.test(pdfMsg)) setTimeout(() => { openPreview(); setTimeout(() => { updatePrintCss(); window.print(); if (u102) setTimeout(() => { const sel = document.querySelector('#genBox [data-k=peca]'); if (sel){ sel.value = "A"; generate(); setTimeout(() => { $("genMsg").textContent = `Salvo a gaxeta ${pitName}. Agora o ANEL DE APOIO (A, ${ringMatLabel(gp)}): clique em 💾 Salvar — sugere ${(base.match(/^\d+/) || [base])[0]}A.`; }, 300); } }, 300); }, 400); }, 100);   // imprime o desenho salvo
+    if (!auto && !desCiclo && !s110 && gp && DESENHO_TYPES.includes(gp.tipoGen) && !/NÃO salvo|não salvo/.test(pdfMsg)) setTimeout(() => { openPreview(); setTimeout(() => { updatePrintCss(); window.print(); if (u102) setTimeout(() => { const sel = document.querySelector('#genBox [data-k=peca]'); if (sel){ sel.value = "A"; generate(); setTimeout(() => { $("genMsg").textContent = `Salvo ${gp.tipoGen === "pse120" ? "o ANEL GT" : "a gaxeta"} ${pitName}. Agora o ANEL DE APOIO (A, ${ringMatLabel(gp)}): clique em 💾 Salvar — sugere ${(base.match(/^\d+/) || [base])[0]}A.`; }, 300); } }, 300); }, 400); }, 100);   // imprime o desenho salvo
     return true;
   } catch(e){ alert("Não foi possível salvar: " + e.message); }
   return false;
@@ -5813,7 +5813,7 @@ const DEFAULT_TOL = [["2000","0.5","1.2","3.0"],["1000","0.3","0.8","2.0"],["400
 // Agora: campo digitado > material escolhido no perfil (mat / matA) > linha ;MATERIAL do programa > PU nas gaxetas
 function dwgMat(p){
   // 5.100.0 (usuário 27/11/2026): PSE 102 R — a gaxeta (U) sai como "PU+<material do anel>" (POM padrão); o anel (A) usa o p.mat dele
-  if (p.tipoGen === "pse102r" && !p.ringA) return String(p.mat || "PU") + "+" + ringMatLabel({ matR: p.matR || "POM" });
+  if (["pse102r","pse120"].includes(p.tipoGen) && !p.ringA) return String(p.mat || "PU") + "+" + ringMatLabel({ matR: p.matR || "POM" });
   if (p.mat) return String(p.mat);
   if (p.matA && !(p.tipoGen === "iso" && String(p.tipoP || "") !== "dp")){ const a = ARR_MAT[p.matA]; return a ? a[0].replace(/\s*\(.*\)\s*$/, "") : String(p.matA); }
   try { const m = /;MATERIAL:\s*(?:USER DEFINED\s+)?(.+?)(?:\s+[\d.]+\/[\d.]+.*|\s+-\s+.*)?$/im.exec(currentText().split("\n").slice(0, 12).join("\n")); if (m && m[1].trim()) return m[1].trim(); } catch(e){}
@@ -6825,7 +6825,7 @@ function drawingSVGCore(p){ // PSE 120 (usuário 16/11/2026): UM desenho só par
   // -- logo, material, assinaturas
   const yLogoEnd = yT + 58, yMatEnd = yT + 140;
   t += `<image href="${LOGO}" x="${c1 + 8}" y="${yT + 6}" width="${c2 - c1 - 16}" height="${(c2 - c1 - 16) * 144 / 640}" preserveAspectRatio="xMidYMid meet"/>`;
-  t += `<line x1="${c1}" y1="${yLogoEnd}" x2="${c2}" y2="${yLogoEnd}" class="tb"/>` + lbl(c1 + 4, yLogoEnd + 12, "MATERIAL:") + val(c1 + 8, yLogoEnd + 34, info.mat || dwgMat(p), "tv big") + (p.tipoGen === "pse102r" && !p.ringA ? val(c1 + 8, yLogoEnd + 52, "PEÇA: " + (pse102rPiece(p) === "A" ? ringMatLabel(p) + " (ANEL A)" : String(p.mat || "PU") + " (GAXETA)")) : "")   /* 5.100.2 (usuário 27/11/2026): PSE 102 R — embaixo do PU+POM, o material da peça deste desenho */ + (!p.ringA && ["pse106","psh106","psh108","psh117","psh105","pse105","pse107","psh107","psh103","pse103","pse118","psh121","psh125","psr211","psr212","pse102r","pse120","psr102","dual","pse127","psh131"].includes(p.tipoGen) ? (() => { const G = p.tipoGen === "dual" ? dualGeom(p) : S15_TYPES.includes(p.tipoGen) ? s15Geom(p) : p.tipoGen === "psr102" ? psr102Geom(p) : pseG(p); return G.bi !== null && G.bo !== null ? val(c1 + 8, yLogoEnd + (p.tipoGen === "pse102r" ? 70 : 52), `${G.sobMedida ? "Tubo" : G.bi ? "Bucha" : "Tarugo"} ${G.bi ? "Ø" + fmtN(G.bi, G.bi % 1 ? 1 : 0) + " x " : ""}Ø${fmtN(G.bo, G.bo % 1 ? 1 : 0)}${G.sobMedida ? " sob med." : ""}`, "tv sm") : ""; })() : "");
+  t += `<line x1="${c1}" y1="${yLogoEnd}" x2="${c2}" y2="${yLogoEnd}" class="tb"/>` + lbl(c1 + 4, yLogoEnd + 12, "MATERIAL:") + val(c1 + 8, yLogoEnd + 34, info.mat || dwgMat(p), "tv big") + (["pse102r","pse120"].includes(p.tipoGen) && !p.ringA ? val(c1 + 8, yLogoEnd + 52, "PEÇA: " + (pse102rPiece(p) === "A" ? ringMatLabel(p) + " (ANEL A)" : String(p.mat || "PU") + (p.tipoGen === "pse120" ? " (ANEL GT)" : " (GAXETA)"))) : "")   /* 5.100.2 (usuário 27/11/2026): PSE 102 R — embaixo do PU+POM, o material da peça deste desenho */ + (!p.ringA && ["pse106","psh106","psh108","psh117","psh105","pse105","pse107","psh107","psh103","pse103","pse118","psh121","psh125","psr211","psr212","pse102r","pse120","psr102","dual","pse127","psh131"].includes(p.tipoGen) ? (() => { const G = p.tipoGen === "dual" ? dualGeom(p) : S15_TYPES.includes(p.tipoGen) ? s15Geom(p) : p.tipoGen === "psr102" ? psr102Geom(p) : pseG(p); return G.bi !== null && G.bo !== null ? val(c1 + 8, yLogoEnd + (["pse102r","pse120"].includes(p.tipoGen) ? 70 : 52), `${G.sobMedida ? "Tubo" : G.bi ? "Bucha" : "Tarugo"} ${G.bi ? "Ø" + fmtN(G.bi, G.bi % 1 ? 1 : 0) + " x " : ""}Ø${fmtN(G.bo, G.bo % 1 ? 1 : 0)}${G.sobMedida ? " sob med." : ""}`, "tv sm") : ""; })() : "");
   const s0 = yMatEnd, s1 = s0 + 14, s2 = s1 + 18, s3 = s2 + 18, sx1 = c1 + 48, sx2 = c1 + 124;
   t += `<line x1="${c1}" y1="${s0}" x2="${c2}" y2="${s0}" class="tb"/><line x1="${c1}" y1="${s1}" x2="${c2}" y2="${s1}" class="tb"/><line x1="${c1}" y1="${s2}" x2="${c2}" y2="${s2}" class="tb"/><line x1="${c1}" y1="${s3}" x2="${c2}" y2="${s3}" class="tb"/>`;
   t += `<line x1="${sx1}" y1="${s0}" x2="${sx1}" y2="${yBot}" class="tb"/><line x1="${sx2}" y1="${s0}" x2="${sx2}" y2="${yBot}" class="tb"/><line x1="${c1}" y1="${s0}" x2="${sx1}" y2="${s1}" class="tb"/>`;
@@ -7664,7 +7664,7 @@ sizeCanvas(); draw();
   buildForm();
   if (!s || s.type !== $("genType").value) return;
   for (const [k, v] of Object.entries(s.vals || {})){ if (TOL_KEYS.includes(k) && k !== "tipoP") continue;
-    if (k === "peca" && s.type === "pse102r") continue;   // 5.100.3: PSE 102 R abre sempre na gaxeta U   // tolerâncias não voltam: começam no padrão
+    if (k === "peca" && ["pse102r","pse120"].includes(s.type)) continue;   // 5.100.3: PSE 102 R abre sempre na gaxeta U   // tolerâncias não voltam: começam no padrão
     // v5.57.1 (usuário 16/11/2026): o TIPO DA PEÇA volta (PSE 108 = "dp"); sem ele, ao reabrir, o PSE 108 virava "Automático"
     // e as peças por ciclo eram ignoradas (isoN só vale com o PSE 108 escolhido) → gerava 1 peça
     const el = document.querySelector(`#genBox [data-k="${k}"]`); if (el) el.value = k === "mat" ? matFromText(v) : v;

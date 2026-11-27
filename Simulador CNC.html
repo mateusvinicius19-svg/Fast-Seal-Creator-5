@@ -1223,7 +1223,7 @@ const GEN = {
   lip: {
     name: "DH PSH 129",
     main: [["dint","Ø interno (bico) (mm)",560],["sec","B · Secção total (mm)",6.5],["h","A · Altura (vazio = tabela padrão)",""],
-           ["h2","C · Secção do rebaixo frontal (vazio = tabela)",""],["b","D · Profundidade do rebaixo (vazio = tabela)",""],["ch","Chanfro externo 45° (mm)",0.5],
+           ["h2","C · Secção do rebaixo frontal (vazio = tabela)",""],["b","D · Profundidade do rebaixo (vazio = tabela)",""],["ch","Chanfro externo 45° (vazio = padrão: 0,3 até secção 2,65 · 0,5 acima)",""],
            ["rpt","Nº de repetições RPT (vazio = 0)",""],["desc","Descrição (desenho / arquivo)","DH PSH 129"],
            ["matA","Material","PU"],["bi","Bucha Ø interno (vazio = automática PU)",""],["bo","Bucha Ø externo (vazio = automática PU)",""]],
     params: [["af","Ângulo do flanco com o degrau (°)",100],["ab","Ângulo da base (°)",10],
@@ -2349,7 +2349,8 @@ function profMemLoad(){
   let v = null; try { v = JSON.parse(localStorage.getItem("ps_prof_" + profMemKey()) || "null"); } catch(e){}
   if (!v) return false;
   for (const [k, x] of Object.entries(v)){ if ((TOL_KEYS.includes(k) && k !== "tipoP") || PROF_MEM_SKIP.has(k)) continue;
-    if (k === "peca" && ["pse102r","pse120"].includes($("genType").value)) continue;   // 5.103.0: PSE 120 também (ANEL GT)   // 5.100.3 (usuário 27/11/2026): PSE 102 R abre sempre na gaxeta U
+    if (k === "peca" && ["pse102r","pse120"].includes($("genType").value)) continue;
+    if (k === "ch" && $("genType").value === "lip") continue;   // 5.106.0: PSH 129 — chanfro externo vazio = padrão pela secção   // 5.103.0: PSE 120 também (ANEL GT)   // 5.100.3 (usuário 27/11/2026): PSE 102 R abre sempre na gaxeta U
     const el = document.querySelector(`#genBox [data-k="${k}"]`); if (el && !el.readOnly) el.value = x; }
   try { syncTolRows(); } catch(e){}
   generate(); return true;
@@ -5797,6 +5798,9 @@ function lipFill(p){
   const d = dhPadrao(Number(p.sec));
   if (!d) return p;
   for (const k of ["h", "h2", "b"]) if (vazio(p[k])) p[k] = d[k];
+  // 5.106.0 (usuário 27/11/2026): PSH 129 — chanfro externo padrão 0,3 na secção 2,65 (altura 4) e 0,5 na 3,5 (altura 6):
+  // vazio = 0,3 até a secção 2,65 e 0,5 acima. Só o PSH 129 (o PSE 125 / DPR usa o "ch" como chanfro interno, com valor próprio).
+  if (vazio(p.ch) && (p.tipoGen || (document.getElementById("genType") || {}).value) === "lip") p.ch = Number(p.sec) <= 2.65 + 1e-9 ? 0.3 : 0.5;
   return p;
 }
 function lipGeom(p){
@@ -7682,7 +7686,8 @@ sizeCanvas(); draw();
   buildForm();
   if (!s || s.type !== $("genType").value) return;
   for (const [k, v] of Object.entries(s.vals || {})){ if (TOL_KEYS.includes(k) && k !== "tipoP") continue;
-    if (k === "peca" && ["pse102r","pse120"].includes(s.type)) continue;   // 5.100.3: PSE 102 R abre sempre na gaxeta U   // tolerâncias não voltam: começam no padrão
+    if (k === "peca" && ["pse102r","pse120"].includes(s.type)) continue;
+    if (k === "ch" && s.type === "lip") continue;   // 5.100.3: PSE 102 R abre sempre na gaxeta U   // tolerâncias não voltam: começam no padrão
     // v5.57.1 (usuário 16/11/2026): o TIPO DA PEÇA volta (PSE 108 = "dp"); sem ele, ao reabrir, o PSE 108 virava "Automático"
     // e as peças por ciclo eram ignoradas (isoN só vale com o PSE 108 escolhido) → gerava 1 peça
     const el = document.querySelector(`#genBox [data-k="${k}"]`); if (el) el.value = k === "mat" ? matFromText(v) : v;
